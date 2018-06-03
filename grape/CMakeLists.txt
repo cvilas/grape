@@ -18,7 +18,7 @@ add_subdirectory(supervisor)
 
 add_library(${PLANT_LIBRARY_TARGET}
     $<TARGET_OBJECTS:${PROJECT_NAME}_common>
-    $<TARGET_OBJECTS:${PROJECT_NAME}_plant>)
+    $<TARGET_OBJECTS:${PROJECT_NAME}_plantlib>)
 set_target_properties(${PLANT_LIBRARY_TARGET} PROPERTIES VERSION ${VERSION} SOVERSION ${VERSION_MAJOR} )
 if (DOXYGEN_FOUND)
 add_dependencies(${PLANT_LIBRARY_TARGET} docs)
@@ -26,7 +26,7 @@ endif()
 
 add_library(${SUPERVISOR_LIBRARY_TARGET}
     $<TARGET_OBJECTS:${PROJECT_NAME}_common>
-    $<TARGET_OBJECTS:${PROJECT_NAME}_supervisor>)
+    $<TARGET_OBJECTS:${PROJECT_NAME}_supervisorlib>)
 set_target_properties(${SUPERVISOR_LIBRARY_TARGET} PROPERTIES VERSION ${VERSION} SOVERSION ${VERSION_MAJOR} )
 if (DOXYGEN_FOUND)
 add_dependencies(${SUPERVISOR_LIBRARY_TARGET} docs)
