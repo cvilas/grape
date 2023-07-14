@@ -1,5 +1,14 @@
+#=================================================================================================
+# GRAPE
+#=================================================================================================
+
+# These rules encode the ROS style guide. The file comes from https://github.com/davetcoleman/roscpp_code_format
+# Deviations:
+# - Opening braces on the same line (No line break before opening braces)
+# - 100 characters per line
+
 ---
-BasedOnStyle:  Google
+BasedOnStyle: Google
 AccessModifierOffset: -2
 ConstructorInitializerIndentWidth: 2
 AlignEscapedNewlinesLeft: false
@@ -8,16 +17,16 @@ AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
-AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: true
 AlwaysBreakBeforeMultilineStrings: false
 BreakBeforeBinaryOperators: false
 BreakBeforeTernaryOperators: false
 BreakConstructorInitializersBeforeComma: true
 BinPackParameters: true
-ColumnLimit:    120
+ColumnLimit: 100
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
-DerivePointerBinding: true
+DerivePointerBinding: false
+PointerBindsToType: true
 ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: true
 MaxEmptyLinesToKeep: 1
@@ -25,24 +34,59 @@ NamespaceIndentation: None
 ObjCSpaceBeforeProtocolList: true
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 60
-PenaltyBreakString: 1
+PenaltyBreakString: 1000
 PenaltyBreakFirstLessLess: 1000
 PenaltyExcessCharacter: 1000
 PenaltyReturnTypeOnItsOwnLine: 90
-PointerBindsToType: false
 SpacesBeforeTrailingComments: 2
 Cpp11BracedListStyle: false
-Standard:        Auto
-IndentWidth:     2
-TabWidth:        2
-UseTab:          Never
-BreakBeforeBraces: Allman
+Standard: Auto
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
 IndentFunctionDeclarationAfterType: false
 SpacesInParentheses: false
-SpacesInAngles:  false
+SpacesInAngles: false
 SpaceInEmptyParentheses: false
 SpacesInCStyleCastParentheses: false
 SpaceAfterControlStatementKeyword: true
 SpaceBeforeAssignmentOperators: true
 ContinuationIndentWidth: 4
+SpaceAfterCStyleCast: false
+SortIncludes: true
+IncludeBlocks:   Regroup
+IncludeCategories:
+  - Regex:           '^<.*(\.h|\.hpp)>$'
+    Priority:        1
+    SortPriority:    3
+    CaseSensitive:   false
+  - Regex:           '^<.*/.*>$'
+    Priority:        2
+    SortPriority:    2
+    CaseSensitive:   false
+  - Regex:           '^<.*>$'
+    Priority:        3
+    SortPriority:    1
+    CaseSensitive:   false
+  - Regex:           '.*'
+    Priority:        4
+    SortPriority:    4
+    CaseSensitive:   false
+
+# Configure each individual brace in BraceWrapping
+BreakBeforeBraces: Custom
+
+# Control of individual brace wrapping cases
+BraceWrapping: {
+  AfterClass: 'false'
+    AfterControlStatement: 'false'
+    AfterEnum : 'false'
+    AfterFunction : 'false'
+    AfterNamespace : 'false'
+    AfterStruct : 'false'
+    AfterUnion : 'false'
+    BeforeCatch : 'false'
+    BeforeElse : 'false'
+    IndentBraces : 'false'
+}
 ...

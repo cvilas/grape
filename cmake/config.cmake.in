@@ -1,7 +1,0 @@
-get_filename_component(SELF_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-include(${SELF_DIR}/@PROJECT_NAME@-targets.cmake)
-get_filename_component(@PROJECT_NAME@_INCLUDE_DIR "${SELF_DIR}/../../include/@PROJECT_NAME@" ABSOLUTE)
-get_filename_component(@PROJECT_NAME@_LIB_DIR "${SELF_DIR}/.." ABSOLUTE)
-get_filename_component(@PROJECT_NAME@_BIN_DIR "${SELF_DIR}/../../bin" ABSOLUTE)
-
-set(@PROJECT_NAME@_LIBS @PLANT_LIBRARY_TARGET@ @SUPERVISOR_LIBRARY_TARGET@)
