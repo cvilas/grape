@@ -1,6 +1,7 @@
 # GRAPE- Graphical Real-time Application Prototyping Environment
 
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
 Grape consists of two components supplied as independent libraries - grape_plant and grape_supervisor. *grape_plant* 
 provides a framework to implement closed loop control, and is potentially deployed on an embedded processor board - the 
