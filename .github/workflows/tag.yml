@@ -1,0 +1,45 @@
+# Tags on commit to main branch
+# - Checks out the repository.
+# - Determines the latest tag in the repository.
+# - Creates a new tag from the latest tag, and increments patch version by 1.
+# - Pushes the new tag to the remote repository.
+
+name: Tag on Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+
+      - name: Determine latest tag
+        id: latest_tag
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0)
+          echo "::set-output name=tag::$latest_tag"
+
+      - name: Determine incremented tag
+        id: incremented_tag
+        run: |
+          IFS='.' read -r -a version_parts <<< "${{ steps.latest_tag.outputs.tag }}"
+          major="${version_parts[0]}"
+          minor="${version_parts[1]}"
+          patch="${version_parts[2]}"
+          patch=$((patch + 1))
+          incremented_tag="${major}.${minor}.${patch}"
+          echo "::set-output name=tag::$incremented_tag"
+
+      - name: Create and push tag
+        run: |
+          git tag "${{ steps.incremented_tag.outputs.tag }}"
+          git push origin "${{ steps.incremented_tag.outputs.tag }}"
+
