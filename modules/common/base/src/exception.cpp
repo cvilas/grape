@@ -5,13 +5,15 @@
 
 #include "grape/exception.h"
 
-#include "grape/utility.h"
+#include <filesystem>
+
+#include "version_impl.h"
 
 namespace grape {
 Exception::Exception(const std::string& message, std::source_location location)
   : std::runtime_error(
-        "[" + std::string(std::filesystem::relative(location.file_name(), getSourcePath())) + ":" +
-        std::to_string(location.line()) + "] " + message) {
+        "[" + std::string(std::filesystem::relative(location.file_name(), GRAPE_SOURCE_PATH)) +
+        ":" + std::to_string(location.line()) + "] " + message) {
 }
 
 }  // namespace grape
