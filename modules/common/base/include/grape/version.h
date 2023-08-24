@@ -7,6 +7,7 @@
 
 #include <cinttypes>
 #include <compare>
+#include <format>
 #include <string_view>
 
 namespace grape {
@@ -29,3 +30,18 @@ auto getVersion() -> Version;
 auto getBuildInfo() -> BuildInfo;
 
 }  // namespace grape
+
+template <>
+struct std::formatter<grape::Version> : std::formatter<std::string> {
+  static auto format(const grape::Version& v, std::format_context& ctx) {
+    return std::format_to(ctx.out(), "{:d}.{:d}.{:d}", v.major, v.minor, v.patch);
+  }
+};
+
+template <>
+struct std::formatter<grape::BuildInfo> : std::formatter<std::string> {
+  static auto format(const grape::BuildInfo& bi, std::format_context& ctx) {
+    return std::format_to(ctx.out(), "'{}' branch, '{}' profile, '{}' hash", bi.branch, bi.profile,
+                          bi.hash);
+  }
+};
