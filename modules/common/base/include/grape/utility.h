@@ -8,6 +8,6 @@
 #include <filesystem>
 
 namespace grape {
-/// \return Location on disk where the source code was built from.
+/// @return Location on disk where the source code was built from.
 auto getSourcePath() -> std::filesystem::path;
 }  // namespace grape

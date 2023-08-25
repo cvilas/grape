@@ -12,6 +12,7 @@
 
 namespace grape {
 
+/// @brief  Software version data
 struct [[nodiscard]] Version {
   uint8_t major{};
   uint8_t minor{};
@@ -19,14 +20,17 @@ struct [[nodiscard]] Version {
   constexpr auto operator<=>(const Version&) const = default;
 };
 
+/// @brief Source configuration data
 struct [[nodiscard]] BuildInfo {
   std::string_view branch;
   std::string_view profile;
   std::string_view hash;
 };
 
+/// @return Software version of project binaries
 auto getVersion() -> Version;
 
+/// @return Source configuration that generated project binaries
 auto getBuildInfo() -> BuildInfo;
 
 }  // namespace grape
