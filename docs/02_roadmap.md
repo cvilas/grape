@@ -3,26 +3,27 @@
 - Base library
   - :done: Versioning
   - Custom Exception definitions
+- :done: Command line flags parsing
+- utility
+  - enum to string: Copy the general idea from here: https://godbolt.org/z/6MxYznfbf
 - Logging library: std::clog based, multiple sinks with std::streambuf
-- console io library
-  - Command line flags parsing
-  - kbhit and getch
-- Configuration library: `Configurable` concept using toml::table
-  
-  ```c++
-  template<class T>
-  concept Configurable = requires (T a) { a.configure(const toml::table&); }
-  ```
-
+- serdes
+  - concept `serialisable`
+- IPC
+  - Supports raw data and `serialisable` types 
+  - 0MQ wrapper
 - Realtime: POSIX scheduling wrappers
 - timing: periodic timer, watchdog, stopwatch. loop timer
-- utility: hostname, hostaddress, programname, programpath, typename, demangle, execute, magic_enum, flag_set
-- IPC
-  - serdes
-  - 0MQ wrapper
+- utility: hostname, hostaddress, isportinuse, programname, programpath, typename, demangle, execute, magic_enum, flag_set
 - plot:
-  - `plottable` concept
+  - concept `plottable`
   - Uses ImGui (https://github.com/ocornut/imgui) and ImPlot (https://github.com/epezent/implot)
+- Configuration library: 
+  - concept `configurable` using `toml::table`
+    ```c++
+    template<class T>
+    concept configurable = requires (T a) { a.configure(const toml::table&); }
+    ```
 - probe library:
   - Port github.com/cvilas/probe library
   - *grape_plant*: closed loop control, deployable on embedded processors.
@@ -38,8 +39,11 @@
 - Video streaming: gstreamer
 - [ftxui](https://github.com/ArthurSonzogni/FTXUI) based terminal UI apps 
 
-Use [C++20](https://youtu.be/N1gOSgZy7h4) or newer features in development
+Use C++20 or newer features in development
 
+- references:
+  - C++20 features: https://youtu.be/N1gOSgZy7h4
+  - Clean code: https://youtu.be/9ch7tZN4jeI?si=YkO84hmfQWfq8KO8
 - Designated initialisers
 - 3-way comparison (spaceship)
 - Concepts
@@ -52,4 +56,14 @@ Use [C++20](https://youtu.be/N1gOSgZy7h4) or newer features in development
 - constexpr everywhere
 - span
 - jthread
+- use std::exception for truly exceptional errors, use std::expected everywhere else for expected exceptions (eg: error opening a file, serdes error, etc) and compose using monads to chain operations
+  ```c++
+  std::expected<Movie,Error> readMovie(const std::string& fileName){
+    return openFile(fileName)
+      .and_then([&](std::ifstream& file){ return readLine(file); })
+      .and_then([&](const std::string& line){ return parseMovie(line); });
+  }
+  ```
+- Provide separate interface headers and implementation headers. (See `clean code` video above)
+- IoC containers for dependency injection, especially for mocking in tests: https://github.com/ybainier/Hypodermic. For why we should use it, see `clean code` video above
 - std::stacktrace
