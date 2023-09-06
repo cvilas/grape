@@ -9,7 +9,7 @@
 
 namespace grape {
 auto getSourcePath() -> std::filesystem::path {
-  return { GRAPE_SOURCE_PATH };
+  return { SOURCE_PATH };
 }
 
 }  // namespace grape

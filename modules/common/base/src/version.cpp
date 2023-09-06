@@ -9,11 +9,11 @@
 
 namespace grape {
 auto getBuildInfo() -> BuildInfo {
-  return { GRAPE_REPO_BRANCH, GRAPE_BUILD_PROFILE, GRAPE_REPO_HASH };
+  return { REPO_BRANCH, BUILD_PROFILE, REPO_HASH };
 }
 
 auto getVersion() -> Version {
-  return { GRAPE_VERSION_MAJOR, GRAPE_VERSION_MINOR, GRAPE_VERSION_PATCH };
+  return { VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH };
 }
 
 }  // namespace grape
