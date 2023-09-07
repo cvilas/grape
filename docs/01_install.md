@@ -32,7 +32,7 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
 
     ```bash
     wget https://apt.llvm.org/llvm.sh
-    export CLANG_VERSION=17 #Replace with latest version number
+    export CLANG_VERSION=18 # Replace with latest version number
     chmod +x llvm.sh
     sudo ./llvm.sh $CLANG_VERSION
     sudo apt install clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
@@ -49,7 +49,7 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
 
     ```bash
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    export GCC_VERSION=13 #Replace with latest version number
+    export GCC_VERSION=13 # Replace with latest version number
     sudo apt update
     sudo apt install g++-$GCC_VERSION gcc-$GCC_VERSION gfortran-$GCC_VERSION
     
