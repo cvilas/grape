@@ -33,7 +33,7 @@ public:
   /// Get the value specified for a command line option
   /// @param option  The command line option (without the '-'). (input)
   /// @return  The value of the specified option.
-  template <ConvertibleFromString T>
+  template <istringstreamable T>
   [[nodiscard]] auto getOption(const std::string& option) const -> std::expected<T, Error>;
 
   /// Convenience method. Returns internal container of key-values.
@@ -44,7 +44,7 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-template <ConvertibleFromString T>
+template <istringstreamable T>
 inline auto CommandLineArgs::getOption(const std::string& option) const -> std::expected<T, Error> {
   const auto& it = key_values_.find(option);
   if (it == key_values_.end()) {

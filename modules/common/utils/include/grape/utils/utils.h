@@ -11,7 +11,7 @@ namespace grape::utils {
 
 /// Defines a concept to check if a type can be converted from a string
 template <typename T>
-concept ConvertibleFromString =
+concept istringstreamable =
     requires(std::string str, T value) { std::istringstream{ str } >> value; };
 
 /// Trims whitespace at the beginning and end of a string
