@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+#include "version_impl.h"
+
 namespace grape::utils {
 
 //-------------------------------------------------------------------------------------------------
@@ -24,4 +26,10 @@ auto trim(const std::string& str) -> std::string {
 
   return result;
 }
+
+//-------------------------------------------------------------------------------------------------
+auto getSourcePath() -> std::filesystem::path {
+  return { SOURCE_PATH };
+}
+
 }  // namespace grape::utils

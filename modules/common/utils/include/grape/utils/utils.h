@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -16,5 +17,8 @@ concept istringstreamable =
 
 /// Trims whitespace at the beginning and end of a string
 auto trim(const std::string& str) -> std::string;
+
+/// @return Location on disk where the source code was built from.
+auto getSourcePath() -> std::filesystem::path;
 
 }  // namespace grape::utils

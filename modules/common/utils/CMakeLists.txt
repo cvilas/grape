@@ -2,15 +2,23 @@
 # Copyright (C) 2018-2023 GRAPE Contributors
 #=================================================================================================
 
-declare_module(NAME utils ALWAYS_BUILD DEPENDS_ON_MODULES "" DEPENDS_ON_EXTERNAL_PROJECTS "")
+declare_module(NAME utils 
+  ALWAYS_BUILD 
+  DEPENDS_ON_MODULES "" # **Note**: This module should not depend on any other module
+  DEPENDS_ON_EXTERNAL_PROJECTS "")
+
+# generate version header
+configure_file(src/version.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version_impl.h @ONLY)
 
 # library sources
 set(SOURCES
-        src/utils.cpp
         src/command_line_args.cpp
+        src/version.cpp
+        src/utils.cpp
         README.md
+        include/grape/utils/command_line_args.h
         include/grape/utils/utils.h
-        include/grape/utils/command_line_args.h)
+        include/grape/utils/version.h)
 
 # library target
 define_module_library(
@@ -27,3 +35,4 @@ define_module_library(
 # Subprojects
 add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(apps)
