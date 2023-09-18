@@ -6,12 +6,12 @@
 #include <format>
 #include <iostream>
 
-#include "grape/version.h"
+#include "grape/utils/version.h"
 
 //=================================================================================================
 auto main() -> int {
-  const auto vn = grape::getVersion();
-  const auto bi = grape::getBuildInfo();
+  const auto vn = grape::utils::getVersion();
+  const auto bi = grape::utils::getBuildInfo();
   std::cout << std::format("Version    : {:d}.{:d}.{:d}\n", vn.major, vn.minor, vn.patch);
   std::cout << std::format("Build Info : '{}' branch, '{}' profile, '{}' hash\n", bi.branch,
                            bi.profile, bi.hash);

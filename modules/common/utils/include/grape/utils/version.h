@@ -9,9 +9,9 @@
 #include <cstdint>
 #include <string_view>
 
-namespace grape {
+namespace grape::utils {
 
-/// @brief  Software version data
+/// Software version data
 struct [[nodiscard]] Version {
   std::uint8_t major{};
   std::uint8_t minor{};
@@ -19,7 +19,7 @@ struct [[nodiscard]] Version {
   constexpr auto operator<=>(const Version&) const = default;
 };
 
-/// @brief Source configuration data
+/// Source configuration data
 struct [[nodiscard]] BuildInfo {
   std::string_view branch;
   std::string_view profile;
@@ -32,4 +32,4 @@ auto getVersion() -> Version;
 /// @return Source configuration that generated project binaries
 auto getBuildInfo() -> BuildInfo;
 
-}  // namespace grape
+}  // namespace grape::utils
