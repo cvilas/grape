@@ -7,13 +7,20 @@
 
 #include "grape/exception.h"
 
+// Demonstrates creating a custom exception
+class CustomException : public grape::Exception {
+public:
+  CustomException(const std::string& msg, std::source_location loc) : Exception(msg, loc) {
+  }
+};
+
 //=================================================================================================
 /// Demonstrates how exceptions should be thrown and caught
 auto main() -> int {
   try {
-    throw grape::Exception("Runtime exception");
+    grape::panic<CustomException>("An exception occurred");
   } catch (const std::exception& ex) {
-    std::cerr << ex.what() << "\n";
+    std::cerr << ex.what() << '\n';
   }
   return EXIT_SUCCESS;
 }
