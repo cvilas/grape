@@ -5,20 +5,18 @@
 
 ## What is Grape?
 
-GRAPE is a framework to develop distributed and embedded control applications, with hooks for instrumentation and remote monitoring.
+GRAPE is a framework to develop large distributed and embedded control applications, with hooks for instrumentation and remote monitoring. By large, I mean hundreds of nodes on a network of compute units running Linux (X86_64 and Aarch64).
 
-It's also a hobby project; an experimental playground to learn/evaluate/apply modern C++ techniques in writing simple, expressive, and performant code for industrial applications.
+It's also a hobby project; an experimental playground to learn/evaluate/apply modern C++ techniques in writing simple, expressive, and performant code for industrial applications. Some features of this repo that I consider interesting
 
-Some project goals:
-
-- Scalable to large distributed systems (hundreds of nodes on a network)
+- A [modular build system](./gbs/README.md)
+- A simple [command line parser](./modules/common/utils/src/command_line_args.cpp)
+- A simple [logging framework](./modules/common/log/README.md)
 - Minimal external dependencies
-- Supports Linux on 64 bit X86 and Arm CPU architectures
-- Depends on the bleeding edge of development tools:
+- Dependence on the bleeding edge for development tools:
+  - Latest C++ language version
   - Latest release of compilers (Clang and GCC)
-  - Latest Ubuntu LTS
   - Latest CMake
-  - Latest versions of external dependencies
 
 ## Getting Started
 
