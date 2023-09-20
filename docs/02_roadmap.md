@@ -1,28 +1,39 @@
 # Roadmap
 
+## Phase 1 - Basics
 - :done: Versioning
 - :done: Exception definitions
 - :done: Command line flags parsing
 - :done: Logging library: std::clog based, multiple sinks with std::streambuf
-- serdes
-  - concept `serialisable`
-- IPC
-  - Supports raw data and `serialisable` types 
-  - Select a backend
-  - Build wrapper for backend
-- Realtime: POSIX scheduling wrappers
-- timing: periodic timer, watchdog, stopwatch. loop timer
-- utility: hostname, hostaddress, isportinuse, programname, programpath, typename, demangle, execute, magic_enum, flag_set
-  - enum to string: Copy the general idea from here: https://godbolt.org/z/6MxYznfbf
-- plot:
-  - concept `plottable`
-  - Uses ImGui (https://github.com/ocornut/imgui) and ImPlot (https://github.com/epezent/implot)
-- Configuration library: 
-  - concept `configurable` using `toml::table`
+- Evaluate lua for scripting and configuration
+  - Docs: motivation (simple but powerful scripting for end users), features desired and implemented
+- Implement a configuration library
+  - Select a format 
+  - Exmaple concept `configurable` using `toml::table`
     ```c++
     template<class T>
     concept configurable = requires (T a) { a.configure(const toml::table&); }
     ```
+- serdes
+  - concept `serialisable`
+- IPC
+  - :done: Select a backend
+  - Build wrapper for backend
+
+## Phase 2 - Graphics Core
+- plot:
+  - concept `plottable`
+  - Uses ImGui (https://github.com/ocornut/imgui) and ImPlot (https://github.com/epezent/implot)
+- HW accelerated 3D graphics
+  - Select a backend
+  - Implement a basic scenegraph example and check performance in MacOS and Linux VM
+
+## Phase 3 - Robotics Core
+
+- Realtime: POSIX scheduling wrappers
+- timing: periodic timer, watchdog, stopwatch. loop timer
+- utility: hostname, hostaddress, isportinuse, programname, programpath, typename, demangle, execute, magic_enum, flag_set
+  - enum to string: Copy the general idea from here: https://godbolt.org/z/6MxYznfbf
 - probe library:
   - Port github.com/cvilas/probe library
   - *grape_plant*: closed loop control, deployable on embedded processors.
