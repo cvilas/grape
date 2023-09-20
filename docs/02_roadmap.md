@@ -1,20 +1,19 @@
 # Roadmap
 
-- Base library
-  - :done: Versioning
-  - Custom Exception definitions
+- :done: Versioning
+- :done: Exception definitions
 - :done: Command line flags parsing
-- utility
-  - enum to string: Copy the general idea from here: https://godbolt.org/z/6MxYznfbf
-- Logging library: std::clog based, multiple sinks with std::streambuf
+- :done: Logging library: std::clog based, multiple sinks with std::streambuf
 - serdes
   - concept `serialisable`
 - IPC
   - Supports raw data and `serialisable` types 
-  - 0MQ wrapper
+  - Select a backend
+  - Build wrapper for backend
 - Realtime: POSIX scheduling wrappers
 - timing: periodic timer, watchdog, stopwatch. loop timer
 - utility: hostname, hostaddress, isportinuse, programname, programpath, typename, demangle, execute, magic_enum, flag_set
+  - enum to string: Copy the general idea from here: https://godbolt.org/z/6MxYznfbf
 - plot:
   - concept `plottable`
   - Uses ImGui (https://github.com/ocornut/imgui) and ImPlot (https://github.com/epezent/implot)
