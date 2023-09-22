@@ -37,8 +37,8 @@ auto benchmarkGrapeLog(int num_iterations) -> std::chrono::milliseconds {
 auto main() -> int {
   constexpr int NUM_ITERATIONS = 100000;  // Number of log messages to output
 
-  const auto grapelog_ms = benchmarkGrapeLog(NUM_ITERATIONS);
   const auto spdlog_ms = benchmarkSpdlog(NUM_ITERATIONS);
+  const auto grapelog_ms = benchmarkGrapeLog(NUM_ITERATIONS);
 
   std::cout << "spdlog - Elapsed time: " << spdlog_ms.count() << " milliseconds\n";
   std::cout << "grape::log - Elapsed time: " << grapelog_ms.count() << " milliseconds\n";
