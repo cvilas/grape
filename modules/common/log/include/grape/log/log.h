@@ -145,6 +145,7 @@ inline constexpr auto toString(Severity s) -> std::string_view {
     case Severity::Debug:
       return "Debug";
   }
+  return "";
 }
 
 //-------------------------------------------------------------------------------------------------
