@@ -13,10 +13,12 @@ configure_file(src/version.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version_impl.h @ON
 # library sources
 set(SOURCES
         src/command_line_args.cpp
+        src/conio.cpp
         src/version.cpp
         src/utils.cpp
         README.md
         include/grape/utils/command_line_args.h
+        include/grape/utils/conio.h
         include/grape/utils/utils.h
         include/grape/utils/version.h)
 
