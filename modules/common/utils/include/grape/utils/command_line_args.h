@@ -51,7 +51,7 @@ inline auto CommandLineArgs::getOption(const std::string& option) const -> std::
     return std::unexpected(Error::NotFound);
   }
   T value;
-  std::istringstream stream(utils::trim(it->second));
+  std::istringstream stream(it->second);
   if (stream >> value) {
     return value;
   }
