@@ -20,6 +20,5 @@ static constexpr std::uint16_t VERSION_PATCH = @VERSION_PATCH@;
 static constexpr std::string_view REPO_BRANCH = "@REPO_BRANCH@";
 static constexpr std::string_view BUILD_PROFILE = "@CMAKE_BUILD_TYPE@";
 static constexpr std::string_view REPO_HASH = "@REPO_HASH@";
-static constexpr std::string_view SOURCE_PATH = "@CMAKE_SOURCE_DIR@";
 
 } // namespace grape::utils

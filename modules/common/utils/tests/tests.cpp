@@ -12,10 +12,12 @@ namespace grape::utils::tests {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("string trimming") {
-  const auto* const input = "  Hello, World!  \t\n";
-  const auto* const expected_output = "Hello, World!";
-  const auto trimmed = grape::utils::trim(input);
-  CHECK(trimmed == expected_output);
+  constexpr auto str = "/path/to/some/file.txt";
+  constexpr auto start_token = "to";
+  constexpr auto end_token = ".txt";
+  constexpr auto truncated = grape::utils::truncate(str, start_token, end_token);
+  constexpr auto expected = "to/some/file";
+  CHECK(truncated == expected);
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -75,10 +75,9 @@ namespace detail {
 
 /// Default log formatter implementation
 auto defaultFormatter(const Record& r) -> std::string {
-  return std::format(
-      "[{}] [{}] [{}:{}] {}\n", r.timestamp, toString(r.severity),
-      std::string(std::filesystem::relative(r.location.file_name(), utils::getSourcePath())),
-      r.location.line(), r.message);
+  return std::format("[{}] [{}] [{}:{}] {}\n", r.timestamp, toString(r.severity),
+                     std::string(utils::truncate(r.location.file_name(), "modules")),
+                     r.location.line(), r.message);
 }
 
 /// @brief Encapsulates logging functions
