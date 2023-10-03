@@ -12,12 +12,12 @@ namespace grape::utils::tests {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("string trimming") {
-  constexpr auto str = "/path/to/some/file.txt";
-  constexpr auto start_token = "to";
-  constexpr auto end_token = ".txt";
-  constexpr auto truncated = grape::utils::truncate(str, start_token, end_token);
-  constexpr auto expected = "to/some/file";
-  CHECK(truncated == expected);
+  constexpr auto STR = "/path/to/some/file.txt";
+  constexpr auto START_TOKEN = "to";
+  constexpr auto END_TOKEN = ".txt";
+  constexpr auto TRUNCATED = grape::utils::truncate(STR, START_TOKEN, END_TOKEN);
+  constexpr auto EXPECTED = "to/some/file";
+  CHECK(TRUNCATED == EXPECTED);
 }
 
 //-------------------------------------------------------------------------------------------------
