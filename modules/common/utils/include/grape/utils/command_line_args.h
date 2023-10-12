@@ -44,6 +44,16 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
+inline constexpr auto toString(CommandLineArgs::Error e) -> std::string_view {
+  switch (e) {
+    case CommandLineArgs::Error::NotFound:
+      return "NotFound";
+    case CommandLineArgs::Error::Unparsable:
+      return "Unparsable";
+  };
+}
+
+//-------------------------------------------------------------------------------------------------
 template <istringstreamable T>
 inline auto CommandLineArgs::getOption(const std::string& option) const -> std::expected<T, Error> {
   const auto& it = key_values_.find(option);

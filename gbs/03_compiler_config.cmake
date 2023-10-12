@@ -153,9 +153,12 @@ if(ENABLE_LINTER)
     # NOTE: To speed up linting, clang-tidy is invoked via clang-tidy-cache. 
     # (https://github.com/matus-chochlik/ctcache)
     # Cache location is set by environment variable CTCACHE_DIR
-    set(CMAKE_CXX_CLANG_TIDY
-        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN}
+    set(LINTER_INVOKE_COMMAND
+        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} 
+        -p ${CMAKE_BINARY_DIR}
         -extra-arg=-Wno-ignored-optimization-argument -extra-arg=-Wno-unknown-warning-option)
+    set(CMAKE_C_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
+    set(CMAKE_CXX_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
   else()
     message(WARNING "Linter (clang-tidy) not found.")
   endif()

@@ -7,6 +7,8 @@
 #include <sstream>
 #include <string>
 
+#include <cxxabi.h>
+
 namespace grape::utils {
 
 /// Defines a concept to check if a type can be converted from a string
@@ -30,6 +32,18 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
   const auto end_pos = end_token.empty() ? std::string_view::npos : str.find(end_token);
   return (start_pos != std::string_view::npos) ? str.substr(start_pos, end_pos - start_pos) :
                                                  str.substr(0, end_pos - start_pos);
+}
+
+/// Return user-readable name for specified type
+template <typename T>
+auto getTypeName() -> std::string {
+  // From https://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname
+  const auto* const mangled_name = typeid(T).name();
+  int status{ 0 };
+  std::unique_ptr<char, void (*)(void*)> res{
+    abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status), std::free
+  };
+  return (status == 0) ? std::string(res.get()) : mangled_name;
 }
 
 }  // namespace grape::utils
