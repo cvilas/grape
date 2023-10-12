@@ -11,7 +11,8 @@ It's also a hobby project; an experimental playground to learn/evaluate/apply mo
 
 - A [modular build system](./gbs/README.md)
 - A simple [command line parser](./modules/common/utils/src/command_line_args.cpp)
-- A simple [logging framework](./modules/common/log/README.md)
+- A simple [logging library](./modules/common/log/README.md)
+- A powerful [configuration and scripting system](./modules/common/script/README.md) 
 - Minimal external dependencies
 - Dependence on the bleeding edge for development tools:
   - Latest C++ language version

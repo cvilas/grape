@@ -4,16 +4,10 @@
 - :done: Versioning
 - :done: Exception definitions
 - :done: Command line flags parsing
-- :done: Logging library: std::clog based, multiple sinks with std::streambuf
-- Evaluate lua for scripting and configuration
-  - Docs: motivation (simple but powerful scripting for end users), features desired and implemented
-- Implement a configuration library
-  - Select a format 
-  - Exmaple concept `configurable` using `toml::table`
-    ```c++
-    template<class T>
-    concept configurable = requires (T a) { a.configure(const toml::table&); }
-    ```
+- :done: Logging library
+- :done: Scripting library
+- integrate magic_enum
+  - refactor existing `toString()` functions
 - serdes
   - concept `serialisable`
 - IPC
@@ -32,7 +26,7 @@
 
 - Realtime: POSIX scheduling wrappers
 - timing: periodic timer, watchdog, stopwatch. loop timer
-- utility: hostname, hostaddress, isportinuse, programname, programpath, typename, demangle, execute, magic_enum, flag_set
+- utility: hostname, hostaddress, isportinuse, programname, programpath, typename, demangle, execute, flag_set
   - enum to string: Copy the general idea from here: https://godbolt.org/z/6MxYznfbf
 - probe library:
   - Port github.com/cvilas/probe library
