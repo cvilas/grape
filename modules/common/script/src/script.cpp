@@ -104,7 +104,7 @@ static auto readToLeaf(lua_State* state, int table_ref, const std::string& key)
       clearLuaStack(state);
       return std::unexpected(ConfigTable::Error::Unparsable);
     }  // not table
-  }  // while
+  }    // while
   return token;
 }
 
@@ -160,7 +160,7 @@ static auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-static auto readIndex(lua_State* state, int table_ref, size_t index)
+static auto readIndex(lua_State* state, const int table_ref, const size_t index)
     -> std::expected<T, ConfigTable::Error> {
   // read table into stack and check its a table, not a value-type
   const auto object_type = lua_rawgeti(state, LUA_REGISTRYINDEX, table_ref);
