@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <format>
 #include <functional>
-#include <iostream>
 #include <source_location>
 
 #include "grape/utils/utils.h"
@@ -88,9 +87,7 @@ public:
     return logger;
   }
 
-  static auto setStreamBuffer(std::streambuf* buf) -> std::streambuf* {
-    return std::clog.rdbuf(buf);
-  }
+  static auto setStreamBuffer(std::streambuf* buf) -> std::streambuf*;
 
   void setFormatter(Formatter&& f) {
     formatter_ = std::move(f);
@@ -114,11 +111,7 @@ public:
     log(Record{ .timestamp = tp, .location = loc, .message = msg, .severity = s });
   }
 
-  void log(const Record& record) const {
-    if (canLog(record.severity)) {
-      std::clog << formatter_(record);
-    }
-  }
+  void log(const Record& record) const;
 
 private:
   Severity threshold_{ Severity::Debug };

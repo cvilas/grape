@@ -2,8 +2,7 @@
 // Copyright (C) 2018-2023 GRAPE Contributors
 //=================================================================================================
 
-#include <format>
-#include <iostream>
+#include <print>
 
 #include "grape/script/script.h"
 
@@ -40,9 +39,9 @@ auto main(int argc, const char* argv[]) -> int {
     const auto table = script.table();
     PersonnelRecord record;
     record.configure(table);
-    std::cout << "From configuration, name='" << record.name << "', age=" << record.age << ".\n";
+    std::println("From configuration, name='{}', age={}.", record.name, record.age);
   } catch (const std::exception& ex) {
-    std::cerr << "Exception: " << ex.what() << '\n';
+    std::println(stderr, "Exception: {}", ex.what());
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

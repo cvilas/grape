@@ -3,7 +3,7 @@
 // MIT License
 //=================================================================================================
 
-#include <iostream>
+#include <print>
 
 #include "grape/exception.h"
 
@@ -20,7 +20,7 @@ auto main() -> int {
   try {
     grape::panic<CustomException>("An exception occurred");
   } catch (const std::exception& ex) {
-    std::cerr << ex.what() << '\n';
+    std::println(stderr, "{}", ex.what());
   }
   return EXIT_SUCCESS;
 }
