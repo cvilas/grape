@@ -2,8 +2,7 @@
 // Copyright (C) 2018-2023 GRAPE Contributors
 //=================================================================================================
 
-#include <format>
-#include <iostream>
+#include <print>
 #include <vector>
 
 #include "grape/script/script.h"
@@ -62,14 +61,13 @@ auto main(int argc, const char* argv[]) -> int {
     const auto table = script.table();
     RobotCluster robot_cluster;
     robot_cluster.configure(table);
-    std::cout << "Cluster '" << robot_cluster.name << "' has following robots:\n";
+    std::println("Cluster '{}' has following robots:", robot_cluster.name);
     for (const auto& r : robot_cluster.members) {
       const auto pose = r.pose;
-      std::cout << " '" << r.name << "' at (" << pose.x << ", " << pose.y << ", " << pose.rz
-                << ")\n";
+      std::println(" '{}' at ({}, {}, {})", r.name, pose.x, pose.y, pose.rz);
     }
   } catch (const std::exception& ex) {
-    std::cerr << "Exception: " << ex.what() << '\n';
+    std::println("Exception: {}", ex.what());
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

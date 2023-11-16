@@ -3,7 +3,7 @@
 //=================================================================================================
 
 #include <cstdlib>
-#include <iostream>
+#include <print>
 #include <sstream>
 
 #include "grape/log/log.h"
@@ -31,7 +31,7 @@ auto main(int argc, const char* argv[]) -> int {
   grape::log::log(grape::log::Severity::Info, "Message directed *back* to default output stream");
 
   // print content from custom stream
-  std::cout << "Custom stream content:\n" << custom_stream.str() << "\n";
+  std::println("Custom stream content:\n{}", custom_stream.str());
 
   return EXIT_SUCCESS;
 }

@@ -1,6 +1,9 @@
 //=================================================================================================
 // Copyright (C) 2018-2023 GRAPE Contributors
 //=================================================================================================
+
+#include <print>
+
 #include "grape/log/log.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -40,8 +43,8 @@ auto main() -> int {
   const auto spdlog_ms = benchmarkSpdlog(NUM_ITERATIONS);
   const auto grapelog_ms = benchmarkGrapeLog(NUM_ITERATIONS);
 
-  std::cout << "spdlog - Elapsed time: " << spdlog_ms.count() << " milliseconds\n";
-  std::cout << "grape::log - Elapsed time: " << grapelog_ms.count() << " milliseconds\n";
+  std::println("spdlog - Elapsed time: {} ms", spdlog_ms.count());
+  std::println("grape::log - Elapsed time: {} ms", grapelog_ms.count());
 
   return EXIT_SUCCESS;
 }

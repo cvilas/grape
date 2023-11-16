@@ -2,8 +2,7 @@
 // Copyright (C) 2018-2023 GRAPE Contributors
 //=================================================================================================
 
-#include <cstdlib>
-#include <iostream>
+#include <print>
 
 #include "grape/utils/command_line_args.h"
 
@@ -13,11 +12,11 @@ auto main(int argc, const char* argv[]) -> int {
   const auto parser = grape::utils::CommandLineArgs(argc, argv);
   const auto& options = parser.options();
   if (options.empty()) {
-    std::cerr << "No command line options specified\n";
+    std::println("No command line options specified");
     return EXIT_SUCCESS;
   }
   for (const auto& [key, value] : options) {
-    std::cout << key << " = " << value << '\n';
+    std::println("{} = {}", key, value);
   }
   return EXIT_SUCCESS;
 }

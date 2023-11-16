@@ -3,8 +3,7 @@
 // MIT License
 //=================================================================================================
 
-#include <format>
-#include <iostream>
+#include <print>
 
 #include "grape/utils/version.h"
 
@@ -12,8 +11,7 @@
 auto main() -> int {
   const auto vn = grape::utils::getVersion();
   const auto bi = grape::utils::getBuildInfo();
-  std::cout << std::format("Version    : {:d}.{:d}.{:d}\n", vn.major, vn.minor, vn.patch);
-  std::cout << std::format("Build Info : '{}' branch, '{}' profile, '{}' hash\n", bi.branch,
-                           bi.profile, bi.hash);
+  std::println("Version    : {:d}.{:d}.{:d}", vn.major, vn.minor, vn.patch);
+  std::println("Build Info : '{}' branch, '{}' profile, '{}' hash", bi.branch, bi.profile, bi.hash);
   return EXIT_SUCCESS;
 }
