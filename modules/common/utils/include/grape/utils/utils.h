@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -43,7 +44,7 @@ auto getTypeName() -> std::string {
   std::unique_ptr<char, void (*)(void*)> res{
     abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status), std::free
   };
-  return (status == 0) ? std::string(res.get()) : mangled_name;
+  return (status == 0) ? res.get() : mangled_name;
 }
 
 }  // namespace grape::utils
