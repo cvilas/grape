@@ -101,20 +101,20 @@ private:
   /// @param lua_table_ref Reference to the table in the registry
   explicit ConfigTable(std::shared_ptr<lua_State> lua_state, int lua_table_ref);
 
-  [[nodiscard]] auto readBool(const std::string& key) const
-      -> std::expected<bool, ConfigTable::Error>;
+  [[nodiscard]] auto
+  readBool(const std::string& key) const -> std::expected<bool, ConfigTable::Error>;
 
-  [[nodiscard]] auto readInt(const std::string& key) const
-      -> std::expected<int, ConfigTable::Error>;
+  [[nodiscard]] auto
+  readInt(const std::string& key) const -> std::expected<int, ConfigTable::Error>;
 
-  [[nodiscard]] auto readFloat(const std::string& key) const
-      -> std::expected<float, ConfigTable::Error>;
+  [[nodiscard]] auto
+  readFloat(const std::string& key) const -> std::expected<float, ConfigTable::Error>;
 
-  [[nodiscard]] auto readString(const std::string& key) const
-      -> std::expected<std::string, ConfigTable::Error>;
+  [[nodiscard]] auto
+  readString(const std::string& key) const -> std::expected<std::string, ConfigTable::Error>;
 
-  [[nodiscard]] auto readTable(const std::string& key) const
-      -> std::expected<ConfigTable, ConfigTable::Error>;
+  [[nodiscard]] auto
+  readTable(const std::string& key) const -> std::expected<ConfigTable, ConfigTable::Error>;
 
   [[nodiscard]] auto readBool(size_t index) const -> std::expected<bool, ConfigTable::Error>;
 
@@ -122,11 +122,11 @@ private:
 
   [[nodiscard]] auto readFloat(size_t index) const -> std::expected<float, ConfigTable::Error>;
 
-  [[nodiscard]] auto readString(size_t index) const
-      -> std::expected<std::string, ConfigTable::Error>;
+  [[nodiscard]] auto
+  readString(size_t index) const -> std::expected<std::string, ConfigTable::Error>;
 
-  [[nodiscard]] auto readTable(size_t index) const
-      -> std::expected<ConfigTable, ConfigTable::Error>;
+  [[nodiscard]] auto
+  readTable(size_t index) const -> std::expected<ConfigTable, ConfigTable::Error>;
 
   std::shared_ptr<lua_State> lua_state_;
   int lua_table_ref_;
@@ -145,8 +145,8 @@ inline constexpr auto toString(ConfigTable::Error e) -> std::string_view {
 
 //-------------------------------------------------------------------------------------------------
 template <Parsable T>
-inline auto ConfigTable::read(const std::string& key) const
-    -> std::expected<T, ConfigTable::Error> {
+inline auto
+ConfigTable::read(const std::string& key) const -> std::expected<T, ConfigTable::Error> {
   if constexpr (std::is_same_v<T, bool>) {
     return readBool(key);
   } else if constexpr (std::is_same_v<T, int>) {

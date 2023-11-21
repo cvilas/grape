@@ -4,7 +4,7 @@
 
 OS               | Architecture  | Compiler
 -----------------|---------------|----------------
-Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
+Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang18
 
 ## Setup build environment
 
@@ -69,10 +69,12 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
     
 ## Configure and build
 
+Note (Dec 2023) Use the clang toolchain to build the project. GCC-13 does not support all features we use.
+
 ```bash
 git clone git@github.com:cvilas/grape
 mkdir -p grape/build
 cd grape/build
-cmake .. -DBUILD_MODULES=all -GNinja
+cmake .. -DBUILD_MODULES=all -DCMAKE_TOOLDCHAIN_FILE=$PWD/../toolchains/toolchain_clang.cmake -GNinja
 ninja
 ```
