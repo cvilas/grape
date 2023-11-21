@@ -14,6 +14,7 @@ Configuration and scripting support.
     max_wheel_speed=100.0
     gear_ratio=10
     max_motor_speed=max_wheel_speed * gear_ratio
+    reference_angle = math.pi
     ```
   - Verifiable for correctness 
   - Extendable as an application programming language for end-users to directly interact with Grape 
