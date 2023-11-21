@@ -12,12 +12,12 @@ It's also a hobby project; an experimental playground to learn/evaluate/apply [m
 - A [modular build system](./gbs/README.md)
 - A simple [command line parser](./modules/common/utils/src/command_line_args.cpp)
 - A simple [logging library](./modules/common/log/README.md)
-- A powerful [configuration and scripting system](./modules/common/script/README.md) 
+- A powerful [configuration and scripting system](./modules/common/script/README.md)
+- Message-passing using [Zenoh](./modules/common/ipc/README.md), the new kid on the block that scales well for large distributed systems.
 - Minimal external dependencies
 - Dependence on the bleeding edge for development tools:
   - Latest C++ language version
-  - Latest release of compilers (Clang and GCC)
-  - Latest CMake
+  - Latest release of compilers (Clang and GCC) and build tools (CMake)
 
 ## Getting Started
 

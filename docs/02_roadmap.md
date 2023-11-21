@@ -7,101 +7,76 @@
 - :done: Command line flags parsing
 - :done: Logging library
 - :done: Scripting library
-- IPC
-  - :done: Select a backend
-  - port zenoh-c examples
-    - Example descriptions: https://github.com/eclipse-zenoh/zenoh/tree/master/examples
-    - :done: z_scout
-    - :done: z_info
-    - :done: z_ping, z_pong (roundtrip)
-    - z_pub_thr, z_sub_thr (throughput)
-    - z_liveliness
-    - z_get_liveliness
-    - z_sub_liveliness
-    - z_non_blocking_get
-    - z_pub_shm
-    - z_pub, z_sub
-    - z_pull
-    - z_put, z_get
-    - z_queryable
-    - z_delete
-    - Document configuration for router, transport, etc. See https://zenoh.io/docs/manual/configuration/
-  - zenoh router example  
-  - zenoh query example
-  - zenoh example pub/sub
-    - subscriber prints tx_time, rx_time, latency
-    - subscriber prints remote endpoint identity
-    - configurable QoS (reliability, priority)
-    - notification on match
-    - notification on discovery
-  - Build wrapper for backend
-    - Config
-    - Context
-    - Publisher
-    - Subscriber
-    - Router
-    - Discovery callback: Uniquely identify pub/sub endpoints
-    - Match callback: Uniquely identify matched endpoints
-  - Examples
-    - simple pub/sub (async message passing) (runnable across subnet)
-    - simple query (synchronous message passing)
-    - pub/sub/router (runnable across the internet)
-    - discovery example
-    - throughput benchmark
-    - latency benchmark
-  - tests
-    - discovery
-    - match
-    - filters
-  - Consider hiding backend with FetchContent
-- integrate magic_enum
-  - refactor existing `toString()` functions
+- :done: Introduce IPC
+- Command line parsing part 2:
+  - addOption(name, optional|required, default);
+  - support --help option by default
+  - support program description as constructor parameter
+
+## Phase 2 - Demo application 1 - Probe
+
+- study: https://pikuma.com/courses/cpp-2d-game-engine-development
 - serdes
-  - Choose backend: low overhead, type-safe, fast
+  - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python
   - concept `serialisable`
+- plot:
+  - :done: Choose a backend: implot
+  - concept `plottable`
+- probe library:
+  - Take inspiration from PlotJuggler and DataTamer
+  - Port github.com/cvilas/probe library
+  - *grape_plant*: closed loop control, deployable on embedded processors.
+  - *grape_supervisor*: remote monitoring, graphing, online parameter tuning, and event logging; runs as a separate process, likely on a different host.
+
+## Phase 3 - CI
+
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
-  - Update CMakePresets.json
+  - Fail the CI if clang-format changes code
+  - Add configuration presets to CMakePresets.json
   - Develop github CI build file
   - Document the usage in install instructions
 
-## Phase 2 - Graphics Core
+## Phase 4 - Audio, Video and 3D Graphics
 
-- plot:
-  - study: https://pikuma.com/courses/cpp-2d-game-engine-development
-  - :done: Choose a backend: implot
-  - concept `plottable`
+- Audio/Video streaming:
+  - Choose backend for audio/video device handling and stream processing
+  - Implement basic examples for AV capture, streaming and display
+
 - HW accelerated 3D graphics
   - Select a backend: vsg, ogre, something else
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 
-## Phase 3 - Robotics Core
+## Phase 5 - Robotics Core
 
-- timing: periodic timer, watchdog, stopwatch. loop timer
+- Timing: periodic timer, watchdog, stopwatch. loop timer
+- enum-to-string and string-to-enum
+  - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
+  - consider magic_enum and other options and choose one
+  - refactor existing `toString()` functions
+- Additional zenoh examples
+  - zenoh_pub_cache: Understand what it is supposed to do and make it work
+  - zenoh_query_sub - make it work
+  - z_storage
+  - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
 - HW IO
-  - canopen
+  - CANopen
   - joystick
-- Video streaming: gstreamer
+- Behaviour trees: Consider building from first principles
+- FSM: introspectable, visualise state transition graph using graphviz.
 
-## Phase 4 - Applications
+## Phase 6 - Demo application 2 - Rover
 
-- Mars Rover (teleop, FPV, visualisation, plots, )
+- Mars Rover (joystick teleop, FPV, mission control)
 
-## Phase 5 - Other utilities
+## Phase 7 - Utilities
 
-- probe library:
-  - Port github.com/cvilas/probe library
-  - *grape_plant*: closed loop control, deployable on embedded processors.
-  - *grape_supervisor*: remote monitoring, graphing, online parameter tuning, and event logging; runs as a separate process, more likely it runs on a different host.
 - Realtime: POSIX scheduling wrappers
 - utility: hostname, hostaddress, isportinuse, programname, programpath, execute, flag_set
-  - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
-- Behaviour trees
 - file cache
 - md5sum
 - factory using crtp (see scratch)
-- FSM
 - [ftxui](https://github.com/ArthurSonzogni/FTXUI) based terminal UI apps
 
 ## Notes

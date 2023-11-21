@@ -67,8 +67,8 @@ struct ConfigTableDetail {
 // key, putting the item at the token location on the stack. On success, the stack is prepared with
 // the leaf item, and the name of the token is returned. The stack can then be read by
 // readLeaf(). If unsuccessful, the error code is returned.
-static auto readToLeaf(lua_State* state, int table_ref, const std::string& key)
-    -> std::expected<std::string, ConfigTable::Error> {
+static auto readToLeaf(lua_State* state, int table_ref,
+                       const std::string& key) -> std::expected<std::string, ConfigTable::Error> {
   // push our table into stack
   std::ignore = lua_rawgeti(state, LUA_REGISTRYINDEX, table_ref);
   // Break the key into tokens and recurse through sub-tables until the last token, then read it
@@ -104,7 +104,7 @@ static auto readToLeaf(lua_State* state, int table_ref, const std::string& key)
       clearLuaStack(state);
       return std::unexpected(ConfigTable::Error::Unparsable);
     }  // not table
-  }    // while
+  }  // while
   return token;
 }
 
@@ -160,8 +160,8 @@ static auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-static auto readIndex(lua_State* state, const int table_ref, const size_t index)
-    -> std::expected<T, ConfigTable::Error> {
+static auto readIndex(lua_State* state, const int table_ref,
+                      const size_t index) -> std::expected<T, ConfigTable::Error> {
   // read table into stack and check its a table, not a value-type
   const auto object_type = lua_rawgeti(state, LUA_REGISTRYINDEX, table_ref);
   if (object_type != LUA_TTABLE) {
@@ -187,8 +187,8 @@ static auto readIndex(lua_State* state, const int table_ref, const size_t index)
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-static auto readKey(lua_State* state, int table_ref, const std::string& key)
-    -> std::expected<T, ConfigTable::Error> {
+static auto readKey(lua_State* state, int table_ref,
+                    const std::string& key) -> std::expected<T, ConfigTable::Error> {
   const auto read_leaf = [state](const std::string& token) -> std::expected<T, ConfigTable::Error> {
     const auto ret = readLeaf<T>(state);
     if (not ret.has_value()) {
