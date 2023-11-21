@@ -9,14 +9,11 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
 ## Setup build environment
 
 - Install the basic tools
-
   ```bash
-  sudo apt install pkg-config gpg wget ca-certificates git-lfs ccache ninja-build automake libtool \
+  sudo apt install pkg-config gpg wget ca-certificates git-lfs curl ccache ninja-build \
   doxygen graphviz linux-generic python3-dev iproute2 python-is-python3 net-tools iftop htop
   ```
-
 - Install latest cmake
-
   ```bash
   wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
   echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
@@ -25,11 +22,8 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
   sudo apt install kitware-archive-keyring
   sudo apt install cmake
   ```
-
 - Install latest compilers
-
   - Clang
-
     ```bash
     wget https://apt.llvm.org/llvm.sh
     export CLANG_VERSION=18 # Replace with latest version number
@@ -44,9 +38,7 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
     --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$CLANG_VERSION \
     --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-$CLANG_VERSION 
     ```
-  
   - GCC
-
     ```bash
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     export GCC_VERSION=13 # Replace with latest version number
@@ -70,7 +62,11 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang17
     --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-$GCC_VERSION \
     --slave /usr/bin/aarch64-linux-gnu-gcov aarch64-linux-gnu-gcov /usr/bin/aarch64-linux-gnu-gcov-$GCC_VERSION
     ```
-
+  - Rust
+    ```bash
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    ```
+    
 ## Configure and build
 
 ```bash
