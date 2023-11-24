@@ -60,10 +60,16 @@ inline auto CommandLineArgs::getOption(const std::string& option) const -> std::
   if (it == key_values_.end()) {
     return std::unexpected(Error::NotFound);
   }
-  T value;
-  std::istringstream stream(it->second);
-  if (stream >> value) {
-    return value;
+  if constexpr (std::is_same_v<T, std::string>) {
+    // note: since std::istringstream extracts only up to whitespace, this special case is
+    // neccessary for parsing strings containing multiple words
+    return it->second;
+  } else {
+    T value;
+    std::istringstream stream(it->second);
+    if (stream >> value) {
+      return value;
+    }
   }
   return std::unexpected(Error::Unparsable);
 }
