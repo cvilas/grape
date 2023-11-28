@@ -20,7 +20,7 @@ auto main() -> int {
   try {
     grape::panic<CustomException>("An exception occurred");
   } catch (const std::exception& ex) {
-    std::println(stderr, "{}", ex.what());
+    std::ignore = std::fputs(ex.what(), stderr);
   }
   return EXIT_SUCCESS;
 }
