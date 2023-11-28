@@ -67,7 +67,7 @@ auto main(int argc, const char* argv[]) -> int {
       std::println(" '{}' at ({}, {}, {})", r.name, pose.x, pose.y, pose.rz);
     }
   } catch (const std::exception& ex) {
-    std::println("Exception: {}", ex.what());
+    std::ignore = std::fputs(ex.what(), stderr);
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

@@ -41,7 +41,7 @@ auto main(int argc, const char* argv[]) -> int {
     record.configure(table);
     std::println("From configuration, name='{}', age={}.", record.name, record.age);
   } catch (const std::exception& ex) {
-    std::println(stderr, "Exception: {}", ex.what());
+    std::ignore = std::fputs(ex.what(), stderr);
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
