@@ -59,6 +59,11 @@
 - serdes
   - Choose backend: low overhead, type-safe, fast
   - concept `serialisable`
+- Setup configuration presets for developer and CI builds
+  - Incorporate lessons from https://youtu.be/UI_QayAb9U0
+  - Update CMakePresets.json
+  - Develop github CI build file
+  - Document the usage in install instructions
 
 ## Phase 2 - Graphics Core
 
