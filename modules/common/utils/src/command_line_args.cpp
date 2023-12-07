@@ -13,7 +13,7 @@ namespace grape::utils {
 CommandLineArgs::CommandLineArgs(int argc, const char* argv[]) {
   const auto args = std::vector<std::string>(argv, argv + argc);
   for (const auto& a : args) {
-    if (a.find("--") == 0) {               //!< '--' indicates key-value pair
+    if (a.starts_with("--")) {             //!< '--' indicates key-value pair
       const std::string kv = a.substr(2);  //!< extract the key-value
       const size_t pos = kv.find('=');     //!< find position of delimiter for value
       key_values_.emplace(kv.substr(0, pos) /* key */,
