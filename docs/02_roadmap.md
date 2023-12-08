@@ -106,8 +106,7 @@
 
 ## Notes
 
-- Use C++20 or newer features in development
-- Introduce C++ modules support once CMake 3.28 is out
+- Use C++23 or newer features in development
 
 ```c++
 // hello world in C++23
