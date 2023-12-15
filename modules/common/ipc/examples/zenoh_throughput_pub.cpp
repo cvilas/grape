@@ -4,8 +4,8 @@
 
 #include <print>
 
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
 
 //=================================================================================================
 // Publishing end of the pair of example programs to measure throughput between a publisher and a
@@ -24,14 +24,16 @@
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-
     static constexpr auto DEFAULT_PAYLOAD_SIZE = 8;
     static constexpr uint8_t DEFAULT_PAYLOAD_FILL = 1;
-    const auto size_opt = args.getOption<size_t>("size");
-    const auto payload_size = (size_opt.has_value() ? size_opt.value() : DEFAULT_PAYLOAD_SIZE);
+
+    auto desc = grape::conio::ProgramDescription("Publisher end of throughput measurement example");
+    desc.defineOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto payload_size = args.getOption<size_t>("size");
     const auto value = std::vector<uint8_t>(payload_size, DEFAULT_PAYLOAD_FILL);
-    std::println("Payload size [--size]: {} bytes", payload_size);
+    std::println("Payload size: {} bytes", payload_size);
 
     auto config = zenohc::Config();
     auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));

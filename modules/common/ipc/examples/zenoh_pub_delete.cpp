@@ -9,9 +9,9 @@
 
 #include <print>
 
+#include "grape/conio/conio.h"
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
-#include "grape/utils/conio.h"
 
 //=================================================================================================
 // Example program that publishes a sample with Samplekind::Delete. Such messages can be
@@ -35,9 +35,11 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-    const auto key_opt = args.getOption<std::string>("key");
-    const auto& key = key_opt.has_value() ? key_opt.value() : DEFAULT_KEY;
+    auto desc = grape::conio::ProgramDescription("Notifies deletion of data on specified key");
+    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto key = args.getOption<std::string>("key");
 
     zenohc::Config config;
     std::println("Opening session...");

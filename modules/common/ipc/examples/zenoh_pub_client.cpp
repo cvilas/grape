@@ -7,8 +7,8 @@
 #include <print>
 #include <thread>
 
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
 
 //=================================================================================================
 // Example program that creates a 'client' publisher. Clients connect to other peers and clients
@@ -43,19 +43,19 @@ auto main(int argc, const char* argv[]) -> int {
     std::ignore = signal(SIGINT, onSignal);
     std::ignore = signal(SIGTERM, onSignal);
 
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
-    const auto key_opt = args.getOption<std::string>("key");
-    const auto& key = key_opt.has_value() ? key_opt.value() : DEFAULT_KEY;
-
     static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
-    const auto value_opt = args.getOption<std::string>("value");
-    const auto& value = value_opt.has_value() ? value_opt.value() : DEFAULT_VALUE;
-
     static constexpr auto DEFAULT_ROUTER = "localhost:7447";
-    const auto router_opt = args.getOption<std::string>("router");
-    const auto& router = router_opt.has_value() ? router_opt.value() : DEFAULT_ROUTER;
+
+    auto desc = grape::conio::ProgramDescription("Example publisher operating in 'client' mode");
+    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY)
+        .defineOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
+        .defineOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto key = args.getOption<std::string>("key");
+    const auto value = args.getOption<std::string>("value");
+    const auto router = args.getOption<std::string>("router");
 
     zenohc::Config config;
 

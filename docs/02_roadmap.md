@@ -8,13 +8,13 @@
 - :done: Logging library
 - :done: Scripting library
 - :done: Introduce IPC
-- Command line parsing part 2:
-  - addOption(name, optional|required, default);
-  - support --help option by default
-  - support program description as constructor parameter
 
 ## Phase 2 - Demo application 1 - Probe
 
+- PoC IPC experiments
+  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 - study: https://pikuma.com/courses/cpp-2d-game-engine-development
 - serdes
   - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python

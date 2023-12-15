@@ -8,8 +8,8 @@
 #include <print>
 #include <span>
 
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
 
 //=================================================================================================
 // Example program that performs roundtrip time measurements. The ping example performs a put
@@ -27,50 +27,21 @@
 // Derived from https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_ping.c
 //=================================================================================================
 
-namespace {
-
-//=================================================================================================
-struct Args {
-  explicit Args(std::span<const char*> argv);
-
-  static constexpr size_t DEFAULT_PACKET_SIZE = 8;
-  static constexpr size_t DEFAULT_NUM_PINGS = 100;
-
-  size_t size{ DEFAULT_PACKET_SIZE };     // --size
-  size_t num_pings{ DEFAULT_NUM_PINGS };  // --pings
-};
-
-//-------------------------------------------------------------------------------------------------
-Args::Args(std::span<const char*> argv) {
-  const auto args = grape::utils::CommandLineArgs(static_cast<int>(argv.size()), argv.data());
-
-  const auto size_opt = args.getOption<size_t>("size");
-  if (size_opt.has_value()) {
-    size = size_opt.value();
-  }
-  std::println("Payload size: {}", size);
-
-  const auto num_pings_opt = args.getOption<size_t>("pings");
-  if (num_pings_opt.has_value()) {
-    num_pings = num_pings_opt.value();
-  }
-  std::println("Number of pings: {}", num_pings);
-
-  if (args.hasOption("help")) {
-    std::println(""                                                                        //
-                 "--pings (optional, default = {}): number of pings to attempt\n"          //
-                 "--size (optional, default = {}): ping and pong payload size in bytes\n"  //
-                 "--help: Prints this message.",
-                 Args::DEFAULT_PACKET_SIZE, Args::DEFAULT_NUM_PINGS);
-  }
-}
-
-}  // namespace
-
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    auto args = Args(std::span(argv, static_cast<size_t>(argc)));
+    static constexpr size_t DEFAULT_PACKET_SIZE = 8;
+    static constexpr size_t DEFAULT_NUM_PINGS = 100;
+
+    auto desc = grape::conio::ProgramDescription("Measures roundtrip time with pong program");
+    desc.defineOption<size_t>("pings", "number of pings to attempt", DEFAULT_NUM_PINGS)
+        .defineOption<size_t>("size", "ping and pong payload size in bytes", DEFAULT_PACKET_SIZE);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto num_pings = args.getOption<size_t>("pings");
+    const auto size = args.getOption<size_t>("size");
+    std::println("Payload size: {}", size);
+    std::println("Number of pings: {}", num_pings);
 
     // prepare session
     auto config = zenohc::Config();
@@ -97,9 +68,9 @@ auto main(int argc, const char* argv[]) -> int {
 
     // ping-pong
     static constexpr auto PONG_WAIT_TIMEOUT = std::chrono::milliseconds(10000);
-    const auto data = std::vector<uint8_t>(args.size);
-    auto results = std::vector<std::chrono::high_resolution_clock::duration>(args.num_pings);
-    for (size_t i = 0; i < args.num_pings; i++) {
+    const auto data = std::vector<uint8_t>(size);
+    auto results = std::vector<std::chrono::high_resolution_clock::duration>(num_pings);
+    for (size_t i = 0; i < num_pings; i++) {
       const auto ts_start = std::chrono::high_resolution_clock::now();
       pub.put(data);
       std::print("Ping ");
@@ -130,7 +101,7 @@ auto main(int argc, const char* argv[]) -> int {
       avg_rtt += r;
     }
     avg_rtt = avg_rtt / static_cast<int>(results.size());
-    std::println("Ping Pong rtt stats ({} pings): min={}, avg={}, max={}", args.num_pings, min_rtt,
+    std::println("Ping Pong rtt stats ({} pings): min={}, avg={}, max={}", num_pings, min_rtt,
                  avg_rtt, max_rtt);
     return EXIT_SUCCESS;
   } catch (const std::exception& ex) {

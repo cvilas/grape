@@ -4,7 +4,7 @@
 - 3-way comparison (spaceship) operator (C++20)
 - Concepts (C++20)
 - std::expected (C++23)
-- std::print (C++20)
+- std::print (C++23)
 - std::format (C++20)
 - std::span (C++20)
 - std::source_location (C++20)

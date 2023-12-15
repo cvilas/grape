@@ -5,9 +5,9 @@
 #include <print>
 #include <thread>
 
+#include "grape/conio/conio.h"
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
-#include "grape/utils/conio.h"
 
 //=================================================================================================
 // Example program demonstrates a subscriber that is notified of last put/delete by polling
@@ -29,9 +29,11 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-    const auto key_opt = args.getOption<std::string>("key");
-    const auto& key = key_opt.has_value() ? key_opt.value() : DEFAULT_KEY;
+    auto desc = grape::conio::ProgramDescription("Pulls data on specified key on-demand");
+    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto key = args.getOption<std::string>("key");
 
     zenohc::Config config;
     std::println("Opening session...");
@@ -48,7 +50,7 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Press any key to pull data... and 'q' to quit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
     while (true) {
-      const auto c = grape::utils::kbhit() ? grape::utils::getch() : 0;
+      const auto c = grape::conio::kbhit() ? grape::conio::getch() : 0;
       if (c == 'q') {
         break;
       }
