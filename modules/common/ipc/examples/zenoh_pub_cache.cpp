@@ -5,9 +5,9 @@
 #include <print>
 #include <thread>
 
+#include "grape/conio/conio.h"
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
-#include "grape/utils/conio.h"
 
 //=================================================================================================
 // Example program creates a publisher and periodically writes a value on the specified key. The
@@ -29,12 +29,13 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_VALUE = "Put from caching publisher";
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-    const auto key_opt = args.getOption<std::string>("key");
-    const auto value_opt = args.getOption<std::string>("value");
+    auto desc = grape::conio::ProgramDescription("Cached periodic publisher example");
+    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY)
+        .defineOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE);
 
-    const auto& key = key_opt.has_value() ? key_opt.value() : DEFAULT_KEY;
-    const auto& value = value_opt.has_value() ? value_opt.value() : DEFAULT_VALUE;
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto key = args.getOption<std::string>("key");
+    const auto value = args.getOption<std::string>("value");
 
     zenohc::Config config;
 
@@ -66,7 +67,7 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
     uint64_t idx = 0;
-    while (not grape::utils::kbhit()) {
+    while (not grape::conio::kbhit()) {
       const auto msg = std::format("[{}] {}", idx++, value);
       std::println("Publishing Data ('{} : {})", key, msg);
       z_put(session.loan(), z_keyexpr(key.c_str()), reinterpret_cast<const uint8_t*>(msg.data()),

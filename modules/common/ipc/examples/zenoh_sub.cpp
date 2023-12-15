@@ -5,9 +5,9 @@
 #include <print>
 #include <thread>
 
+#include "grape/conio/conio.h"
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
-#include "grape/utils/conio.h"
 
 //=================================================================================================
 // Example program that creates a subscriber. The subscriber will be notified of each put or delete
@@ -28,9 +28,11 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-    const auto key_opt = args.getOption<std::string>("key");
-    const auto& key = key_opt.has_value() ? key_opt.value() : DEFAULT_KEY;
+    auto desc = grape::conio::ProgramDescription("Subscriber listening for data on specified key");
+    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto key = args.getOption<std::string>("key");
 
     zenohc::Config config;
 
@@ -65,7 +67,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
-    while (not grape::utils::kbhit()) {
+    while (not grape::conio::kbhit()) {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
 

@@ -6,8 +6,8 @@
 #include <csignal>
 #include <print>
 
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
 
 //=================================================================================================
 // Example program creates a Zenoh router. Routers route data between 'clients' and local
@@ -39,7 +39,16 @@ auto main(int argc, const char* argv[]) -> int {
     std::ignore = signal(SIGINT, onSignal);
     std::ignore = signal(SIGTERM, onSignal);
 
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
+    static constexpr auto DEFAULT_PORT = 7447;
+    static constexpr auto DEFAULT_ADDRESS = "[::]";  //!< all available interfaces
+
+    auto desc = grape::conio::ProgramDescription("Zenoh router");
+    desc.defineOption<int>("port", "Port on which the service is available", DEFAULT_PORT)
+        .defineOption<std::string>("address", "IP address of the service", DEFAULT_ADDRESS);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto port = args.getOption<int>("port");
+    const auto addr = args.getOption<std::string>("address");
 
     zenohc::Config config;
 
@@ -48,17 +57,6 @@ auto main(int argc, const char* argv[]) -> int {
       std::println("Setting mode failed");
       return EXIT_FAILURE;
     }
-
-    // Configure to listen on the specified port or use default port
-    static constexpr auto DEFAULT_PORT = 7447;
-    const auto port_opt = args.getOption<int>("port");
-    const auto& port = port_opt.has_value() ? port_opt.value() : DEFAULT_PORT;
-
-    // Configure to listen on specified ethernet address or all available ethernet intefaces (ipv6
-    // [::]) by default
-    static constexpr auto DEFAULT_ADDRESS = "[::]";
-    const auto addr_opt = args.getOption<std::string>("address");
-    const auto& addr = addr_opt.has_value() ? addr_opt.value() : DEFAULT_ADDRESS;
 
     const auto listener_endpoint = std::format(R"(["tcp/{}:{}"])", addr, port);
     if (not config.insert_json(Z_CONFIG_LISTEN_KEY, listener_endpoint.c_str())) {

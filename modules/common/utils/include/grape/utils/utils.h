@@ -12,11 +12,6 @@
 
 namespace grape::utils {
 
-/// Defines a concept to check if a type can be converted from a string
-template <typename T>
-concept istringstreamable =
-    requires(std::string str, T value) { std::istringstream{ str } >> value; };
-
 /// Truncates a string by returning the segment between start and end token strings, including
 /// the start token but excluding the end token. For example, the following code will return
 /// 'to/some/file'

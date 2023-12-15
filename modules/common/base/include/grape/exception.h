@@ -11,6 +11,7 @@
 
 namespace grape {
 
+//=================================================================================================
 /// Base class for exceptions
 /// @include exception_example.cpp
 class Exception : public std::runtime_error {
@@ -30,5 +31,42 @@ constexpr void panic(const std::string& message,
                      std::source_location location = std::source_location::current()) {
   throw T{ message, location };
 }
+
+//=================================================================================================
+/// Exception raised on operating with mismatched types. Examples
+/// - serialisation/deserialisation across incompatible types
+/// - Typecasting between incompatible types
+class TypeMismatchException : public grape::Exception {
+public:
+  TypeMismatchException(const std::string& msg, std::source_location loc) : Exception(msg, loc) {
+  }
+};
+
+//=================================================================================================
+/// Exception raised due to invalid/incomplete/undefined configuration
+class InvalidConfigurationException : public grape::Exception {
+public:
+  InvalidConfigurationException(const std::string& msg, std::source_location loc)
+    : Exception(msg, loc) {
+  }
+};
+
+//=================================================================================================
+/// Exception raised due to invalid parameters
+class InvalidParameterException : public grape::Exception {
+public:
+  InvalidParameterException(const std::string& msg, std::source_location loc)
+    : Exception(msg, loc) {
+  }
+};
+
+//=================================================================================================
+/// Exception raised due to invalid or unsupported operation
+class InvalidOperationException : public grape::Exception {
+public:
+  InvalidOperationException(const std::string& msg, std::source_location loc)
+    : Exception(msg, loc) {
+  }
+};
 
 }  // namespace grape

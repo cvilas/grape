@@ -2,7 +2,7 @@
 // Copyright (C) 2018-2023 GRAPE Contributors
 //=================================================================================================
 
-#include "grape/utils/conio.h"
+#include "grape/conio/conio.h"
 
 #include <cstdio>
 
@@ -11,7 +11,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-namespace grape::utils {
+namespace grape::conio {
 
 //-------------------------------------------------------------------------------------------------
 auto kbhit() -> bool {
@@ -42,4 +42,4 @@ auto getch() -> int {
   return ch;
 }
 
-}  // namespace grape::utils
+}  // namespace grape::conio

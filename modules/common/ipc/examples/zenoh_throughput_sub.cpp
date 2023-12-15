@@ -6,8 +6,8 @@
 #include <print>
 #include <thread>
 
+#include "grape/conio/conio.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/conio.h"
 
 //=================================================================================================
 // Subscribing end of the pair of example programs to measure throughput between a publisher and a
@@ -72,7 +72,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
-    while (not grape::utils::kbhit()) {
+    while (not grape::conio::kbhit()) {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     sub.drop();

@@ -6,8 +6,8 @@
 #include <print>
 #include <thread>
 
+#include "grape/conio/conio.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/conio.h"
 
 //=================================================================================================
 // Example program demonstrates how to interact with a queryable to perform a query, and receive

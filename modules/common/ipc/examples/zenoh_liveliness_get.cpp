@@ -5,8 +5,8 @@
 #include <print>
 #include <thread>
 
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
 
 //=================================================================================================
 // Queries currently alive tokens that match a given key expression. To learn how tokens are
@@ -26,9 +26,12 @@
 auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/**";
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-    const auto key_opt = args.getOption<std::string>("key");
-    const auto& key = key_opt.has_value() ? key_opt.value() : DEFAULT_KEY;
+
+    auto desc = grape::conio::ProgramDescription("Queries liveliness token");
+    desc.defineOption<std::string>("key", "key expression to query liveliness of", DEFAULT_KEY);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto key = args.getOption<std::string>("key");
 
     zenohc::Config config;
     std::println("Opening session...");

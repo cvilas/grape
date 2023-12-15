@@ -6,8 +6,8 @@
 #include <csignal>
 #include <print>
 
+#include "grape/conio/program_options.h"
 #include "grape/ipc/ipc.h"
-#include "grape/utils/command_line_args.h"
 
 //=================================================================================================
 // Example program that creates a 'client' subscriber. Clients connect to other peers and clients
@@ -42,15 +42,16 @@ auto main(int argc, const char* argv[]) -> int {
     std::ignore = signal(SIGINT, onSignal);
     std::ignore = signal(SIGTERM, onSignal);
 
-    const auto args = grape::utils::CommandLineArgs(argc, argv);
-
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
-    const auto key_opt = args.getOption<std::string>("key");
-    const auto& key = key_opt.has_value() ? key_opt.value() : DEFAULT_KEY;
-
     static constexpr auto DEFAULT_ROUTER = "localhost:7447";
-    const auto router_opt = args.getOption<std::string>("router");
-    const auto& router = router_opt.has_value() ? router_opt.value() : DEFAULT_ROUTER;
+
+    auto desc = grape::conio::ProgramDescription("Example subscriber operating in 'client' mode");
+    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY)
+        .defineOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER);
+
+    const auto args = std::move(desc).parse(argc, argv);
+    const auto key = args.getOption<std::string>("key");
+    const auto router = args.getOption<std::string>("router");
 
     zenohc::Config config;
 
