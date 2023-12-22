@@ -48,7 +48,7 @@ TEST_CASE("Reads required option if specified on the command line", "[program_ar
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Default value is used or optional argument if unspecified", "[program_args]") {
+TEST_CASE("Default value is used for optional argument if unspecified", "[program_args]") {
   static constexpr auto INT_KEY_DEFAULT_VALUE = 20;
   auto desc = grape::conio::ProgramDescription("optional args default value test");
   desc.defineOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE);
