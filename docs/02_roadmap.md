@@ -1,35 +1,37 @@
 # Roadmap
 
-## Phase 1 - Basics
+## Phase 1 - Base
 
 - :done: Versioning
 - :done: Exception definitions
 - :done: Command line flags parsing
 - :done: Logging library
 - :done: Scripting library
-- :done: Introduce IPC
+- :done: Message passing
 
 ## Phase 2 - Demo application 1 - Probe
 
-- PoC IPC experiments
-  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
-- study: https://pikuma.com/courses/cpp-2d-game-engine-development
-- serdes
-  - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python
-  - concept `serialisable`
+- study: 
+  - [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development)
+  - [reflect-cpp](https://github.com/getml/reflect-cpp)
+- probe library:
+  - Study [DataTamer](https://github.com/PickNikRobotics/data_tamer) and [probe](github.com/cvilas/probe)
+  - Extend probe api for real-time performance (no memory allocation, minimal network overheads, no system calls in RT path)
+  - *grape_plant*: closed loop control, deployable on embedded processors.
+  - *grape_supervisor*: remote monitoring, graphing, online parameter tuning, and event logging; runs as a separate process, likely on a different host.
 - plot:
   - :done: Choose a backend: implot
   - concept `plottable`
-- probe library:
-  - Take inspiration from PlotJuggler and DataTamer
-  - Port github.com/cvilas/probe library
-  - *grape_plant*: closed loop control, deployable on embedded processors.
-  - *grape_supervisor*: remote monitoring, graphing, online parameter tuning, and event logging; runs as a separate process, likely on a different host.
+- serdes
+  - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python
+  - concept `serialisable`
+- zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
 
 ## Phase 3 - CI
 
+- Refactor logging
+  - Remove logging from script classes. Use error code and message instead.
+  - Make `utils::truncate`` work at compile time from `logger::log()`
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
   - Fail the CI if clang-format changes code
@@ -59,12 +61,18 @@
   - zenoh_pub_cache: Understand what it is supposed to do and make it work
   - zenoh_query_sub - make it work
   - z_storage
-  - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
+  - any new examples that have appeared in zenoh-c, zenoh-cpp
+  - describe and provide example for user attachments. z_get/pub/queryable_attachment
+    - The Attachment feature is a generic way for users to attach any "metadata" to the payload they send through Zenoh. The same could be achieved by taking your data and metadata, serialize them all in a single payload and send it through Zenoh. The key benefit here is that if your main payload and metadata come from different memory regions, it avoids allocating a new buffer and serializing thus copying your payload and metadata in this new buffer. In a way it brings similar benefits as Vectored I/O and writev function: https://en.wikipedia.org/wiki/Vectored_I/O
 - HW IO
   - CANopen
   - joystick
 - Behaviour trees: Consider building from first principles
 - FSM: introspectable, visualise state transition graph using graphviz.
+- PoC IPC experiments
+  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 
 ## Phase 6 - Demo application 2 - Rover
 

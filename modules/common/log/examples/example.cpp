@@ -4,12 +4,13 @@
 
 #include <cstdlib>
 
-#include "grape/log/log.h"
+#include "grape/log/logger.h"
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   (void)argc;
   (void)argv;
-  grape::log::log(grape::log::Severity::Error, "A log message");
+  grape::log::Logger logger;
+  logger.log(grape::log::Severity::Error, "A log message");
   return EXIT_SUCCESS;
 }

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <streambuf>
 
-#include "grape/log/log.h"
+#include "grape/log/logger.h"
 
 /// A custom buffer class that clones data to multiple data buffers.
 class TeeStreamBuffer : public std::streambuf {
@@ -47,14 +47,16 @@ auto main() -> int {
   // Create a new stream using the custom tee buffer
   std::ostream tee_stream(&tee_buffer);
 
+  grape::log::Logger logger;
+
   // Redirect log to the custom stream
-  auto* original_buffer = grape::log::setStreamBuffer(tee_stream.rdbuf());
+  auto* original_buffer = grape::log::Logger::setStreamBuffer(tee_stream.rdbuf());
 
   // Now, any output sent to logger will go to both the log file and standard output
-  grape::log::log(grape::log::Severity::Info, "This message goes to log file and standard output");
+  logger.log(grape::log::Severity::Info, "This message goes to log file and standard output");
 
   // Restore the original buffer before exiting
-  grape::log::setStreamBuffer(original_buffer);
+  grape::log::Logger::setStreamBuffer(original_buffer);
 
   return EXIT_SUCCESS;
 }

@@ -6,9 +6,9 @@ declare_module(NAME log DEPENDS_ON_MODULES "utils" DEPENDS_ON_EXTERNAL_PROJECTS 
 
 # library sources
 set(SOURCES
-        src/log.cpp
         README.md
-        include/grape/log/log.h)
+        include/grape/log/logger.h
+        include/grape/log/singleton_logger.h)
 
 # library target
 define_module_library(

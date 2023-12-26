@@ -27,7 +27,7 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
   const auto start_pos = str.find(start_token);
   const auto end_pos = end_token.empty() ? std::string_view::npos : str.find(end_token);
   return (start_pos != std::string_view::npos) ? str.substr(start_pos, end_pos - start_pos) :
-                                                 str.substr(0, end_pos - start_pos);
+                                                 str.substr(0, end_pos);
 }
 
 /// Return user-readable name for specified type

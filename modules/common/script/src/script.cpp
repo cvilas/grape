@@ -4,7 +4,7 @@
 
 #include "grape/script/script.h"
 
-#include "grape/log/log.h"
+#include "grape/log/singleton_logger.h"
 #include "grape/utils/utils.h"
 #include "lua.hpp"
 
