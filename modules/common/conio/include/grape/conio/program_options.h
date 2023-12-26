@@ -40,12 +40,12 @@ public:
 
 public:
   /// Check whether an option was specified on the command line
-  /// @param option  The command line option (without the '--'). 
+  /// @param option  The command line option (without the '--').
   /// @return true if option is found
   [[nodiscard]] auto hasOption(const std::string& option) const -> bool;
 
   /// Get the value specified for a command line option
-  /// @param option  The command line option (without the '--'). 
+  /// @param option  The command line option (without the '--').
   /// @return  The value of the specified option.
   template <StringStreamable T>
   [[nodiscard]] auto getOption(const std::string& option) const -> T;

@@ -4,15 +4,16 @@
 
 #include <cstdlib>
 
-#include "grape/log/log.h"
+#include "grape/log/logger.h"
 
 //=================================================================================================
 // Demonstrates customisation of the logging output with a custom formatter
 auto main(int argc, const char* argv[]) -> int {
   (void)argc;
   (void)argv;
-  grape::log::setFormatter(
+  grape::log::Logger logger;
+  logger.setFormatter(
       [](const grape::log::Record& r) -> std::string { return std::format("{}\n", r.message); });
-  grape::log::log(grape::log::Severity::Error, "Custom formatted log message");
+  logger.log(grape::log::Severity::Error, "Custom formatted log message");
   return EXIT_SUCCESS;
 }
