@@ -10,47 +10,36 @@
 - :done: Message passing
 - :done: Realtime services  
 
-## Phase 2 - Demo application 1 - Probe
+## Phase 2 - Multimodel data logging and visualisation - timeseries data
 
-- Design
-  - :done: Start requirement document
+- :done: Design
   - :done: Choose data types to support. 
   - :done: Implement fixed size non-allocating strings
-  - Implement `FIFOBuffer` supporting in-place operations to write/read data
-  - Propose how to serialise data at the plant and deserialise at monitor
-    - use fixed size data structures 
-    - serdes is basically required for big-endian<->little-endian conversations, even if fixed size data structures are used. maybe use fastcdr
-  - [Proof of concept](https://godbolt.org/z/aee4jsMfW)
-
-- Study: 
-  - :done: [cactus-rt](https://github.com/cactusdynamics/cactus-rt)
-  - [DataTamer](https://github.com/PickNikRobotics/data_tamer) 
-  - [probe](github.com/cvilas/probe)
-  - Sign up for [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development) course
-  - Document all these resources
-- Implement Plant
-- Implement Monitor 
-- plot:
-  - :done: Choose a backend: implot (docking branch)
-  - concept `plottable`
+  - :done: Implement `FIFOBuffer` supporting in-place operations to write/read data
+  - :done: [Proof of concept](https://godbolt.org/z/hqf444erc)
+- :done: Implement probe::Controller
+- Implement probe::Monitor
+  - :done: Study [FoxGlove](https://foxglove.dev/). What features do we want
+  - Study API proposed in [probe](https://github.com/cvilas/probe)
+  - plot:
+    - :done: Choose a backend: implot (docking branch)
+    - concept `plottable`
+- Implement experimental [MCAP](https://github.com/foxglove/mcap/tree/main/cpp) reader and writer
 - Refactor logging
   - Consider fixed size string for logs 
   - Consider using the `FIFOBuffer` for logs.
+- Refactor to reduce padding. Turn on `-Wpadded` and minimise padding in data structures that are cache sensitive
+  - log::Record
+  - probe::Signal
+- Study [SPSC FIFO](https://youtu.be/K3P_Lmq6pw0) and review [implementation](https://github.com/CharlesFrasch/cppcon2023)
+- Benchmark operations per second for `FIFOBuffer`. Compare against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023)
+  - Replace `%` operations with `AND` (fifo4a) for speedup 
+- Benchmark operations per second for `MPSCQueue`.
 - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
+- Refactor gbs template files
+  - Replace grape with @CMAKE_PROJECT_NAME@ in all files
 
-## Phase 3 - CI
-
-- Setup configuration presets for developer and CI builds
-  - Incorporate lessons from https://youtu.be/UI_QayAb9U0
-  - Fail the CI if clang-format changes code
-  - Add configuration presets to CMakePresets.json
-  - Develop github CI build file
-  - Document the usage in install instructions
-- study
-  - [reflect-cpp](https://github.com/getml/reflect-cpp)
-- integrate cpack to generate artifacts 
-
-## Phase 4 - Audio, Video and 3D Graphics
+## Phase 4 - Multimodel data logging and visualisation - audio, video, 3D graphics
 
 - Audio/Video streaming:
   - Choose backend for audio/video device handling and stream processing
@@ -61,7 +50,22 @@
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 
-## Phase 5 - Robotics Core
+## Phase 3 - CI
+
+- Sign up for [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development) course
+- Setup configuration presets for developer and CI builds
+  - Incorporate lessons from https://youtu.be/UI_QayAb9U0
+  - Fail the CI if clang-format changes code
+  - Add configuration presets to CMakePresets.json
+  - Develop github CI build file
+  - Document the usage in install instructions
+- study
+  - [boost-ext/reflect](https://github.com/boost-ext/reflect)
+  - [reflect-cpp](https://github.com/getml/reflect-cpp)
+- Integrate cpack to generate artifacts 
+- Integrate cmake-format
+
+## Phase 5 - Robotics behaviours
 
 - Study
   - Robotics at compile time: https://youtu.be/Y6AUsB3RUhA
@@ -86,7 +90,7 @@
   - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 
-## Phase 6 - Demo application 2 - Rover
+## Phase 6 - Demo application - Rover
 
 - Mars Rover (joystick teleop, FPV, mission control)
 
@@ -116,17 +120,9 @@ auto main() -> int {
 }
 ```
 
-- references:
-  - C++20 features: <https://youtu.be/N1gOSgZy7h4>
-  - Clean code: <https://youtu.be/9ch7tZN4jeI?si=YkO84hmfQWfq8KO8>
-- **Coroutines**: Review usability for async processing, nonblocking IO
-- Modules
-- monads or_else, and_them, transforms on std::optional: <https://www.cppstories.com/2023/monadic-optional-ops-cpp23/>
-- Calendar updates in chrono
-- Ranges
-- constexpr everywhere
-- jthread
-- use std::exception for truly exceptional errors, use std::expected everywhere else
-- Provide separate interface headers and implementation headers. (See `clean code` video above)
-- IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above
-- std::stacktrace
+## References:
+
+- C++23 features: <https://youtu.be/Cttb8vMuq-Y>
+- C++20 features: <https://youtu.be/N1gOSgZy7h4>
+- Clean code: <https://youtu.be/9ch7tZN4jeI?si=YkO84hmfQWfq8KO8>
+- IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above- **Coroutines**: Review usability for async processing, nonblocking IO

@@ -1,0 +1,66 @@
+//=================================================================================================
+// Copyright (C) 2023 GRAPE Contributors
+//=================================================================================================
+
+#pragma once
+
+#include <cstdint>
+
+namespace grape::probe {
+
+/// Lists datatypes that are supported
+template <typename T>
+struct IsNumeric : std::disjunction<                    //
+                       std::is_same<T, std::int8_t>,    //
+                       std::is_same<T, std::uint8_t>,   //
+                       std::is_same<T, std::int16_t>,   //
+                       std::is_same<T, std::uint16_t>,  //
+                       std::is_same<T, std::int32_t>,   //
+                       std::is_same<T, std::uint32_t>,  //
+                       std::is_same<T, std::int64_t>,   //
+                       std::is_same<T, std::uint64_t>,  //
+                       std::is_same<T, float>,          //
+                       std::is_same<T, double>          //
+                       > {};
+
+static_assert(sizeof(float) == 4, "Requires platform with 4-byte single precision float type");
+static_assert(sizeof(double) == 2 * sizeof(float));
+
+template <typename T>
+constexpr bool IS_NUMERIC_V = IsNumeric<T>::value;
+
+template <typename T>
+concept NumericType = IS_NUMERIC_V<T>;
+
+/// Identifiers for supported numeric data types
+enum class TypeId : std::uint8_t {
+  Int8,
+  Uint8,
+  Int16,
+  Uint16,
+  Int32,
+  Uint32,
+  Int64,
+  Uint64,
+  Float32,
+  Float64,
+};
+
+/// Get type identifier given numeric data type
+template <NumericType T>
+constexpr auto toTypeId() -> TypeId {
+  // clang-format off
+  if constexpr (std::is_same_v<T, std::int8_t>) { return TypeId::Int8; }
+  if constexpr (std::is_same_v<T, std::uint8_t>) { return TypeId::Uint8; }
+  if constexpr (std::is_same_v<T, std::int16_t>) { return TypeId::Int16; }
+  if constexpr (std::is_same_v<T, std::uint16_t>) { return TypeId::Uint16; }
+  if constexpr (std::is_same_v<T, std::int32_t>) { return TypeId::Int32; }
+  if constexpr (std::is_same_v<T, std::uint32_t>) { return TypeId::Uint32; }
+  if constexpr (std::is_same_v<T, std::int64_t>) { return TypeId::Int64; }
+  if constexpr (std::is_same_v<T, std::uint64_t>) { return TypeId::Uint64; }
+  if constexpr (std::is_same_v<T, float>) { return TypeId::Float32; }
+  if constexpr (std::is_same_v<T, double>) { return TypeId::Float64; }
+  // clang-format on
+}
+
+}  // namespace grape::probe
