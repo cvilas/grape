@@ -66,7 +66,17 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang18
     ```bash
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     ```
-    
+  - Setup [sccache](https://github.com/mozilla/sccache)
+    ```bash
+    cargo install sccache --locked
+    ```
+
+    To cache Rust builds, add following lines to `$HOME/.cargo/config.toml`
+    ```toml
+    [build]
+    rustc-wrapper="sccache"
+    ```
+
 ## Configure and build
 
 Note (Dec 2023) Use the clang toolchain to build the project. GCC-13 does not support all features we use.
