@@ -4,7 +4,7 @@
 
 #include "grape/script/script.h"
 
-#include "grape/log/singleton_logger.h"
+#include "grape/exception.h"
 #include "grape/utils/utils.h"
 #include "lua.hpp"
 
@@ -14,7 +14,7 @@ namespace grape::script {
 ConfigScript::ConfigScript(const std::string& script_string) : ConfigScript() {
   auto* const state = lua_state_.get();
   if (luaL_dostring(state, script_string.c_str()) != LUA_OK) {
-    grape::panic<ScriptException>(lua_tostring(state, -1));
+    grape::panic<Exception>(lua_tostring(state, -1));
   }
 }
 
@@ -22,7 +22,7 @@ ConfigScript::ConfigScript(const std::string& script_string) : ConfigScript() {
 ConfigScript::ConfigScript(const std::filesystem::path& script_path) : ConfigScript() {
   auto* const state = lua_state_.get();
   if (luaL_dofile(state, script_path.c_str()) != LUA_OK) {
-    grape::panic<ScriptException>(lua_tostring(state, -1));
+    grape::panic<Exception>(lua_tostring(state, -1));
   }
 }
 
@@ -34,8 +34,7 @@ ConfigScript::ConfigScript()
 
 //-------------------------------------------------------------------------------------------------
 void ConfigScript::exitLua(lua_State* state) {
-  log::log(log::Severity::Debug,
-           std::format("Cleaning up Lua state ({} items on stack).", lua_gettop(state)));
+  // std::println(stderr, "Cleaning up Lua state ({} items on stack).", lua_gettop(state));
   lua_close(state);
 }
 
@@ -85,7 +84,6 @@ static auto readToLeaf(lua_State* state, int table_ref,
     std::ignore = lua_pushstring(state, token.c_str());
     const auto object_type = lua_gettable(state, -2);
     if (object_type == LUA_TNIL) {
-      log::log(log::Severity::Debug, std::format("Key '{}' is not found", token));
       clearLuaStack(state);
       return std::unexpected(ConfigTable::Error::NotFound);
     }
@@ -100,7 +98,6 @@ static auto readToLeaf(lua_State* state, int table_ref,
     lua_remove(state, -2);  // delete previously retrieved item, leaving current item on stack.
     start_pos = end_pos + 1;
     if (object_type != LUA_TTABLE) {
-      log::log(log::Severity::Debug, std::format("Key '{}' is not a table", token));
       clearLuaStack(state);
       return std::unexpected(ConfigTable::Error::Unparsable);
     }  // not table
@@ -173,7 +170,6 @@ static auto readIndex(lua_State* state, const int table_ref,
   const auto size = lua_rawlen(state, -1);
   const auto lua_index = index + 1;
   if (lua_index > size) {
-    log::log(log::Severity::Debug, std::format("Invalid index '{}' (size={})", index, size));
     clearLuaStack(state);
     return std::unexpected(ConfigTable::Error::NotFound);
   }
@@ -187,20 +183,13 @@ static auto readIndex(lua_State* state, const int table_ref,
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-static auto readKey(lua_State* state, int table_ref,
-                    const std::string& key) -> std::expected<T, ConfigTable::Error> {
-  const auto read_leaf = [state](const std::string& token) -> std::expected<T, ConfigTable::Error> {
-    const auto ret = readLeaf<T>(state);
-    if (not ret.has_value()) {
-      if (ret.error() == ConfigTable::Error::Unparsable) {
-        log::log(log::Severity::Debug, std::format("Value of key '{}' cannot be parsed as '{}'",
-                                                   token, utils::getTypeName<T>()));
-      }
-    }
-    return ret;
+static auto readKey(lua_State* state, int table_ref, const std::string& key)
+    -> std::expected<T, ConfigTable::Error> {
+  const auto read_leaf = [state](const auto& /*token*/) -> std::expected<T, ConfigTable::Error> {
+    return readLeaf<T>(state);
   };
-  const auto return_error = [](const auto& e) -> std::expected<T, ConfigTable::Error> {
-    return std::unexpected(e);
+  const auto return_error = [](const auto& error) -> std::expected<T, ConfigTable::Error> {
+    return std::unexpected(error);
   };
   return readToLeaf(state, table_ref, key)  //
       .and_then(read_leaf)                  //
@@ -215,7 +204,7 @@ ConfigTable::ConfigTable(std::shared_ptr<lua_State> lua_state, int lua_table_ref
   const auto object_type = lua_rawgeti(state, LUA_REGISTRYINDEX, lua_table_ref_);
   if (object_type == LUA_TTABLE) {
     size_ = lua_rawlen(state, -1);
-    log::log(log::Severity::Debug, std::format("Table size='{}'", size_));
+    // std::println(stderr, "Table size='{}'", size_);
   }
   clearLuaStack(state);
 }
@@ -271,8 +260,8 @@ auto ConfigTable::readTable(const std::string& key) const
   const auto on_success = [this](const ConfigTableDetail& d) -> std::expected<ConfigTable, Error> {
     return ConfigTable(this->lua_state_, d.table_reference);
   };
-  const auto on_fail = [](const auto& e) -> std::expected<ConfigTable, Error> {
-    return std::unexpected(e);
+  const auto on_fail = [](const ConfigTable::Error& error) -> std::expected<ConfigTable, Error> {
+    return std::unexpected(error);
   };
   return readKey<ConfigTableDetail>(lua_state_.get(), lua_table_ref_, key)  //
       .and_then(on_success)                                                 //
@@ -304,8 +293,8 @@ auto ConfigTable::readTable(size_t index) const -> std::expected<ConfigTable, Co
   const auto on_success = [this](const ConfigTableDetail& d) -> std::expected<ConfigTable, Error> {
     return ConfigTable(this->lua_state_, d.table_reference);
   };
-  const auto on_fail = [](const auto& e) -> std::expected<ConfigTable, Error> {
-    return std::unexpected(e);
+  const auto on_fail = [](const auto& error) -> std::expected<ConfigTable, Error> {
+    return std::unexpected(error);
   };
   return readIndex<ConfigTableDetail>(lua_state_.get(), lua_table_ref_, index)  //
       .and_then(on_success)                                                     //

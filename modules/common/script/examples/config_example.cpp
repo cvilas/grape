@@ -4,18 +4,12 @@
 
 #include <print>
 
+#include "grape/exception.h"
 #include "grape/script/script.h"
 
 //=================================================================================================
 // Example shows how to configure fields in a custom data structure from a script
 //=================================================================================================
-
-// An exception class for configuration errors
-class ConfigException : public grape::Exception {
-public:
-  ConfigException(const std::string& msg, std::source_location loc) : Exception(msg, loc) {
-  }
-};
 
 // An example data structure that is configurable
 struct PersonnelRecord {
@@ -53,7 +47,7 @@ void PersonnelRecord::configure(const grape::script::ConfigTable& table) {
   if (age_result.has_value()) {
     age = static_cast<unsigned int>(age_result.value());
   } else {
-    grape::panic<ConfigException>(
+    grape::panic<grape::Exception>(
         std::format("Error reading age: {}\n", toString(age_result.error())));
   }
 
@@ -61,7 +55,7 @@ void PersonnelRecord::configure(const grape::script::ConfigTable& table) {
   if (name_result.has_value()) {
     name = name_result.value();
   } else {
-    grape::panic<ConfigException>(
+    grape::panic<grape::Exception>(
         std::format("Error reading name: {}\n", toString(name_result.error())));
   }
 }

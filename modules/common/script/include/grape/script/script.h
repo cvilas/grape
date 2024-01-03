@@ -7,22 +7,12 @@
 #include <concepts>
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <memory>
-#include <vector>
-
-#include "grape/exception.h"
 
 struct lua_State;  //!< Internal detail. Don't worry about it!
 
 namespace grape::script {
-
-//=================================================================================================
-/// Exception triggered by errors in script execution
-class ScriptException : public grape::Exception {
-public:
-  ScriptException(const std::string& msg, std::source_location loc) : Exception(msg, loc) {
-  }
-};
 
 class ConfigTable;  //!< Forward declaration. Interface description is further down
 
@@ -134,8 +124,8 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-inline constexpr auto toString(ConfigTable::Error e) -> std::string_view {
-  switch (e) {
+inline constexpr auto toString(ConfigTable::Error code) -> std::string_view {
+  switch (code) {
     case ConfigTable::Error::NotFound:
       return "NotFound";
     case ConfigTable::Error::Unparsable:
