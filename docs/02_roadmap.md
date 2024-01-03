@@ -8,6 +8,24 @@
 - :done: Logging library
 - :done: Scripting library
 - :done: Message passing
+- Refactor logging
+  - benchmark
+    - write google benchmark
+    - hide logger output from console - write to file instead. 
+    - ensure there are no missed logs
+    - Make sure final logger takes <10ms
+  - make it lock free
+    - config class to set threshold, formatter, logger name, flush period, queue capacity
+    - set reasonable defaults 
+    - move config class into logger at construction
+  - make consumer side non-rt 
+  - consider function to set cpu affinity for the consumer thread
+  - provide sample formatters in a separate folder
+  - provide header for record and severity
+  - note number of missed logs in the appenders
+  - consider setting logger_name and removing singleton logger
+  - does using __LINE__, __FILE__ and __FUNCTION__ instead of std::source_location improve speed?
+  - write unit tests
 - Realtime services
   - :done: non-blocking mpsc queue
   - :done: memory locking function
