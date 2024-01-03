@@ -2,7 +2,7 @@
 # Copyright (C) 2018-2023 GRAPE Contributors
 #=================================================================================================
 
-declare_module(NAME script DEPENDS_ON_MODULES base log DEPENDS_ON_EXTERNAL_PROJECTS "")
+declare_module(NAME script DEPENDS_ON_MODULES base DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
 set(SOURCES
@@ -13,7 +13,7 @@ set(SOURCES
 # library target
 define_module_library(
         NAME script
-        PUBLIC_LINK_LIBS grape::log grape::base
+        PUBLIC_LINK_LIBS grape::base
         PRIVATE_LINK_LIBS lualib
         SOURCES 
           ${SOURCES}
