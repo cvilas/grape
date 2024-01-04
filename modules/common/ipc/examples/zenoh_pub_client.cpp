@@ -30,8 +30,7 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 std::atomic_bool s_exit = false;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
-void onSignal(int signum) {
-  std::println("\nReceived signal {}", strsignal(signum));
+void onSignal(int /*signum*/) {
   s_exit = true;
 }
 
