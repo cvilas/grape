@@ -11,7 +11,7 @@ Logging services
 - Reports timestamp and source location from where the log was fired
 - Threshold severity level settable at runtime
 - User definable log sinks (file, network, console)
-- User definable data formatters at sink
+- User definable data format at sink
 - Simple API
   ```c++
   log(severity, message);

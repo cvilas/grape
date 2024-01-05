@@ -2,18 +2,23 @@
 # Copyright (C) 2018-2023 GRAPE Contributors
 #=================================================================================================
 
-declare_module(NAME log DEPENDS_ON_MODULES "utils" DEPENDS_ON_EXTERNAL_PROJECTS "")
+declare_module(NAME log DEPENDS_ON_MODULES "utils;realtime" DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
 set(SOURCES
         README.md
+        include/grape/log/config.h
+        include/grape/log/default_formatter.h
+        include/grape/log/default_sink.h
         include/grape/log/logger.h
-        include/grape/log/singleton_logger.h)
+        include/grape/log/record.h
+        include/grape/log/severity.h
+        src/logger.cpp)
 
 # library target
 define_module_library(
         NAME log
-        PUBLIC_LINK_LIBS grape::utils
+        PUBLIC_LINK_LIBS grape::realtime grape::utils
         PRIVATE_LINK_LIBS ""
         SOURCES ${SOURCES}
         PUBLIC_INCLUDE_PATHS
