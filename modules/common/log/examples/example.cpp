@@ -10,7 +10,7 @@
 auto main(int argc, const char* argv[]) -> int {
   (void)argc;
   (void)argv;
-  grape::log::Logger logger;
+  grape::log::Logger logger({});
   logger.log(grape::log::Severity::Error, "A log message");
   return EXIT_SUCCESS;
 }

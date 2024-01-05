@@ -28,12 +28,7 @@ In all other situations, prefer to return `std::expected` over throwing an excep
 ## OS configuration
 
 - Configure the kernel for preemption by following these guidelines for [Real-time Ubuntu](https://ubuntu.com/real-time)
-- The percentage of CPU time set aside for real-time processes can be specified by modifying `/proc/sys/kernel/sched_rt_runtime_us`. The default is 950000 (0.95 seconds), meaning 5% CPU is set aside for non-real-time processes. If set to -1, no CPU time is set aside for non-realtime processes, which is a dangerous thing to do, as a runaway realtime task will monopolise the CPU. Modify the parameter by setting the value in `/etc/sysctl.conf` as follows: 
-  ```bash
-  kernel.sched_rt_runtime_us=-1
-  ```
-  (Logout/reboot to apply changes.)
-- A process can change it's own scheduling policy and priority (eg: by calling `setSchedule()`), but only if run as root by default. This behaviour can be changed in two ways:
+- By default, a process can change it's own scheduling policy and priority (eg: by calling `setSchedule()`) only if run as root. This behaviour can be changed in two ways:
   - Grant the ability to a specific executable using `setcap`:
     ```bash
     sudo setcap cap_sys_nice=ep /path/to/executable
@@ -45,11 +40,29 @@ In all other situations, prefer to return `std::expected` over throwing an excep
     <username> hard rtprio 50
     ```
     The _soft_ limit is advisory, and _hard_ limit is enforced by the system. For details, `man 5 limits.conf`.
+- Optionally, configure [RT throttling](https://wiki.linuxfoundation.org/realtime/documentation/technical_basics/sched_rt_throttling) to limit execution time of realtime tasks. The default settings below indicate 95% CPU is set aside for realtime processes:
+  ```bash
+  # cat /proc/sys/kernel/sched_rt_period_us
+  1000000
+  # cat /proc/sys/kernel/sched_rt_runtime_us
+  950000
+  ```
+  To set 50% CPU usage for real-time tasks and a larger period, for instance, one can do:
+  ```bash
+  echo 2000000 > /proc/sys/kernel/sched_rt_period_us
+  echo 1000000 > /proc/sys/kernel/sched_rt_runtime_us
+  ```
+  Setting `sched_rt_runtime_us=-1` disables throttling. Note that this could cause a runaway RT task to monopolise the CPU and lock up the system. 
 
+  To make the change persistent, modify `/etc/sysctl.conf` as follows:
+  ```
+  kernel.sched_rt_runtime_us=-1
+  ```
+  
 ### A note on `top` and process priority
 
 `top` displays process priority in the 'PR' column in the range [-100, 39]. Lower PR mean higher process priority. PR is calculated as follows:
-- For regular processes: PR = 20 + NI (NI is 'nice' in the range [-20, 19]. Pnemonic: lower number implies less nice).
+- For regular processes: PR = 20 + NI (NI is 'nice' in the range [-20, 19]. Pnemonic: lower number = process is less 'nice' = takes higher priority over other processes).
 - For real time processes: PR = -1 - rt_priority (rt_priority range: [1, 99])
 
 ## References

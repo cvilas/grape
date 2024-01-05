@@ -17,20 +17,6 @@ define_module_example(
         PUBLIC_LINK_LIBS "")
 
 define_module_example(
-                NAME multiple_sinks_example
-                SOURCES multiple_sinks_example.cpp
-                PUBLIC_INCLUDE_PATHS
-                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-                PUBLIC_LINK_LIBS "")
-        
-define_module_example(
-        NAME custom_formatter_example
-        SOURCES custom_formatter_example.cpp
-        PUBLIC_INCLUDE_PATHS
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-        PUBLIC_LINK_LIBS "")
-
-define_module_example(
         NAME spdlog_bench
         SOURCES spdlog_bench.cpp
         PRIVATE_INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/spdlog/include

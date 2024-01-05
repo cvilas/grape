@@ -2,59 +2,56 @@
 // Copyright (C) 2018-2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
+#include <fstream>
 
-#include "grape/log/singleton_logger.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
+#include "grape/log/logger.h"
+#include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/spdlog.h"
 
 //-------------------------------------------------------------------------------------------------
-auto benchmarkSpdlog(int num_iterations) -> std::chrono::milliseconds {
-  auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-  auto logger = std::make_shared<spdlog::logger>("benchmark_spdlogger", console_sink);
+auto benchmarkSpdlog(std::size_t num_iterations) -> std::chrono::microseconds {
+  auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("benchmark_spdlog_out.txt", true);
+  auto logger = std::make_shared<spdlog::logger>("benchmark_spdlogger", sink);
+
   const auto start_time = std::chrono::high_resolution_clock::now();
-  for (int i = 0; i < num_iterations; ++i) {
+  for (std::size_t i = 0; i < num_iterations; ++i) {
     SPDLOG_LOGGER_INFO(logger, "Log message {:d}", i);
   }
-
   const auto end_time = std::chrono::high_resolution_clock::now();
-  return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+  return std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
 }
 
 //-------------------------------------------------------------------------------------------------
-auto benchmarkGrapeLog(int num_iterations) -> std::chrono::milliseconds {
-  auto logger = grape::log::Logger();
-  const auto start_time = std::chrono::high_resolution_clock::now();
-  for (int i = 0; i < num_iterations; ++i) {
-    logger.log(grape::log::Severity::Info, std::format("Log message {:d}", i));
-  }
-  const auto end_time = std::chrono::high_resolution_clock::now();
-  return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-}
+auto benchmarkGrapeLog(std::size_t num_iterations) -> std::chrono::microseconds {
+  auto log_file = std::ofstream("benchmark_grapelog_out.txt");
+  auto config = grape::log::Config();
+  config.queue_capacity = num_iterations;
+  config.flush_period = std::chrono::microseconds(100);
+  config.sink = [&log_file](const grape::log::Record& r) {
+    log_file << grape::log::defaultFormatter(r) << '\n';
+  };
+  config.logger_name = "benchmark_grapelog";
 
-//-------------------------------------------------------------------------------------------------
-auto benchmarkGrapeSingletonLog(int num_iterations) -> std::chrono::milliseconds {
+  auto logger = std::make_unique<grape::log::Logger>(std::move(config));
   const auto start_time = std::chrono::high_resolution_clock::now();
-  for (int i = 0; i < num_iterations; ++i) {
-    grape::log::log(grape::log::Severity::Info, std::format("Log message {:d}", i));
+  for (std::size_t i = 0; i < num_iterations; ++i) {
+    logger->log(grape::log::Severity::Info, std::format("Log message {:d}", i));
   }
   const auto end_time = std::chrono::high_resolution_clock::now();
-  return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+  return std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
 }
 
 //=================================================================================================
 // Benchmark our logger against spdlog (https://github.com/gabime/spdlog)
 auto main() -> int {
-  constexpr int NUM_ITERATIONS = 100000;  // Number of log messages to output
+  constexpr std::size_t NUM_ITERATIONS = 100000;  // Number of log messages to output
 
-  const auto spdlog_ms = benchmarkSpdlog(NUM_ITERATIONS);
-  const auto singleton_log_ms = benchmarkGrapeSingletonLog(NUM_ITERATIONS);
-  const auto log_ms = benchmarkGrapeLog(NUM_ITERATIONS);
+  const auto spdlog = benchmarkSpdlog(NUM_ITERATIONS);
+  const auto log = benchmarkGrapeLog(NUM_ITERATIONS);
 
-  std::println("Elapsed time");
-  std::println("- spdlog {} ms", spdlog_ms.count());
-  std::println("- grape singleton logger {} ms", singleton_log_ms.count());
-  std::println("- grape logger {} ms", log_ms.count());
+  std::println("Benchmark {} iterations:", NUM_ITERATIONS);
+  std::println("  spdlog {} us", spdlog.count());
+  std::println("  grape  {} us", log.count());
 
   return EXIT_SUCCESS;
 }

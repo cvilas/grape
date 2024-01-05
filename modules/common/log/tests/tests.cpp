@@ -9,27 +9,51 @@ namespace grape::log::tests {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
-TEST_CASE("Logging tests", "[log]") {
-  grape::log::Logger logger;
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
+  std::string stream;
+  static constexpr auto QUEUE_CAPACITY = 10u;
 
-  // set a custom formatter so we know what the log would look like
-  logger.setFormatter(
-      [](const grape::log::Record& r) -> std::string { return std::format("{}", r.message); });
+  auto config = grape::log::Config();
+  config.threshold = grape::log::Severity::Note;
+  config.sink = [&stream](const grape::log::Record& r) {
+    stream.append(std::format("{}", r.message));
+  };
+  config.queue_capacity = QUEUE_CAPACITY;
 
-  // set a logging level so we can check logs higher in severity are logged but not lower
-  logger.setThreshold(grape::log::Severity::Note);
-
-  // set a custom stream so we can examine it
-  std::ostringstream test_ostream;
-  auto* previous_stream = grape::log::Logger::setStreamBuffer(test_ostream.rdbuf());
+  auto logger = std::make_unique<grape::log::Logger>(std::move(config));
 
   const std::string log_str = "This should appear in logs";
-  logger.log(grape::log::Severity::Error, log_str);
-  logger.log(grape::log::Severity::Debug, "This should not appear in logs");
-  CHECK(test_ostream.str() == log_str);
+  logger->log(grape::log::Severity::Error, log_str);                           //!< above threshold
+  logger->log(grape::log::Severity::Debug, "This should not appear in logs");  //!< below threshold
+  logger.reset();  //!< destroying the logger forces queue to flush
+  REQUIRE(stream == log_str);
+}
 
-  // reset logging stream
-  grape::log::Logger::setStreamBuffer(previous_stream);
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Queue capacity and flush period are respected", "[log]") {
+  using namespace std::chrono_literals;
+  static constexpr auto FLUSH_PERIOD = 1s;
+  static constexpr auto FLUSH_WAIT_PERIOD = FLUSH_PERIOD + 500ms;
+  static constexpr auto QUEUE_CAPACITY = 5u;
+  std::atomic_size_t num_logs{ 0 };
+  auto config = grape::log::Config();
+  config.threshold = grape::log::Severity::Debug;
+  config.sink = [&num_logs](const grape::log::Record&) { num_logs++; };
+  config.queue_capacity = QUEUE_CAPACITY;
+  config.flush_period = FLUSH_PERIOD;
+
+  auto logger = grape::log::Logger(std::move(config));
+
+  // push messages beyond queue capacity before the logs get flushed
+  static constexpr auto NUM_MESSAGES = QUEUE_CAPACITY * 3;
+  for (std::size_t i = 0; i < NUM_MESSAGES; ++i) {
+    logger.log(grape::log::Severity::Debug, std::format("Message no. {}", i));
+  }
+  REQUIRE(num_logs == 0);                                         //!< not flushed yet
+  std::this_thread::sleep_for(FLUSH_WAIT_PERIOD);                 //!< wait for flush
+  REQUIRE(num_logs == QUEUE_CAPACITY);                            //!< should be flushed now
+  REQUIRE(logger.missedLogs() == NUM_MESSAGES - QUEUE_CAPACITY);  //!< check overflow
 }
 
 // NOLINTEND(cert-err58-cpp)
