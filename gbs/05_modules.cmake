@@ -754,3 +754,24 @@ if(NOT CMAKE_CROSSCOMPILING)
     message(STATUS "Documentation ('make docs'): Not Available")
   endif(DOXYGEN_FOUND)
 endif(NOT CMAKE_CROSSCOMPILING)
+
+#=================================================================================================
+# Set up facilities for google benchmark framework
+FetchContent_Declare(
+  benchmark
+  GIT_REPOSITORY https://github.com/google/benchmark.git
+  GIT_TAG v1.8.3)
+
+FetchContent_GetProperties(benchmark)
+if (NOT benchmark_POPULATED)
+    message(STATUS "Populating benchmark (google)")
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "")
+    FetchContent_Populate(benchmark)
+    add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR} EXCLUDE_FROM_ALL)
+    set(BENCHMARK_INCLUDE_DIR ${benchmark_SOURCE_DIR}/include)
+    set_target_properties(benchmark PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")
+    set_target_properties(benchmark PROPERTIES CXX_CLANG_TIDY "")
+    set_target_properties(benchmark PROPERTIES UNITY_BUILD OFF)
+endif ()
+
