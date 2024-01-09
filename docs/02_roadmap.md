@@ -13,11 +13,8 @@
   - :done: memory locking function
   - :done: priority inheriting mutex
   - :done: Scheduler functions
-  - Periodic timer, watchdog, stopwatch
-  - RT thread
-    - implementation
-    - documentation recommending how to implement RT program
-  - Benchmark program to print mean and variance in timer accuracy
+  - :done: Thread
+  - document guidelines
 - Refactor Exceptions ([inspiration](https://youtu.be/Oy-VTqz1_58)) 
   - Single exception class and no hierarchy
   - Explain recommended usage and rationale in the docs
@@ -55,6 +52,7 @@
   - Document the usage in install instructions
 - study
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
+- integrate cpack to generate artifacts 
 
 ## Phase 4 - Audio, Video and 3D Graphics
 

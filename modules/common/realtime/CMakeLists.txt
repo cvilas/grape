@@ -10,7 +10,8 @@ set(SOURCES
         README.md
         include/grape/realtime/mpsc_queue.h
         include/grape/realtime/mutex.h
-        include/grape/realtime/realtime.h)
+        include/grape/realtime/realtime.h
+        include/grape/realtime/thread.h)
 
 # library target
 define_module_library(

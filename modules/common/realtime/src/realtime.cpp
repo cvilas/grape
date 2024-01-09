@@ -22,12 +22,12 @@ namespace grape::realtime {
 void lockMemory() {
   // The implementation here follows from John Ogness' talk, 'A Checklist for Writing Linux
   // Real-Time Applications' at Embedded Liux Conference Europe 2020. See docs.
-
+#ifdef __linux__
   // Lock all current and future process address space into RAM, preventing paging into swap area
   if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
     panic<Exception>(std::format("mlockall: {}", std::strerror(errno)));
   }
-#ifdef __linux__
+
   // Heap trimming: when the amount of contiguous free memory at the top of the  heap  grows
   // sufficiently large, system call (sbrk) is used to release this memory back to the system. The
   // following call disables heap trimming completely. (We avoid system calls at the cost of free

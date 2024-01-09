@@ -12,6 +12,7 @@ namespace grape::realtime {
 
 /// Lock process address space into physical memory to avoid page faults and resulting unbounded
 /// memory access latency. Usually called on application startup and before creation of any threads.
+/// @note This function is a no-op on any OS except Linux
 void lockMemory();
 
 /// Set CPU affinity for a thread in Linux.

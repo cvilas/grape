@@ -50,8 +50,8 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-MPSCQueue<T>::MPSCQueue(std::size_t capacity) : capacity_(capacity), items_(capacity_) {
-  assert(capacity_ >= 1);
+MPSCQueue<T>::MPSCQueue(std::size_t capacity)
+  : capacity_((capacity > 0 ? capacity : 1u)), items_(capacity_) {
 }
 
 //-------------------------------------------------------------------------------------------------
