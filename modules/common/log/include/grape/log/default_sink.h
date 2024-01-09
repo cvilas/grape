@@ -11,7 +11,7 @@
 namespace grape::log {
 
 /// Default log sink implementation. Just writes to standard error output
-void defaultSink(const Record& r) {
+inline void defaultSink(const Record& r) {
   std::println(stderr, "{}", defaultFormatter(r));
 }
 
