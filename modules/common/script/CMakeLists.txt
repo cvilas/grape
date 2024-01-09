@@ -14,7 +14,8 @@ set(SOURCES
 define_module_library(
         NAME script
         PUBLIC_LINK_LIBS grape::base
-        PRIVATE_LINK_LIBS lualib
+        PRIVATE_LINK_LIBS 
+          $<BUILD_LOCAL_INTERFACE:lualib>
         SOURCES 
           ${SOURCES}
         PUBLIC_INCLUDE_PATHS
