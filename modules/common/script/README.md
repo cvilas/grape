@@ -31,12 +31,12 @@ for those who wish to learn Lua and how to integrate Lua with C/C++.
 
 ### Why is Lua sources integrated directly into our codebase?
 
-- We cannot build Lua like we do other external dependencies. Lua is distributed with a Makefile 
-  (instead of CMakeLists.txt) that hardcodes compiler and build options. This makes it impossible 
-  to build it with different toolchains or cross-build the library for different targets. 
-- As a consequence of the above, we need to write our own CMake build script anyway. For the 
-  sake of keeping things consistent we might as integrate the sources, not just the build script.
-- Our own build script also means we fully control external dependencies (eg: readline) and 
+- Lua cannot be built like other external dependencies. It is distributed with a Makefile 
+  and hardcodes compiler and build options, making it impossible to build it with different 
+  toolchains or different targets. 
+- As a consequence of the above, a custom CMake build script is required. For the sake of 
+  consistency, sources are integrated as well, not just the build script.
+- Custom build script eliminates additional external dependencies (eg: readline) and 
   per-platform idiosyncracies.
 - Lua is stable and releases are infrequent. Minor releases are years apart. Therefore updating 
   Lua sources (if we ever need to) is not a major maintenance overhead.
