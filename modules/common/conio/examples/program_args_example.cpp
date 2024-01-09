@@ -28,7 +28,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     return EXIT_SUCCESS;
   } catch (const std::exception& ex) {
-    std::puts(ex.what());
+    std::ignore = std::fputs(ex.what(), stderr);
     return EXIT_FAILURE;
   }
 }
