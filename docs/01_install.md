@@ -4,14 +4,15 @@
 
 OS               | Architecture  | Compiler
 -----------------|---------------|----------------
-Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang18
+Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
 
 ## Setup build environment
 
 - Install the basic tools
   ```bash
-  sudo apt install pkg-config gpg wget ca-certificates git-lfs curl ccache ninja-build \
-  doxygen graphviz linux-generic python3-dev iproute2 python-is-python3 net-tools iftop htop
+  sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
+  doxygen graphviz linux-generic python3-dev python-is-python3 libssl-dev \
+  iproute2 net-tools iftop htop
   ```
 - Install latest cmake
   ```bash
@@ -41,7 +42,7 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang18
   - GCC
     ```bash
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    export GCC_VERSION=13 # Replace with latest version number
+    export GCC_VERSION=14 # Replace with latest version number
     sudo apt update
     sudo apt install g++-$GCC_VERSION gcc-$GCC_VERSION gfortran-$GCC_VERSION
     
@@ -55,7 +56,6 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang18
     sudo apt install g++-$GCC_VERSION-aarch64-linux-gnu gcc-$GCC_VERSION-aarch64-linux-gnu \
     gfortran-$GCC_VERSION-aarch64-linux-gnu binfmt-support qemu-user-static qemu-system-arm qemu -y
 
-  
     sudo update-alternatives --remove-all aarch64-linux-gnu-gcc aarch64-linux-gnu-gfortran
     sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gfortran aarch64-linux-gnu-gfortran /usr/bin/aarch64-linux-gnu-gfortran-$GCC_VERSION $GCC_VERSION
     sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-$GCC_VERSION $GCC_VERSION \
@@ -79,12 +79,12 @@ Ubuntu 22.04 LTS | Arm64, X86_64 | GCC13, Clang18
 
 ## Configure and build
 
-Note (Dec 2023) Use the clang toolchain to build the project. GCC-13 does not support all features we use.
+Note (Jan 2023) Use the clang toolchain to build the project. GCC-14 does not support all features we use.
 
 ```bash
 git clone git@github.com:cvilas/grape
 mkdir -p grape/build
 cd grape/build
-cmake .. -DBUILD_MODULES=all -DCMAKE_TOOLDCHAIN_FILE=$PWD/../toolchains/toolchain_clang.cmake -GNinja
+cmake .. -DBUILD_MODULES=all -DCMAKE_TOOLCHAIN_FILE=$PWD/../toolchains/toolchain_clang.cmake -GNinja
 ninja
 ```
