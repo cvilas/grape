@@ -8,36 +8,53 @@
 - :done: Logging library
 - :done: Scripting library
 - :done: Message passing
+- Realtime services
+  - :done: non-blocking mpsc queue
+  - :done: memory locking function
+  - :done: priority inheriting mutex
+  - :done: Scheduler functions
+  - Periodic timer, watchdog, stopwatch
+  - RT thread
+    - implementation
+    - documentation recommending how to implement RT program
+  - Benchmark program to print mean and variance in timer accuracy
+- Refactor Exceptions ([inspiration](https://youtu.be/Oy-VTqz1_58)) 
+  - Single exception class and no hierarchy
+  - Explain recommended usage and rationale in the docs
 
-## Phase 2 - Demo application 1 - Probe
+## Phase 2 - Demo application 1 - GRAPE
 
-- study: 
-  - [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development)
-  - [reflect-cpp](https://github.com/getml/reflect-cpp)
-- probe library:
-  - Study [DataTamer](https://github.com/PickNikRobotics/data_tamer) and [probe](github.com/cvilas/probe)
-  - Extend probe api for real-time performance (no memory allocation, minimal network overheads, no system calls in RT path)
-  - *grape_plant*: closed loop control, deployable on embedded processors.
-  - *grape_supervisor*: remote monitoring, graphing, online parameter tuning, and event logging; runs as a separate process, likely on a different host.
+- Design
+  - :done: Start requirement document
+  - Sketch out the architecture: in RT path no memory allocation, minimal network overheads, no system calls, no locks
+- Study: 
+  - [cactus-rt](https://github.com/cactusdynamics/cactus-rt)
+  - [wesplot](https://github.com/cactusdynamics/wesplot)
+  - [DataTamer](https://github.com/PickNikRobotics/data_tamer) and [probe](github.com/cvilas/probe)
+  - Sign up for [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development) course
+  - Document all these resources
+- Implement:
+  - Implement Plant
+  - Implement Monitor 
 - plot:
-  - :done: Choose a backend: implot
+  - :done: Choose a backend: implot (docking branch)
   - concept `plottable`
 - serdes
   - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python
   - concept `serialisable`
 - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
+- Consider integrating mp_uints library
 
 ## Phase 3 - CI
 
-- Refactor logging
-  - Remove logging from script classes. Use error code and message instead.
-  - Make `utils::truncate`` work at compile time from `logger::log()`
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
   - Fail the CI if clang-format changes code
   - Add configuration presets to CMakePresets.json
   - Develop github CI build file
   - Document the usage in install instructions
+- study
+  - [reflect-cpp](https://github.com/getml/reflect-cpp)
 
 ## Phase 4 - Audio, Video and 3D Graphics
 
@@ -46,13 +63,12 @@
   - Implement basic examples for AV capture, streaming and display
 
 - HW accelerated 3D graphics
-  - Select a backend: vsg, ogre, something else
+  - Select a backend: vsg, ogre, raylib, something else
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 
 ## Phase 5 - Robotics Core
 
-- Timing: periodic timer, watchdog, stopwatch. loop timer
 - enum-to-string and string-to-enum
   - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
   - consider magic_enum and other options and choose one
@@ -80,7 +96,6 @@
 
 ## Phase 7 - Utilities
 
-- Realtime: POSIX scheduling wrappers
 - utility: hostname, hostaddress, isportinuse, programname, programpath, execute, flag_set
 - file cache
 - md5sum
