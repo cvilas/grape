@@ -50,9 +50,9 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   for (std::size_t i = 0; i < NUM_MESSAGES; ++i) {
     logger.log(grape::log::Severity::Debug, std::format("Message no. {}", i));
   }
-  REQUIRE(num_logs == 0);                                         //!< not flushed yet
-  std::this_thread::sleep_for(FLUSH_WAIT_PERIOD);                 //!< wait for flush
-  REQUIRE(num_logs == QUEUE_CAPACITY);                            //!< should be flushed now
+  REQUIRE(num_logs == 0);                          //!< not flushed yet
+  std::this_thread::sleep_for(FLUSH_WAIT_PERIOD);  //!< wait for flush
+  REQUIRE(num_logs == QUEUE_CAPACITY + 1);         //!< includes record indicating missed count
   REQUIRE(logger.missedLogs() == NUM_MESSAGES - QUEUE_CAPACITY);  //!< check overflow
 }
 
