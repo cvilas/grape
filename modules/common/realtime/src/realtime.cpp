@@ -45,16 +45,18 @@ void lockMemory() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void setCpuAffinity(int cpu, pid_t pid) {
+void setCpuAffinity(std::span<const int> cpus, pid_t pid) {
 #ifdef __linux__
   cpu_set_t mask;
   CPU_ZERO(&mask);
-  CPU_SET(cpu, &mask);
+  for (int i : cpus) {
+    CPU_SET(i, &mask);
+  }
   if (0 != sched_setaffinity(pid, sizeof(mask), &mask)) {
     panic<Exception>(std::format("sched_setaffinity: {}", strerror(errno)));
   }
 #else
-  (void)cpu;
+  (void)cpus;
   (void)pid;
 #endif
 }

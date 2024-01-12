@@ -8,13 +8,7 @@
 - :done: Logging library
 - :done: Scripting library
 - :done: Message passing
-- Realtime services
-  - :done: non-blocking mpsc queue
-  - :done: memory locking function
-  - :done: priority inheriting mutex
-  - :done: Scheduler functions
-  - :done: Thread
-  - document guidelines
+- :done: Realtime services
 - Refactor Exceptions ([inspiration](https://youtu.be/Oy-VTqz1_58)) 
   - Single exception class and no hierarchy
   - Explain recommended usage and rationale in the docs
