@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <span>
 
 #include <sys/types.h>
 
@@ -17,9 +18,9 @@ void lockMemory();
 
 /// Set CPU affinity for a thread in Linux.
 /// @note This function is a no-op on any OS except Linux
-/// @param cpu CPU index, starting at 0
+/// @param cpus List of CPU indices, starting at 0
 /// @param pid Linux specific thread ID, typically returned by gettid() (0=calling thread)
-void setCpuAffinity(int cpu, pid_t pid = 0);
+void setCpuAffinity(std::span<const int> cpus, pid_t pid = 0);
 
 /// Thread scheduling parameters
 struct Schedule {

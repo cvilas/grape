@@ -63,12 +63,19 @@ auto main() -> int {
     static constexpr auto PROCESS_INTERVAL = std::chrono::microseconds(1000);
     task_config.interval = PROCESS_INTERVAL;
 
+    // Define CPU cores to allocate to non-rt and rt threads. Ideally these should be
+    // non-intersecting sets.
+    static constexpr auto CPUS_RT = { 0 };
+    static constexpr auto CPUS_NON_RT = { 1, 2, 3 };
+
+    // Set main thread CPU affinity here. Will assign rt thread CPU affinity in task setup().
+    grape::realtime::setCpuAffinity(CPUS_NON_RT);
+
     // set task thread to run on a specific CPU with real-time scheduling policy
     task_config.setup = []() -> bool {
       std::println("setup() called");
-      static constexpr auto CPU = 1;
+      grape::realtime::setCpuAffinity(CPUS_RT);
       static constexpr auto RT_PRIORITY = 20;
-      grape::realtime::setCpuAffinity(CPU);
       grape::realtime::setSchedule({ .policy = grape::realtime::Schedule::Policy::Realtime,  //
                                      .priority = RT_PRIORITY });
       return true;
