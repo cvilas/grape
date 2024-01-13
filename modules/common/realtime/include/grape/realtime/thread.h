@@ -80,15 +80,6 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 inline Thread::Thread(Thread::Config&& config) : config_(std::move(config)) {
-  if (config_.setup == nullptr) {
-    panic<Exception>("setup() function cannot be null");
-  }
-  if (config_.process == nullptr) {
-    panic<Exception>("process() function cannot be null");
-  }
-  if (config_.teardown == nullptr) {
-    panic<Exception>("teardown() function cannot be null");
-  }
 }
 
 //-------------------------------------------------------------------------------------------------
