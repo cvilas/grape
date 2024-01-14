@@ -44,7 +44,7 @@ TEST_CASE("Reads required option if specified on the command line", "[program_ar
   const auto argc = 1;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const auto args = std::move(desc).parse(argc, argv);
-  CHECK(args.getOption<int>("required_key") == 16);
+  CHECK((args.getOption<int>("required_key") == 16));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ TEST_CASE("Default value is used for optional argument if unspecified", "[progra
   desc.defineOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE);
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const auto args = std::move(desc).parse(0, nullptr);
-  CHECK(args.getOption<int>("int_key") == INT_KEY_DEFAULT_VALUE);
+  CHECK((args.getOption<int>("int_key") == INT_KEY_DEFAULT_VALUE));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ TEST_CASE("Default value is overridden when optional argument is unspecified", "
   const auto argc = 1;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const auto args = std::move(desc).parse(argc, argv);
-  CHECK(args.getOption<int>("int_key") == 10);
+  CHECK((args.getOption<int>("int_key") == 10));
 }
 
 //-------------------------------------------------------------------------------------------------

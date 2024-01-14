@@ -35,7 +35,7 @@ struct Config {
   std::chrono::microseconds flush_period{ DEFAULT_FLUSH_PERIOD };
 
   /// Identifying name for the logger
-  std::string logger_name{};
+  std::string logger_name;
 };
 
 }  // namespace grape::log
