@@ -49,7 +49,7 @@ public:
     std::chrono::microseconds interval{ DEFAULT_PROCESS_INTERVAL };
 
     /// Sets an optional custom name for the thread
-    std::string name{};
+    std::string name;
   };
 
 public:
@@ -74,7 +74,7 @@ private:
 
   Config config_;
   std::atomic_flag exit_flag_{ false };
-  std::thread thread_{};
+  std::thread thread_;
 };
 
 //-------------------------------------------------------------------------------------------------

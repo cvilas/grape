@@ -183,8 +183,8 @@ static auto readIndex(lua_State* state, const int table_ref,
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-static auto readKey(lua_State* state, int table_ref, const std::string& key)
-    -> std::expected<T, ConfigTable::Error> {
+static auto readKey(lua_State* state, int table_ref,
+                    const std::string& key) -> std::expected<T, ConfigTable::Error> {
   const auto read_leaf = [state](const auto& /*token*/) -> std::expected<T, ConfigTable::Error> {
     return readLeaf<T>(state);
   };

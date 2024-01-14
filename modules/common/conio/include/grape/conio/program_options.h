@@ -111,13 +111,13 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-inline constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
+constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
   options_.emplace_back(HELP_KEY, "", utils::getTypeName<std::string>(), brief, false, false);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-inline constexpr auto ProgramDescription::defineOption(
+constexpr auto ProgramDescription::defineOption(
     const std::string& key, const std::string& description) -> ProgramDescription& {
   const auto it = std::find_if(options_.begin(), options_.end(),
                                [&key](const auto& opt) { return key == opt.key; });
@@ -130,9 +130,9 @@ inline constexpr auto ProgramDescription::defineOption(
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-inline constexpr auto
-ProgramDescription::defineOption(const std::string& key, const std::string& description,
-                                 const T& default_value) -> ProgramDescription& {
+constexpr auto ProgramDescription::defineOption(const std::string& key,
+                                                const std::string& description,
+                                                const T& default_value) -> ProgramDescription& {
   const auto it = std::find_if(options_.begin(), options_.end(),
                                [&key](const auto& opt) { return key == opt.key; });
   if (it != options_.end()) {

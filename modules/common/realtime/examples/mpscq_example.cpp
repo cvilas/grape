@@ -26,7 +26,7 @@ auto main() -> int {
   try {
     // An example data structure
     struct ExampleObject {
-      std::string name{};
+      std::string name;
       std::uint64_t value{};
     };
 

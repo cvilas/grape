@@ -18,7 +18,7 @@ class Exception : public std::runtime_error {
 public:
   /// @param message A message describing the error and what caused it
   /// @param location Location in the source where the error was triggered at
-  explicit Exception(const std::string& message, std::source_location location);
+  Exception(const std::string& message, std::source_location location);
 };
 
 /// @brief  User function to throw an exception

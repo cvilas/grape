@@ -20,7 +20,7 @@ inline auto toString(const zenohc::Id& id) -> std::string {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline constexpr auto toString(const zenohc::WhatAmI& me) -> std::string_view {
+constexpr auto toString(const zenohc::WhatAmI& me) -> std::string_view {
   switch (me) {
     case zenohc::WhatAmI::Z_WHATAMI_ROUTER:
       return "Router";
@@ -32,7 +32,7 @@ inline constexpr auto toString(const zenohc::WhatAmI& me) -> std::string_view {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline constexpr auto toString(zenohc::SampleKind kind) -> std::string_view {
+constexpr auto toString(zenohc::SampleKind kind) -> std::string_view {
   switch (kind) {
     case Z_SAMPLE_KIND_PUT:
       return "Put";
@@ -56,7 +56,7 @@ inline auto toString(const zenohc::StrArrayView& arr) -> std::string {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline constexpr auto toNanoSeconds(const zenohc::Timestamp& ts) -> std::uint64_t {
+constexpr auto toNanoSeconds(const zenohc::Timestamp& ts) -> std::uint64_t {
   // NTP64 timestamping: https://docs.rs/zenoh/0.7.2-rc/zenoh/time/struct.NTP64.html
   const auto ntp64 = ts.get_time();
   const auto seconds = static_cast<std::uint32_t>(ntp64 >> 32U);
@@ -79,7 +79,7 @@ inline auto toString(const zenohc::Timestamp& ts) -> std::string {
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-inline constexpr auto expect(std::variant<T, zenohc::ErrorMessage>&& v) -> T {
+constexpr auto expect(std::variant<T, zenohc::ErrorMessage>&& v) -> T {
   if (v.index() == 1) {
     const auto* msg = std::get<zenohc::ErrorMessage>(v).as_string_view().data();
     throw std::runtime_error(std::format("Zenoh Exception: {}", msg));

@@ -124,7 +124,7 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-inline constexpr auto toString(ConfigTable::Error code) -> std::string_view {
+constexpr auto toString(ConfigTable::Error code) -> std::string_view {
   switch (code) {
     case ConfigTable::Error::NotFound:
       return "NotFound";

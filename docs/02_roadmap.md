@@ -11,6 +11,8 @@
 - :done: Realtime services
 - Refactor Exceptions ([inspiration](https://youtu.be/Oy-VTqz1_58)) 
   - Single exception class and no hierarchy
+  - what() -> message, where() -> location, when() -> stacktrace
+  - std::format function for location and stacktrace
   - Explain recommended usage and rationale in the docs
 
 ## Phase 2 - Demo application 1 - GRAPE

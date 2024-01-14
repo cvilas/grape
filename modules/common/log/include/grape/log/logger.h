@@ -55,7 +55,7 @@ private:
 
   static_assert(std::atomic_uint32_t::is_always_lock_free);
   Config config_{};
-  std::atomic_uint32_t missed_logs_{};
+  std::atomic_uint32_t missed_logs_{ 0 };
   realtime::MPSCQueue<Record> queue_;
   struct Backend;
   std::unique_ptr<Backend> backend_{ nullptr };
