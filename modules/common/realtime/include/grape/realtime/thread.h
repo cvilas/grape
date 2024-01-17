@@ -12,7 +12,6 @@
 #ifdef __linux__
 #include <sys/prctl.h>
 #endif
-#include "grape/exception.h"
 
 namespace grape::realtime {
 

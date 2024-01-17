@@ -3,7 +3,6 @@
 //=================================================================================================
 
 #include <csignal>
-#include <format>
 #include <print>
 
 #include "grape/realtime/realtime.h"
