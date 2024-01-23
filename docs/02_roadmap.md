@@ -8,22 +8,31 @@
 - :done: Logging library
 - :done: Scripting library
 - :done: Message passing
-- :done: Realtime services
+- :done: Realtime services  
 - Refactor Exceptions ([inspiration](https://youtu.be/Oy-VTqz1_58)) 
   - Single exception class and no hierarchy
   - what() -> message, where() -> location, when() -> stacktrace
   - std::format function for location and stacktrace
   - Explain recommended usage and rationale in the docs
 
-## Phase 2 - Demo application 1 - GRAPE
+## Phase 2 - Demo application 1 - Probe
 
 - Design
   - :done: Start requirement document
-  - Sketch out the architecture: in RT path no memory allocation, minimal network overheads, no system calls, no locks
+  - :done: Choose data types to support. 
+  - :done: Implement fixed size non-allocating strings
+  - Enhance mpscq interface 
+    - `tryBorrow() -> std::optional<Item>`
+    - `Item.commit(T&&)`. Throw if `~Item` is called without `commit` as it renders the buffer unusable
+  - Propose how to serialise data at the plant and deserialise at monitor
+    - use fixed size data structures 
+    - serdes is basically required for big-endian<->little-endian conversations, even if fixed size data structures are used. maybe use fastcdr
+  - [Proof of concept](https://godbolt.org/z/seKKsWc8f)
+
 - Study: 
-  - [cactus-rt](https://github.com/cactusdynamics/cactus-rt)
-  - [wesplot](https://github.com/cactusdynamics/wesplot)
-  - [DataTamer](https://github.com/PickNikRobotics/data_tamer) and [probe](github.com/cvilas/probe)
+  - :done: [cactus-rt](https://github.com/cactusdynamics/cactus-rt)
+  - [DataTamer](https://github.com/PickNikRobotics/data_tamer) 
+  - [probe](github.com/cvilas/probe)
   - Sign up for [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development) course
   - Document all these resources
 - Implement:
