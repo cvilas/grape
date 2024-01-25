@@ -19,28 +19,28 @@ namespace grape::realtime {
 /// @tparam Traits Traits class for the character type
 /// @tparam N The maximum length of the string excluding the terminating null character
 template <typename CharT, std::size_t N, typename Traits = std::char_traits<CharT>>
-class BasicFastString {
+class BasicFixedString {
 public:
-  constexpr BasicFastString() noexcept {
+  constexpr BasicFixedString() noexcept {
     data_.fill('\0');
   };
 
   template <std::size_t M>
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  consteval BasicFastString(const CharT (&str)[M]) {
+  // NOLINTNEXTLINE(google-explicit-constructor,cppcoreguidelines-avoid-c-arrays)
+  consteval BasicFixedString(const CharT (&str)[M]) {
     const auto length = std::min(M - 1, N);
     Traits::copy(data_.data(), str, length);
     data_.at(length) = '\0';
   }
 
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr BasicFastString(const CharT* str) {
+  constexpr BasicFixedString(const CharT* str) {
     const auto length = std::min(Traits::length(str), N);
     Traits::copy(data_.data(), str, length);
     data_.at(length) = '\0';
   }
 
-  constexpr BasicFastString(const CharT* str, std::size_t length) {
+  constexpr BasicFixedString(const CharT* str, std::size_t length) {
     const auto usable_length = std::min(length, N);
     Traits::copy(data_.data(), str, usable_length);
     data_.at(usable_length) = '\0';
@@ -85,37 +85,36 @@ public:
   constexpr void append(const CharT* str, std::size_t len) {
     const auto current_length = length();
     const auto length_to_copy = std::min(len, (N - current_length));
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::copy(str, str + length_to_copy, data_.data() + current_length);
     data_.at(current_length + length_to_copy) = '\0';
   }
 
   /// implemented as a member to avoid implicit conversion
-  [[nodiscard]] constexpr auto operator==(const BasicFastString& rhs) const -> bool {
+  [[nodiscard]] constexpr auto operator==(const BasicFixedString& rhs) const -> bool {
     return (data_ == rhs.data_);
   }
 
-  [[nodiscard]] constexpr auto operator!=(const BasicFastString& rhs) const -> bool {
+  [[nodiscard]] constexpr auto operator!=(const BasicFixedString& rhs) const -> bool {
     return !(*this == rhs);
   }
 
-  constexpr void swap(BasicFastString& rhs) noexcept {
+  constexpr void swap(BasicFixedString& rhs) noexcept {
     std::swap(data_, rhs.data_);
   }
 
 private:
-  static constexpr auto SIZE_64BIT = 8;
-  static_assert(sizeof(std::size_t) == SIZE_64BIT, "Only 64-bit systems are supported");
   static_assert(N > 0, "Container capacity must be valid");
   std::array<CharT, N + 1> data_{};
 };
 
 template <class CharT, std::size_t N, class Traits = std::char_traits<CharT>>
-constexpr void swap(const BasicFastString<CharT, N>& lhs,
-                    const BasicFastString<CharT, N>& rhs) noexcept {
+constexpr void swap(const BasicFixedString<CharT, N>& lhs,
+                    const BasicFixedString<CharT, N>& rhs) noexcept {
   rhs.swap(lhs);
 }
 
 template <std::size_t max_length>
-using FastString = BasicFastString<char, max_length>;
+using FixedString = BasicFixedString<char, max_length>;
 
 }  // namespace grape::realtime
