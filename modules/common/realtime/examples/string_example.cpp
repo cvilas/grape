@@ -4,15 +4,15 @@
 
 #include <print>
 
-#include "grape/realtime/fast_string.h"
+#include "grape/realtime/fixed_string.h"
 
 //=================================================================================================
 auto main() -> int {
   try {
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-    using FastString8 = grape::realtime::FastString<7>;
+    using FixedString8 = grape::realtime::FixedString<7>;
 
-    static constexpr FastString8 STRING = "abcdefghij";  //!< this will get truncated to fit
+    static constexpr FixedString8 STRING = "abcdefghij";  //!< this will get truncated to fit
     constexpr auto SUB_STRING = STRING.str().substr(0, 2);
     constexpr auto STRING_LENGTH = STRING.length();
     std::println("String='{}', length={}", STRING.str(), STRING_LENGTH);

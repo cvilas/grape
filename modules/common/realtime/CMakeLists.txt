@@ -8,7 +8,7 @@ declare_module(NAME realtime DEPENDS_ON_MODULES "base" DEPENDS_ON_EXTERNAL_PROJE
 set(SOURCES
         src/realtime.cpp
         README.md
-        include/grape/realtime/fast_string.h
+        include/grape/realtime/fixed_string.h
         include/grape/realtime/mpsc_queue.h
         include/grape/realtime/mutex.h
         include/grape/realtime/realtime.h

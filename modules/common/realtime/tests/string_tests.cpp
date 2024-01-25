@@ -5,18 +5,18 @@
 #include <array>
 
 #include "catch2/catch_test_macros.hpp"
-#include "grape/realtime/fast_string.h"
+#include "grape/realtime/fixed_string.h"
 
 namespace grape::realtime::tests {
 
 // NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
 
-using FastString8 = grape::realtime::FastString<7>;
+using FixedString8 = grape::realtime::FixedString<7>;
 using namespace std::string_literals;
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Default construction", "[FastString]") {
-  constexpr FastString8 STR{};
+TEST_CASE("Default construction", "[FixedString]") {
+  constexpr FixedString8 STR{};
 
   CHECK((0 == STR.length()));  // NOLINT(readability-container-size-empty)
   CHECK(STR.empty());
@@ -24,9 +24,9 @@ TEST_CASE("Default construction", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("construction from constexpr", "[FastString]") {
+TEST_CASE("construction from constexpr", "[FixedString]") {
   constexpr const char* STR = "1234";
-  constexpr FastString8 FAST_STR = STR;
+  constexpr FixedString8 FAST_STR = STR;
 
   CHECK((4 == FAST_STR.length()));
   CHECK_FALSE(FAST_STR.empty());
@@ -34,13 +34,13 @@ TEST_CASE("construction from constexpr", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("construction from const buffer", "[FastString]") {
-  using FastString24 = grape::realtime::FastString<23>;
+TEST_CASE("construction from const buffer", "[FixedString]") {
+  using FixedString24 = grape::realtime::FixedString<23>;
   constexpr std::array<char, 24> BUFFER{ 'H', 'e', 'l', 'l', 'o', ' ', 'W',
                                          'o', 'r', 'l', 'd', '!', '\0' };
   constexpr size_t BUFFER_STR_SIZE = 12;
 
-  constexpr FastString24 STR(BUFFER.data(), BUFFER_STR_SIZE);
+  constexpr FixedString24 STR(BUFFER.data(), BUFFER_STR_SIZE);
 
   CHECK(("Hello World!"s == STR.cStr()));
   CHECK((12 == STR.length()));
@@ -49,14 +49,14 @@ TEST_CASE("construction from const buffer", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("construction from buffer", "[FastString]") {
-  using FastString24 = grape::realtime::FastString<23>;
+TEST_CASE("construction from buffer", "[FixedString]") {
+  using FixedString24 = grape::realtime::FixedString<23>;
   std::array<char, 24> buffer = {
     'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!', '\0'
   };
   size_t buffer_str_size = 12;
 
-  FastString24 str(buffer.data(), buffer_str_size);
+  FixedString24 str(buffer.data(), buffer_str_size);
 
   CHECK(("Hello World!"s == str.cStr()));
   CHECK((12 == str.length()));
@@ -65,8 +65,8 @@ TEST_CASE("construction from buffer", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("copy construction", "[FastString]") {
-  constexpr FastString8 STR{ "abc" };
+TEST_CASE("copy construction", "[FixedString]") {
+  constexpr FixedString8 STR{ "abc" };
   auto str_copy = STR;
 
   CHECK((str_copy.length() == STR.length()));
@@ -76,8 +76,8 @@ TEST_CASE("copy construction", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("move construction", "[FastString]") {
-  constexpr FastString8 STR{ "abc" };
+TEST_CASE("move construction", "[FixedString]") {
+  constexpr FixedString8 STR{ "abc" };
   auto str_copy = STR;
   auto str_move = std::move(str_copy);  // NOLINT(performance-move-const-arg)
 
@@ -88,9 +88,9 @@ TEST_CASE("move construction", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("copy assignment", "[FastString]") {
-  constexpr FastString8 STR1{ "1234", 4 };
-  FastString8 str2{ "lmnopqrstuvxyz" };
+TEST_CASE("copy assignment", "[FixedString]") {
+  constexpr FixedString8 STR1{ "1234", 4 };
+  FixedString8 str2{ "lmnopqrstuvxyz" };
 
   CHECK(("1234"s == STR1.cStr()));
   CHECK(("lmnopqr"s == str2.cStr()));
@@ -101,17 +101,17 @@ TEST_CASE("copy assignment", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("move assignment", "[FastString]") {
-  constexpr FastString8 STR1{ "1234", 4 };
-  FastString8 str2{ "lmnopqrstuvxyz" };
+TEST_CASE("move assignment", "[FixedString]") {
+  constexpr FixedString8 STR1{ "1234", 4 };
+  FixedString8 str2{ "lmnopqrstuvxyz" };
   str2 = std::move(STR1);  // NOLINT(performance-move-const-arg)
 
   CHECK(("1234"s == str2.cStr()));
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("using with string_view", "[FastString]") {
-  static constexpr FastString8 STR{ "abcdefghij", 10 };
+TEST_CASE("using with string_view", "[FixedString]") {
+  static constexpr FixedString8 STR{ "abcdefghij", 10 };
   constexpr auto STR_SUB_STR = STR.str().substr(0, 2);
   constexpr auto STR_STR = STR.str();
   constexpr auto STR_LENGTH = STR.length();
@@ -123,18 +123,18 @@ TEST_CASE("using with string_view", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("comparison", "[FastString]") {
-  constexpr FastString8 STR1{ "abcd" };
-  constexpr FastString8 STR2{ "abcd" };
-  constexpr FastString8 STR3{ "abcf" };
+TEST_CASE("comparison", "[FixedString]") {
+  constexpr FixedString8 STR1{ "abcd" };
+  constexpr FixedString8 STR2{ "abcd" };
+  constexpr FixedString8 STR3{ "abcf" };
 
   CHECK((STR1 == STR2));
   CHECK_FALSE((STR2 == STR3));
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("append", "[FastString]") {
-  FastString8 str{ "abc" };
+TEST_CASE("append", "[FixedString]") {
+  FixedString8 str{ "abc" };
   CHECK(("abc"s == str.cStr()));
 
   str.append("d");
@@ -145,8 +145,8 @@ TEST_CASE("append", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("clear", "[FastString]") {
-  FastString8 str{ "abcdefg" };
+TEST_CASE("clear", "[FixedString]") {
+  FixedString8 str{ "abcdefg" };
   CHECK(("abcdefg"s == str.cStr()));
   CHECK_FALSE(str.empty());
 
@@ -156,9 +156,9 @@ TEST_CASE("clear", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("swap", "[FastString]") {
-  FastString8 str1{ "xyz" };
-  FastString8 str2{ "34" };
+TEST_CASE("swap", "[FixedString]") {
+  FixedString8 str1{ "xyz" };
+  FixedString8 str2{ "34" };
 
   str2.swap(str1);
   CHECK(("xyz"s == str2.cStr()));
@@ -170,9 +170,9 @@ TEST_CASE("swap", "[FastString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("using member variables", "[FastString]") {
+TEST_CASE("using member variables", "[FixedString]") {
   // uses only 8 bytes in stack
-  CHECK((8 == sizeof(FastString8)));
+  CHECK((8 == sizeof(FixedString8)));
 }
 
 // NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
