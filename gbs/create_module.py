@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2018-2023 GRAPE Contributors
+# Copyright (C) 2018 GRAPE Contributors
 #
 
 import os
 import shutil
 import sys
 import fileinput
+import datetime
 
 def create_module(module_name):
     """
@@ -37,13 +38,16 @@ def create_module(module_name):
         os.path.join(module_name, "src", module_name + ".cpp")
     )
 
-    # Replace all instances of @module@ in files with module name
+    # Replace all instances of @tokens@ in files
+    year = str(datetime.datetime.now().year)
     for subdir, _, files in os.walk(module_name):
          for f in files:
             file_path = os.path.join(subdir, f)
             with fileinput.FileInput(file_path, inplace=True) as file:
                  for line in file:
-                      print(line.replace("@module@", module_name), end='')
+                    line = line.replace('@module@', module_name)
+                    line = line.replace('@year@', year)
+                    print(line, end='')
     return
 
 if __name__ == '__main__':

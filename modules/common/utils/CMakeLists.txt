@@ -1,5 +1,5 @@
 #=================================================================================================
-# Copyright (C) 2018-2023 GRAPE Contributors
+# Copyright (C) 2023 GRAPE Contributors
 #=================================================================================================
 
 declare_module(NAME utils 
@@ -13,7 +13,6 @@ configure_file(src/version.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version_impl.h @ON
 # library sources
 set(SOURCES
         src/version.cpp
-        src/utils.cpp
         README.md
         include/grape/utils/utils.h
         include/grape/utils/version.h)
@@ -32,5 +31,4 @@ define_module_library(
 
 # Subprojects
 add_subdirectory(tests)
-add_subdirectory(examples)
 add_subdirectory(apps)

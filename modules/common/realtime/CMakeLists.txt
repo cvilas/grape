@@ -1,5 +1,5 @@
 #=================================================================================================
-# Copyright (C) 2018-2023 GRAPE Contributors
+# Copyright (C) 2023 GRAPE Contributors
 #=================================================================================================
 
 declare_module(NAME realtime DEPENDS_ON_MODULES "base" DEPENDS_ON_EXTERNAL_PROJECTS "")
