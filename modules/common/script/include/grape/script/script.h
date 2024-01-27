@@ -131,6 +131,7 @@ constexpr auto toString(ConfigTable::Error code) -> std::string_view {
     case ConfigTable::Error::Unparsable:
       return "Unparsable";
   };
+  return "";
 }
 
 //-------------------------------------------------------------------------------------------------

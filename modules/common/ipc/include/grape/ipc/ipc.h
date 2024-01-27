@@ -29,6 +29,7 @@ constexpr auto toString(const zenohc::WhatAmI& me) -> std::string_view {
     case zenohc::WhatAmI::Z_WHATAMI_CLIENT:
       return "Client";
   }
+  return "";
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -39,6 +40,7 @@ constexpr auto toString(zenohc::SampleKind kind) -> std::string_view {
     case Z_SAMPLE_KIND_DELETE:
       return "Delete";
   }
+  return "";
 }
 
 //-------------------------------------------------------------------------------------------------
