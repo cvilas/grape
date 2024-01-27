@@ -1,5 +1,5 @@
 #=================================================================================================
-# Copyright (C) 2018-2023 GRAPE Contributors
+# Copyright (C) @year@ GRAPE Contributors
 #=================================================================================================
 
 declare_module(NAME @module@ DEPENDS_ON_MODULES "" DEPENDS_ON_EXTERNAL_PROJECTS "")

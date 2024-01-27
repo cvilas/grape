@@ -1,5 +1,5 @@
 #=================================================================================================
-# Copyright (C) 2018-2023 GRAPE Contributors
+# Copyright (C) 2023 GRAPE Contributors
 #=================================================================================================
 
 declare_module(NAME base DEPENDS_ON_MODULES "utils" DEPENDS_ON_EXTERNAL_PROJECTS "")
