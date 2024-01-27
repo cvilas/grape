@@ -12,6 +12,7 @@
 #ifdef __linux__
 #include <sys/prctl.h>
 #endif
+#include <type_traits>
 
 namespace grape::realtime {
 
@@ -23,8 +24,9 @@ namespace grape::realtime {
 /// @include thread_example.cpp
 class Thread {
 public:
-  using ProcessClock = std::chrono::high_resolution_clock;
-  static_assert(ProcessClock::is_steady);
+  using ProcessClock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
+                                          std::chrono::high_resolution_clock,  //
+                                          std::chrono::steady_clock>;
 
   /// @brief Thread configuration parameters
   struct Config {

@@ -20,7 +20,7 @@ void lockMemory();
 /// @note This function is a no-op on any OS except Linux
 /// @param cpus List of CPU indices, starting at 0
 /// @param pid Linux specific thread ID, typically returned by gettid() (0=calling thread)
-void setCpuAffinity(std::span<const int> cpus, pid_t pid = 0);
+void setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid = 0);
 
 /// Thread scheduling parameters
 struct Schedule {

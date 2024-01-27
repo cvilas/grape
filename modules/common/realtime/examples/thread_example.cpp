@@ -2,6 +2,7 @@
 // Copyright (C) 2018-2024 GRAPE Contributors
 //=================================================================================================
 
+#include <cmath>
 #include <csignal>
 #include <print>
 
@@ -64,8 +65,8 @@ auto main() -> int {
 
     // Define CPU cores to allocate to non-rt and rt threads. Ideally these should be
     // non-intersecting sets.
-    static constexpr auto CPUS_RT = { 0 };
-    static constexpr auto CPUS_NON_RT = { 1, 2, 3 };
+    static constexpr auto CPUS_RT = { 0u };
+    static constexpr auto CPUS_NON_RT = { 1u, 2u, 3u };
 
     // Set main thread CPU affinity here. Will assign rt thread CPU affinity in task setup().
     grape::realtime::setCpuAffinity(CPUS_NON_RT);
