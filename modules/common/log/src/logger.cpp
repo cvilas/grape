@@ -29,7 +29,7 @@ Logger::~Logger() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Logger::log(Record&& record) noexcept {
+void Logger::log(Record&& record) {
   if (canLog(record.severity)) {
     if (not queue_.tryPush(std::move(record))) {
       missed_logs_.fetch_add(1, std::memory_order_acquire);
