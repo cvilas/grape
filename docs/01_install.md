@@ -46,7 +46,8 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
     sudo apt update
     sudo apt install g++-$GCC_VERSION gcc-$GCC_VERSION gfortran-$GCC_VERSION
     
-    sudo update-alternatives --remove-all gcc gfortran
+    sudo update-alternatives --remove-all gcc 
+    sudo update-alternatives --remove-all gfortran
     sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-$GCC_VERSION $GCC_VERSION
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$GCC_VERSION $GCC_VERSION \
     --slave /usr/bin/g++ g++ /usr/bin/g++-$GCC_VERSION \
