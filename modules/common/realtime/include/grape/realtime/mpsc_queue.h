@@ -25,18 +25,17 @@ public:
   /// Attempt to enqueue without blocking.
   /// @note Can be called concurrently from multiple threads.
   /// @return true on success, false if queue is full.
-  [[nodiscard]] auto tryPush(T&& obj) noexcept -> bool;
+  [[nodiscard]] auto tryPush(T&& obj) -> bool;
 
   /// Attempt to dequeue without blocking.
   /// @note Should not be called concurrently from multiple threads without mutual exclusion.
   /// @return An item from queue if the operation won't block, else nothing
-  [[nodiscard]] auto tryPop() noexcept -> std::optional<T>;
+  [[nodiscard]] auto tryPop() -> std::optional<T>;
 
   /// @return The number of items in queue.
   [[nodiscard]] auto count() const noexcept -> std::size_t;
 
 private:
-  std::size_t capacity_{};
   static_assert(std::atomic_size_t::is_always_lock_free);
   std::atomic_size_t count_{ 0 };
   std::atomic_size_t head_{ 0 };
@@ -50,23 +49,23 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-MPSCQueue<T>::MPSCQueue(std::size_t capacity)
-  : capacity_((capacity > 0 ? capacity : 1u)), items_(capacity_) {
+MPSCQueue<T>::MPSCQueue(std::size_t capacity) : items_((capacity > 0 ? capacity : 1u)) {
 }
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-auto MPSCQueue<T>::tryPush(T&& obj) noexcept -> bool {
+auto MPSCQueue<T>::tryPush(T&& obj) -> bool {
   const auto count = count_.fetch_add(1, std::memory_order_acquire);
-  if (count >= capacity_) {
+  const auto capacity = items_.size();
+  if (count >= capacity) {
     // back off, queue is full
     count_.fetch_sub(1, std::memory_order_release);
     return false;
   }
 
   // increment head, giving 'exclusive' access to that element until readability flag is set
-  const auto head = head_.fetch_add(1, std::memory_order_acquire) % capacity_;
-  auto& item = items_[head];  // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+  const auto head = head_.fetch_add(1, std::memory_order_acquire) % capacity;
+  auto& item = items_.at(head);
   assert(not item.is_readable.test(std::memory_order_acquire));
   item.value = std::move(obj);
   item.is_readable.test_and_set(std::memory_order_release);
@@ -75,8 +74,8 @@ auto MPSCQueue<T>::tryPush(T&& obj) noexcept -> bool {
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-inline auto MPSCQueue<T>::tryPop() noexcept -> std::optional<T> {
-  auto& item = items_[tail_];  // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+inline auto MPSCQueue<T>::tryPop() -> std::optional<T> {
+  auto& item = items_.at(tail_);
   if (not item.is_readable.test(std::memory_order_acquire)) {
     // A thread could still be writing to this location
     return {};
@@ -85,7 +84,7 @@ inline auto MPSCQueue<T>::tryPop() noexcept -> std::optional<T> {
   item.is_readable.clear(std::memory_order_release);
   auto ret = std::move(item.value);
 
-  if (++tail_ >= capacity_) {
+  if (++tail_ >= items_.size()) {
     tail_ = 0;
   }
 
