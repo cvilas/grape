@@ -21,13 +21,13 @@
   - :done: Start requirement document
   - :done: Choose data types to support. 
   - :done: Implement fixed size non-allocating strings
-  - Enhance mpscq interface 
-    - `tryBorrow() -> std::optional<Item>`
-    - `Item.commit(T&&)`. Throw if `~Item` is called without `commit` as it renders the buffer unusable
+  - Consider a new buffer type based on mpscq that allows in-place operations to commit/read data using `std::invocable`
+    - Consider fixed size string for logs 
+    - Use the alternative buffer implementation for logs.
   - Propose how to serialise data at the plant and deserialise at monitor
     - use fixed size data structures 
     - serdes is basically required for big-endian<->little-endian conversations, even if fixed size data structures are used. maybe use fastcdr
-  - [Proof of concept](https://godbolt.org/z/seKKsWc8f)
+  - [Proof of concept](https://godbolt.org/z/aee4jsMfW)
 
 - Study: 
   - :done: [cactus-rt](https://github.com/cactusdynamics/cactus-rt)
