@@ -42,8 +42,8 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_ADDRESS = "[::]";  //!< all available interfaces
 
     auto desc = grape::conio::ProgramDescription("Zenoh router");
-    desc.defineOption<int>("port", "Port on which the service is available", DEFAULT_PORT)
-        .defineOption<std::string>("address", "IP address of the service", DEFAULT_ADDRESS);
+    desc.declareOption<int>("port", "Port on which the service is available", DEFAULT_PORT)
+        .declareOption<std::string>("address", "IP address of the service", DEFAULT_ADDRESS);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto port = args.getOption<int>("port");
@@ -72,8 +72,8 @@ auto main(int argc, const char* argv[]) -> int {
     s_exit.wait(false);
 
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

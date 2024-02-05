@@ -13,8 +13,8 @@ namespace grape::utils::tests {
 TEST_CASE("Throws on attempted duplicate definition of option", "[program_args]") {
   auto desc = grape::conio::ProgramDescription("duplication test");
   CHECK_THROWS_AS(
-      desc.defineOption<int>("key1", "a key").defineOption<int>("key1", "duplicate of key1"),
-      grape::InvalidOperationException);
+      desc.declareOption<int>("key1", "a key").declareOption<int>("key1", "duplicate of key1"),
+      grape::conio::ProgramOptionException);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -25,20 +25,20 @@ TEST_CASE("Throws if undefined options are specified on the command line", "[pro
   const auto argc = 1;
 
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  CHECK_THROWS_AS(std::move(desc).parse(argc, argv), grape::InvalidParameterException);
+  CHECK_THROWS_AS(std::move(desc).parse(argc, argv), grape::conio::ProgramOptionException);
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Throws if required option is not specified on the command line", "[program_args]") {
   auto desc = grape::conio::ProgramDescription("missing option test");
-  desc.defineOption<std::string>("required_key", "A required key");
-  CHECK_THROWS_AS(std::move(desc).parse(0, nullptr), grape::InvalidConfigurationException);
+  desc.declareOption<std::string>("required_key", "A required key");
+  CHECK_THROWS_AS(std::move(desc).parse(0, nullptr), grape::conio::ProgramOptionException);
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Reads required option if specified on the command line", "[program_args]") {
   auto desc = grape::conio::ProgramDescription("required option test");
-  desc.defineOption<int>("required_key", "A required key");
+  desc.declareOption<int>("required_key", "A required key");
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
   const char* argv[] = { "--required_key=16" };
   const auto argc = 1;
@@ -51,7 +51,7 @@ TEST_CASE("Reads required option if specified on the command line", "[program_ar
 TEST_CASE("Default value is used for optional argument if unspecified", "[program_args]") {
   static constexpr auto INT_KEY_DEFAULT_VALUE = 20;
   auto desc = grape::conio::ProgramDescription("optional args default value test");
-  desc.defineOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE);
+  desc.declareOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE);
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const auto args = std::move(desc).parse(0, nullptr);
   CHECK((args.getOption<int>("int_key") == INT_KEY_DEFAULT_VALUE));
@@ -61,7 +61,7 @@ TEST_CASE("Default value is used for optional argument if unspecified", "[progra
 TEST_CASE("Default value is overridden when optional argument is unspecified", "[program_args]") {
   static constexpr auto INT_KEY_DEFAULT_VALUE = 20;
   auto desc = grape::conio::ProgramDescription("optional arg override test");
-  desc.defineOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE);
+  desc.declareOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE);
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
   const char* argv[] = { "--int_key=10" };
   const auto argc = 1;
@@ -87,15 +87,15 @@ TEST_CASE("Ensures 'help' is always available", "[program_args]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Throws on type mismatch between declaration and parsing", "[program_args]") {
   auto desc = grape::conio::ProgramDescription("declaration and parsed type mismatch test");
-  desc.defineOption<int>("int_key", "An integer key", 1);
+  desc.declareOption<int>("int_key", "An integer key", 1);
   const auto args = std::move(desc).parse(0, nullptr);
-  CHECK_THROWS_AS(args.getOption<std::string>("int_key"), grape::TypeMismatchException);
+  CHECK_THROWS_AS(args.getOption<std::string>("int_key"), grape::conio::ProgramOptionException);
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Throws if value specified at runtime is unparsable as defined type", "[program_args]") {
   auto desc = grape::conio::ProgramDescription("unparsable option test");
-  desc.defineOption<int>("int_key", "An integer key");
+  desc.declareOption<int>("int_key", "An integer key");
 
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
   const char* argv[] = { "--int_key=\"a string value\"" };
@@ -104,7 +104,7 @@ TEST_CASE("Throws if value specified at runtime is unparsable as defined type", 
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const auto args = std::move(desc).parse(argc, argv);
 
-  CHECK_THROWS_AS(args.getOption<int>("int_key"), grape::TypeMismatchException);
+  CHECK_THROWS_AS(args.getOption<int>("int_key"), grape::conio::ProgramOptionException);
 }
 
 // NOLINTEND(cert-err58-cpp)

@@ -6,6 +6,7 @@
 #include <print>
 #include <thread>
 
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -36,7 +37,8 @@ auto main() -> int {
     std::this_thread::sleep_for(std::chrono::seconds(1));
     std::println("{}", success ? "success" : "failed");
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
+    return EXIT_FAILURE;
   }
 }

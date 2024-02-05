@@ -12,8 +12,10 @@ configure_file(src/version.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version_impl.h @ON
 
 # library sources
 set(SOURCES
+        src/stacktrace.cpp
         src/version.cpp
         README.md
+        include/grape/utils/stacktrace.h
         include/grape/utils/utils.h
         include/grape/utils/version.h)
 

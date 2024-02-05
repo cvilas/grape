@@ -48,7 +48,7 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/**";
 
     auto desc = grape::conio::ProgramDescription("Subscribes to liveliness state changes");
-    desc.defineOption<std::string>("key", "key expression to track liveliness of", DEFAULT_KEY);
+    desc.declareOption<std::string>("key", "key expression to track liveliness of", DEFAULT_KEY);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto key = args.getOption<std::string>("key");
@@ -83,8 +83,8 @@ auto main(int argc, const char* argv[]) -> int {
 
     z_undeclare_subscriber(z_move(sub));
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

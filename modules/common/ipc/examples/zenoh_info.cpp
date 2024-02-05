@@ -5,6 +5,7 @@
 #include <print>
 #include <span>
 
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -34,8 +35,8 @@ auto main(int argc, char** argv) -> int {
     std::println("Peer ids:");
     session.info_peers_zid(print_id);
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

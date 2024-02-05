@@ -8,6 +8,7 @@
 #include <print>
 #include <thread>
 
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -58,8 +59,8 @@ auto main() -> int {
     std::println("Press ctrl-c to exit");
     s_exit.wait(false);
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

@@ -121,8 +121,15 @@ auto main() -> int {
                  std::chrono::duration<double>(stats.mean),
                  std::chrono::duration<double>(std::sqrt(stats.variance)), stats.num_samples);
 
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (const grape::SystemException& ex) {
+    const auto& context = ex.data();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "(syscall: %s) ", context.function_name.data());
+    grape::AbstractException::consume();
+    return EXIT_FAILURE;
+  } catch (...) {
+    grape::AbstractException::consume();
+    return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
 }

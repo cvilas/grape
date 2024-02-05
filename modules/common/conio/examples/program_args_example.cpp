@@ -11,8 +11,8 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     // describe the program and all it's command line options
     auto desc = grape::conio::ProgramDescription("A dummy service that does nothing");
-    desc.defineOption<int>("port", "The port this service is available on")
-        .defineOption<std::string>("address", "The IP address of this service", "[::]");
+    desc.declareOption<int>("port", "The port this service is available on")
+        .declareOption<std::string>("address", "The IP address of this service", "[::]");
 
     // parse the command line arguments
     const auto args = std::move(desc).parse(argc, argv);
@@ -27,8 +27,13 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("The IP address in use is {}", address);
 
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (const grape::conio::ProgramOptionException& ex) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "[%s] ", toString(ex.data()).data());
+    grape::conio::ProgramOptionException::consume();
+    return EXIT_FAILURE;
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

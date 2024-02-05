@@ -4,7 +4,6 @@
 
 #include <print>
 
-#include "grape/exception.h"
 #include "grape/script/script.h"
 
 //=================================================================================================
@@ -24,6 +23,8 @@ static constexpr std::string_view CONFIG = R"(
   age=65
 )";
 
+using ConfigTableException = grape::Exception<grape::script::ConfigTable::Error>;
+
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   (void)argc;
@@ -34,11 +35,21 @@ auto main(int argc, const char* argv[]) -> int {
     PersonnelRecord record;
     record.configure(table);
     std::println("From configuration, name='{}', age={}.", record.name, record.age);
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+    return EXIT_SUCCESS;
+  } catch (const ConfigTableException& ex) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "[%s]\n", toString(ex.data()).data());
+    ConfigTableException::consume();
+    return EXIT_FAILURE;
+  } catch (const grape::script::ConfigScriptException& ex) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "[%s]\n", toString(ex.data()).data());
+    grape::script::ConfigScriptException::consume();
+    return EXIT_FAILURE;
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
-  return EXIT_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -47,15 +58,13 @@ void PersonnelRecord::configure(const grape::script::ConfigTable& table) {
   if (age_result.has_value()) {
     age = static_cast<unsigned int>(age_result.value());
   } else {
-    grape::panic<grape::Exception>(
-        std::format("Error reading age: {}\n", toString(age_result.error())));
+    grape::panic<ConfigTableException>("Error reading age", age_result.error());
   }
 
   const auto name_result = table.read<std::string>("name");
   if (name_result.has_value()) {
     name = name_result.value();
   } else {
-    grape::panic<grape::Exception>(
-        std::format("Error reading name: {}\n", toString(name_result.error())));
+    grape::panic<ConfigTableException>("Error reading name", name_result.error());
   }
 }

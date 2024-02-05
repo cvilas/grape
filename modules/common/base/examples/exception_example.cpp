@@ -3,24 +3,44 @@
 // MIT License
 //=================================================================================================
 
-#include <print>
-
 #include "grape/exception.h"
+#include "grape/utils/utils.h"
 
-// Demonstrates creating a custom exception
-class CustomException : public grape::Exception {
-public:
-  CustomException(const std::string& msg, std::source_location loc) : Exception(msg, loc) {
-  }
+namespace {
+enum class Error : uint8_t { Bad, RealBad };
+constexpr auto toString(const Error& er) -> std::string_view {
+  switch (er) {
+    case Error::Bad:
+      return "Bad";
+    case Error::RealBad:
+      return "RealBad";
+  };
 };
 
+using WorkException = grape::Exception<Error>;
+
+void functionThatThrows() {
+  grape::panic<WorkException>("Boom!!", Error::RealBad);
+}
+
+void doWork() {
+  functionThatThrows();
+}
+}  // namespace
+
 //=================================================================================================
-/// Demonstrates how exceptions should be thrown and caught
+/// Demonstrates usage and handling of exceptions
 auto main() -> int {
   try {
-    grape::panic<CustomException>("An exception occurred");
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+    doWork();
+    return EXIT_SUCCESS;
+  } catch (const WorkException& ex) {  // handle exceptions you care about
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Error code: %s\n", toString(ex.data()).data());
+    WorkException::consume();
+    return EXIT_FAILURE;
+  } catch (...) {  // default handle all other exceptions
+    grape::AbstractException::consume();
+    return EXIT_FAILURE;
   }
-  return EXIT_SUCCESS;
 }

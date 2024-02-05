@@ -28,7 +28,7 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr uint8_t DEFAULT_PAYLOAD_FILL = 1;
 
     auto desc = grape::conio::ProgramDescription("Publisher end of throughput measurement example");
-    desc.defineOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE);
+    desc.declareOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto payload_size = args.getOption<size_t>("size");
@@ -48,8 +48,8 @@ auto main(int argc, const char* argv[]) -> int {
     }
     return EXIT_SUCCESS;
 
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

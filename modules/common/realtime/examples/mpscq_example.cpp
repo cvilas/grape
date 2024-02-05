@@ -8,6 +8,7 @@
 #include <thread>
 #include <vector>
 
+#include "grape/exception.h"
 #include "grape/realtime/mpsc_queue.h"
 
 namespace {
@@ -74,8 +75,8 @@ auto main() -> int {
 
     t1.join();
     t2.join();
-  } catch (const std::exception& ex) {
-    std::ignore = fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

@@ -34,8 +34,8 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr size_t DEFAULT_NUM_PINGS = 100;
 
     auto desc = grape::conio::ProgramDescription("Measures roundtrip time with pong program");
-    desc.defineOption<size_t>("pings", "number of pings to attempt", DEFAULT_NUM_PINGS)
-        .defineOption<size_t>("size", "ping and pong payload size in bytes", DEFAULT_PACKET_SIZE);
+    desc.declareOption<size_t>("pings", "number of pings to attempt", DEFAULT_NUM_PINGS)
+        .declareOption<size_t>("size", "ping and pong payload size in bytes", DEFAULT_PACKET_SIZE);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto num_pings = args.getOption<size_t>("pings");
@@ -104,8 +104,8 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Ping Pong rtt stats ({} pings): min={}, avg={}, max={}", num_pings, min_rtt,
                  avg_rtt, max_rtt);
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

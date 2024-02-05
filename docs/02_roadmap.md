@@ -9,11 +9,6 @@
 - :done: Scripting library
 - :done: Message passing
 - :done: Realtime services  
-- Refactor Exceptions ([inspiration](https://youtu.be/Oy-VTqz1_58)) 
-  - Single exception class and no hierarchy
-  - what() -> message, where() -> location, when() -> stacktrace
-  - std::format function for location and stacktrace
-  - Explain recommended usage and rationale in the docs
 
 ## Phase 2 - Demo application 1 - Probe
 
@@ -72,6 +67,8 @@
 
 ## Phase 5 - Robotics Core
 
+- Study
+  - Robotics at compile time: https://youtu.be/Y6AUsB3RUhA
 - enum-to-string and string-to-enum
   - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
   - consider magic_enum and other options and choose one

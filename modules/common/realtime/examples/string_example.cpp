@@ -4,6 +4,7 @@
 
 #include <print>
 
+#include "grape/exception.h"
 #include "grape/realtime/fixed_string.h"
 
 //=================================================================================================
@@ -17,8 +18,9 @@ auto main() -> int {
     constexpr auto STRING_LENGTH = STRING.length();
     std::println("String='{}', length={}", STRING.str(), STRING_LENGTH);
     std::println("Sub-string='{}'", SUB_STRING);
-  } catch (const std::exception& ex) {
-    std::ignore = fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
+    return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
 }

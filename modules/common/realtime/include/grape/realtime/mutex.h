@@ -47,21 +47,26 @@ inline Mutex::Mutex() {
   {
     const auto result = pthread_mutexattr_init(&attr);
     if (result != 0) {
-      panic<Exception>(std::format("pthread_mutexattr_init: {}", std::strerror(result)));
+      panic<SystemException>(
+          std::strerror(result),
+          SystemError{ .code = result, .function_name = "pthread_mutexattr_init" });
     }
   }
 
   {
     const auto result = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
     if (result != 0) {
-      panic<Exception>(std::format("pthread_mutexattr_setprotocol: {}", std::strerror(result)));
+      panic<SystemException>(
+          std::strerror(result),
+          SystemError{ .code = result, .function_name = "pthread_mutexattr_setprotocol" });
     }
   }
 
   {
     const auto result = pthread_mutex_init(&mutex_, &attr);
     if (result != 0) {
-      panic<Exception>(std::format("pthread_mutex_init: {}", std::strerror(result)));
+      panic<SystemException>(std::strerror(result),
+                             SystemError{ .code = result, .function_name = "pthread_mutex_init" });
     }
   }
 }
@@ -75,7 +80,8 @@ inline Mutex::~Mutex() {
 inline void Mutex::lock() {
   const auto result = pthread_mutex_lock(&mutex_);
   if (result != 0) {
-    panic<Exception>(std::strerror(result));
+    panic<SystemException>(std::strerror(result),
+                           SystemError{ .code = result, .function_name = "pthread_mutex_lock" });
   }
 }
 
