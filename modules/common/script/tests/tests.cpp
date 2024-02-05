@@ -129,7 +129,8 @@ TEST_CASE("errroneous script throws exception", "[script]") {
     name = "Jane Smith", -- syntax error: ',' character
   )";
 
-  CHECK_THROWS_AS(grape::script::ConfigScript(std::string(ERROR_SCRIPT)), grape::Exception);
+  CHECK_THROWS_AS(grape::script::ConfigScript(std::string(ERROR_SCRIPT)),
+                  grape::script::ConfigScriptException);
 }
 
 // NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)

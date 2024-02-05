@@ -31,7 +31,7 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
     auto desc = grape::conio::ProgramDescription("Notifies deletion of data on specified key");
-    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY);
+    desc.declareOption<std::string>("key", "Key expression", DEFAULT_KEY);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto key = args.getOption<std::string>("key");
@@ -47,8 +47,8 @@ auto main(int argc, const char* argv[]) -> int {
       return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

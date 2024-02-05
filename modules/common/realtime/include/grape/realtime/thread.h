@@ -14,6 +14,8 @@
 #endif
 #include <type_traits>
 
+#include "grape/exception.h"
+
 namespace grape::realtime {
 
 /// @brief A versatile thread spawner
@@ -126,15 +128,15 @@ inline void Thread::threadFunction() noexcept {
     }
 
     config_.teardown();
-
-  } catch (const std::exception& ex) {
+  } catch (const grape::SystemException& ex) {
+    const auto& context = ex.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Thread '%s' terminated. Exception:\n%s\n",  //
-                          config_.name.c_str(), ex.what());
+    std::ignore = fprintf(stderr, "(syscall: %s) ", context.function_name.data());
+    grape::AbstractException::consume();
   } catch (...) {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Thread '%s' terminated. Unknown exception",  //
-                          config_.name.c_str());
+    std::ignore = fprintf(stderr, "Thread '%s' terminated.\n", config_.name.c_str());
+    grape::AbstractException::consume();
   }
 }
 }  // namespace grape::realtime

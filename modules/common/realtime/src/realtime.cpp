@@ -25,21 +25,32 @@ void lockMemory() {
 #ifdef __linux__
   // Lock all current and future process address space into RAM, preventing paging into swap area
   if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
-    panic<Exception>(std::format("mlockall: {}", std::strerror(errno)));
+    const auto err = errno;
+    panic<SystemException>(std::strerror(err),
+                           SystemError{ .code = err, .function_name = "mlockall: {}" });
   }
 
   // Heap trimming: when the amount of contiguous free memory at the top of the  heap  grows
   // sufficiently large, system call (sbrk) is used to release this memory back to the system. The
   // following call disables heap trimming completely. (We avoid system calls at the cost of free
   // RAM not being returned to the OS.)
-  if (mallopt(M_TRIM_THRESHOLD, -1) != 1) {
-    panic<Exception>("mallopt(M_TRIM_THRESHOLD) failed");
+  {
+    const auto code = mallopt(M_TRIM_THRESHOLD, -1);
+    if (code != 1) {
+      panic<SystemException>(
+          "Unable to disable memory trimming",
+          SystemError{ .code = code, .function_name = "mallopt(M_TRIM_THRESHOLD)" });
+    }
   }
 
   // Disable the use of mmap for servicing large allocation requests. This leaves glibc with only
   // heap memory for new allocations
-  if (mallopt(M_MMAP_MAX, 0) != 1) {
-    panic<Exception>("mallopt(M_MMAP_MAX) failed");
+  {
+    const auto code = mallopt(M_MMAP_MAX, 0);
+    if (code != 1) {
+      panic<SystemException>("Unable to disable mmap for large allocation requrests",
+                             SystemError{ .code = code, .function_name = "mallopt(M_MMAP_MAX)" });
+    }
   }
 #endif
 }
@@ -53,7 +64,9 @@ void setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) {
     CPU_SET(i, &mask);
   }
   if (0 != sched_setaffinity(pid, sizeof(mask), &mask)) {
-    panic<Exception>(std::format("sched_setaffinity: {}", strerror(errno)));
+    const auto err = errno;
+    panic<SystemException>(strerror(err),
+                           SystemError{ .code = err, .function_name = "sched_setaffinity" });
   }
 #else
   (void)cpus;
@@ -68,7 +81,9 @@ void setSchedule(Schedule schedule, pid_t pid) {
   param.sched_priority = schedule.priority;
   const auto prio = (schedule.policy == Schedule::Policy::Realtime ? SCHED_FIFO : SCHED_OTHER);
   if (0 != sched_setscheduler(pid, prio, &param)) {
-    panic<Exception>(std::format("sched_setscheduler: {}", strerror(errno)));
+    const auto err = errno;
+    panic<SystemException>(strerror(err),
+                           SystemError{ .code = err, .function_name = "sched_setscheduler" });
   }
 #else
   (void)schedule;

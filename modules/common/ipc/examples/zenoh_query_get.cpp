@@ -7,6 +7,7 @@
 #include <thread>
 
 #include "grape/conio/conio.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -56,8 +57,8 @@ auto main(int argc, const char* argv[]) -> int {
     sync_point.arrive_and_wait();  //!< wait until reply callback is triggered
 
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

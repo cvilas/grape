@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "grape/conio/conio.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -82,7 +83,8 @@ auto main(int argc, const char* argv[]) -> int {
     stats.print();
 
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
+    return EXIT_FAILURE;
   }
 }

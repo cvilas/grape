@@ -28,8 +28,8 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
 
     auto desc = grape::conio::ProgramDescription("Puts a specified value on specified key");
-    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY)
-        .defineOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE);
+    desc.declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+        .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto key = args.getOption<std::string>("key");
@@ -49,8 +49,8 @@ auto main(int argc, const char* argv[]) -> int {
     }
 
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

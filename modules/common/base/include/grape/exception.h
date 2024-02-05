@@ -5,68 +5,109 @@
 
 #pragma once
 
+#include <exception>
+#include <format>
 #include <source_location>
-#include <stdexcept>
+#include <string>
 #include <type_traits>
+
+#include "grape/utils/stacktrace.h"
 
 namespace grape {
 
 //=================================================================================================
-/// Base class for exceptions
+/// Abstract interface for exceptions
+class AbstractException {
+public:
+  /// @return Non-modifiable reference to error message
+  [[nodiscard]] virtual auto what() const noexcept -> const std::string& = 0;
+
+  /// @return Location in the source where the exception occurred
+  [[nodiscard]] virtual auto where() const noexcept -> const std::source_location& = 0;
+
+  /// @return Backtrace leading up to exception
+  [[nodiscard]] virtual auto when() const noexcept -> const utils::StackTrace& = 0;
+
+  /// A utility method (Lippincott function) that consumes all exceptions and prints diagnostics
+  /// except custom data set by user in the derived classes
+  static void consume() noexcept;
+
+  virtual ~AbstractException() = default;
+};
+
+//=================================================================================================
+/// Exception class, inspired from Peter Muldoon (https://youtu.be/Oy-VTqz1_58)
+///
+/// Guidelines:
+/// - Use exceptions only for serious/infrequent/unexpected errors where getting out of control flow
+/// to
+///   prevent further damage is more important than trying to continue onward.
+///   - For shallow returns, prefer 'std::optional' and 'std::expected'
+///   - Define as few exception types as possible
+///   - Exceptions are defined by their catch handler usage. Use them for:
+///     - Error tracing and logging
+///     - Stack unwinding for terminally fatal or transactionally fatal errors
+/// - The following NOT good uses for exceptions:
+///   - Resource management (eg: to release resources in catch block). Use RAII instead.
+///   - Loop control flow. Use return status codes instead.
+///   - Memory corruption or exhaustion. Just terminate instead.
+/// @todo Integrate std::stacktrace when compiler support becomes available
 /// @include exception_example.cpp
-class Exception : public std::runtime_error {
+template <typename DATA_T>
+class Exception : public AbstractException {
 public:
-  /// @param message A message describing the error and what caused it
+  /// @param message A context-specific description of the error
+  /// @param data Contextual user-defined data
   /// @param location Location in the source where the error was triggered at
-  Exception(const std::string& message, std::source_location location);
+  Exception(std::string message, DATA_T data, std::source_location location,
+            utils::StackTrace trace)
+    : message_{ std::move(message) }
+    , data_{ std::move(data) }
+    , location_{ location }
+    , backtrace_{ std::move(trace) } {
+  }
+
+  [[nodiscard]] auto what() const noexcept -> const std::string& override {
+    return message_;
+  }
+
+  [[nodiscard]] auto where() const noexcept -> const std::source_location& override {
+    return location_;
+  }
+
+  /// @return Backtrace leading up to exception
+  [[nodiscard]] auto when() const noexcept -> const utils::StackTrace& override {
+    return backtrace_;
+  }
+
+  /// @return User-defined contextual data
+  [[nodiscard]] auto data() const noexcept -> const DATA_T& {
+    return data_;
+  }
+
+private:
+  std::string message_;
+  DATA_T data_;
+  std::source_location location_;
+  utils::StackTrace backtrace_;
 };
 
-/// @brief  User function to throw an exception
-/// @tparam T Exception type, derived from grape::Exception
-/// @param message A message describing the error and what caused it
-/// @param location Location in the source where the error was triggered at
-template <typename T>
-  requires std::is_base_of_v<Exception, T>
-constexpr void panic(const std::string& message,
-                     std::source_location location = std::source_location::current()) {
-  throw T{ message, location };
+//=================================================================================================
+/// Errors from system calls or platform library functions
+struct SystemError {
+  int code;  //!< error code (errno) set by failing system call or library function
+  std::string_view function_name;  //!< name of system call or library function
+};
+
+using SystemException = grape::Exception<SystemError>;
+
+/// User function to throw an exception derived from Exception<DATA_T>
+template <typename T, class DATA_T>
+  requires std::derived_from<T, Exception<DATA_T>>
+constexpr void panic(std::string message, DATA_T data,                                 //
+                     std::source_location location = std::source_location::current(),  //
+                     utils::StackTrace trace = utils::StackTrace::current()) {
+  throw T{ message, data, location, trace };
 }
-
-//=================================================================================================
-/// Exception raised on operating with mismatched types. Examples
-/// - serialisation/deserialisation across incompatible types
-/// - Typecasting between incompatible types
-class TypeMismatchException : public grape::Exception {
-public:
-  TypeMismatchException(const std::string& msg, std::source_location loc) : Exception(msg, loc) {
-  }
-};
-
-//=================================================================================================
-/// Exception raised due to invalid/incomplete/undefined configuration
-class InvalidConfigurationException : public grape::Exception {
-public:
-  InvalidConfigurationException(const std::string& msg, std::source_location loc)
-    : Exception(msg, loc) {
-  }
-};
-
-//=================================================================================================
-/// Exception raised due to invalid parameters
-class InvalidParameterException : public grape::Exception {
-public:
-  InvalidParameterException(const std::string& msg, std::source_location loc)
-    : Exception(msg, loc) {
-  }
-};
-
-//=================================================================================================
-/// Exception raised due to invalid or unsupported operation
-class InvalidOperationException : public grape::Exception {
-public:
-  InvalidOperationException(const std::string& msg, std::source_location loc)
-    : Exception(msg, loc) {
-  }
-};
 
 }  // namespace grape

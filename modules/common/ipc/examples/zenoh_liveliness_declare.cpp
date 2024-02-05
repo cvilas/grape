@@ -30,8 +30,8 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/liveliness";
 
     auto desc = grape::conio::ProgramDescription("Declares/undeclares liveliness token");
-    desc.defineOption<std::string>("key", "key expression to declare liveliness token on",
-                                   DEFAULT_KEY);
+    desc.declareOption<std::string>("key", "key expression to declare liveliness token on",
+                                    DEFAULT_KEY);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto key = args.getOption<std::string>("key");
@@ -71,8 +71,8 @@ auto main(int argc, const char* argv[]) -> int {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

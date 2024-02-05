@@ -47,9 +47,9 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_ROUTER = "localhost:7447";
 
     auto desc = grape::conio::ProgramDescription("Example publisher operating in 'client' mode");
-    desc.defineOption<std::string>("key", "Key expression", DEFAULT_KEY)
-        .defineOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
-        .defineOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER);
+    desc.declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+        .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
+        .declareOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER);
 
     const auto args = std::move(desc).parse(argc, argv);
     const auto key = args.getOption<std::string>("key");
@@ -90,8 +90,8 @@ auto main(int argc, const char* argv[]) -> int {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
 }

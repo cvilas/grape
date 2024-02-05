@@ -46,6 +46,8 @@ static constexpr std::string_view CONFIG = R"(
   }
 )";
 
+using ConfigTableException = grape::Exception<grape::script::ConfigTable::Error>;
+
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   (void)argc;
@@ -60,11 +62,21 @@ auto main(int argc, const char* argv[]) -> int {
       const auto pose = r.pose;
       std::println(" '{}' at ({}, {}, {})", r.name, pose.x, pose.y, pose.rz);
     }
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
+    return EXIT_SUCCESS;
+  } catch (const ConfigTableException& ex) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "[%s]\n", toString(ex.data()).data());
+    ConfigTableException::consume();
+    return EXIT_FAILURE;
+  } catch (const grape::script::ConfigScriptException& ex) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "[%s]\n", toString(ex.data()).data());
+    grape::script::ConfigScriptException::consume();
+    return EXIT_FAILURE;
+  } catch (...) {
+    grape::AbstractException::consume();
     return EXIT_FAILURE;
   }
-  return EXIT_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -73,19 +85,19 @@ void Pose::configure(const grape::script::ConfigTable& table) {
   if (x_res.has_value()) {
     x = x_res.value();
   } else {
-    grape::panic<grape::Exception>(std::format("Key 'x' {}", toString(x_res.error())));
+    grape::panic<ConfigTableException>("Key 'x' {}", x_res.error());
   }
   const auto y_res = table.read<float>("y");
   if (y_res.has_value()) {
     y = y_res.value();
   } else {
-    grape::panic<grape::Exception>(std::format("Key 'y' {}", toString(y_res.error())));
+    grape::panic<ConfigTableException>("Key 'y' {}", y_res.error());
   }
   const auto rz_res = table.read<float>("rz");
   if (rz_res.has_value()) {
     rz = rz_res.value();
   } else {
-    grape::panic<grape::Exception>(std::format("Key 'rz' {}", toString(rz_res.error())));
+    grape::panic<ConfigTableException>("Key 'rz'", rz_res.error());
   }
 }
 
@@ -95,13 +107,13 @@ void Robot::configure(const grape::script::ConfigTable& table) {
   if (name_res.has_value()) {
     name = name_res.value();
   } else {
-    grape::panic<grape::Exception>(std::format("Key 'name' {}", toString(name_res.error())));
+    grape::panic<ConfigTableException>("Key 'name'", name_res.error());
   }
   const auto pose_tab = table.read<grape::script::ConfigTable>("pose");
   if (pose_tab.has_value()) {
     pose.configure(pose_tab.value());
   } else {
-    grape::panic<grape::Exception>(std::format("Key 'pose' {}", toString(pose_tab.error())));
+    grape::panic<ConfigTableException>("Key 'pose'", pose_tab.error());
   }
 }
 
@@ -111,12 +123,11 @@ void RobotCluster::configure(const grape::script::ConfigTable& table) {
   if (name_res.has_value()) {
     name = name_res.value();
   } else {
-    grape::panic<grape::Exception>(
-        std::format("Key 'cluster_name' {}", toString(name_res.error())));
+    grape::panic<ConfigTableException>("Key 'cluster_name'", name_res.error());
   }
   const auto members_res = table.read<grape::script::ConfigTable>("members");
   if (not members_res.has_value()) {
-    grape::panic<grape::Exception>(std::format("Key 'members' {}", toString(members_res.error())));
+    grape::panic<ConfigTableException>("Key 'members'", members_res.error());
   }
   const auto& members_table = members_res.value();
   const auto sz = members_table.size();
@@ -124,7 +135,7 @@ void RobotCluster::configure(const grape::script::ConfigTable& table) {
   for (size_t i = 0; i < sz; ++i) {
     const auto robot_res = members_table.read<grape::script::ConfigTable>(i);
     if (not robot_res.has_value()) {
-      grape::panic<grape::Exception>(std::format("Robot({}): {}", i, toString(robot_res.error())));
+      grape::panic<ConfigTableException>(std::format("Robot({})", i), robot_res.error());
     }
     members.at(i).configure(robot_res.value());
   }

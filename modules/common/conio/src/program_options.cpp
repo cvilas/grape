@@ -31,7 +31,8 @@ auto ProgramDescription::parse(int argc, const char** argv) && -> ProgramOptions
                                    [&key](const auto& opt) { return key == opt.key; });
 
       if (it == options_.end()) {
-        panic<InvalidParameterException>(std::format("Undefined option '{}'", key));
+        panic<ProgramOptionException>(std::format("Option '{}' undeclared", key),
+                                      ProgramOptions::Error::UndeclaredOption);
       }
       if (it != help_it) {
         it->value = ((pos == std::string::npos) ? "" : kv.substr(pos + 1));
@@ -49,8 +50,8 @@ auto ProgramDescription::parse(int argc, const char** argv) && -> ProgramOptions
   // check all required arguments are specified
   for (const auto& entry : options_) {
     if (entry.is_required and not entry.is_specified) {
-      panic<InvalidConfigurationException>(
-          std::format("Required option '{}' not specified", entry.key));
+      panic<ProgramOptionException>(std::format("Required option '{}' not specified", entry.key),
+                                    ProgramOptions::Error::UndefinedOption);
     }
   }
   return ProgramOptions(std::move(options_));

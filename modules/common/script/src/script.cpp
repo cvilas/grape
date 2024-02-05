@@ -14,7 +14,7 @@ namespace grape::script {
 ConfigScript::ConfigScript(const std::string& script_string) : ConfigScript() {
   auto* const state = lua_state_.get();
   if (luaL_dostring(state, script_string.c_str()) != LUA_OK) {
-    grape::panic<Exception>(lua_tostring(state, -1));
+    panic<ConfigScriptException>(lua_tostring(state, -1), ConfigScript::Error::Unloadable);
   }
 }
 
@@ -22,7 +22,7 @@ ConfigScript::ConfigScript(const std::string& script_string) : ConfigScript() {
 ConfigScript::ConfigScript(const std::filesystem::path& script_path) : ConfigScript() {
   auto* const state = lua_state_.get();
   if (luaL_dofile(state, script_path.c_str()) != LUA_OK) {
-    grape::panic<Exception>(lua_tostring(state, -1));
+    panic<ConfigScriptException>(lua_tostring(state, -1), ConfigScript::Error::Unloadable);
   }
 }
 
