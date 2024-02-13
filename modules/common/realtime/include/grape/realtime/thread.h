@@ -132,7 +132,7 @@ inline void Thread::threadFunction() noexcept {
     const auto& context = ex.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "(syscall: %s) ", context.function_name.data());
-    grape::AbstractException::consume();
+    grape::SystemException::consume();
   } catch (...) {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "Thread '%s' terminated.\n", config_.name.c_str());
