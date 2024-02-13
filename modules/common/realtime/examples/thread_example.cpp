@@ -125,7 +125,7 @@ auto main() -> int {
     const auto& context = ex.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "(syscall: %s) ", context.function_name.data());
-    grape::AbstractException::consume();
+    grape::SystemException::consume();
     return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
