@@ -39,9 +39,8 @@ public:
 /// Exception class, inspired from Peter Muldoon (https://youtu.be/Oy-VTqz1_58)
 ///
 /// Guidelines:
-/// - Use exceptions only for serious/infrequent/unexpected errors where getting out of control flow
-/// to
-///   prevent further damage is more important than trying to continue onward.
+/// - Use exceptions only for serious/infrequent/unexpected errors where getting out of control
+/// flow to prevent further damage is more important than trying to continue onward.
 ///   - For shallow returns, prefer 'std::optional' and 'std::expected'
 ///   - Define as few exception types as possible
 ///   - Exceptions are defined by their catch handler usage. Use them for:
