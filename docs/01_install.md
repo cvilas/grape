@@ -27,7 +27,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
   - Clang
     ```bash
     wget https://apt.llvm.org/llvm.sh
-    export CLANG_VERSION=18 # Replace with latest version number
+    export CLANG_VERSION=19 # Replace with latest version number
     chmod +x llvm.sh
     sudo ./llvm.sh $CLANG_VERSION
     sudo apt install clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
