@@ -16,9 +16,7 @@
   - :done: Start requirement document
   - :done: Choose data types to support. 
   - :done: Implement fixed size non-allocating strings
-  - Consider a new buffer type based on mpscq that allows in-place operations to commit/read data using `std::invocable`
-    - Consider fixed size string for logs 
-    - Use the alternative buffer implementation for logs.
+  - Implement `FIFOBuffer` supporting in-place operations to write/read data
   - Propose how to serialise data at the plant and deserialise at monitor
     - use fixed size data structures 
     - serdes is basically required for big-endian<->little-endian conversations, even if fixed size data structures are used. maybe use fastcdr
@@ -30,9 +28,11 @@
   - [probe](github.com/cvilas/probe)
   - Sign up for [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development) course
   - Document all these resources
-- Implement:
-  - Implement Plant
-  - Implement Monitor 
+- Implement Plant
+- Implement Monitor 
+- Refactor logging
+  - Consider fixed size string for logs 
+  - Consider using the `FIFOBuffer` for logs.
 - plot:
   - :done: Choose a backend: implot (docking branch)
   - concept `plottable`

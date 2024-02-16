@@ -138,10 +138,7 @@ auto main() -> int {
 inline void Profiler::addSample(double sample) {
   // Numerically stable version of Welford's online algorithm from
   // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-  const auto abs = std::abs(sample);
-  if (stats_.abs_max < abs) {
-    stats_.abs_max = abs;
-  }
+  stats_.abs_max = std::max(std::abs(sample), stats_.abs_max);
   stats_.num_samples += 1;
   const auto delta = sample - stats_.mean;
   stats_.mean += delta / static_cast<double>(stats_.num_samples);
