@@ -37,13 +37,13 @@ public:
   /// @param func Writing function
   /// @note Can be called concurrently from multiple threads.
   /// @return false if buffer is full and has no more space to write, else true.
-  [[nodiscard]] auto visitToWrite(WriterFunc func) -> bool;
+  [[nodiscard]] auto visitToWrite(const WriterFunc& func) -> bool;
 
   /// Attempt to read a frame in-place without blocking.
   /// @param func Reading function
   /// @note Should not be called concurrently from multiple threads without mutual exclusion.
   /// @return false if buffer has no more items to read, else true
-  [[nodiscard]] auto visitToRead(ReaderFunc func) -> bool;
+  [[nodiscard]] auto visitToRead(const ReaderFunc& func) -> bool;
 
   /// @return The number of items in queue.
   [[nodiscard]] auto count() const noexcept -> std::size_t;
@@ -66,7 +66,7 @@ constexpr FIFOBuffer::FIFOBuffer(const Options& options)
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto FIFOBuffer::visitToWrite(WriterFunc func) -> bool {
+inline auto FIFOBuffer::visitToWrite(const WriterFunc& func) -> bool {
   const auto count = count_.fetch_add(1, std::memory_order_acquire);
   if (count >= options_.num_frames) {
     // back off, queue is full
@@ -78,25 +78,29 @@ inline auto FIFOBuffer::visitToWrite(WriterFunc func) -> bool {
   const auto head = head_.fetch_add(1, std::memory_order_acquire) % options_.num_frames;
   auto& readability_flag = is_readable_.at(head);
   assert(not readability_flag.test(std::memory_order_acquire));
-  const auto it =
-      std::next(std::begin(buffer_), static_cast<std::int64_t>(head * options_.frame_length));
-  std::invoke(std::forward<WriterFunc>(func), std::span{ it, options_.frame_length });
+
+  // write frame
+  const auto frame_offset = static_cast<std::int64_t>(head * options_.frame_length);
+  const auto frame_start = std::next(std::begin(buffer_), frame_offset);
+  func(std::span{ frame_start, options_.frame_length });
   readability_flag.test_and_set(std::memory_order_release);
+
   return true;
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto FIFOBuffer::visitToRead(ReaderFunc func) -> bool {
+inline auto FIFOBuffer::visitToRead(const ReaderFunc& func) -> bool {
   auto& readability_flag = is_readable_.at(tail_);
   if (not readability_flag.test(std::memory_order_acquire)) {
     // A thread could still be writing to this location
     return false;
   }
 
+  // read frame
   readability_flag.clear(std::memory_order_release);
-  const auto it =
-      std::next(std::begin(buffer_), static_cast<std::int64_t>(tail_ * options_.frame_length));
-  std::invoke(std::forward<ReaderFunc>(func), std::span{ it, options_.frame_length });
+  const auto frame_offset = static_cast<std::int64_t>(tail_ * options_.frame_length);
+  const auto frame_start = std::next(std::begin(buffer_), frame_offset);
+  func(std::span{ frame_start, options_.frame_length });
 
   if (++tail_ >= options_.num_frames) {
     tail_ = 0;

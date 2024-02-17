@@ -6,7 +6,6 @@
 #include <csignal>
 #include <print>
 #include <thread>
-#include <vector>
 
 #include "grape/exception.h"
 #include "grape/realtime/mpsc_queue.h"

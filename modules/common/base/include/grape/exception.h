@@ -6,10 +6,8 @@
 #pragma once
 
 #include <exception>
-#include <format>
 #include <source_location>
 #include <string>
-#include <type_traits>
 
 #include "grape/utils/stacktrace.h"
 

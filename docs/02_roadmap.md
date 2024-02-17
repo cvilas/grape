@@ -30,17 +30,13 @@
   - Document all these resources
 - Implement Plant
 - Implement Monitor 
-- Refactor logging
-  - Consider fixed size string for logs 
-  - Consider using the `FIFOBuffer` for logs.
 - plot:
   - :done: Choose a backend: implot (docking branch)
   - concept `plottable`
-- serdes
-  - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python
-  - concept `serialisable`
+- Refactor logging
+  - Consider fixed size string for logs 
+  - Consider using the `FIFOBuffer` for logs.
 - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
-- Consider integrating mp_uints library
 
 ## Phase 3 - CI
 
@@ -96,11 +92,16 @@
 
 ## Phase 7 - Utilities
 
+- serdes
+  - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python
+  - concept `serialisable`
 - utility: hostname, hostaddress, isportinuse, programname, programpath, execute, flag_set
 - file cache
 - md5sum
 - factory using crtp (see scratch)
 - [ftxui](https://github.com/ArthurSonzogni/FTXUI) based terminal UI apps
+- Redesign ProgramOptions with [monadic interface](https://youtu.be/kZ8rbhGgtv4)
+- Consider integrating mp_uints library
 
 ## Notes
 

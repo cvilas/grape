@@ -7,7 +7,6 @@
 #include <concepts>
 #include <expected>
 #include <filesystem>
-#include <format>
 #include <memory>
 
 #include "grape/exception.h"

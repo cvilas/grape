@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <functional>
-#include <thread>
-
 #include "grape/log/config.h"
 #include "grape/realtime/mpsc_queue.h"
 
