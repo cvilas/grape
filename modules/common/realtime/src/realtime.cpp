@@ -27,7 +27,7 @@ void lockMemory() {
   if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
     const auto err = errno;
     panic<SystemException>(std::strerror(err),
-                           SystemError{ .code = err, .function_name = "mlockall: {}" });
+                           SystemError{ .code = err, .function_name = "mlockall" });
   }
 
   // Heap trimming: when the amount of contiguous free memory at the top of the  heap  grows
