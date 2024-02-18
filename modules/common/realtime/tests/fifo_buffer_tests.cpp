@@ -34,7 +34,7 @@ TEST_CASE("Writes and reads are in FIFO order", "[FIFOBuffer]") {
 
   // read
   for (std::size_t i = 0; i < options.num_frames; ++i) {
-    std::vector<std::byte> read_data(options.frame_length, std::byte(0xff));
+    std::vector<std::byte> read_data(options.frame_length, static_cast<std::byte>(0xff));
     REQUIRE(buffer.visitToRead([&read_data](std::span<const std::byte> frame) {
       std::copy(frame.begin(), frame.end(), read_data.begin());
     }));
