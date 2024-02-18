@@ -35,6 +35,7 @@ auto main() -> int {
       std::uint64_t value = 0;
       while (!s_exit) {
         const auto pushed = buffer.visitToWrite([&value](std::span<std::byte> frame) {
+          assert(sizeof(value) == frame.size_bytes());
           std::memcpy(frame.data(), &value, sizeof(value));
         });
         std::this_thread::sleep_for(UPDATE_PERIOD);
@@ -53,7 +54,8 @@ auto main() -> int {
         std::uint64_t value{};
         if (buffer.count() > 0) {
           const auto pulled = buffer.visitToRead([&value](std::span<const std::byte> frame) {
-            std::memcpy(&value, frame.data(), sizeof(value));
+            assert(sizeof(value) == frame.size_bytes());
+            std::memcpy(&value, frame.data(), frame.size_bytes());
           });
           if (pulled) {
             std::println("consume - {:d}", value);
