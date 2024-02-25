@@ -28,13 +28,10 @@
 - Refactor logging
   - Consider fixed size string for logs 
   - Consider using the `FIFOBuffer` for logs.
-- Refactor to reduce padding. Turn on `-Wpadded` and minimise padding in data structures that are cache sensitive
-  - log::Record
-  - probe::Signal
 - Study [SPSC FIFO](https://youtu.be/K3P_Lmq6pw0) and review [implementation](https://github.com/CharlesFrasch/cppcon2023)
-- Benchmark operations per second for `FIFOBuffer`. Compare against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023)
-  - Replace `%` operations with `AND` (fifo4a) for speedup 
-- Benchmark operations per second for `MPSCQueue`.
+- Benchmark operations per second for `FIFOBuffer` and `MPSCQueue`. 
+  - Compare against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023) and improve performance where possible
+  - Check effect of replacing `%` operations with `AND` (fifo4a) for speedup 
 - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
 - Refactor gbs template files
   - Replace grape with @CMAKE_PROJECT_NAME@ in all files
