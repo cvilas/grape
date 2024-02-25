@@ -10,12 +10,28 @@ define_module_example(
         PUBLIC_LINK_LIBS "")
 
 define_module_example(
-        NAME fifo_buffer_example
-        SOURCES fifo_buffer_example.cpp
+        NAME mpscq_bench
+        SOURCES mpscq_bench.cpp
+        PUBLIC_INCLUDE_PATHS
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        PRIVATE_LINK_LIBS benchmark::benchmark
+        PUBLIC_LINK_LIBS "")
+        
+define_module_example(
+        NAME fifo_example
+        SOURCES fifo_example.cpp
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS "")
 
+define_module_example(
+        NAME fifo_bench
+        SOURCES fifo_bench.cpp
+        PUBLIC_INCLUDE_PATHS
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        PRIVATE_LINK_LIBS benchmark::benchmark
+        PUBLIC_LINK_LIBS "")
+        
 define_module_example(
         NAME string_example
         SOURCES string_example.cpp
