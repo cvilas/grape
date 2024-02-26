@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # required by source analysis tools
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Baseline compiler warning settings for project and external targets
-set(GRAPE_COMPILER_WARNINGS -Wall -Wextra -Wpedantic -Werror)
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 set(THIRD_PARTY_COMPILER_WARNINGS -Wall -Wextra -Wpedantic)
 
 # clang warnings
@@ -39,17 +39,12 @@ set(GCC_WARNINGS
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  add_compile_options(-fcolor-diagnostics)
-  set(GRAPE_COMPILER_WARNINGS ${GRAPE_COMPILER_WARNINGS} ${CLANG_WARNINGS})
+  add_compile_options(-fcolor-diagnostics ${CLANG_WARNINGS})
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  add_compile_options(-fdiagnostics-color=always)
-  set(GRAPE_COMPILER_WARNINGS ${GRAPE_COMPILER_WARNINGS} ${GCC_WARNINGS})
+  add_compile_options(-fdiagnostics-color=always ${GCC_WARNINGS})
 else()
   message(FATAL_ERROR "Unsupported compiler '${CMAKE_CXX_COMPILER_ID}'")
 endif()
-
-# set those compiler warning options
-add_compile_options(${GRAPE_COMPILER_WARNINGS})
 
 # enable sanitizer options
 set(SANITIZERS "")
@@ -175,5 +170,3 @@ message(STATUS "\tENABLE_TSAN                    : ${ENABLE_TSAN}")
 message(STATUS "\tENABLE_UBSAN                   : ${ENABLE_UBSAN}")
 message(STATUS "\tENABLE_COVERAGE                : ${ENABLE_COVERAGE}")
 message(STATUS "\tENABLE_LINTER                  : ${ENABLE_LINTER} (${LINTER_BIN})")
-message(STATUS "\tEnabled warnings (grape)       : ${GRAPE_COMPILER_WARNINGS}")
-message(STATUS "\tEnabled warnings (third-party) : ${THIRD_PARTY_COMPILER_WARNINGS}")
