@@ -3,8 +3,6 @@
 // MIT License
 //=================================================================================================
 
-#pragma once
-
 #include "grape/exception.h"
 
 #include "grape/utils/utils.h"
