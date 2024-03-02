@@ -20,15 +20,15 @@ TEST_CASE("Basline single producer and single consumer case", "[mpsc_queue]") {
   REQUIRE(queue.tryPush(2));
   REQUIRE(queue.tryPush(3));
 
-  REQUIRE((queue.count() == 3u));
+  REQUIRE(queue.count() == 3u);
 
   // NOLINTBEGIN(bugprone-unchecked-optional-access)
-  REQUIRE((queue.tryPop().value() == 1));
-  REQUIRE((queue.tryPop().value() == 2));
-  REQUIRE((queue.tryPop().value() == 3));
+  REQUIRE(queue.tryPop().value() == 1);
+  REQUIRE(queue.tryPop().value() == 2);
+  REQUIRE(queue.tryPop().value() == 3);
   // NOLINTEND(bugprone-unchecked-optional-access)
 
-  REQUIRE((queue.count() == 0u));
+  REQUIRE(queue.count() == 0u);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ TEST_CASE("Multiple producers should be able to push", "[mpsc_queue]") {
     producer.join();
   }
   static constexpr auto EXPECTED_COUNT = NUM_PRODUCERS * NUM_ITEMS_PER_PRODUCER;
-  REQUIRE((queue.count() == EXPECTED_COUNT));
+  REQUIRE(queue.count() == EXPECTED_COUNT);
 
   std::vector<int> popped_items;
   popped_items.reserve(EXPECTED_COUNT);
@@ -63,7 +63,7 @@ TEST_CASE("Multiple producers should be able to push", "[mpsc_queue]") {
     }
   }
 
-  REQUIRE((popped_items.size() == EXPECTED_COUNT));
+  REQUIRE(popped_items.size() == EXPECTED_COUNT);
 }
 
 //-------------------------------------------------------------------------------------------------

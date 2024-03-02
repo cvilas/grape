@@ -16,7 +16,7 @@ TEST_CASE("string trimming") {
   constexpr auto END_TOKEN = ".txt";
   constexpr auto TRUNCATED = grape::utils::truncate(STR, START_TOKEN, END_TOKEN);
   constexpr auto EXPECTED = "to/some/file";
-  CHECK((TRUNCATED == EXPECTED));
+  CHECK(TRUNCATED == EXPECTED);
 }
 
 // NOLINTEND(cert-err58-cpp)
