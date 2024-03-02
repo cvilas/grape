@@ -29,7 +29,7 @@ TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
   logger->log(grape::log::Severity::Error, log_str);                           //!< above threshold
   logger->log(grape::log::Severity::Debug, "This should not appear in logs");  //!< below threshold
   logger.reset();  //!< destroying the logger forces queue to flush
-  REQUIRE((stream == log_str));
+  REQUIRE(stream == log_str);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -52,10 +52,10 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   for (std::size_t i = 0; i < NUM_MESSAGES; ++i) {
     logger.log(grape::log::Severity::Debug, std::format("Message no. {}", i));
   }
-  REQUIRE((num_logs == 0));                        //!< not flushed yet
+  REQUIRE(num_logs == 0);                          //!< not flushed yet
   std::this_thread::sleep_for(FLUSH_WAIT_PERIOD);  //!< wait for flush
-  REQUIRE((num_logs == QUEUE_CAPACITY + 1));       //!< includes record indicating missed count
-  REQUIRE((logger.missedLogs() == NUM_MESSAGES - QUEUE_CAPACITY));  //!< check overflow
+  REQUIRE(num_logs == QUEUE_CAPACITY + 1);         //!< includes record indicating missed count
+  REQUIRE(logger.missedLogs() == NUM_MESSAGES - QUEUE_CAPACITY);  //!< check overflow
 }
 
 // NOLINTEND(cert-err58-cpp)

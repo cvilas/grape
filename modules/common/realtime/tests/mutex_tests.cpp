@@ -25,7 +25,7 @@ TEST_CASE("Mutex functionality", "[Mutex]") {
 
   SECTION("Native Handle") {
     grape::realtime::Mutex::native_handle_type handle = mutex.native_handle();
-    REQUIRE((handle != nullptr));
+    REQUIRE(handle != nullptr);
   }
 
   SECTION("Multiple Lock/Unlock") {

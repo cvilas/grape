@@ -18,9 +18,9 @@ using namespace std::string_literals;
 TEST_CASE("Default constructed string is empty", "[FixedString]") {
   constexpr FixedString8 STR{};
 
-  CHECK((0 == STR.length()));  // NOLINT(readability-container-size-empty)
+  CHECK(0 == STR.length());  // NOLINT(readability-container-size-empty)
   CHECK(STR.empty());
-  CHECK((7 == STR.maxSize()));
+  CHECK(7 == STR.maxSize());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -28,9 +28,9 @@ TEST_CASE("Construction from constexpr string", "[FixedString]") {
   constexpr const char* STR = "1234";
   constexpr FixedString8 FAST_STR = STR;
 
-  CHECK((4 == FAST_STR.length()));
+  CHECK(4 == FAST_STR.length());
   CHECK_FALSE(FAST_STR.empty());
-  CHECK((7 == FAST_STR.maxSize()));
+  CHECK(7 == FAST_STR.maxSize());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -42,10 +42,10 @@ TEST_CASE("Construction from const buffer", "[FixedString]") {
 
   constexpr FixedString24 STR(BUFFER.data(), BUFFER_STR_SIZE);
 
-  CHECK(("Hello World!"s == STR.cStr()));
-  CHECK((12 == STR.length()));
+  CHECK("Hello World!"s == STR.cStr());
+  CHECK(12 == STR.length());
   CHECK_FALSE(STR.empty());
-  CHECK((23 == STR.maxSize()));
+  CHECK(23 == STR.maxSize());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -53,10 +53,10 @@ TEST_CASE("Copy construction", "[FixedString]") {
   constexpr FixedString8 STR{ "abc" };
   auto str_copy = STR;
 
-  CHECK((str_copy.length() == STR.length()));
+  CHECK(str_copy.length() == STR.length());
   CHECK_FALSE(STR.empty());
   CHECK_FALSE(str_copy.empty());
-  CHECK((str_copy.maxSize() == STR.maxSize()));
+  CHECK(str_copy.maxSize() == STR.maxSize());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -65,10 +65,10 @@ TEST_CASE("Move construction", "[FixedString]") {
   auto str_copy = STR;
   auto str_move = std::move(str_copy);  // NOLINT(performance-move-const-arg)
 
-  CHECK((str_move.length() == STR.length()));
+  CHECK(str_move.length() == STR.length());
   CHECK_FALSE(STR.empty());
   CHECK_FALSE(str_move.empty());
-  CHECK((str_move.maxSize() == STR.maxSize()));
+  CHECK(str_move.maxSize() == STR.maxSize());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -76,12 +76,12 @@ TEST_CASE("Copy assignment", "[FixedString]") {
   constexpr FixedString8 STR1{ "1234", 4 };
   FixedString8 str2{ "lmnopqrstuvxyz" };
 
-  CHECK(("1234"s == STR1.cStr()));
-  CHECK(("lmnopqr"s == str2.cStr()));
+  CHECK("1234"s == STR1.cStr());
+  CHECK("lmnopqr"s == str2.cStr());
 
   str2 = STR1;
 
-  CHECK(("1234"s == str2.cStr()));
+  CHECK("1234"s == str2.cStr());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ TEST_CASE("Move assignment", "[FixedString]") {
   FixedString8 str2{ "lmnopqrstuvxyz" };
   str2 = std::move(STR1);  // NOLINT(performance-move-const-arg)
 
-  CHECK(("1234"s == str2.cStr()));
+  CHECK("1234"s == str2.cStr());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -100,10 +100,10 @@ TEST_CASE("Using with string_view", "[FixedString]") {
   constexpr auto STR_STR = STR.str();
   constexpr auto STR_LENGTH = STR.length();
 
-  CHECK(("abcdefg"s == STR.cStr()));
-  CHECK(("ab"s == STR_SUB_STR));
-  CHECK(("abcdefg"s == STR_STR));
-  CHECK((7 == STR_LENGTH));
+  CHECK("abcdefg"s == STR.cStr());
+  CHECK("ab"s == STR_SUB_STR);
+  CHECK("abcdefg"s == STR_STR);
+  CHECK(7 == STR_LENGTH);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -112,30 +112,30 @@ TEST_CASE("Comparison", "[FixedString]") {
   constexpr FixedString8 STR2{ "abcd" };
   constexpr FixedString8 STR3{ "abcf" };
 
-  CHECK((STR1 == STR2));
-  CHECK_FALSE((STR2 == STR3));
+  CHECK(STR1 == STR2);
+  CHECK_FALSE(STR2 == STR3);
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Append", "[FixedString]") {
   FixedString8 str{ "abc" };
-  CHECK(("abc"s == str.cStr()));
+  CHECK("abc"s == str.cStr());
 
   str.append("d");
-  CHECK(("abcd"s == str.cStr()));
+  CHECK("abcd"s == str.cStr());
 
   str.append("efghi", 5);
-  CHECK(("abcdefg"s == str.cStr()));
+  CHECK("abcdefg"s == str.cStr());
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Clear", "[FixedString]") {
   FixedString8 str{ "abcdefg" };
-  CHECK(("abcdefg"s == str.cStr()));
+  CHECK("abcdefg"s == str.cStr());
   CHECK_FALSE(str.empty());
 
   str.clear();
-  CHECK((""s == str.cStr()));
+  CHECK(""s == str.cStr());
   CHECK(str.empty());
 }
 
@@ -145,17 +145,17 @@ TEST_CASE("Swap", "[FixedString]") {
   FixedString8 str2{ "34" };
 
   str2.swap(str1);
-  CHECK(("xyz"s == str2.cStr()));
-  CHECK(("34"s == str1.cStr()));
+  CHECK("xyz"s == str2.cStr());
+  CHECK("34"s == str1.cStr());
 
   std::swap(str2, str1);
-  CHECK(("34"s == str2.cStr()));
-  CHECK(("xyz"s == str1.cStr()));
+  CHECK("34"s == str2.cStr());
+  CHECK("xyz"s == str1.cStr());
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Size in stack", "[FixedString]") {
-  CHECK((8 == sizeof(FixedString8)));
+  CHECK(8 == sizeof(FixedString8));
 }
 
 // NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)

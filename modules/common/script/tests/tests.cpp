@@ -41,17 +41,17 @@ TEST_CASE("[configuration script tests]", "[script]") {
     // string
     const auto name = root_table.read<std::string>("name");
     CHECK(name.has_value());
-    CHECK((name.value() == "Jane Smith"));
+    CHECK(name.value() == "Jane Smith");
 
     // bool
     const auto is_qualified = root_table.read<bool>("is_qualified");
     CHECK(is_qualified.has_value());
-    CHECK((is_qualified.value() == true));
+    CHECK(is_qualified.value() == true);
 
     // int
     const auto age = root_table.read<int>("age");
     CHECK(age.has_value());
-    CHECK((age.value() == 65));
+    CHECK(age.value() == 65);
 
     // table
     const auto table = root_table.read<ConfigTable>("nested_table.nested_nested_table");
@@ -78,48 +78,48 @@ TEST_CASE("[configuration script tests]", "[script]") {
     CHECK(array_result.has_value());
     const auto& array = array_result.value();
     const auto sz = array.size();
-    CHECK((sz == 3));
+    CHECK(sz == 3);
     const auto expected = std::array<int, 3>{ 90, 28, 16 };
     for (size_t i = 0; i < sz; ++i) {
       const auto elem_result = array.read<int>(i);
       CHECK(elem_result.has_value());
       const auto& elem = elem_result.value();
-      CHECK((expected.at(i) == elem));
+      CHECK(expected.at(i) == elem);
     }
 
     // invalid array index returns error
     const auto elem_result = array.read<int>(sz);
     CHECK(not elem_result.has_value());
-    CHECK((elem_result.error() == ConfigTable::Error::NotFound));
+    CHECK(elem_result.error() == ConfigTable::Error::NotFound);
   }
 
   SECTION("trying to parse data as incomptible type returns error") {
     // bool from string
     const auto bool_from_string = root_table.read<bool>("name");
     CHECK(not bool_from_string.has_value());
-    CHECK((bool_from_string.error() == ConfigTable::Error::Unparsable));
+    CHECK(bool_from_string.error() == ConfigTable::Error::Unparsable);
 
     // table from bool
     const auto table_from_bool = root_table.read<ConfigTable>("is_qualified");
     CHECK(not table_from_bool.has_value());
-    CHECK((table_from_bool.error() == ConfigTable::Error::Unparsable));
+    CHECK(table_from_bool.error() == ConfigTable::Error::Unparsable);
 
     // string from float
     const auto table = root_table.read<ConfigTable>("nested_table.nested_nested_table");
     CHECK(table.has_value());
     const auto string_from_float = table.value().read<std::string>("radius");
     CHECK(not string_from_float.has_value());
-    CHECK((string_from_float.error() == ConfigTable::Error::Unparsable));
+    CHECK(string_from_float.error() == ConfigTable::Error::Unparsable);
   }
 
   SECTION("trying to parse non-existant key returns error") {
     // test invalid key
     const auto entry1 = root_table.read<bool>("non-existant-key");
-    CHECK((entry1.error() == ConfigTable::Error::NotFound));
+    CHECK(entry1.error() == ConfigTable::Error::NotFound);
 
     // test dereferencing a valid key as a sub-table
     const auto entry2 = root_table.read<bool>("name.non-existant-key");
-    CHECK((entry2.error() == ConfigTable::Error::Unparsable));
+    CHECK(entry2.error() == ConfigTable::Error::Unparsable);
   }
 }
 

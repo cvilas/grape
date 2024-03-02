@@ -428,7 +428,7 @@ endmacro()
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.5.2)
+  GIT_TAG v3.5.3)
 FetchContent_MakeAvailable(Catch2)
 set_target_properties(Catch2 PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")
 set_target_properties(Catch2 PROPERTIES CXX_CLANG_TIDY "")
