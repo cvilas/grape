@@ -22,7 +22,7 @@ Delegate each real-time task to it's own `Thread` instance as follows:
     - Assign a scheduling policy using `setSchedule()`
     - Optionally, dedicate a CPU core to the thread using `setCpuAffinity()`
   - Implement the time-critical step update in `process()`. Additionally, this path should:
-    - Avoid locks. Use lock-free atomic variables. Where unavoidable, use real-time safe [`Mutex`](include/grape/realtime/mutex.h)
+    - Avoid locks. Use lock-free atomic variables. Where unavoidable, use priority-inversion safe [`Mutex`](include/grape/realtime/mutex.h)
     - Avoid OS system calls 
     - Avoid third-party code whose worst-case execution time is unknown
     - Avoid additional memory allocation/deallocation. 

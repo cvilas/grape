@@ -61,6 +61,7 @@
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
 - Integrate cpack to generate artifacts 
 - Integrate cmake-format
+- Review all negated checks in `.clang-tidy`
 
 ## Phase 5 - Robotics behaviours
 
