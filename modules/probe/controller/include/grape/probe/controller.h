@@ -192,6 +192,7 @@ auto Controller::qset(const std::string& name,
     if (offset_size + value_size > buffer.size_bytes()) {
       // this should never happen
       buffer_check = std::unexpected(Error::BufferTooSmall);
+      return;
     }
     std::memcpy(buffer.data(), &offset, offset_size);
     std::memcpy(buffer.data() + offset_size, value.data(), value_size);
