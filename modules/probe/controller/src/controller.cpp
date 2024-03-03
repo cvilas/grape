@@ -78,6 +78,7 @@ auto Controller::snap() -> std::expected<void, Error> {
       offset += count;
       if (offset > buffer_size) {
         buffer_check = std::unexpected(Error::BufferTooSmall);
+        return;
       }
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
       const auto* src = reinterpret_cast<void*>(s.address);
