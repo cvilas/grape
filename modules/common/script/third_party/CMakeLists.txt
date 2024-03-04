@@ -67,6 +67,7 @@ set(LUA_SOURCES
 add_library(lualib STATIC ${LUA_SOURCES})
 set_target_properties(lualib PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(lualib PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
+set_target_properties(lualib PROPERTIES POSITION_INDEPENDENT_CODE ON) # always need this
 set_target_properties(lualib PROPERTIES UNITY_BUILD OFF)
 
 add_executable(grape_lua ${LUA_SOURCES_DIR}/lua.c)
