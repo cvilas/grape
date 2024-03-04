@@ -13,39 +13,46 @@
 ## Phase 2 - Multimodel data logging and visualisation - timeseries data
 
 - :done: Implement `probe::Controller`
+- Make shared libs work (-fPIC doesn't work)
 - Implement `probe::Monitor`
-  - Get OpenGL3 working on qemu VM: turn off hardware acceleration (use one of the non-gl display hardware options). See `glxinfo -B` for supported OpenGL versions
-  - Only build implot and imgui examples on `make examples`
+  - Proof of concept: Modify controller example to plot instead of print
+  - Get OpenGL3 working on qemu VM: 
+    - turn off hardware acceleration (use one of the non-gl display hardware options). See `glxinfo -B` for supported OpenGL versions
   - Update install instructions to support SDL3
   - Test examples work on MacOS and Linux
-  - Proof of concept
-- `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`
+    - For GL on macos add /opt/X11/lib to path in the toolchain
+    - Version 130 opengl not supported. Follow the imgui example to set up implot example
 - Implement experimental [MCAP](https://github.com/foxglove/mcap/tree/main/cpp) reader and writer
-- Refactor logging
-  - Consider fixed size string for logs 
-  - Consider using the `FIFOBuffer` for logs.
-- Refactor thread class out of realtime and put it in 'grape'
-  - Insert logging to capture timer overruns in the loop
-- Study [SPSC FIFO](https://youtu.be/K3P_Lmq6pw0) and review [implementation](https://github.com/CharlesFrasch/cppcon2023)
-- Benchmark operations per second for `FIFOBuffer` and `MPSCQueue`. 
-  - Compare against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023) and improve performance where possible
-  - Check effect of replacing `%` operations with `AND` (fifo4a) for speedup 
-- zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
-- Refactor gbs template files
-  - Replace grape with @CMAKE_PROJECT_NAME@ in all files
 
-## Phase 4 - Multimodel data logging and visualisation - audio, video, 3D graphics
+## Phase 3 - Multimodel data logging and visualisation - audio, video, 3D graphics
 
 - Audio/Video streaming:
   - Choose backend for audio/video device handling and stream processing
   - Implement basic examples for AV capture, streaming and display
-
+- zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
 - HW accelerated 3D graphics
   - Select a backend: vsg, ogre, raylib, something else
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 
-## Phase 3 - CI
+## Phase 4 - Refactor
+
+- Have a single place to maintain version numbers of all external dependencies
+  - Single versions file maybe
+  - Add version to find_package() calls within modules 
+- Refactor gbs template files to make it project agnostic
+  - Replace occurances of 'grape' with @CMAKE_PROJECT_NAME@ in all files
+- Refactor logging
+  - Consider using the `FIFOBuffer` for logs.
+  - Color console handler like in [Quill](https://github.com/odygrd/quill/blob/master/quill/src/handlers/ConsoleHandler.cpp)
+  - Study Quill to understand how to reduce overhead even more
+- Refactor thread class out of realtime and put it in 'grape'
+  - Insert logging to capture timer overruns in the loop
+- Study [SPSC FIFO](https://youtu.be/K3P_Lmq6pw0) and review [implementation](https://github.com/CharlesFrasch/cppcon2023)
+- Benchmark `FIFOBuffer` against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023) and improve performance where possible
+- `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
+
+## Phase 5 - CI
 
 - Sign up for [game engine](https://pikuma.com/courses/cpp-2d-game-engine-development) course
 - Setup configuration presets for developer and CI builds
@@ -57,11 +64,13 @@
 - study
   - [boost-ext/reflect](https://github.com/boost-ext/reflect)
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
+- Implement CI build using github workflow  
 - Integrate cpack to generate artifacts 
 - Integrate cmake-format
+- Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Review all negated checks in `.clang-tidy`
 
-## Phase 5 - Robotics behaviours
+## Phase 65 - Robotics behaviours
 
 - Study
   - Robotics at compile time: https://youtu.be/Y6AUsB3RUhA
@@ -86,11 +95,11 @@
   - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 
-## Phase 6 - Demo application - Rover
+## Phase 7 - Demo application - Rover
 
 - Mars Rover (joystick teleop, FPV, mission control)
 
-## Phase 7 - Utilities
+## Phase 8 - Utilities
 
 - serdes
   - Choose backend: low overhead, type-safe, fast, no external dependencies, supports C++ and Python
@@ -100,7 +109,6 @@
 - md5sum
 - factory using crtp (see scratch)
 - [ftxui](https://github.com/ArthurSonzogni/FTXUI) based terminal UI apps
-- Redesign ProgramOptions with [monadic interface](https://youtu.be/kZ8rbhGgtv4)
 - Consider integrating mp_uints library
 
 ## Notes
@@ -122,3 +130,4 @@ auto main() -> int {
 - C++20 features: <https://youtu.be/N1gOSgZy7h4>
 - Clean code: <https://youtu.be/9ch7tZN4jeI?si=YkO84hmfQWfq8KO8>
 - IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above- **Coroutines**: Review usability for async processing, nonblocking IO
+
