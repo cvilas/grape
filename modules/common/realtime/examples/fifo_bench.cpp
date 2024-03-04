@@ -2,6 +2,9 @@
 // Copyright (C) 2018 GRAPE Contributors
 //=================================================================================================
 
+#include <cstring>
+#include <stdexcept>
+
 #include <benchmark/benchmark.h>
 
 #include "grape/realtime/fifo_buffer.h"

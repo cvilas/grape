@@ -3,6 +3,7 @@
 //=================================================================================================
 
 #include <atomic>
+#include <cmath>
 #include <csignal>
 #include <cstdlib>
 #include <numbers>
@@ -38,7 +39,7 @@ void print(std::string_view name, std::span<const std::byte> data) {
 //-------------------------------------------------------------------------------------------------
 // deserialises record
 void sink(const std::vector<grape::probe::Signal>& signals, std::span<const std::byte> data) {
-  auto offset = 0u;
+  auto offset = 0UL;
   for (const auto& s : signals) {
     const auto size_bytes = length(s.type) * s.num_elements;
     using TID = grape::probe::TypeId;
@@ -126,7 +127,7 @@ auto main(int argc, const char* argv[]) -> int {
     // we periodically receive batched updates and show how to queue a control variable update
     const auto monitor = [&probe]() {
       static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(1000);
-      double amplitude = {};
+      double desired_amplitude = {};
       while (not s_exit) {
         const auto ts = std::chrono::high_resolution_clock::now();
 
@@ -135,8 +136,8 @@ auto main(int argc, const char* argv[]) -> int {
 
         // Queue update for a control parameter
         static constexpr auto AMPLITUDE_DELTA = 0.1;
-        amplitude += AMPLITUDE_DELTA;
-        if (not probe.qset("amplitude", amplitude)) {
+        desired_amplitude += AMPLITUDE_DELTA;
+        if (not probe.qset("amplitude", desired_amplitude)) {
           std::println("Error setting control variable");
         }
 

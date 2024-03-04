@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <csignal>
+#include <cstring>
 #include <print>
 
 #include "grape/realtime/schedule.h"
@@ -73,9 +74,9 @@ auto main() -> int {
     static constexpr auto CPUS_NON_RT = { 1u, 2u, 3u };
 
     // Set main thread CPU affinity here. Will assign rt thread CPU affinity in task setup().
-    const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_NON_RT);
-    if (not is_cpu_set) {
-      const auto err = is_cpu_set.error();
+    const auto is_main_cpu_set = grape::realtime::setCpuAffinity(CPUS_NON_RT);
+    if (not is_main_cpu_set) {
+      const auto err = is_main_cpu_set.error();
       // NOLINTNEXTLINE(concurrency-mt-unsafe)
       std::println("Main thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
     } else {
@@ -85,9 +86,9 @@ auto main() -> int {
     // set task thread to run on a specific CPU with real-time scheduling policy
     task_config.setup = []() -> bool {
       std::println("Setup started");
-      const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
-      if (not is_cpu_set) {
-        const auto err = is_cpu_set.error();
+      const auto is_task_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
+      if (not is_task_cpu_set) {
+        const auto err = is_task_cpu_set.error();
         // NOLINTNEXTLINE(concurrency-mt-unsafe)
         std::println("Task thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
       } else {
