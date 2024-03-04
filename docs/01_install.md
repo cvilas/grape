@@ -4,17 +4,20 @@
 
 OS               | Architecture  | Compiler
 -----------------|---------------|----------------
-Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang19
+Ubuntu 24.04 LTS | Arm64, X86_64 | Clang19 (GCC15?)
 
 ## Setup build environment
 
-- Install the basic tools
+- Install the basic 
+
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
   ccache doxygen graphviz linux-generic python3-dev python3-pip python-is-python3 \
   iproute2 net-tools iftop htop
   ```
+
 - Install latest cmake and helpers
+
   ```bash
   wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
   echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
@@ -24,8 +27,10 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang19
   sudo apt install cmake
   pip3 install cmake-format
   ```
+
 - Install latest compilers
   - Clang
+
     ```bash
     wget https://apt.llvm.org/llvm.sh
     export CLANG_VERSION=19 # Replace with latest version number
@@ -40,10 +45,12 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang19
     --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$CLANG_VERSION \
     --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-$CLANG_VERSION 
     ```
+
   - GCC
+
     ```bash
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    export GCC_VERSION=14 # Replace with latest version number
+    export GCC_VERSION=15 # Replace with latest version number
     sudo apt update
     sudo apt install g++-$GCC_VERSION gcc-$GCC_VERSION gfortran-$GCC_VERSION
     
@@ -64,13 +71,17 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang19
     --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-$GCC_VERSION \
     --slave /usr/bin/aarch64-linux-gnu-gcov aarch64-linux-gnu-gcov /usr/bin/aarch64-linux-gnu-gcov-$GCC_VERSION
     ```
+
   - Rust
+
     ```bash
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     sudo apt install libssl-dev
     cargo install sccache --locked
     ```
+
   - To cache Rust builds, add following lines to `$HOME/.cargo/config.toml`
+
     ```toml
     [build]
     rustc-wrapper="sccache"

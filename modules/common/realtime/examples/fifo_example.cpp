@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <csignal>
+#include <cstring>
 #include <print>
 #include <thread>
 

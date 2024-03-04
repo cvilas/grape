@@ -3,6 +3,8 @@
 // MIT License
 //=================================================================================================
 
+#include <utility>
+
 #include "grape/exception.h"
 #include "grape/utils/utils.h"
 
@@ -15,6 +17,7 @@ constexpr auto toString(const Error& er) -> std::string_view {
     case Error::RealBad:
       return "RealBad";
   };
+  std::unreachable();
 };
 
 using WorkException = grape::Exception<Error>;

@@ -52,11 +52,10 @@ auto main(int argc, const char* argv[]) -> int {
                    sample.get_payload().as_string_view());
       const auto& attachments = sample.get_attachment();
       if (attachments.check()) {
-        attachments.iterate(
-            [](const zenohc::BytesView& key, const zenohc::BytesView& value) -> bool {
-              std::println("   attachment: {}: {}", key.as_string_view(), value.as_string_view());
-              return true;
-            });
+        attachments.iterate([](const zenohc::BytesView& k, const zenohc::BytesView& v) -> bool {
+          std::println("   attachment: {}: {}", k.as_string_view(), v.as_string_view());
+          return true;
+        });
 
         // reads particular attachment item
         auto index = attachments.get("index");

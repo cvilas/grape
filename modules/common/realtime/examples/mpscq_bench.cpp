@@ -2,6 +2,9 @@
 // Copyright (C) 2018 GRAPE Contributors
 //=================================================================================================
 
+#include <array>
+#include <stdexcept>
+
 #include <benchmark/benchmark.h>
 
 #include "grape/realtime/mpsc_queue.h"

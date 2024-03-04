@@ -77,7 +77,7 @@ Controller::Controller(PinConfig&& pins, const BufferConfig& buffer_config, Rece
 auto Controller::snap() -> std::expected<void, Error> {
   auto buffer_check = std::expected<void, Error>{};
   const auto writer = [&signals = pins_.signals(), &buffer_check](std::span<std::byte> buffer) {
-    auto offset = 0u;
+    auto offset = 0UL;
     const auto buffer_size = buffer.size_bytes();
     for (const auto& s : signals) {
       const auto count = length(s.type) * s.num_elements;

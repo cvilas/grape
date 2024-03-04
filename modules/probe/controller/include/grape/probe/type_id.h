@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <utility>
 
 namespace grape::probe {
 
@@ -80,5 +81,6 @@ constexpr auto length(TypeId t) -> std::size_t {
     case TypeId::Float64:return sizeof(double); break;
       // clang-format on
   }
+  std::unreachable();
 }
 }  // namespace grape::probe

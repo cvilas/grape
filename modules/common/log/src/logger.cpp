@@ -4,6 +4,7 @@
 
 #include "grape/log/logger.h"
 
+#include <cstring>
 #include <thread>
 
 namespace grape::log {
