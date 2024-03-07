@@ -24,6 +24,8 @@
 - Refactor logging
   - Consider fixed size string for logs 
   - Consider using the `FIFOBuffer` for logs.
+- Refactor thread class out of realtime and put it in 'grape'
+  - Insert logging to capture timer overruns in the loop
 - Study [SPSC FIFO](https://youtu.be/K3P_Lmq6pw0) and review [implementation](https://github.com/CharlesFrasch/cppcon2023)
 - Benchmark operations per second for `FIFOBuffer` and `MPSCQueue`. 
   - Compare against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023) and improve performance where possible

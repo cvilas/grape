@@ -41,7 +41,9 @@ public:
     /// @brief Function called periodically (see interval) from within the thread
     /// @return 'true' to indicate success and to continue calling the function in the next
     /// time-step; 'false' to indicate failure or exit condition (will call teardown())
-    std::function<bool()> process{ [] { return false; } };
+    std::function<bool(const ProcessClock::time_point&)> process{
+      [](const ProcessClock::time_point&) { return false; }
+    };
 
     /// @brief Function called once just before exit from thread. Use this for any cleaning up
     /// before exiting thread
@@ -107,35 +109,52 @@ inline void Thread::stop() noexcept {
 
 //-------------------------------------------------------------------------------------------------
 inline void Thread::threadFunction() noexcept {
-#ifdef __linux__
-  // for easy identification on tools like htop, set the name of the thread
-  if (not config_.name.empty()) {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = ::prctl(PR_SET_NAME, config_.name.c_str());
-  }
-#endif
   try {
+#ifdef __linux__
+    // for easy identification on tools like htop, set the name of the thread
+    if (not config_.name.empty()) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+      std::ignore = ::prctl(PR_SET_NAME, config_.name.c_str());
+    }
+#endif
     if (not config_.setup()) {
       return;
     }
 
     bool continue_process = true;
-    auto next_wakeup_tp = ProcessClock::now();
+    auto next_wakeup_tp = ProcessClock::now() + config_.interval;
     while (continue_process and not exit_flag_.test()) {
-      continue_process = config_.process();
-      next_wakeup_tp += config_.interval;
+      // wait our turn
       std::this_thread::sleep_until(next_wakeup_tp);
+
+      // run process step and time it
+      const auto process_start_tp = ProcessClock::now();
+      continue_process = config_.process(process_start_tp);
+      const auto process_end_tp = ProcessClock::now();
+
+      // compute how long to sleep this thread until next process step
+      const auto wakeup_latency = process_start_tp - next_wakeup_tp;
+      const auto process_latency = process_end_tp - process_start_tp;
+      if (wakeup_latency + process_latency > config_.interval) {
+        // process overran allocated time. reset timing
+        next_wakeup_tp = ProcessClock::now();
+        // TODO: Log this event, with wakeup and process latencies
+      } else {
+        next_wakeup_tp += config_.interval;
+      }
     }
 
     config_.teardown();
   } catch (const grape::realtime::SystemException& ex) {
     const auto& context = ex.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "(syscall: %s) ", context.function_name.data());
+    std::ignore = fprintf(stderr, "\n(syscall: %s) ", context.function_name.data());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "\nThread '%s' terminated", config_.name.c_str());
     grape::realtime::SystemException::consume();
   } catch (...) {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Thread '%s' terminated.\n", config_.name.c_str());
+    std::ignore = fprintf(stderr, "\nThread '%s' terminated", config_.name.c_str());
     grape::AbstractException::consume();
   }
 }

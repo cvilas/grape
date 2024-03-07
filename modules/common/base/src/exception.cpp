@@ -16,17 +16,16 @@ void AbstractException::consume() noexcept {
     }
   } catch (const AbstractException& ex) {
     const auto& loc = ex.where();
-    std::ignore = fprintf(stderr, "%s\nin\n%s\nat\n%s:%d\n", ex.what().c_str(), loc.function_name(),
+    std::ignore = fprintf(stderr, "\n%s\nin\n%s\nat\n%s:%d", ex.what().c_str(), loc.function_name(),
                           utils::truncate(loc.file_name(), "modules").data(), loc.line());
-    std::ignore = fprintf(stderr, "Backtrace:\n");
+    std::ignore = fprintf(stderr, "\nBacktrace:");
     for (const auto& s : ex.when().trace()) {
-      std::ignore = fprintf(stderr, "%s\n", s.c_str());
+      std::ignore = fprintf(stderr, "\n%s", s.c_str());
     }
-
   } catch (const std::exception& ex) {
-    std::ignore = fprintf(stderr, "Exception: %s\n", ex.what());
+    std::ignore = fprintf(stderr, "\nException: %s", ex.what());
   } catch (...) {
-    std::ignore = fputs("Unknown exception\n", stderr);
+    std::ignore = fputs("\nUnknown exception", stderr);
   }
   // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 }
