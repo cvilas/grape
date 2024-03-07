@@ -9,7 +9,7 @@
 
 #include <pthread.h>
 
-#include "grape/exception.h"
+#include "grape/realtime/system_error.h"
 
 namespace grape::realtime {
 

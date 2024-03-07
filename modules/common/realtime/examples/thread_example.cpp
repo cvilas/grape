@@ -6,7 +6,7 @@
 #include <csignal>
 #include <print>
 
-#include "grape/realtime/realtime.h"
+#include "grape/realtime/schedule.h"
 #include "grape/realtime/thread.h"
 
 namespace {
@@ -51,7 +51,11 @@ auto main() -> int {
 
   try {
     // disable swap
-    grape::realtime::lockMemory();
+    const auto is_mem_locked = grape::realtime::lockMemory();
+    if (not is_mem_locked) {
+      const auto err = is_mem_locked.error();
+      std::println("Main thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
+    }
 
     // create task configurator
     auto task_config = grape::realtime::Thread::Config();
@@ -69,15 +73,35 @@ auto main() -> int {
     static constexpr auto CPUS_NON_RT = { 1u, 2u, 3u };
 
     // Set main thread CPU affinity here. Will assign rt thread CPU affinity in task setup().
-    grape::realtime::setCpuAffinity(CPUS_NON_RT);
+    const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_NON_RT);
+    if (not is_cpu_set) {
+      const auto err = is_cpu_set.error();
+      std::println("Main thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
+    } else {
+      std::println("Main thread: Set to run on CPUs {}", CPUS_NON_RT);
+    }
 
     // set task thread to run on a specific CPU with real-time scheduling policy
     task_config.setup = []() -> bool {
       std::println("setup() called");
-      grape::realtime::setCpuAffinity(CPUS_RT);
+      const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
+      if (not is_cpu_set) {
+        const auto err = is_cpu_set.error();
+        std::println("Task thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
+      } else {
+        std::println("Task thread: Set to run on CPUs {}", CPUS_RT);
+      }
+
       static constexpr auto RT_PRIORITY = 20;
-      grape::realtime::setSchedule({ .policy = grape::realtime::Schedule::Policy::Realtime,  //
-                                     .priority = RT_PRIORITY });
+      const auto is_scheduled =
+          grape::realtime::setSchedule({ .policy = grape::realtime::Schedule::Policy::Realtime,  //
+                                         .priority = RT_PRIORITY });
+      if (not is_scheduled) {
+        const auto err = is_scheduled.error();
+        std::println("Task thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
+      } else {
+        std::println("Task thread: Scheduled to run at RT priority {}", RT_PRIORITY);
+      }
       return true;
     };
 
@@ -121,11 +145,11 @@ auto main() -> int {
                  std::chrono::duration<double>(stats.mean),
                  std::chrono::duration<double>(std::sqrt(stats.variance)), stats.num_samples);
 
-  } catch (const grape::SystemException& ex) {
+  } catch (const grape::realtime::SystemException& ex) {
     const auto& context = ex.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "(syscall: %s) ", context.function_name.data());
-    grape::SystemException::consume();
+    grape::realtime::SystemException::consume();
     return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();

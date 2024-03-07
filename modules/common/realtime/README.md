@@ -46,18 +46,6 @@ Facilities such as a watchdog to monitor the health of the real-time task thread
 ### OS configuration
 
 - Configure the kernel for preemption by following the [Real-time Ubuntu](https://ubuntu.com/real-time) guide
-- By default, a process can change it's own scheduling policy and priority only if run as root. This behaviour can be changed in two ways:
-  - Grant the ability to a specific executable using `setcap`:
-    ```bash
-    sudo setcap cap_sys_nice=ep /path/to/executable
-    ```
-  - Grant the ability to any process run by a specific user/group by modifying `/etc/security/limits.conf`. For instance, the following lines define a _soft_ limit of 20 and a _hard_ limit of 90 for processes run by members of the group `<groupname>` and a _hard_ limit of 50 for processes run by user `<username>` (replace `<username>` and `<groupname>` as needed). 
-    ```bash
-    @<groupname> hard rtprio 90
-    @<groupname> soft rtprio 20
-    <username> hard rtprio 50
-    ```
-    The _soft_ limit is advisory, and _hard_ limit is enforced by the system. For details, `man 5 limits.conf`.
 - (Optional) Configure [RT throttling](https://wiki.linuxfoundation.org/realtime/documentation/technical_basics/sched_rt_throttling) to limit execution time of real-time tasks. The default settings below indicate 95% CPU is set aside for real-time processes:
   ```bash
   # cat /proc/sys/kernel/sched_rt_period_us
