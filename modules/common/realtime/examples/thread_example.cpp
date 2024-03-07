@@ -42,8 +42,7 @@ private:
 
 //=================================================================================================
 // Example program demonstrates the recommended approach to building a realtime application.
-// - Delegates the realtime execution path to the separate thread. (which just accumulates timing
-// statistics)
+// - Delegates realtime execution path to a separate thread. (which just accumulates timing stats)
 // - Main thread continues unprivileged and handles events, I/O, user inputs, etc.
 auto main() -> int {
   std::ignore = signal(SIGINT, onSignal);
@@ -83,7 +82,7 @@ auto main() -> int {
 
     // set task thread to run on a specific CPU with real-time scheduling policy
     task_config.setup = []() -> bool {
-      std::println("setup() called");
+      std::println("Setup started");
       const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
       if (not is_cpu_set) {
         const auto err = is_cpu_set.error();
@@ -102,37 +101,36 @@ auto main() -> int {
       } else {
         std::println("Task thread: Scheduled to run at RT priority {}", RT_PRIORITY);
       }
+      std::println("Setup done");
       return true;
     };
 
     Profiler profiler;
 
     // set the periodic process function for the task thread
-    task_config.process = [&profiler]() -> bool {
-      const auto tp = grape::realtime::Thread::ProcessClock::now();
+    task_config.process =
+        [&profiler](const grape::realtime::Thread::ProcessClock::time_point& tp) -> bool {
       static auto last_tp = tp;
-      const auto dt = std::chrono::duration<double>(tp - last_tp);
+      const auto dt = std::chrono::duration<double>(tp - last_tp).count();
       last_tp = tp;
 
-      profiler.addSample(dt.count());
+      profiler.addSample(dt);
       const auto stats = profiler.stats();
-      std::println("Process timing statistics: max={}, mean={}, std.dev.={} ({} samples) ",
-                   std::chrono::duration<double>(stats.abs_max),
-                   std::chrono::duration<double>(stats.mean),
-                   std::chrono::duration<double>(std::sqrt(stats.variance)), stats.num_samples);
+      std::print("\rProcess step={:06d}, dt={:.6f}, max={:.6f}, mean={:.6f}, std.dev.={:.9f}",
+                 stats.num_samples, dt, stats.abs_max, stats.mean, std::sqrt(stats.variance));
 
       return true;
     };
 
     // set the clean up function for the task thread
-    task_config.teardown = []() { std::println("teardown() called"); };
+    task_config.teardown = []() { std::println("\nTeardown"); };
 
     // off we go. start the task
     auto task = grape::realtime::Thread(std::move(task_config));
     task.start();
 
     // main thread continues to handle regular tasks such as event handling
-    std::println("Press ctrl-c to exit");
+    std::println("\nPress ctrl-c to exit");
     s_exit.wait(false);
 
     // Send request to exit thread
@@ -140,17 +138,10 @@ auto main() -> int {
 
     // print results from task before exit
     const auto& stats = profiler.stats();
-    std::println("Final process timing statistics: max={}, mean={}, std.dev.={} ({} samples) ",
-                 std::chrono::duration<double>(stats.abs_max),
-                 std::chrono::duration<double>(stats.mean),
-                 std::chrono::duration<double>(std::sqrt(stats.variance)), stats.num_samples);
+    std::println(
+        "Final process timing statistics: max={:.6f}, mean={:.6f}, std.dev.={:.9f} ({} samples)",
+        stats.abs_max, stats.mean, std::sqrt(stats.variance), stats.num_samples);
 
-  } catch (const grape::realtime::SystemException& ex) {
-    const auto& context = ex.data();
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "(syscall: %s) ", context.function_name.data());
-    grape::realtime::SystemException::consume();
-    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;
