@@ -89,15 +89,6 @@ private:
   utils::StackTrace backtrace_;
 };
 
-//=================================================================================================
-/// Errors from system calls or platform library functions
-struct SystemError {
-  int code;  //!< error code (errno) set by failing system call or library function
-  std::string_view function_name;  //!< name of system call or library function
-};
-
-using SystemException = grape::Exception<SystemError>;
-
 /// User function to throw an exception derived from Exception<DATA_T>
 template <typename T, class DATA_T>
   requires std::derived_from<T, Exception<DATA_T>>

@@ -12,18 +12,14 @@
 
 ## Phase 2 - Multimodel data logging and visualisation - timeseries data
 
-- :done: Design
-  - :done: Choose data types to support. 
-  - :done: Implement fixed size non-allocating strings
-  - :done: Implement `FIFOBuffer` supporting in-place operations to write/read data
-  - :done: [Proof of concept](https://godbolt.org/z/hqf444erc)
-- :done: Implement probe::Controller
-- Implement probe::Monitor
-  - :done: Study [FoxGlove](https://foxglove.dev/). What features do we want
-  - Study API proposed in [probe](https://github.com/cvilas/probe)
-  - plot:
-    - :done: Choose a backend: implot (docking branch)
-    - concept `plottable`
+- :done: Implement `probe::Controller`
+- Implement `probe::Monitor`
+  - Get OpenGL3 working on qemu VM: turn off hardware acceleration (use one of the non-gl display hardware options). See `glxinfo -B` for supported OpenGL versions
+  - Only build implot and imgui examples on `make examples`
+  - Update install instructions to support SDL3
+  - Test examples work on MacOS and Linux
+  - Proof of concept
+- `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`
 - Implement experimental [MCAP](https://github.com/foxglove/mcap/tree/main/cpp) reader and writer
 - Refactor logging
   - Consider fixed size string for logs 
