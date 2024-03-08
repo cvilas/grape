@@ -53,3 +53,7 @@ Note that after configuration,
 - `make docs` generates source code documentation using doxygen
 - `make install` builds and installs targets
 - `<install_location>/bin/uninstall.sh` uninstalls everything
+
+## References
+
+- Jason Turner's [CMake Template](https://github.com/cpp-best-practices/cmake_template)
