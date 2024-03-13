@@ -118,7 +118,7 @@ auto main() -> int {
 
 ## References:
 
-- C++23 features: <https://youtu.be/Cttb8vMuq-Y>
+- C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)
 - C++20 features: <https://youtu.be/N1gOSgZy7h4>
 - Clean code: <https://youtu.be/9ch7tZN4jeI?si=YkO84hmfQWfq8KO8>
 - IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above- **Coroutines**: Review usability for async processing, nonblocking IO

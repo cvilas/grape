@@ -108,8 +108,8 @@ auto main() -> int {
     Profiler profiler;
 
     // set the periodic process function for the task thread
-    task_config.process =
-        [&profiler](const grape::realtime::Thread::ProcessClock::time_point& tp) -> bool {
+    task_config.process = [&profiler]() -> bool {
+      const auto tp = grape::realtime::Thread::ProcessClock::now();
       static auto last_tp = tp;
       const auto dt = std::chrono::duration<double>(tp - last_tp).count();
       last_tp = tp;
