@@ -41,9 +41,7 @@ public:
     /// @brief Function called periodically (see interval) from within the thread
     /// @return 'true' to indicate success and to continue calling the function in the next
     /// time-step; 'false' to indicate failure or exit condition (will call teardown())
-    std::function<bool(const ProcessClock::time_point&)> process{
-      [](const ProcessClock::time_point&) { return false; }
-    };
+    std::function<bool()> process{ []() { return false; } };
 
     /// @brief Function called once just before exit from thread. Use this for any cleaning up
     /// before exiting thread
@@ -122,26 +120,13 @@ inline void Thread::threadFunction() noexcept {
     }
 
     bool continue_process = true;
-    auto next_wakeup_tp = ProcessClock::now() + config_.interval;
+    auto wakeup_tp = ProcessClock::now();
     while (continue_process and not exit_flag_.test()) {
-      // wait our turn
-      std::this_thread::sleep_until(next_wakeup_tp);
-
-      // run process step and time it
-      const auto process_start_tp = ProcessClock::now();
-      continue_process = config_.process(process_start_tp);
-      const auto process_end_tp = ProcessClock::now();
-
-      // compute how long to sleep this thread until next process step
-      const auto wakeup_latency = process_start_tp - next_wakeup_tp;
-      const auto process_latency = process_end_tp - process_start_tp;
-      if (wakeup_latency + process_latency > config_.interval) {
-        // process overran allocated time. reset timing
-        next_wakeup_tp = ProcessClock::now();
-        // TODO: Log this event, with wakeup and process latencies
-      } else {
-        next_wakeup_tp += config_.interval;
-      }
+      continue_process = config_.process();
+      const auto now_tp = ProcessClock::now();
+      const auto dt = now_tp - wakeup_tp;
+      wakeup_tp = (dt > config_.interval) ? now_tp : (wakeup_tp + config_.interval);
+      std::this_thread::sleep_until(wakeup_tp);
     }
 
     config_.teardown();
