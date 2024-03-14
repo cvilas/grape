@@ -21,6 +21,7 @@ define_module_example(
         SOURCES spdlog_bench.cpp
         PRIVATE_INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/spdlog-1.13.0/include
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        PRIVATE_LINK_LIBS benchmark::benchmark
         PUBLIC_LINK_LIBS "")
 set_target_properties(grape_log_spdlog_bench PROPERTIES CXX_CLANG_TIDY "") # turn off spdlog linter warnings
         
