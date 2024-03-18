@@ -44,9 +44,7 @@ void Statistics::print() const {
 }  // namespace
 
 //=================================================================================================
-auto main(int argc, const char* argv[]) -> int {
-  (void)argc;
-  (void)argv;
+auto main() -> int {
   try {
     auto config = zenohc::Config();
     auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));

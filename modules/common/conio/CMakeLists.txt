@@ -4,7 +4,7 @@
 
 declare_module(NAME conio 
   ALWAYS_BUILD 
-  DEPENDS_ON_MODULES utils base
+  DEPENDS_ON_MODULES utils
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
@@ -18,7 +18,7 @@ set(SOURCES
 # library target
 define_module_library(
         NAME conio
-        PUBLIC_LINK_LIBS grape::utils grape::base
+        PUBLIC_LINK_LIBS grape::utils
         PRIVATE_LINK_LIBS ""
         SOURCES ${SOURCES}
         PUBLIC_INCLUDE_PATHS

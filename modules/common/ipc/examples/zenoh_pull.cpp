@@ -5,8 +5,9 @@
 #include <print>
 #include <thread>
 
+#include "examples_utils.h"
 #include "grape/conio/conio.h"
-#include "grape/conio/program_options.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -29,11 +30,15 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
-    auto desc = grape::conio::ProgramDescription("Pulls data on specified key on-demand");
-    desc.declareOption<std::string>("key", "Key expression", DEFAULT_KEY);
+    const auto args_opt = grape::conio::ProgramDescription("Pulls data on specified key on-demand")
+                              .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+                              .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto key = args.getOption<std::string>("key");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
 
     zenohc::Config config;
     std::println("Opening session...");
@@ -61,6 +66,10 @@ auto main(int argc, const char* argv[]) -> int {
     }
 
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

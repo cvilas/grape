@@ -8,7 +8,8 @@
 #include <print>
 #include <span>
 
-#include "grape/conio/program_options.h"
+#include "examples_utils.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -33,13 +34,20 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr size_t DEFAULT_PACKET_SIZE = 8;
     static constexpr size_t DEFAULT_NUM_PINGS = 100;
 
-    auto desc = grape::conio::ProgramDescription("Measures roundtrip time with pong program");
-    desc.declareOption<size_t>("pings", "number of pings to attempt", DEFAULT_NUM_PINGS)
-        .declareOption<size_t>("size", "ping and pong payload size in bytes", DEFAULT_PACKET_SIZE);
+    const auto args_opt =
+        grape::conio::ProgramDescription("Measures roundtrip time with pong program")
+            .declareOption<size_t>("pings", "number of pings to attempt", DEFAULT_NUM_PINGS)
+            .declareOption<size_t>("size", "ping and pong payload size in bytes",
+                                   DEFAULT_PACKET_SIZE)
+            .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto num_pings = args.getOption<size_t>("pings");
-    const auto size = args.getOption<size_t>("size");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
+    const auto num_pings = grape::ipc::ex::getOptionOrThrow<size_t>(args, "pings");
+    const auto size = grape::ipc::ex::getOptionOrThrow<size_t>(args, "size");
+
     std::println("Payload size: {}", size);
     std::println("Number of pings: {}", num_pings);
 
@@ -104,6 +112,10 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Ping Pong rtt stats ({} pings): min={}, avg={}, max={}", num_pings, min_rtt,
                  avg_rtt, max_rtt);
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

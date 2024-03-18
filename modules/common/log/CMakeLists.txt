@@ -2,7 +2,7 @@
 # Copyright (C) 2023 GRAPE Contributors
 #=================================================================================================
 
-declare_module(NAME log DEPENDS_ON_MODULES "utils;realtime" DEPENDS_ON_EXTERNAL_PROJECTS "")
+declare_module(NAME log DEPENDS_ON_MODULES "realtime" DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
 set(SOURCES
@@ -18,7 +18,7 @@ set(SOURCES
 # library target
 define_module_library(
         NAME log
-        PUBLIC_LINK_LIBS grape::realtime grape::utils
+        PUBLIC_LINK_LIBS grape::realtime
         PRIVATE_LINK_LIBS ""
         SOURCES ${SOURCES}
         PUBLIC_INCLUDE_PATHS

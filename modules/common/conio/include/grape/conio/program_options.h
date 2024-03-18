@@ -4,11 +4,14 @@
 
 #pragma once
 
-#include <algorithm>
+#include <concepts>
+#include <cstdint>
+#include <expected>
 #include <format>
+#include <sstream>
+#include <string>
 #include <vector>
 
-#include "grape/exception.h"
 #include "grape/utils/utils.h"
 
 namespace grape::conio {
@@ -22,182 +25,188 @@ concept StringStreamable = requires(std::string str, T value) {
 };
 
 //=================================================================================================
-/// Container for command line options for a program. To be used with ProgramDescription class.
+/// Container for command line arguments of an application. Created by ProgramDescription.
 class ProgramOptions {
 public:
-  /// @brief Error codes
-  enum class Error : std::uint8_t {
-    UndeclaredOption,  //!< access an undeclared option
-    RedeclaredOption,  //!< declare an option multiple times
-    UnparsableOption,  //!< parse an option as incompatible type
-    UndefinedOption    //!< not define an option declared as required
+  /// Error description
+  struct Error {
+    enum class Code : std::uint8_t {
+      Undeclared,   //!< accessed an undeclared option
+      Redeclared,   //!< option declared multiple times
+      Undefined,    //!< option declared as required but not defined
+      Unparsable,   //!< option not parsable as requested type
+      TypeMismatch  //!< option type at declaration does not match type at definition
+    };
+    Code code;
+    std::string key;
   };
 
-  /// @brief  Holds program options and their details
+  /// Holds program options and their details
   struct Option {
     std::string key;
-    std::string description;
-    std::string value_type;
+    std::string brief;
     std::string value;
+    std::string type;
     bool is_required{ false };
     bool is_specified{ false };
   };
 
 public:
   /// Check whether an option was specified on the command line
-  /// @param option  The command line option (without the '--').
+  /// @param key The command line option (without the '--').
   /// @return true if option is found
-  [[nodiscard]] auto hasOption(const std::string& option) const -> bool;
+  [[nodiscard]] auto hasOption(const std::string& key) const -> bool;
 
   /// Get the value specified for a command line option
-  /// @param option  The command line option (without the '--').
+  /// @param key The command line option (without the '--').
   /// @return  The value of the specified option.
   template <StringStreamable T>
-  [[nodiscard]] auto getOption(const std::string& option) const -> T;
+  [[nodiscard]] auto getOption(const std::string& key) const -> std::expected<T, Error>;
 
 private:
   friend class ProgramDescription;
 
   /// @brief Constructor. See ProgramDescription::parse
   /// @param options List of supported program options
-  explicit ProgramOptions(std::vector<Option>&& options);
+  constexpr explicit ProgramOptions(std::vector<Option>&& options);
+
+  static constexpr auto HELP_KEY = "help";
+
+  static void insertHelp(std::vector<Option>& options);
 
   std::vector<Option> options_;
 };
 
-using ProgramOptionException = Exception<ProgramOptions::Error>;
-
 //=================================================================================================
-/// Program description and command line parsing utility. Works with ProgramOptions class.
+/// Define online help and supported command line arguments for an application.
 ///
 /// Features:
 /// - Enforces that every supported command line option is declared and described exactly once
-/// - Throws if unsupported options are specified on the command line
-/// - Throws if required options are not specified on the command line
-/// - Throws if value types are mismatched between where they are defined and where they are used
+/// - Notifies an error if unsupported options are specified on the command line
+/// - Notifies an error if required options are not specified on the command line
+/// - Notifies an error if value types are mismatched between where they are defined and where they
+/// are used
 /// - Ensures 'help' is always available
 /// See also ProgramOptions
+/// See example program for usage
 class ProgramDescription {
 public:
   /// @brief Creates object
-  /// @param brief A brief text describing the program
+  /// @param brief A brief text describing the application
   constexpr explicit ProgramDescription(const std::string& brief);
 
   /// @brief Declare a required command line option (--key=value)
   /// @tparam T Value type
   /// @param key Key of the key-value pair
-  /// @param description A brief text describing the option
-  /// @return Reference to the object. Enables daisy-chained calls
+  /// @param brief A brief text describing the option
+  /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
   constexpr auto declareOption(const std::string& key,
-                               const std::string& description) -> ProgramDescription&;
+                               const std::string& brief) -> ProgramDescription&;
 
   /// @brief Declare an optional command line option (--key=value)
   /// @tparam T Value type
   /// @param key Key of the key-value pair
-  /// @param description A brief text describing the option
+  /// @param brief A brief text describing the option
   /// @param default_value Default value to use if the option is not specified on the command line
-  /// @return Reference to the object. Enables daisy-chained calls
+  /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
-  constexpr auto declareOption(const std::string& key, const std::string& description,
+  constexpr auto declareOption(const std::string& key, const std::string& brief,
                                const T& default_value) -> ProgramDescription&;
 
-  /// @brief Builds the container to parse command line options.
-  /// @note: The resources in this object is moved into the returned object, making this object
-  /// unvalid.
+  /// @brief Parses and returns command line options at runtime.
   /// @param argc Number of arguments on the command line
   /// @param argv array of C-style strings
   /// @return Object containing command line options
-  auto parse(int argc, const char** argv) && -> ProgramOptions;
+  auto parse(int argc,
+             const char** argv) const -> std::expected<ProgramOptions, ProgramOptions::Error>;
 
 private:
-  static constexpr auto HELP_KEY = "help";
-
-  auto insertHelp() -> std::vector<ProgramOptions::Option>::const_iterator;
   std::vector<ProgramOptions::Option> options_;
 };
 
 //-------------------------------------------------------------------------------------------------
-constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
-  options_.emplace_back(HELP_KEY, "", utils::getTypeName<std::string>(), brief, false, false);
+constexpr ProgramOptions::ProgramOptions(std::vector<ProgramOptions::Option>&& options)
+  : options_(std::move(options)) {
 }
 
 //-------------------------------------------------------------------------------------------------
-template <StringStreamable T>
-constexpr auto ProgramDescription::declareOption(
-    const std::string& key, const std::string& description) -> ProgramDescription& {
-  const auto it = std::find_if(options_.begin(), options_.end(),
-                               [&key](const auto& opt) { return key == opt.key; });
-  if (it != options_.end()) {
-    panic<ProgramOptionException>(std::format("Attempted redefinition of option '{}'", key),
-                                  ProgramOptions::Error::RedeclaredOption);
-  }
-  options_.emplace_back(key, description, utils::getTypeName<T>(), "", true, false);
-  return *this;
+constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
+  options_.emplace_back(ProgramOptions::Option{ .key = ProgramOptions::HELP_KEY,
+                                                .brief = brief,
+                                                .value = "",
+                                                .type = utils::getTypeName<std::string>(),
+                                                .is_required = false,
+                                                .is_specified = false });
 }
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
 constexpr auto ProgramDescription::declareOption(const std::string& key,
-                                                 const std::string& description,
-                                                 const T& default_value) -> ProgramDescription& {
-  const auto it = std::find_if(options_.begin(), options_.end(),
-                               [&key](const auto& opt) { return key == opt.key; });
-  if (it != options_.end()) {
-    panic<ProgramOptionException>(std::format("Attempted redefinition of option '{}'", key),
-                                  ProgramOptions::Error::RedeclaredOption);
-  }
-  options_.emplace_back(key, description, utils::getTypeName<T>(), std::format("{}", default_value),
-                        false, false);
+                                                 const std::string& brief) -> ProgramDescription& {
+  options_.emplace_back(ProgramOptions::Option{ .key = key,
+                                                .brief = brief,
+                                                .value = "",
+                                                .type = utils::getTypeName<T>(),
+                                                .is_required = true,
+                                                .is_specified = false });
   return *this;
 }
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-inline auto ProgramOptions::getOption(const std::string& option) const -> T {
+constexpr auto ProgramDescription::declareOption(const std::string& key, const std::string& brief,
+                                                 const T& default_value) -> ProgramDescription& {
+  options_.emplace_back(ProgramOptions::Option{ .key = key,
+                                                .brief = brief,
+                                                .value = std::format("{}", default_value),
+                                                .type = utils::getTypeName<T>(),
+                                                .is_required = false,
+                                                .is_specified = false });
+  return *this;
+}
+
+//-------------------------------------------------------------------------------------------------
+template <StringStreamable T>
+inline auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T, Error> {
   const auto it = std::find_if(options_.begin(), options_.end(),
-                               [&option](const auto& opt) { return option == opt.key; });
+                               [&key](const auto& opt) { return key == opt.key; });
   if (it == options_.end()) {
-    panic<ProgramOptionException>(std::format("Option '{}' not declared", option),
-                                  ProgramOptions::Error::UndeclaredOption);
+    return std::unexpected(Error{ .code = Error::Code::Undeclared, .key = key });
   }
 
-  const auto my_type = utils::getTypeName<T>();
-  if (it->value_type != my_type) {
-    panic<ProgramOptionException>(
-
-        std::format("Tried to parse option '{}' as type {} but it's specified as type {}", option,
-                    my_type, it->value_type),
-        ProgramOptions::Error::UnparsableOption);
+  if (it->type != utils::getTypeName<T>()) {
+    return std::unexpected(Error{ .code = Error::Code::TypeMismatch, .key = key });
   }
+
   if constexpr (std::is_same_v<T, std::string>) {
     // note: since std::istringstream extracts only up to whitespace, this special case is
     // neccessary for parsing strings containing multiple words
     return it->value;
   }
+
   T value;
   std::istringstream stream(it->value);
   if (not(stream >> value)) {
-    panic<ProgramOptionException>(
-
-        std::format("Unable to parse value '{}' as type {} for option '{}'", it->value, my_type,
-                    option),
-        ProgramOptions::Error::UnparsableOption);
+    return std::unexpected(Error{ .code = Error::Code::Unparsable, .key = key });
   }
+
   return value;
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toString(ProgramOptions::Error code) -> std::string_view {
+constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_view {
   switch (code) {
-    case ProgramOptions::Error::UndeclaredOption:
-      return "UndeclaredOption";
-    case ProgramOptions::Error::RedeclaredOption:
-      return "RedeclaredOption";
-    case ProgramOptions::Error::UnparsableOption:
-      return "UnparsableOption";
-    case ProgramOptions::Error::UndefinedOption:
-      return "UndefinedOption";
+    case ProgramOptions::Error::Code::Undeclared:
+      return "Undeclared";
+    case ProgramOptions::Error::Code::Redeclared:
+      return "Redeclared";
+    case ProgramOptions::Error::Code::Undefined:
+      return "Undefined";
+    case ProgramOptions::Error::Code::Unparsable:
+      return "Unparsable";
+    case ProgramOptions::Error::Code::TypeMismatch:
+      return "TypeMismatch";
   };
   return {};
 }

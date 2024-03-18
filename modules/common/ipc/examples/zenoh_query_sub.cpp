@@ -36,9 +36,7 @@ void dataHandler(const z_sample_t* sample, void* arg) {
 }
 
 //=================================================================================================
-auto main(int argc, const char* argv[]) -> int {
-  (void)argc;
-  (void)argv;
+auto main() -> int {
   try {
     auto config = zenohc::Config();
     auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));

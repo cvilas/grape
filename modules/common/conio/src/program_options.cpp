@@ -4,24 +4,44 @@
 
 #include "grape/conio/program_options.h"
 
-#include <print>
+#include <algorithm>
 
 namespace grape::conio {
 
 //-------------------------------------------------------------------------------------------------
-ProgramOptions::ProgramOptions(std::vector<Option>&& options) : options_(std::move(options)) {
-}
-
-//-------------------------------------------------------------------------------------------------
-auto ProgramOptions::hasOption(const std::string& option) const -> bool {
+auto ProgramOptions::hasOption(const std::string& key) const -> bool {
   return (options_.end() != std::find_if(options_.begin(), options_.end(),
-                                         [&option](const auto& opt) { return option == opt.key; }));
+                                         [&key](const auto& opt) { return key == opt.key; }));
 }
 
 //-------------------------------------------------------------------------------------------------
-auto ProgramDescription::parse(int argc, const char** argv) && -> ProgramOptions {
-  const auto help_it = insertHelp();
+void ProgramOptions::insertHelp(std::vector<Option>& options) {
+  std::string help_string;
+  auto it_help = std::vector<Option>::iterator();
+  for (auto it = options.begin(); it != options.end(); ++it) {
+    if (it->key == HELP_KEY) {
+      it_help = it;
+      help_string += it->brief + "\nOptions:\n";
+      continue;
+    }
+    if (it->is_required) {
+      help_string += std::format("--{} [required]: {}. [type: {}]\n", it->key, it->brief, it->type);
+    } else {
+      help_string += std::format("--{} [optional]: {}; (default: {}) [type: {}]\n", it->key,
+                                 it->brief, it->value, it->type);
+    }
+  }
+  help_string += std::format("--{} [optional]: {}", HELP_KEY, "This text!");
+  it_help->value = help_string;
+}
 
+//-------------------------------------------------------------------------------------------------
+auto ProgramDescription::parse(int argc, const char** argv) const
+    -> std::expected<ProgramOptions, ProgramOptions::Error> {
+  auto tmp_options = options_;
+  ProgramOptions::insertHelp(tmp_options);
+
+  using Error = ProgramOptions::Error;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   const auto args_list = std::vector<std::string>(argv, argv + argc);
   for (const auto& arg : args_list) {
@@ -29,57 +49,42 @@ auto ProgramDescription::parse(int argc, const char** argv) && -> ProgramOptions
       const std::string kv = arg.substr(2);
       const size_t pos = kv.find('=');
       const auto key = kv.substr(0, pos);
-      const auto it = std::find_if(options_.begin(), options_.end(),
+      const auto it = std::find_if(tmp_options.begin(), tmp_options.end(),
                                    [&key](const auto& opt) { return key == opt.key; });
 
-      if (it == options_.end()) {
-        panic<ProgramOptionException>(std::format("Option '{}' undeclared", key),
-                                      ProgramOptions::Error::UndeclaredOption);
-      }
-      if (it != help_it) {
-        it->value = ((pos == std::string::npos) ? "" : kv.substr(pos + 1));
+      if (it == tmp_options.end()) {
+        return std::unexpected(Error{ .code = Error::Code::Undeclared, .key = key });
       }
       it->is_specified = true;
-    }
-  }
 
-  // print help
-  if (help_it->is_specified) {
-    std::println(stderr, "{}", help_it->value);
-    exit(0);
+      if (key == ProgramOptions::HELP_KEY) {
+        // print help and exit if it was specified
+        std::println(stderr, "{}", it->value);
+        exit(0);
+      } else {
+        it->value = ((pos == std::string::npos) ? "" : kv.substr(pos + 1));
+      }
+    }
   }
 
   // check all required arguments are specified
-  for (const auto& entry : options_) {
+  for (const auto& entry : tmp_options) {
     if (entry.is_required and not entry.is_specified) {
-      panic<ProgramOptionException>(std::format("Required option '{}' not specified", entry.key),
-                                    ProgramOptions::Error::UndefinedOption);
+      return std::unexpected(Error{ .code = Error::Code::Undefined, .key = entry.key });
     }
   }
-  return ProgramOptions(std::move(options_));
-}
 
-//-------------------------------------------------------------------------------------------------
-auto ProgramDescription::insertHelp() -> std::vector<ProgramOptions::Option>::const_iterator {
-  const auto it = std::find_if(options_.begin(), options_.end(),
-                               [](const auto& opt) { return HELP_KEY == opt.key; });
-  std::stringstream help_stream;
-  help_stream << it->value << "\nOptions:\n";
-  for (const auto& entry : options_) {
-    if (entry.key == HELP_KEY) {
-      continue;
-    }
-    if (entry.is_required) {
-      help_stream << std::format("--{} [required]: {}. [type: {}]\n", entry.key, entry.description,
-                                 entry.value_type);
-    } else {
-      help_stream << std::format("--{} [optional]: {}; (default: {}) [type: {}]\n", entry.key,
-                                 entry.description, entry.value, entry.value_type);
-    }
+  // Check for duplicate declarations
+  std::sort(tmp_options.begin(), tmp_options.end(),
+            [](const auto& a, const auto& b) { return a.key < b.key; });
+  const auto dup_it =
+      std::adjacent_find(tmp_options.begin(), tmp_options.end(),
+                         [](const auto& a, const auto& b) { return a.key == b.key; });
+  if (dup_it != tmp_options.end()) {
+    return std::unexpected(Error{ .code = Error::Code::Redeclared, .key = dup_it->key });
   }
-  help_stream << std::format("--{} [optional]: {}", HELP_KEY, "This text!");
-  it->value = help_stream.str();
-  return it;
+
+  return ProgramOptions(std::move(tmp_options));
 }
 
 }  // namespace grape::conio

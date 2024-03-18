@@ -32,14 +32,14 @@ define_module_example(
 
 define_module_example(
         NAME zenoh_throughput_pub
-        SOURCES zenoh_throughput_pub.cpp
+        SOURCES zenoh_throughput_pub.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_throughput_sub
-        SOURCES zenoh_throughput_sub.cpp
+        SOURCES zenoh_throughput_sub.cpp 
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
@@ -81,84 +81,84 @@ define_module_example(
         
 define_module_example(
         NAME zenoh_put
-        SOURCES zenoh_put.cpp
+        SOURCES zenoh_put.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_pub
-        SOURCES zenoh_pub.cpp
+        SOURCES zenoh_pub.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_pub_delete
-        SOURCES zenoh_pub_delete.cpp
+        SOURCES zenoh_pub_delete.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_pub_shm
-        SOURCES zenoh_pub_shm.cpp
+        SOURCES zenoh_pub_shm.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
                 
 define_module_example(
         NAME zenoh_pub_cache
-        SOURCES zenoh_pub_cache.cpp
+        SOURCES zenoh_pub_cache.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_sub
-        SOURCES zenoh_sub.cpp
+        SOURCES zenoh_sub.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
         
 define_module_example(
         NAME zenoh_pull
-        SOURCES zenoh_pull.cpp
+        SOURCES zenoh_pull.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_pub_client
-        SOURCES zenoh_pub_client.cpp
+        SOURCES zenoh_pub_client.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_sub_client
-        SOURCES zenoh_sub_client.cpp
+        SOURCES zenoh_sub_client.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_liveliness_declare
-        SOURCES zenoh_liveliness_declare.cpp
+        SOURCES zenoh_liveliness_declare.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
         NAME zenoh_liveliness_sub
-        SOURCES zenoh_liveliness_sub.cpp
+        SOURCES zenoh_liveliness_sub.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-        NAME zenoh_liveliness_get
-        SOURCES zenoh_liveliness_get.cpp
+        NAME zenoh_liveliness_get 
+        SOURCES zenoh_liveliness_get.cpp examples_utils.h
         PUBLIC_INCLUDE_PATHS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         PUBLIC_LINK_LIBS grape::conio)
