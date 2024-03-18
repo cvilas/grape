@@ -21,9 +21,7 @@
 //=================================================================================================
 
 //=================================================================================================
-auto main(int argc, const char* argv[]) -> int {
-  (void)argc;
-  (void)argv;
+auto main() -> int {
   try {
     static constexpr auto KEY = "grape/ipc/example/zenoh/queryable";
     static constexpr auto PARAM = "default";

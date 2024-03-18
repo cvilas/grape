@@ -4,9 +4,10 @@
 
 #pragma once
 
+#include <cstdlib>
 #include <memory>
-#include <sstream>
 #include <string>
+#include <typeinfo>
 
 #include <cxxabi.h>
 

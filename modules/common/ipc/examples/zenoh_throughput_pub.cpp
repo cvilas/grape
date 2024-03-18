@@ -4,7 +4,8 @@
 
 #include <print>
 
-#include "grape/conio/program_options.h"
+#include "examples_utils.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -27,11 +28,15 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_PAYLOAD_SIZE = 8;
     static constexpr uint8_t DEFAULT_PAYLOAD_FILL = 1;
 
-    auto desc = grape::conio::ProgramDescription("Publisher end of throughput measurement example");
-    desc.declareOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE);
-
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto payload_size = args.getOption<size_t>("size");
+    const auto args_opt =
+        grape::conio::ProgramDescription("Publisher end of throughput measurement example")
+            .declareOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE)
+            .parse(argc, argv);
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
+    const auto payload_size = grape::ipc::ex::getOptionOrThrow<size_t>(args, "size");
     const auto value = std::vector<uint8_t>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 
@@ -47,7 +52,10 @@ auto main(int argc, const char* argv[]) -> int {
       pub.put(value);
     }
     return EXIT_SUCCESS;
-
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

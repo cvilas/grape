@@ -5,7 +5,8 @@
 #include <print>
 #include <thread>
 
-#include "grape/conio/program_options.h"
+#include "examples_utils.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -27,11 +28,15 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/**";
 
-    auto desc = grape::conio::ProgramDescription("Queries liveliness token");
-    desc.declareOption<std::string>("key", "key expression to query liveliness of", DEFAULT_KEY);
+    const auto args_opt =
+        grape::conio::ProgramDescription("Queries liveliness token")
+            .declareOption<std::string>("key", "key expression to query liveliness of", DEFAULT_KEY)
+            .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto key = args.getOption<std::string>("key");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
 
     zenohc::Config config;
     std::println("Opening session...");
@@ -42,6 +47,7 @@ auto main(int argc, const char* argv[]) -> int {
     // liveliness yet (Dec 2023)
     //----
 
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto keystr = z_keyexpr(key.c_str());
     std::println("Sending liveliness query for '{}'...", key);
     static constexpr auto FIFO_BOUND = 16;
@@ -61,6 +67,10 @@ auto main(int argc, const char* argv[]) -> int {
     z_drop(z_move(reply));
     z_drop(z_move(channel));
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

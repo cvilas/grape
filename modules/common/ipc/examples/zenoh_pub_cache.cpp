@@ -5,8 +5,9 @@
 #include <print>
 #include <thread>
 
+#include "examples_utils.h"
 #include "grape/conio/conio.h"
-#include "grape/conio/program_options.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -29,13 +30,18 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_VALUE = "Put from caching publisher";
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
-    auto desc = grape::conio::ProgramDescription("Cached periodic publisher example");
-    desc.declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
-        .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE);
+    const auto args_opt =
+        grape::conio::ProgramDescription("Cached periodic publisher example")
+            .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+            .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
+            .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto key = args.getOption<std::string>("key");
-    const auto value = args.getOption<std::string>("value");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
     zenohc::Config config;
 
@@ -78,6 +84,10 @@ auto main(int argc, const char* argv[]) -> int {
     z_drop(z_move(pub_cache));
 
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

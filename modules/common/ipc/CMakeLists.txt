@@ -2,7 +2,7 @@
 # Copyright (C) 2023 GRAPE Contributors
 #=================================================================================================
 
-declare_module(NAME ipc DEPENDS_ON_MODULES "" DEPENDS_ON_EXTERNAL_PROJECTS zenohcxx)
+declare_module(NAME ipc DEPENDS_ON_MODULES "base" DEPENDS_ON_EXTERNAL_PROJECTS zenohcxx)
 
 find_package(zenohc REQUIRED)
 find_package(zenohcxx REQUIRED)
@@ -16,7 +16,7 @@ set(SOURCES
 # library target
 define_module_library(
         NAME ipc
-        PUBLIC_LINK_LIBS ""
+        PUBLIC_LINK_LIBS grape::base
         PRIVATE_LINK_LIBS ""
         SOURCES ${SOURCES}
         PUBLIC_INCLUDE_PATHS

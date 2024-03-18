@@ -7,6 +7,7 @@
 #include <print>
 
 #include "grape/conio/program_options.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -41,13 +42,25 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_PORT = 7447;
     static constexpr auto DEFAULT_ADDRESS = "[::]";  //!< all available interfaces
 
-    auto desc = grape::conio::ProgramDescription("Zenoh router");
-    desc.declareOption<int>("port", "Port on which the service is available", DEFAULT_PORT)
-        .declareOption<std::string>("address", "IP address of the service", DEFAULT_ADDRESS);
+    const auto args_opt =
+        grape::conio::ProgramDescription("Zenoh router")
+            .declareOption<int>("port", "Port on which the service is available", DEFAULT_PORT)
+            .declareOption<std::string>("address", "IP address of the service", DEFAULT_ADDRESS)
+            .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto port = args.getOption<int>("port");
-    const auto addr = args.getOption<std::string>("address");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
+
+    const auto port_opt = args.getOption<int>("port");
+    if (not port_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ port_opt.error() };
+    }
+    const auto addr_opt = args.getOption<std::string>("address");
+    if (not addr_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ addr_opt.error() };
+    }
 
     zenohc::Config config;
 
@@ -57,7 +70,8 @@ auto main(int argc, const char* argv[]) -> int {
       return EXIT_FAILURE;
     }
 
-    const auto listener_endpoint = std::format(R"(["tcp/{}:{}"])", addr, port);
+    const auto listener_endpoint =
+        std::format(R"(["tcp/{}:{}"])", addr_opt.value(), port_opt.value());
     if (not config.insert_json(Z_CONFIG_LISTEN_KEY, listener_endpoint.c_str())) {
       std::println("Setting listening to {} failed", listener_endpoint);
       return EXIT_FAILURE;
@@ -72,6 +86,10 @@ auto main(int argc, const char* argv[]) -> int {
     s_exit.wait(false);
 
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

@@ -5,8 +5,9 @@
 #include <print>
 #include <thread>
 
+#include "examples_utils.h"
 #include "grape/conio/conio.h"
-#include "grape/conio/program_options.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -47,11 +48,15 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/**";
 
-    auto desc = grape::conio::ProgramDescription("Subscribes to liveliness state changes");
-    desc.declareOption<std::string>("key", "key expression to track liveliness of", DEFAULT_KEY);
+    const auto args_opt =
+        grape::conio::ProgramDescription("Subscribes to liveliness state changes")
+            .declareOption<std::string>("key", "key expression to track liveliness of", DEFAULT_KEY)
+            .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto key = args.getOption<std::string>("key");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
 
     zenohc::Config config;
     std::println("Opening session...");
@@ -62,6 +67,7 @@ auto main(int argc, const char* argv[]) -> int {
     // liveliness yet (Dec 2023)
     //----
 
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     std::println("Declaring liveliness subscriber on '{}'...", key);
     const auto keystr = z_keyexpr(key.c_str());
     z_owned_closure_sample_t callback = z_closure(dataHandler);
@@ -83,6 +89,10 @@ auto main(int argc, const char* argv[]) -> int {
 
     z_undeclare_subscriber(z_move(sub));
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

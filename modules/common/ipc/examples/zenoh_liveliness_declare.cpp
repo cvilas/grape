@@ -5,8 +5,9 @@
 #include <print>
 #include <thread>
 
+#include "examples_utils.h"
 #include "grape/conio/conio.h"
-#include "grape/conio/program_options.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -29,12 +30,16 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/liveliness";
 
-    auto desc = grape::conio::ProgramDescription("Declares/undeclares liveliness token");
-    desc.declareOption<std::string>("key", "key expression to declare liveliness token on",
-                                    DEFAULT_KEY);
+    const auto args_opt =
+        grape::conio::ProgramDescription("Declares/undeclares liveliness token")
+            .declareOption<std::string>("key", "key expression to declare liveliness token on",
+                                        DEFAULT_KEY)
+            .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto key = args.getOption<std::string>("key");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
 
     zenohc::Config config;
     std::println("Opening session...");
@@ -45,6 +50,7 @@ auto main(int argc, const char* argv[]) -> int {
     // liveliness yet (Dec 2023)
     //----
 
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     auto token = zc_owned_liveliness_token_t();
     const auto toggle_liveliness = [&session, &token, &key] {
       if (!z_check(token)) {
@@ -71,6 +77,10 @@ auto main(int argc, const char* argv[]) -> int {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

@@ -29,9 +29,9 @@ Logger::~Logger() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Logger::log(Record&& record) {
+void Logger::log(Record&& record) {  // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
   if (canLog(record.severity)) {
-    if (not queue_.tryPush(std::move(record))) {
+    if (not queue_.tryPush(std::forward<Record>(record))) {
       missed_logs_.fetch_add(1, std::memory_order_acquire);
     }
   }

@@ -7,7 +7,8 @@
 #include <print>
 #include <thread>
 
-#include "grape/conio/program_options.h"
+#include "examples_utils.h"
+#include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
@@ -46,15 +47,21 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
     static constexpr auto DEFAULT_ROUTER = "localhost:7447";
 
-    auto desc = grape::conio::ProgramDescription("Example publisher operating in 'client' mode");
-    desc.declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
-        .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
-        .declareOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER);
+    const auto args_opt =
+        grape::conio::ProgramDescription("Example publisher operating in 'client' mode")
+            .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+            .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
+            .declareOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER)
+            .parse(argc, argv);
 
-    const auto args = std::move(desc).parse(argc, argv);
-    const auto key = args.getOption<std::string>("key");
-    const auto value = args.getOption<std::string>("value");
-    const auto router = args.getOption<std::string>("router");
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
+
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
+    const auto router = grape::ipc::ex::getOptionOrThrow<std::string>(args, "router");
 
     zenohc::Config config;
 
@@ -90,6 +97,10 @@ auto main(int argc, const char* argv[]) -> int {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;
+  } catch (const grape::conio::ProgramOptions::Error& ex) {
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;
