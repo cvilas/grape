@@ -8,8 +8,8 @@ namespace grape::@module@::tests {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
-TEST_CASE("[example test]", "[@module@]") {
-  CHECK(false);
+TEST_CASE("[Test]", "[@module@]") {
+  WARN("No tests implemented");
 }
 
 // NOLINTEND(cert-err58-cpp)
