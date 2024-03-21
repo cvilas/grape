@@ -29,8 +29,8 @@ public:
            const std::source_location& loc = std::source_location::current()) {
     log(Record{ .timestamp = std::chrono::system_clock::now(),  //
                 .location = loc,                                //
-                .logger_name = config_.logger_name,             //
-                .message = message,                             //
+                .logger_name = config_.logger_name.c_str(),     //
+                .message = message.c_str(),                     //
                 .severity = severity });
   }
 

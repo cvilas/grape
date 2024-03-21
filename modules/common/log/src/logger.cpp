@@ -62,10 +62,10 @@ void Logger::flush() noexcept {
       const auto delta_missed_logs = missed_logs - backend_->missed_logs;
       backend_->missed_logs = missed_logs;
       if (config_.sink != nullptr) {
-        config_.sink({ .timestamp = std::chrono::system_clock::now(),                   //
-                       .location = std::source_location::current(),                     //
-                       .logger_name = config_.logger_name,                              //
-                       .message = std::format("{} records missed", delta_missed_logs),  //
+        config_.sink({ .timestamp = std::chrono::system_clock::now(),                           //
+                       .location = std::source_location::current(),                             //
+                       .logger_name = config_.logger_name.c_str(),                              //
+                       .message = std::format("{} records missed", delta_missed_logs).c_str(),  //
                        .severity = Severity::Warn });
       }
     }
