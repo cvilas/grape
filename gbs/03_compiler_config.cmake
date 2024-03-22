@@ -111,6 +111,7 @@ if(ENABLE_IPO)
     set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # About: Run "cmake --help-policy CMP0069"
   else()
     message(WARNING "Interprocedural optimisation is not supported: ${output}")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)
   endif()
 endif()
 
