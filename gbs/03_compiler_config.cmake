@@ -110,7 +110,7 @@ if(ENABLE_IPO)
     cmake_policy(SET CMP0069 NEW) # For submodules (eg: googletest) that use CMake older than v3.8
     set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # About: Run "cmake --help-policy CMP0069"
   else()
-    message(SEND_ERROR "Interprocedural optimisation is not supported: ${output}")
+    message(WARNING "Interprocedural optimisation is not supported: ${output}")
   endif()
 endif()
 
@@ -162,7 +162,7 @@ message(STATUS "Compiler configuration:")
 message(STATUS "\tCompiler                       : ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "\tBUILD_SHARED_LIBS              : ${BUILD_SHARED_LIBS}")
 message(STATUS "\tENABLE_CACHE                   : ${ENABLE_CACHE} (${CACHE_BIN})")
-message(STATUS "\tENABLE_IPO                     : ${ENABLE_IPO}")
+message(STATUS "\tENABLE_IPO                     : ${ENABLE_IPO} (supported: ${CMAKE_INTERPROCEDURAL_OPTIMIZATION})")
 message(STATUS "\tENABLE_ASAN                    : ${ENABLE_ASAN}")
 message(STATUS "\tENABLE_LSAN                    : ${ENABLE_LSAN}")
 message(STATUS "\tENABLE_MSAN                    : ${ENABLE_MSAN}")
