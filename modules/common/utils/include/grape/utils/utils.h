@@ -31,6 +31,7 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
                                                  str.substr(0, end_pos);
 }
 
+/*
 /// Return user-readable name for specified type
 template <typename T>
 auto getTypeName() -> std::string {
@@ -41,6 +42,30 @@ auto getTypeName() -> std::string {
     abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status), std::free
   };
   return (status == 0) ? res.get() : mangled_name;
+}
+*/
+
+/// Return user-readable name for specified type
+template <class T>
+constexpr auto getTypeName() -> std::string_view {
+  // From https://stackoverflow.com/a/35943472/9929294
+  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  // clang-format off
+  char const* p = __PRETTY_FUNCTION__;
+  while (*p++ != '='){}
+  for (; *p == ' '; ++p){}
+  char const* p2 = p;
+  int count = 1;
+  for (;; ++p2) {
+    switch (*p2) {
+      case '[': ++count; break;
+      case ']': --count; if (!count) { return { p, static_cast<std::size_t>(p2 - p) }; } break;
+      default: break;
+    }
+  }
+  // clang-format on
+  // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  return {};
 }
 
 }  // namespace grape::utils
