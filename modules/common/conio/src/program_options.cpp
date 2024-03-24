@@ -5,8 +5,14 @@
 #include "grape/conio/program_options.h"
 
 #include <algorithm>
+#include <print>
 
 namespace grape::conio {
+
+//-------------------------------------------------------------------------------------------------
+ProgramOptions::ProgramOptions(std::vector<ProgramOptions::Option>&& options)
+  : options_(std::move(options)) {
+}
 
 //-------------------------------------------------------------------------------------------------
 auto ProgramOptions::hasOption(const std::string& key) const -> bool {
