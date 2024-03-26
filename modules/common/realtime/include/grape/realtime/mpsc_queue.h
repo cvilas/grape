@@ -82,7 +82,8 @@ inline auto MPSCQueue<T>::tryPop() -> std::optional<T> {
   }
 
   item.is_readable.clear(std::memory_order_release);
-  auto ret = std::move(item.value);
+  std::optional<T> ret;
+  ret.emplace(std::move(item.value));
 
   if (++tail_ >= items_.size()) {
     tail_ = 0;
