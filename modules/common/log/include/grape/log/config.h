@@ -7,7 +7,6 @@
 #include <functional>
 
 #include "grape/log/default_sink.h"
-#include "grape/realtime/mpsc_queue.h"
 
 namespace grape::log {
 
