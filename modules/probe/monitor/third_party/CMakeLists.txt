@@ -33,7 +33,7 @@ target_include_directories(imguilib PRIVATE ${IMGUI_SOURCES_DIR})
 target_link_libraries(imguilib PUBLIC SDL3::SDL3)
 set_target_properties(imguilib PROPERTIES CXX_CLANG_TIDY "")
 set_target_properties(imguilib PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
-set_target_properties(imguilib PROPERTIES POSITION_INDEPENDENT_CODE ON) 
+set_target_properties(imguilib PROPERTIES POSITION_INDEPENDENT_CODE ON) # always need this
 set_target_properties(imguilib PROPERTIES UNITY_BUILD OFF)
 
 add_executable(imgui_sdl3_opengl3_example EXCLUDE_FROM_ALL ${IMGUI_SOURCES_DIR}/examples/sdl3_opengl3_example.cpp)
@@ -66,6 +66,7 @@ target_include_directories(implotlib PRIVATE ${IMGUI_SOURCES_DIR} ${IMPLOT_SOURC
 target_link_libraries(implotlib PRIVATE imguilib)
 set_target_properties(implotlib PROPERTIES CXX_CLANG_TIDY "")
 set_target_properties(implotlib PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
+set_target_properties(implotlib PROPERTIES POSITION_INDEPENDENT_CODE ON) # always need this
 
 add_executable(implot_example EXCLUDE_FROM_ALL ${IMPLOT_SOURCES_DIR}/examples/implot_example.cpp)
 add_clang_format(implot_example)
