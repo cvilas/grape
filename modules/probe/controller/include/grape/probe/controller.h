@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cinttypes>
+#include <cstring>
 #include <expected>
 #include <span>
 #include <string>

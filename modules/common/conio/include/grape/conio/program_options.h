@@ -46,7 +46,7 @@ public:
     std::string key;
     std::string brief;
     std::string value;
-    std::string type;
+    std::string_view type;
     bool is_required{ false };
     bool is_specified{ false };
   };
@@ -68,7 +68,7 @@ private:
 
   /// @brief Constructor. See ProgramDescription::parse
   /// @param options List of supported program options
-  constexpr explicit ProgramOptions(std::vector<Option>&& options);
+  explicit ProgramOptions(std::vector<Option>&& options);
 
   static constexpr auto HELP_KEY = "help";
 
@@ -101,8 +101,7 @@ public:
   /// @param brief A brief text describing the option
   /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
-  constexpr auto declareOption(const std::string& key,
-                               const std::string& brief) -> ProgramDescription&;
+  auto declareOption(const std::string& key, const std::string& brief) -> ProgramDescription&;
 
   /// @brief Declare an optional command line option (--key=value)
   /// @tparam T Value type
@@ -111,8 +110,8 @@ public:
   /// @param default_value Default value to use if the option is not specified on the command line
   /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
-  constexpr auto declareOption(const std::string& key, const std::string& brief,
-                               const T& default_value) -> ProgramDescription&;
+  auto declareOption(const std::string& key, const std::string& brief,
+                     const T& default_value) -> ProgramDescription&;
 
   /// @brief Parses and returns command line options at runtime.
   /// @param argc Number of arguments on the command line
@@ -126,11 +125,6 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-constexpr ProgramOptions::ProgramOptions(std::vector<ProgramOptions::Option>&& options)
-  : options_(std::move(options)) {
-}
-
-//-------------------------------------------------------------------------------------------------
 constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
   options_.emplace_back(ProgramOptions::Option{ .key = ProgramOptions::HELP_KEY,
                                                 .brief = brief,
@@ -142,8 +136,8 @@ constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-constexpr auto ProgramDescription::declareOption(const std::string& key,
-                                                 const std::string& brief) -> ProgramDescription& {
+auto ProgramDescription::declareOption(const std::string& key,
+                                       const std::string& brief) -> ProgramDescription& {
   options_.emplace_back(ProgramOptions::Option{ .key = key,
                                                 .brief = brief,
                                                 .value = "",
@@ -155,8 +149,8 @@ constexpr auto ProgramDescription::declareOption(const std::string& key,
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-constexpr auto ProgramDescription::declareOption(const std::string& key, const std::string& brief,
-                                                 const T& default_value) -> ProgramDescription& {
+auto ProgramDescription::declareOption(const std::string& key, const std::string& brief,
+                                       const T& default_value) -> ProgramDescription& {
   options_.emplace_back(ProgramOptions::Option{ .key = key,
                                                 .brief = brief,
                                                 .value = std::format("{}", default_value),
@@ -168,7 +162,7 @@ constexpr auto ProgramDescription::declareOption(const std::string& key, const s
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-inline auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T, Error> {
+auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T, Error> {
   const auto it = std::find_if(options_.begin(), options_.end(),
                                [&key](const auto& opt) { return key == opt.key; });
   if (it == options_.end()) {
