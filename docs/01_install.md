@@ -11,10 +11,10 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
 - Install the basic tools
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
-  doxygen graphviz linux-generic python3-dev python-is-python3 libssl-dev \
+  doxygen graphviz linux-generic python3-dev python3-pip python-is-python3 libssl-dev \
   iproute2 net-tools iftop htop
   ```
-- Install latest cmake
+- Install latest cmake and helpers
   ```bash
   wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
   echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
@@ -22,6 +22,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
   sudo rm /usr/share/keyrings/kitware-archive-keyring.gpg
   sudo apt install kitware-archive-keyring
   sudo apt install cmake
+  pip3 install cmake-format
   ```
 - Install latest compilers
   - Clang
