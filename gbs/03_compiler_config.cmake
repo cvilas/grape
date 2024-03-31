@@ -104,8 +104,8 @@ endif()
 option(ENABLE_IPO "Enable interprocedural optimization" ON)
 if(ENABLE_IPO)
   include(CheckIPOSupported)
-  check_ipo_supported(RESULT ipo_result OUTPUT output)
-  if(ipo_result)
+  check_ipo_supported(RESULT is_ipo_supported OUTPUT output)
+  if(is_ipo_supported)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
     cmake_policy(SET CMP0069 NEW) # For submodules (eg: googletest) that use CMake older than v3.8
     set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # About: Run "cmake --help-policy CMP0069"
@@ -144,12 +144,11 @@ option(ENABLE_LINTER "Enable static analysis" ON)
 if(ENABLE_LINTER)
   find_program(LINTER_BIN NAMES clang-tidy QUIET)
   if(LINTER_BIN)
-    # NOTE: To speed up linting, clang-tidy is invoked via clang-tidy-cache. 
-    # (https://github.com/matus-chochlik/ctcache)
-    # Cache location is set by environment variable CTCACHE_DIR
+    # NOTE: To speed up linting, clang-tidy is invoked via clang-tidy-cache.
+    # (https://github.com/matus-chochlik/ctcache) Cache location is set by environment variable
+    # CTCACHE_DIR
     set(LINTER_INVOKE_COMMAND
-        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} 
-        -p ${CMAKE_BINARY_DIR}
+        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} -p ${CMAKE_BINARY_DIR}
         -extra-arg=-Wno-ignored-optimization-argument -extra-arg=-Wno-unknown-warning-option)
     set(CMAKE_C_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
     set(CMAKE_CXX_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
@@ -160,14 +159,14 @@ endif()
 
 # print summary
 message(STATUS "Compiler configuration:")
-message(STATUS "\tCompiler                       : ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "\tBUILD_SHARED_LIBS              : ${BUILD_SHARED_LIBS}")
-message(STATUS "\tENABLE_CACHE                   : ${ENABLE_CACHE} (${CACHE_BIN})")
-message(STATUS "\tENABLE_IPO                     : ${ENABLE_IPO} (supported: ${CMAKE_INTERPROCEDURAL_OPTIMIZATION})")
-message(STATUS "\tENABLE_ASAN                    : ${ENABLE_ASAN}")
-message(STATUS "\tENABLE_LSAN                    : ${ENABLE_LSAN}")
-message(STATUS "\tENABLE_MSAN                    : ${ENABLE_MSAN}")
-message(STATUS "\tENABLE_TSAN                    : ${ENABLE_TSAN}")
-message(STATUS "\tENABLE_UBSAN                   : ${ENABLE_UBSAN}")
-message(STATUS "\tENABLE_COVERAGE                : ${ENABLE_COVERAGE}")
-message(STATUS "\tENABLE_LINTER                  : ${ENABLE_LINTER} (${LINTER_BIN})")
+message(STATUS "\tCompiler          : ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "\tBUILD_SHARED_LIBS : ${BUILD_SHARED_LIBS}")
+message(STATUS "\tENABLE_CACHE      : ${ENABLE_CACHE} (${CACHE_BIN})")
+message(STATUS "\tENABLE_IPO        : ${ENABLE_IPO} (supported: ${is_ipo_supported})")
+message(STATUS "\tENABLE_ASAN       : ${ENABLE_ASAN}")
+message(STATUS "\tENABLE_LSAN       : ${ENABLE_LSAN}")
+message(STATUS "\tENABLE_MSAN       : ${ENABLE_MSAN}")
+message(STATUS "\tENABLE_TSAN       : ${ENABLE_TSAN}")
+message(STATUS "\tENABLE_UBSAN      : ${ENABLE_UBSAN}")
+message(STATUS "\tENABLE_COVERAGE   : ${ENABLE_COVERAGE}")
+message(STATUS "\tENABLE_LINTER     : ${ENABLE_LINTER} (${LINTER_BIN})")
