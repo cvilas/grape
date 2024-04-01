@@ -54,7 +54,7 @@ Checks:          '-*,
                  -readability-function-cognitive-complexity,
                  -readability-redundant-access-specifiers,
                  -readability-identifier-length,
-                 readability-braces-around-statements
+                 -readability-braces-around-statements
                   '
 
 # Check headers from `modules` only.

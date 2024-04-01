@@ -3,7 +3,7 @@
 # =================================================================================================
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_PACKAGE_VERSION ${GRAPE_VERSION})
+set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_PACKAGE_VENDOR "Vilas Kumar Chitrakaran")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 
