@@ -13,26 +13,15 @@
 ## Phase 2 - Multimodel data logging and visualisation - timeseries data
 
 - :done: Implement `probe::Controller`
+- Implement experimental [MCAP](https://github.com/foxglove/mcap/tree/main/cpp) reader and writer
 - Implement `probe::Monitor`
   - Get OpenGL3 working on qemu VM: turn off hardware acceleration (use one of the non-gl display hardware options). See `glxinfo -B` for supported OpenGL versions
   - Only build implot and imgui examples on `make examples`
   - Update install instructions to support SDL3
   - Test examples work on MacOS and Linux
-  - Proof of concept
-- `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`
-- Implement experimental [MCAP](https://github.com/foxglove/mcap/tree/main/cpp) reader and writer
-- Refactor logging
-  - Consider fixed size string for logs 
-  - Consider using the `FIFOBuffer` for logs.
-- Refactor thread class out of realtime and put it in 'grape'
-  - Insert logging to capture timer overruns in the loop
-- Study [SPSC FIFO](https://youtu.be/K3P_Lmq6pw0) and review [implementation](https://github.com/CharlesFrasch/cppcon2023)
-- Benchmark operations per second for `FIFOBuffer` and `MPSCQueue`. 
-  - Compare against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023) and improve performance where possible
-  - Check effect of replacing `%` operations with `AND` (fifo4a) for speedup 
-- zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
-- Refactor gbs template files
-  - Replace grape with @CMAKE_PROJECT_NAME@ in all files
+    - For GL on macos add /opt/X11/lib to path in the toolchain
+    - Version 130 opengl not supported. Follow the imgui example to set up implot example
+- Make shared libs work (-fPIC doesn't work)
 
 ## Phase 4 - Multimodel data logging and visualisation - audio, video, 3D graphics
 
@@ -61,7 +50,7 @@
 - Integrate cmake-format
 - Review all negated checks in `.clang-tidy`
 
-## Phase 5 - Robotics behaviours
+## Phase 6 - Robotics behaviours
 
 - Study
   - Robotics at compile time: https://youtu.be/Y6AUsB3RUhA
@@ -116,9 +105,9 @@ auto main() -> int {
 }
 ```
 
-## References:
+## References
 
 - C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)
 - C++20 features: <https://youtu.be/N1gOSgZy7h4>
-- Clean code: <https://youtu.be/9ch7tZN4jeI?si=YkO84hmfQWfq8KO8>
-- IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above- **Coroutines**: Review usability for async processing, nonblocking IO
+- Clean code: <https://youtu.be/9ch7tZN4jeI>
+- IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above
