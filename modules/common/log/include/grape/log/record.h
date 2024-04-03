@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <source_location>
+#include <type_traits>
 
 #include "grape/log/severity.h"
 #include "grape/realtime/fixed_string.h"
@@ -23,4 +24,9 @@ struct [[nodiscard]] Record {
   realtime::FixedString<MAX_LOG_MESSAGE_LEN> message;
   Severity severity{ Severity::Debug };
 };
+
+// Ensure any future changes maintains triviality for the sake of performance
+static_assert(std::is_trivially_copyable_v<Record> == true);
+static_assert(std::is_trivially_move_constructible_v<Record> == true);
+
 }  // namespace grape::log
