@@ -8,7 +8,6 @@ project(grape LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_UNITY_BUILD TRUE)
 
 # Integrate the Grape Build System to setup the project
 include(${CMAKE_SOURCE_DIR}/gbs/gbs.cmake)

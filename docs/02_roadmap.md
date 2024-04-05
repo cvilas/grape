@@ -21,7 +21,6 @@
   - Test examples work on MacOS and Linux
     - For GL on macos add /opt/X11/lib to path in the toolchain
     - Version 130 opengl not supported. Follow the imgui example to set up implot example
-- Make shared libs work (-fPIC doesn't work)
 
 ## Phase 4 - Multimodel data logging and visualisation - audio, video, 3D graphics
 
@@ -30,7 +29,8 @@
   - Implement basic examples for AV capture, streaming and display
 
 - HW accelerated 3D graphics
-  - Select a backend: vsg, ogre, raylib, something else
+  - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), ??
+  - Select a rendering backend: vsg, ogre, raylib, something else
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 
