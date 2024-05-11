@@ -27,8 +27,8 @@ auto main() -> int {
     (void)signal(SIGTERM, onSignal);
 
     using Fifo = grape::realtime::FIFOBuffer;
-    const auto options = Fifo::Options{ .frame_length = 8U, .num_frames = 10U };
-    Fifo buffer(options);
+    const auto cfg = Fifo::Config{ .frame_length = 8U, .num_frames = 10U };
+    Fifo buffer(cfg);
 
     const auto producer = [&buffer](const std::string& name) {
       static constexpr auto UPDATE_PERIOD = std::chrono::milliseconds(100);
