@@ -19,7 +19,7 @@ namespace grape::realtime {
 class FIFOBuffer {
 public:
   /// Buffer configuration options
-  struct Options {
+  struct Config {
     std::size_t frame_length;  //!< Length of a single frame in bytes
     std::size_t num_frames;    //!< Number of frames in the buffer
   };
@@ -31,7 +31,7 @@ public:
   using ReaderFunc = std::function<void(std::span<const std::byte>)>;
 
   /// Construct a buffer with the specified options
-  explicit constexpr FIFOBuffer(const Options& options);
+  explicit constexpr FIFOBuffer(const Config& options);
 
   /// Attempt to write a frame in-place without blocking.
   /// @param func Writing function
@@ -50,7 +50,7 @@ public:
 
 private:
   static_assert(std::atomic_size_t::is_always_lock_free);
-  Options options_;
+  Config config_;
   std::atomic_size_t count_{ 0 };
   std::atomic_size_t head_{ 0 };
   std::size_t tail_{ 0 };
@@ -59,30 +59,30 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-constexpr FIFOBuffer::FIFOBuffer(const Options& options)
-  : options_(options)
-  , is_readable_(options_.num_frames)
-  , buffer_(options_.num_frames * options_.frame_length) {
+constexpr FIFOBuffer::FIFOBuffer(const Config& options)
+  : config_(options)
+  , is_readable_(config_.num_frames)
+  , buffer_(config_.num_frames * config_.frame_length) {
 }
 
 //-------------------------------------------------------------------------------------------------
 inline auto FIFOBuffer::visitToWrite(const WriterFunc& func) -> bool {
   const auto count = count_.fetch_add(1, std::memory_order_acquire);
-  if (count >= options_.num_frames) {
+  if (count >= config_.num_frames) {
     // back off, queue is full
     count_.fetch_sub(1, std::memory_order_release);
     return false;
   }
 
   // increment head, giving 'exclusive' access to that element until readability flag is set
-  const auto head = head_.fetch_add(1, std::memory_order_acquire) % options_.num_frames;
+  const auto head = head_.fetch_add(1, std::memory_order_acquire) % config_.num_frames;
   auto& readability_flag = is_readable_.at(head);
   assert(not readability_flag.test(std::memory_order_acquire));
 
   // write frame
-  const auto frame_offset = static_cast<std::int64_t>(head * options_.frame_length);
+  const auto frame_offset = static_cast<std::int64_t>(head * config_.frame_length);
   const auto frame_start = std::next(std::begin(buffer_), frame_offset);
-  func(std::span{ frame_start, options_.frame_length });
+  func(std::span{ frame_start, config_.frame_length });
   readability_flag.test_and_set(std::memory_order_release);
 
   return true;
@@ -98,11 +98,11 @@ inline auto FIFOBuffer::visitToRead(const ReaderFunc& func) -> bool {
 
   // read frame
   readability_flag.clear(std::memory_order_release);
-  const auto frame_offset = static_cast<std::int64_t>(tail_ * options_.frame_length);
+  const auto frame_offset = static_cast<std::int64_t>(tail_ * config_.frame_length);
   const auto frame_start = std::next(std::begin(buffer_), frame_offset);
-  func(std::span{ frame_start, options_.frame_length });
+  func(std::span{ frame_start, config_.frame_length });
 
-  if (++tail_ >= options_.num_frames) {
+  if (++tail_ >= config_.num_frames) {
     tail_ = 0;
   }
 
