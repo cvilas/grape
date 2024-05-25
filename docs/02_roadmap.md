@@ -39,6 +39,7 @@
 - Have a single place to maintain version numbers of all external dependencies
   - Single versions file maybe
   - Add version to find_package() calls within modules 
+- Allow examples and tests to depend on external dependencies that the main project does not depend on
 - Refactor gbs template files to make it project agnostic
   - Replace occurances of 'grape' with @CMAKE_PROJECT_NAME@ in all files
 - Refactor logging
