@@ -143,12 +143,14 @@ option(ENABLE_LINTER "Enable static analysis" ON)
 if(ENABLE_LINTER)
   find_program(LINTER_BIN NAMES clang-tidy QUIET)
   if(LINTER_BIN)
+    set(LINTER_ARGS 
+      -extra-arg=-Wno-ignored-optimization-argument 
+      -extra-arg=-Wno-unknown-warning-option)
     # NOTE: To speed up linting, clang-tidy is invoked via clang-tidy-cache.
     # (https://github.com/matus-chochlik/ctcache) Cache location is set by environment variable
     # CTCACHE_DIR
     set(LINTER_INVOKE_COMMAND
-        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} -p ${CMAKE_BINARY_DIR}
-        -extra-arg=-Wno-ignored-optimization-argument -extra-arg=-Wno-unknown-warning-option)
+        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} -p ${CMAKE_BINARY_DIR} ${LINTER_ARGS})
     set(CMAKE_C_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
     set(CMAKE_CXX_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
   else()
