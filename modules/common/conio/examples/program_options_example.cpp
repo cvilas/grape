@@ -40,8 +40,10 @@ auto main(int argc, const char* argv[]) -> int {
 
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
+    const auto code_str = toString(ex.code);
     /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    std::ignore = fprintf(stderr, "Option '%s' %.*s", ex.key.c_str(),
+                          static_cast<int>(code_str.length()), code_str.data());
     return EXIT_FAILURE;
   } catch (const std::exception& ex) {
     /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

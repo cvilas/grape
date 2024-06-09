@@ -44,7 +44,7 @@ TEST_CASE("Multiple producers should be able to push", "[mpsc_queue]") {
   for (std::size_t i = 0; i < NUM_PRODUCERS; ++i) {
     producers.emplace_back([&queue, i]() {
       for (std::size_t j = 0; j < NUM_ITEMS_PER_PRODUCER; ++j) {
-        std::ignore = queue.tryPush(static_cast<int>(i * NUM_ITEMS_PER_PRODUCER + j));
+        std::ignore = queue.tryPush(static_cast<int>((i * NUM_ITEMS_PER_PRODUCER) + j));
       }
     });
   }

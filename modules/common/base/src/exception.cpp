@@ -8,6 +8,7 @@
 #include "grape/utils/utils.h"
 
 namespace grape {
+
 void AbstractException::consume() noexcept {
   // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
   try {
@@ -16,8 +17,10 @@ void AbstractException::consume() noexcept {
     }
   } catch (const AbstractException& ex) {
     const auto& loc = ex.where();
-    std::ignore = fprintf(stderr, "\n%s\nin\n%s\nat\n%s:%d", ex.what().c_str(), loc.function_name(),
-                          utils::truncate(loc.file_name(), "modules").data(), loc.line());
+    const auto loc_fname = utils::truncate(loc.file_name(), "modules");
+    std::ignore = fprintf(stderr, "\n%s\nin\n%s\nat\n%.*s:%d", ex.what().c_str(),  //
+                          loc.function_name(),                                     //
+                          static_cast<int>(loc_fname.length()), loc_fname.data(), loc.line());
     std::ignore = fprintf(stderr, "\nBacktrace:");
     for (const auto& s : ex.when().trace()) {
       std::ignore = fprintf(stderr, "\n%s", s.c_str());

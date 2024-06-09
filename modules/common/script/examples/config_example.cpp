@@ -37,13 +37,15 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("From configuration, name='{}', age={}.", record.name, record.age);
     return EXIT_SUCCESS;
   } catch (const ConfigTableException& ex) {
+    const auto err_str = toString(ex.data());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "[%s]\n", toString(ex.data()).data());
+    std::ignore = fprintf(stderr, "[%.*s]\n", static_cast<int>(err_str.length()), err_str.data());
     ConfigTableException::consume();
     return EXIT_FAILURE;
   } catch (const grape::script::ConfigScriptException& ex) {
+    const auto err_str = toString(ex.data());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "[%s]\n", toString(ex.data()).data());
+    std::ignore = fprintf(stderr, "[%.*s]\n", static_cast<int>(err_str.length()), err_str.data());
     grape::script::ConfigScriptException::consume();
     return EXIT_FAILURE;
   } catch (...) {

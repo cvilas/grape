@@ -17,4 +17,12 @@ auto getOptionOrThrow(const conio::ProgramOptions& args, const std::string& key)
   }
   return opt.value();
 }
+
+void printMessage(const grape::conio::ProgramOptions::Error& ex) {
+  const auto code_str = toString(ex.code);
+  /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+  std::ignore = fprintf(stderr, "Option '%s' %.*s", ex.key.c_str(),
+                        static_cast<int>(code_str.length()), code_str.data());
+}
+
 }  // namespace grape::ipc::ex
