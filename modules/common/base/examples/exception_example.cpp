@@ -35,8 +35,10 @@ auto main() -> int {
     doWork();
     return EXIT_SUCCESS;
   } catch (const WorkException& ex) {  // handle exceptions you care about
+    const auto code_str = toString(ex.data());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Error code: %s\n", toString(ex.data()).data());
+    std::ignore = fprintf(stderr, "Error code: %.*s\n",  //
+                          static_cast<int>(code_str.length()), code_str.data());
     WorkException::consume();
     return EXIT_FAILURE;
   } catch (...) {  // default handle all other exceptions

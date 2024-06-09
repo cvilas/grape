@@ -68,8 +68,7 @@ auto main(int argc, const char* argv[]) -> int {
     z_drop(z_move(channel));
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
-    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Option '%s' %s", ex.key.c_str(), toString(ex.code).data());
+    grape::ipc::ex::printMessage(ex);
     return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();

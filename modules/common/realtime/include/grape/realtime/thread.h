@@ -132,8 +132,10 @@ inline void Thread::threadFunction() noexcept {
     config_.teardown();
   } catch (const grape::realtime::SystemException& ex) {
     const auto& context = ex.data();
+    const auto fname = context.function_name;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "\n(syscall: %s) ", context.function_name.data());
+    std::ignore = fprintf(stderr, "\n(syscall: %.*s) ",  //
+                          static_cast<int>(fname.length()), fname.data());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "\nThread '%s' terminated", config_.name.c_str());
     grape::realtime::SystemException::consume();
