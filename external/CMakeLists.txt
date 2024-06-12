@@ -3,9 +3,9 @@
 # =================================================================================================
 
 # =================================================================================================
-# This is the configuration file for third party dependencies that must be built
-# standalone and isolated from rest of the project. The dependencies declared in
-# this file are downloaded, configured and built at configuration time.
+# This is the configuration file for third party dependencies that must be built standalone and
+# isolated from rest of the project. The dependencies declared in this file are downloaded,
+# configured and built at configuration time.
 # =================================================================================================
 
 cmake_minimum_required(VERSION 3.27.3)
@@ -17,8 +17,7 @@ include(ExternalProject)
 # --------------------------------------------------------------------------------------------------
 # Setup baseline build configuration
 # --------------------------------------------------------------------------------------------------
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                      "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/")
 set_directory_properties(PROPERTIES EP_UPDATE_DISCONNECTED 1) # skip update step
 
 # Collect common arguments to configure external projects
@@ -47,8 +46,7 @@ endmacro()
 # --------------------------------------------------------------------------------------------------
 # zenohcxx
 if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
-  # install zenoh-c first 
-  # set(zenohc_VERION_REQUIRED 0.11.0.0)
+  # install zenoh-c first set(zenohc_VERION_REQUIRED 0.11.0.0)
   find_package(zenohc QUIET) # ${zenohc_VERION_REQUIRED} QUIET)
   if(zenohc_FOUND)
     message(STATUS "zenohc: Using version ${zenohc_VERSION} from ${zenohc_DIR}")
@@ -66,8 +64,7 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
   # set(zenohcxx_VERION_REQUIRED 0.11.0.0)
   find_package(zenohcxx QUIET) # ${zenohcxx_VERION_REQUIRED} QUIET)
   if(zenohcxx_FOUND)
-    message(
-      STATUS "zenohcxx: Using version ${zenohcxx_VERSION} from ${zenohcxx_DIR}")
+    message(STATUS "zenohcxx: Using version ${zenohcxx_VERSION} from ${zenohcxx_DIR}")
     add_dummy_target(zenohcxx)
   else()
     message(STATUS "zenohcxx: Building ${zenohcxx_VERION_REQUIRED} from source")
@@ -76,8 +73,7 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-cpp.git"
       GIT_TAG main # v${zenohcxx_VERION_REQUIRED}
       GIT_SHALLOW true
-      SOURCE_SUBDIR install # configure the 'install' sub-project to avoid
-                            # building zenoh-c again
+      SOURCE_SUBDIR install # configure the 'install' sub-project to avoid building zenoh-c again
       DEPENDS zenohc
       CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS})
   endif()
