@@ -65,6 +65,7 @@
 - Integrate cpack to generate artifacts 
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Review all negated checks in `.clang-tidy`
+- Integrate cmake-format as a target that runs `find ./modules -name CMakeLists.txt | xargs cmake-format -c .cmake-format.py -i`
 
 ## Phase 6 - Robotics behaviours
 
