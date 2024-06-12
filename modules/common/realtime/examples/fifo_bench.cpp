@@ -22,9 +22,12 @@ void bmFifoWrite(benchmark::State& state) {
   };
   for (auto s : state) {
     (void)s;
-    if (not fifo.visitToWrite(writer)) {
+    bool succeeded = false;
+    benchmark::DoNotOptimize(succeeded = fifo.visitToWrite(writer));
+    if (not succeeded) {
       throw std::runtime_error("write failed");
     }
+    benchmark::ClobberMemory();
   }
 }
 
@@ -54,9 +57,12 @@ void bmFifoRead(benchmark::State& state) {
 
   for (auto s : state) {
     (void)s;
-    if (not fifo.visitToRead(reader)) {
+    bool succeeded = false;
+    benchmark::DoNotOptimize(succeeded = fifo.visitToRead(reader));
+    if (not succeeded) {
       throw std::runtime_error("read failed");
     }
+    benchmark::ClobberMemory();
   }
 }
 }  // namespace
