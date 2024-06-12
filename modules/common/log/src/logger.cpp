@@ -15,9 +15,9 @@ struct Logger::Backend {
 };
 
 //-------------------------------------------------------------------------------------------------
-Logger::Logger(Config&& config)     //
-  : config_(std::move(config))      //
-  , queue_(config_.queue_capacity)  //
+Logger::Logger(Config&& config)                                                       //
+  : config_(std::move(config))                                                        //
+  , queue_({ .frame_length = sizeof(Record), .num_frames = config_.queue_capacity })  //
   , backend_(std::make_unique<Backend>()) {
   backend_->sink_thread = std::thread([this]() { sinkLoop(); });
 }
@@ -29,9 +29,13 @@ Logger::~Logger() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Logger::log(Record&& record) {  // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
+void Logger::log(const Record& record) {
   if (canLog(record.severity)) {
-    if (not queue_.tryPush(std::forward<Record>(record))) {
+    const auto writer = [&record](std::span<std::byte> frame) {
+      assert(sizeof(record) == frame.size_bytes());
+      std::memcpy(frame.data(), &record, sizeof(Record));
+    };
+    if (not queue_.visitToWrite(writer)) {
       missed_logs_.fetch_add(1, std::memory_order_acquire);
     }
   }
@@ -49,10 +53,15 @@ void Logger::sinkLoop() noexcept {
 //-------------------------------------------------------------------------------------------------
 void Logger::flush() noexcept {
   try {
+    auto record = Record();
+    const auto reader = [&record](std::span<const std::byte> frame) {
+      assert(sizeof(record) == frame.size_bytes());
+      std::memcpy(&record, frame.data(), frame.size_bytes());
+    };
     // flush all log records
-    for (auto record = queue_.tryPop(); record.has_value(); record = queue_.tryPop()) {
+    while (queue_.visitToRead(reader)) {
       if (config_.sink != nullptr) {
-        config_.sink(record.value());  // NOLINT(bugprone-unchecked-optional-access)
+        config_.sink(record);
       }
     }
 
