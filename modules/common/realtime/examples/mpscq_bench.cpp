@@ -22,6 +22,7 @@ void bmMpscqPush(benchmark::State& state) {
     if (not queue.tryPush(Item{})) {
       throw std::runtime_error("tryPush failed");
     }
+    benchmark::ClobberMemory();
   }
 }
 
@@ -39,10 +40,12 @@ void bmMpscqPop(benchmark::State& state) {
 
   for (auto s : state) {
     (void)s;
-    const auto item = queue.tryPop();
+    auto item = queue.tryPop();
+    benchmark::DoNotOptimize(item);
     if (not item.has_value()) {
       throw std::runtime_error("tryPop failed");
     }
+    benchmark::ClobberMemory();
   }
 }
 }  // namespace
