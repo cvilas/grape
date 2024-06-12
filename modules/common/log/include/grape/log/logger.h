@@ -5,7 +5,7 @@
 #pragma once
 
 #include "grape/log/config.h"
-#include "grape/realtime/mpsc_queue.h"
+#include "grape/realtime/fifo_buffer.h"
 
 namespace grape::log {
 
@@ -46,14 +46,14 @@ public:
   void operator=(Logger&&) = delete;
 
 private:
-  void log(Record&& record);
+  void log(const Record& record);
   void sinkLoop() noexcept;
   void flush() noexcept;
 
   static_assert(std::atomic_uint32_t::is_always_lock_free);
   Config config_{};
   std::atomic_uint32_t missed_logs_{ 0 };
-  realtime::MPSCQueue<Record> queue_;
+  realtime::FIFOBuffer queue_;
   struct Backend;
   std::unique_ptr<Backend> backend_{ nullptr };
 };

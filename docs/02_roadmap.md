@@ -42,7 +42,6 @@
 - Refactor gbs template files to make it project agnostic
   - Replace occurances of 'grape' with @CMAKE_PROJECT_NAME@ in all files
 - Refactor logging
-  - Consider using the `FIFOBuffer` for logs.
   - Color console handler like in [Quill](https://github.com/odygrd/quill/blob/master/quill/src/handlers/ConsoleHandler.cpp)
   - Study Quill to understand how to reduce overhead even more
 - Refactor thread class out of realtime and put it in 'grape'

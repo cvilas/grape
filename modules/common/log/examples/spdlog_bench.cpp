@@ -17,10 +17,7 @@ auto bmSpdlog(benchmark::State& state) {
   auto i = 0uz;
   for (auto s : state) {
     (void)s;
-    SPDLOG_LOGGER_INFO(logger,
-                       "This is a message longer than 32 characters, to avoid short string "
-                       "optimisation. Log number {:d}",
-                       i++);
+    SPDLOG_LOGGER_INFO(logger, "Log number {:d}", i++);
   }
 }
 
@@ -39,10 +36,7 @@ auto bmGrapeLog(benchmark::State& state) {
   auto i = 0uz;
   for (auto s : state) {
     (void)s;
-    logger->log(grape::log::Severity::Info,
-                std::format("This is a message longer than 32 characters, to avoid short string "
-                            "optimisation. Log number {:d}",
-                            i++));
+    logger->log(grape::log::Severity::Info, std::format("Log number {:d}", i++));
   }
 }
 
