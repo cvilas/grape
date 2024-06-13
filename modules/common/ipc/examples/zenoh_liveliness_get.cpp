@@ -68,7 +68,7 @@ auto main(int argc, const char* argv[]) -> int {
     z_drop(z_move(channel));
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
-    grape::ipc::ex::printMessage(ex);
+    std::ignore = std::fputs(toString(ex).c_str(), stderr);
     return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();

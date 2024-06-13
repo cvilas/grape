@@ -205,4 +205,8 @@ constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_
   return {};
 }
 
+//-------------------------------------------------------------------------------------------------
+auto toString(const ProgramOptions::Error& ex) -> std::string {
+  return std::format("Option '{}' {}", ex.key, toString(ex.code));
+}
 }  // namespace grape::conio
