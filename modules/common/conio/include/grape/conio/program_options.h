@@ -117,8 +117,8 @@ public:
   /// @param argc Number of arguments on the command line
   /// @param argv array of C-style strings
   /// @return Object containing command line options
-  auto parse(int argc,
-             const char** argv) const -> std::expected<ProgramOptions, ProgramOptions::Error>;
+  [[nodiscard]] auto
+  parse(int argc, const char** argv) const -> std::expected<ProgramOptions, ProgramOptions::Error>;
 
 private:
   std::vector<ProgramOptions::Option> options_;
@@ -189,7 +189,7 @@ auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T,
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_view {
+[[nodiscard]] constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_view {
   switch (code) {
     case ProgramOptions::Error::Code::Undeclared:
       return "Undeclared";
@@ -206,7 +206,7 @@ constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_
 }
 
 //-------------------------------------------------------------------------------------------------
-auto toString(const ProgramOptions::Error& ex) -> std::string {
+[[nodiscard]] inline auto toString(const ProgramOptions::Error& ex) -> std::string {
   return std::format("Option '{}' {}", ex.key, toString(ex.code));
 }
 }  // namespace grape::conio
