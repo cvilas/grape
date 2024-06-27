@@ -1,7 +1,8 @@
 //=================================================================================================
-// Copyright (C) 2023 GRAPE Contributors
+// Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
+#include <map>
 #include <print>
 #include <thread>
 
@@ -11,30 +12,28 @@
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// Example program creates a caching publisher and periodically writes a value on the specified key.
-//
-// A caching publisher is a publisher with in-memory storage. It exposes a Queryable for such that
-// querying subscribers can receive past publications. Of course, it also works with regular
-// subscribers
+// The Attachment feature enables users to attach metadata to the payload. The data and metadata
+// can come from different memory regions, avoiding the need to copy both into a new buffer and
+// then serializing them as a single payload. In principle this is similar to vectored I/O:
+// https://en.wikipedia.org/wiki/Vectored_I/O
 //
 // Typical usage:
 // ```bash
-// zenoh_pub_cache [--key=demo/example/test --value="Hello World"]
+// zenoh_attachment_pub [--key=demo/example/test --value="Hello World"]
 // ```
 //
-// Paired with example: zenoh_query_sub.cpp, zenoh_sub.cpp
+// Paired with example: zenoh_attachment_sub.cpp
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_pub_cache.c
 //=================================================================================================
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    static constexpr auto DEFAULT_VALUE = "Put from caching publisher";
+    static constexpr auto DEFAULT_VALUE = "Put from attachment publisher";
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
     const auto args_opt =
-        grape::conio::ProgramDescription("Cached periodic publisher example")
+        grape::conio::ProgramDescription("Attachment publisher example")
             .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
             .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
             .parse(argc, argv);
@@ -48,44 +47,32 @@ auto main(int argc, const char* argv[]) -> int {
 
     zenohc::Config config;
 
-    // enable timestamping
-    if (not config.insert_json(Z_CONFIG_ADD_TIMESTAMP_KEY, "true")) {
-      std::println("Error enabling timestamps");
-      return EXIT_FAILURE;
-    }
-
     std::println("Opening session...");
     auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
 
-    //----
-    // Note: The rest of this application uses the C API because the C++ API does not expose
-    // caching publication yet (Dec 2023)
-    //----
+    std::println("Declaring Publisher on '{}'", key);
+    auto pub = grape::ipc::expect<zenohc::Publisher>(session.declare_publisher(key));
 
-    static constexpr auto PUB_HISTORY = 10;
-    auto pub_cache_opts = ze_publication_cache_options_default();
-    pub_cache_opts.history = PUB_HISTORY;
+    zenohc::PublisherPutOptions options;
+    options.set_encoding(Z_ENCODING_PREFIX_TEXT_PLAIN);
 
-    std::println("Declaring publication cache on '{}'...", key);
-    auto pub_cache =
-        ze_declare_publication_cache(session.loan(), z_keyexpr(key.c_str()), &pub_cache_opts);
-    if (!z_check(pub_cache)) {
-      std::println("Unable to declare publication cache for key expression!");
-      return EXIT_FAILURE;
-    }
+    // allocate and set attachment map
+    auto attachment = std::map<std::string, std::string>{};
+    options.set_attachment(attachment);
 
-    std::println("Press any key to exit");
+    // Insert an attachment
+    attachment.insert(std::pair("source", "C++"));
+
+    // periodically publish data with attachments
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
     uint64_t idx = 0;
-    while (not grape::conio::kbhit()) {
+    while (true) {
       const auto msg = std::format("[{}] {}", idx++, value);
       std::println("Publishing Data ('{} : {})", key, msg);
-      z_put(session.loan(), z_keyexpr(key.c_str()), reinterpret_cast<const uint8_t*>(msg.data()),
-            msg.length(), nullptr);
+      attachment["index"] = std::to_string(idx);
+      pub.put(msg, options);
       std::this_thread::sleep_for(LOOP_WAIT);
     }
-    z_drop(z_move(pub_cache));
-
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);

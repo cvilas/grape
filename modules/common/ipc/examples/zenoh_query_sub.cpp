@@ -5,21 +5,21 @@
 #include <print>
 #include <thread>
 
+#include "examples_utils.h"
 #include "grape/conio/conio.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// Example program to demonstrate a late joining subscriber interacting with a queryable.
+// Example program to demonstrate querying subscriber.
 //
-// A QueryingSubscriber is useful for late-joining subscribers: given that a publication cache has
-// been instantiated on a keyexpr, the querying subscriber will first perform a get to obtain the
-// "existing" state, and then keep on behaving like a normal subscriber (letting you force another
-// get through its fetch method).
+// A querying subscriber queries, then subscribes. When matched with a caching publisher, the
+// subscriber first performs a get to obtain the "existing" state, and thereafter continues
+// behaving like a regular subscriber. Caching publisher plus querying subscribers are useful where
+// a subscriber might join late (after publisher has started), but must receive historical data
+// from a publisher in order to initialise and function.
 //
-// Paired with example: zenoh_queryable.cpp.
-// See also: zenoh_query_get.cpp, zenoh_query_get_channel_non_blocking.cpp,
-// zenoh_query_get_channel.cpp
+// Paired with example: zenoh_pub_cache.cpp
 //
 // Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_query_sub.c
 //=================================================================================================
@@ -36,26 +36,33 @@ void dataHandler(const z_sample_t* sample, void* arg) {
 }
 
 //=================================================================================================
-auto main() -> int {
+auto main(int argc, const char* argv[]) -> int {
   try {
+    static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
+
+    const auto args_opt = grape::conio::ProgramDescription("Querying subscriber example")
+                              .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+                              .parse(argc, argv);
+
+    if (not args_opt.has_value()) {
+      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+    }
+    const auto& args = args_opt.value();
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    std::println("Declaring querying subscriber on '{}'...", key);
+
     auto config = zenohc::Config();
     auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
-
-    static constexpr auto KEY = "grape/ipc/example/zenoh/queryable";
-    std::println("Declaring querying subscriber on '{}'...", KEY);
 
     //----
     // Note: The rest of this application uses the C API because the C++ API does not expose
     // querying subscriber yet (Dec 2023)
-    //
-    // TODO: This example does not work as in the description above. Make it so. Clarify how to
-    // force another 'get'
     //----
 
     const auto sub_opts = ze_querying_subscriber_options_default();
     z_owned_closure_sample_t callback = z_closure(dataHandler);
-    auto sub =
-        ze_declare_querying_subscriber(session.loan(), z_keyexpr(KEY), z_move(callback), &sub_opts);
+    auto sub = ze_declare_querying_subscriber(session.loan(), z_keyexpr(key.c_str()),
+                                              z_move(callback), &sub_opts);
     if (!z_check(sub)) {
       std::println("Unable to declare querying subscriber.");
       return EXIT_FAILURE;

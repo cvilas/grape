@@ -14,7 +14,7 @@
 // Example program demonstrates how to interact with a queryable to perform a query, and receive
 // an iterator of results _asynchronously_ via a callback.
 //
-// Paired with: zenoh_queryable.cpp. See also zenoh_query_sub.cpp, zenoh_query_get_channel.cpp
+// Paired with: zenoh_queryable.cpp. See also zenoh_query_get_channel.cpp
 //
 // Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_get.c
 //=================================================================================================

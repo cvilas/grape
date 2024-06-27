@@ -52,6 +52,9 @@ auto main(int argc, const char* argv[]) -> int {
       std::println("Delete failed with error {}", error);
       return EXIT_FAILURE;
     }
+
+    // Note: The same result can be accomplished by calling delete_resource() on a publisher.
+
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);
