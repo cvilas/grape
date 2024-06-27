@@ -76,13 +76,7 @@
   - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
   - consider magic_enum and other options and choose one
   - refactor existing `toString()` functions
-- Additional zenoh examples
-  - zenoh_pub_cache: Understand what it is supposed to do and make it work
-  - zenoh_query_sub - make it work
-  - z_storage
-  - any new examples that have appeared in zenoh-c, zenoh-cpp
-  - describe and provide example for user attachments. z_get/pub/queryable_attachment
-    - The Attachment feature is a generic way for users to attach any "metadata" to the payload they send through Zenoh. The same could be achieved by taking your data and metadata, serialize them all in a single payload and send it through Zenoh. The key benefit here is that if your main payload and metadata come from different memory regions, it avoids allocating a new buffer and serializing thus copying your payload and metadata in this new buffer. In a way it brings similar benefits as Vectored I/O and writev function: https://en.wikipedia.org/wiki/Vectored_I/O
+- Any new zenoh examples that have appeared in zenoh-c, zenoh-cpp
 - HW IO
   - CANopen
   - joystick

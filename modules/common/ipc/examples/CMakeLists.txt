@@ -139,3 +139,15 @@ define_module_example(
   SOURCES zenoh_liveliness_get.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME zenoh_attachment_pub
+  SOURCES zenoh_attachment_pub.cpp examples_utils.h
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME zenoh_attachment_sub
+  SOURCES zenoh_attachment_sub.cpp examples_utils.h
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)

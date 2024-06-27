@@ -13,7 +13,7 @@
 // Example program that declares a queryable. The queryable will be triggered on remote calls on the
 // designated topic, and will return a value to the querier.
 //
-// Paired with examples: zenoh_query_get.cpp, zenoh_query_get_channel.cpp, zenoh_query_sub.cpp
+// Paired with examples: zenoh_query_get.cpp, zenoh_query_get_channel.cpp
 //
 // Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_queryable.c
 //=================================================================================================
