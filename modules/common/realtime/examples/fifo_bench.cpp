@@ -20,9 +20,9 @@ void bmFifoWrite(benchmark::State& state) {
   const auto writer = [&data](std::span<std::byte> buffer) {
     std::memcpy(buffer.data(), data.data(), data.size());
   };
+  bool succeeded = false;
   for (auto s : state) {
     (void)s;
-    bool succeeded = false;
     benchmark::DoNotOptimize(succeeded = fifo.visitToWrite(writer));
     if (not succeeded) {
       throw std::runtime_error("write failed");
@@ -55,9 +55,9 @@ void bmFifoRead(benchmark::State& state) {
     std::memcpy(data.data(), buffer.data(), buffer.size_bytes());
   };
 
+  bool succeeded = false;
   for (auto s : state) {
     (void)s;
-    bool succeeded = false;
     benchmark::DoNotOptimize(succeeded = fifo.visitToRead(reader));
     if (not succeeded) {
       throw std::runtime_error("read failed");
@@ -70,7 +70,7 @@ void bmFifoRead(benchmark::State& state) {
 static constexpr auto MAX_ITERATIONS = 1000000U;
 static constexpr auto DATA_SIZE_MULT = 2U;
 static constexpr auto DATA_SIZE_MIN = 8;
-static constexpr auto DATA_SIZE_MAX = 4096;
+static constexpr auto DATA_SIZE_MAX = 2048;
 
 // NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmFifoWrite)
