@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "grape/exception.h"
+#include <string_view>
 
 namespace grape::realtime {
 
@@ -17,5 +17,4 @@ struct SystemError {
   std::string_view function_name;  //!< name of failing system call or library function
 };
 
-using SystemException = grape::Exception<SystemError>;
 }  // namespace grape::realtime

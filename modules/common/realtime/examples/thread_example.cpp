@@ -53,6 +53,7 @@ auto main() -> int {
     const auto is_mem_locked = grape::realtime::lockMemory();
     if (not is_mem_locked) {
       const auto err = is_mem_locked.error();
+      // NOLINTNEXTLINE(concurrency-mt-unsafe)
       std::println("Main thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
     }
 
@@ -75,6 +76,7 @@ auto main() -> int {
     const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_NON_RT);
     if (not is_cpu_set) {
       const auto err = is_cpu_set.error();
+      // NOLINTNEXTLINE(concurrency-mt-unsafe)
       std::println("Main thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
     } else {
       std::println("Main thread: Set to run on CPUs {}", CPUS_NON_RT);
@@ -86,6 +88,7 @@ auto main() -> int {
       const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
       if (not is_cpu_set) {
         const auto err = is_cpu_set.error();
+        // NOLINTNEXTLINE(concurrency-mt-unsafe)
         std::println("Task thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
       } else {
         std::println("Task thread: Set to run on CPUs {}", CPUS_RT);
@@ -97,6 +100,7 @@ auto main() -> int {
                                          .priority = RT_PRIORITY });
       if (not is_scheduled) {
         const auto err = is_scheduled.error();
+        // NOLINTNEXTLINE(concurrency-mt-unsafe)
         std::println("Task thread: {}: {}. Continuing ..", err.function_name, strerror(err.code));
       } else {
         std::println("Task thread: Scheduled to run at RT priority {}", RT_PRIORITY);

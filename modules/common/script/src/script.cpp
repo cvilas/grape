@@ -46,9 +46,12 @@ auto ConfigScript::table() const -> ConfigTable {
   const int global_table_ref = luaL_ref(state_ptr, LUA_REGISTRYINDEX);
   return ConfigTable(lua_state_, global_table_ref);
 }
+}  // namespace grape::script
+
+namespace {
 
 //=================================================================================================
-static void clearLuaStack(lua_State* state) {
+void clearLuaStack(lua_State* state) {
   auto sz = lua_gettop(state);
   while (sz > 0) {
     --sz;
@@ -61,13 +64,15 @@ struct ConfigTableDetail {
   int table_reference;
 };
 
+using ConfigTable = grape::script::ConfigTable;
+
 //-------------------------------------------------------------------------------------------------
 // Splits the key into tokens and recursively reads all the way to the last token (leaf) in the
 // key, putting the item at the token location on the stack. On success, the stack is prepared with
 // the leaf item, and the name of the token is returned. The stack can then be read by
 // readLeaf(). If unsuccessful, the error code is returned.
-static auto readToLeaf(lua_State* state, int table_ref,
-                       const std::string& key) -> std::expected<std::string, ConfigTable::Error> {
+auto readToLeaf(lua_State* state, int table_ref,
+                const std::string& key) -> std::expected<std::string, ConfigTable::Error> {
   // push our table into stack
   std::ignore = lua_rawgeti(state, LUA_REGISTRYINDEX, table_ref);
   // Break the key into tokens and recurse through sub-tables until the last token, then read it
@@ -109,7 +114,7 @@ static auto readToLeaf(lua_State* state, int table_ref,
 // Parses the item already in the stack as specified type. The item must be placed in stack by
 // calling readToLeaf()
 template <typename T>
-static auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
+auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
   const auto object_type = lua_type(state, -1);
   // boolean
   if constexpr (std::is_same_v<T, bool>) {
@@ -142,10 +147,10 @@ static auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
 
   // table
   else if constexpr (std::is_same_v<T, ConfigTableDetail>) {
-    const auto result =
-        ((object_type == LUA_TTABLE) ?
-             std::expected<T, ConfigTable::Error>{ luaL_ref(state, LUA_REGISTRYINDEX) } :
-             std::unexpected(ConfigTable::Error::Unparsable));
+    const auto result = ((object_type == LUA_TTABLE) ?
+                             std::expected<T, ConfigTable::Error>{ ConfigTableDetail{
+                                 .table_reference = luaL_ref(state, LUA_REGISTRYINDEX) } } :
+                             std::unexpected(ConfigTable::Error::Unparsable));
     clearLuaStack(state);
     return result;
   }  // table
@@ -157,8 +162,8 @@ static auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-static auto readIndex(lua_State* state, const int table_ref,
-                      const size_t index) -> std::expected<T, ConfigTable::Error> {
+auto readIndex(lua_State* state, const int table_ref,
+               const size_t index) -> std::expected<T, ConfigTable::Error> {
   // read table into stack and check its a table, not a value-type
   const auto object_type = lua_rawgeti(state, LUA_REGISTRYINDEX, table_ref);
   if (object_type != LUA_TTABLE) {
@@ -183,8 +188,8 @@ static auto readIndex(lua_State* state, const int table_ref,
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-static auto readKey(lua_State* state, int table_ref,
-                    const std::string& key) -> std::expected<T, ConfigTable::Error> {
+auto readKey(lua_State* state, int table_ref,
+             const std::string& key) -> std::expected<T, ConfigTable::Error> {
   const auto read_leaf = [state](const auto& /*token*/) -> std::expected<T, ConfigTable::Error> {
     return readLeaf<T>(state);
   };
@@ -195,6 +200,10 @@ static auto readKey(lua_State* state, int table_ref,
       .and_then(read_leaf)                  //
       .or_else(return_error);
 }
+
+}  // namespace
+
+namespace grape::script {
 
 //=================================================================================================
 ConfigTable::ConfigTable(std::shared_ptr<lua_State> lua_state, int lua_table_ref)

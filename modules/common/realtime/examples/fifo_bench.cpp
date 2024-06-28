@@ -65,12 +65,11 @@ void bmFifoRead(benchmark::State& state) {
     benchmark::ClobberMemory();
   }
 }
-}  // namespace
 
-static constexpr auto MAX_ITERATIONS = 1000000U;
-static constexpr auto DATA_SIZE_MULT = 2U;
-static constexpr auto DATA_SIZE_MIN = 8;
-static constexpr auto DATA_SIZE_MAX = 2048;
+constexpr auto MAX_ITERATIONS = 1000000U;
+constexpr auto DATA_SIZE_MULT = 2U;
+constexpr auto DATA_SIZE_MIN = 8;
+constexpr auto DATA_SIZE_MAX = 2048;
 
 // NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmFifoWrite)
@@ -83,6 +82,8 @@ BENCHMARK(bmFifoRead)
     ->RangeMultiplier(DATA_SIZE_MULT)
     ->Range(DATA_SIZE_MIN, DATA_SIZE_MAX)
     ->Iterations(MAX_ITERATIONS);
+
+}  // namespace
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay,modernize-use-trailing-return-type)
 BENCHMARK_MAIN();

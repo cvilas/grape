@@ -10,17 +10,11 @@
 - :done: Message passing
 - :done: Realtime services  
 
-## Phase 2 - Multimodel data logging and visualisation - timeseries data
+## Phase 2 - Multimodal data logging and visualisation - timeseries data
 
 - :done: Implement `probe::Controller`
-- Implement experimental [MCAP](https://github.com/foxglove/mcap/tree/main/cpp) reader and writer
-- Implement `probe::Monitor`
-  - Get OpenGL3 working on qemu VM: turn off hardware acceleration (use one of the non-gl display hardware options). See `glxinfo -B` for supported OpenGL versions
-  - Only build implot and imgui examples on `make examples`
-  - Update install instructions to support SDL3
-  - Test examples work on MacOS and Linux
-    - For GL on macos add /opt/X11/lib to path in the toolchain
-    - Version 130 opengl not supported. Follow the imgui example to set up implot example
+- :done: Implement `probe::Monitor` PoC
+- Production-ready implementation of Monitor (See TODO in Monitor/README)
 
 ## Phase 3 - Multimodel data logging and visualisation - audio, video, 3D graphics
 
@@ -29,10 +23,16 @@
   - Implement basic examples for AV capture, streaming and display
 - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
 - HW accelerated 3D graphics
-  - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), ??
+  - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
   - Select a rendering backend: vsg, ogre, raylib, something else
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
+- Set zenoh version to 1.0.0
+- Implement new zenoh features as examples
+  - matched pub/sub discovery
+  - Other new features: https://zenoh.io/blog/2024-04-30-zenoh-electrode/
+- Demonstrate hard realtime capability with Ubuntu 24.04 on X86 and RaspberryPi
+  - https://ubuntu.com/blog/real-time-kernel-tuning
 
 ## Phase 4 - Refactor
 
@@ -66,7 +66,6 @@
 - Integrate cpack to generate artifacts 
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Review all negated checks in `.clang-tidy`
-- Integrate cmake-format as a target that runs `find ./modules -name CMakeLists.txt | xargs cmake-format -c .cmake-format.py -i`
 
 ## Phase 6 - Robotics behaviours
 
@@ -76,7 +75,6 @@
   - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
   - consider magic_enum and other options and choose one
   - refactor existing `toString()` functions
-- Any new zenoh examples that have appeared in zenoh-c, zenoh-cpp
 - HW IO
   - CANopen
   - joystick
@@ -120,5 +118,6 @@ auto main() -> int {
 
 - C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)
 - C++20 features: <https://youtu.be/N1gOSgZy7h4>
+- Interfaces with C++20 concept: <https://concepts.godbolt.org/z/PjGb466cr>
 - Clean code: <https://youtu.be/9ch7tZN4jeI>
 - IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above

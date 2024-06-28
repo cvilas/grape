@@ -56,7 +56,7 @@ auto main(int argc, const char* argv[]) -> int {
     z_owned_reply_t reply = z_reply_null();
     for (z_call(channel.recv, &reply); z_check(reply); z_call(channel.recv, &reply)) {
       if (z_reply_is_ok(&reply)) {
-        z_sample_t sample = z_reply_ok(&reply);
+        const z_sample_t sample = z_reply_ok(&reply);
         z_owned_str_t sample_keystr = z_keyexpr_to_string(sample.keyexpr);
         std::println(">> Alive token ('{}')", z_loan(sample_keystr));
         z_drop(z_move(sample_keystr));

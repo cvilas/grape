@@ -7,7 +7,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/realtime/mpsc_queue.h"
 
-namespace grape::realtime::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
@@ -87,4 +87,4 @@ TEST_CASE("Popping empty queue should return false", "[mpsc_queue]") {
 
 // NOLINTEND(cert-err58-cpp)
 
-}  // namespace grape::realtime::tests
+}  // namespace

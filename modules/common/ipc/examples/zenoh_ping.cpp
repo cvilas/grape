@@ -68,7 +68,7 @@ auto main(int argc, const char* argv[]) -> int {
     const auto cb = [&pong_mut, &pong_cond, &pong_received](const zenohc::Sample& sample) {
       const auto payload = sample.sample_payload_rcinc();
       std::print("Pong [{} bytes] ", payload.get_payload().get_len());
-      std::lock_guard lk(pong_mut);
+      const std::lock_guard lk(pong_mut);
       pong_received = true;
       pong_cond.notify_one();
     };

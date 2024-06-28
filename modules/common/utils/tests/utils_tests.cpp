@@ -5,7 +5,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/utils/utils.h"
 
-namespace grape::utils::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
@@ -20,4 +20,4 @@ TEST_CASE("string trimming") {
 }
 
 // NOLINTEND(cert-err58-cpp)
-}  // namespace grape::utils::tests
+}  // namespace

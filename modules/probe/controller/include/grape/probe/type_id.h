@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>
 
 namespace grape::probe {
 
@@ -46,7 +47,7 @@ enum class TypeId : std::uint8_t {
   Float64,
 };
 
-/// Get type identifier given numeric data type
+/// @return Type identifier given numeric data type
 template <NumericType T>
 constexpr auto toTypeId() -> TypeId {
   // clang-format off
@@ -63,4 +64,21 @@ constexpr auto toTypeId() -> TypeId {
   // clang-format on
 }
 
+/// @return Length in bytes, for an element of the specified type
+constexpr auto length(TypeId t) -> std::size_t {
+  switch (t) {
+      // clang-format off
+    case TypeId::Int8: return sizeof(std::int8_t); break;
+    case TypeId::Uint8:return sizeof(std::uint8_t); break;
+    case TypeId::Int16:return sizeof(std::int16_t); break;
+    case TypeId::Uint16:return sizeof(std::uint16_t); break;
+    case TypeId::Int32:return sizeof(std::int32_t); break;
+    case TypeId::Uint32:return sizeof(std::uint32_t); break;
+    case TypeId::Int64:return sizeof(std::int64_t); break;
+    case TypeId::Uint64:return sizeof(std::uint64_t); break;
+    case TypeId::Float32:return sizeof(float); break;
+    case TypeId::Float64:return sizeof(double); break;
+      // clang-format on
+  }
+}
 }  // namespace grape::probe

@@ -27,10 +27,13 @@ struct Signal {
 
   realtime::FixedString<MAX_NAME_LENGTH> name;  //!< Unique identifier name for the signal
   std::uintptr_t address{ 0 };    //!< Address of the signal in the process address space
-  std::size_t element_size{ 0 };  //!< Size (in bytes) of a single element in the signal sequence
   std::size_t num_elements{ 0 };  //!< Number of elements in the signal sequence
   TypeId type{};                  //!< Data type of elements in the signal sequence
   Role role{};                    //!< Mode of usage of the signal
 };
+
+// Ensure any future changes maintains triviality for the sake of performance
+static_assert(std::is_trivially_copyable_v<Signal> == true);
+static_assert(std::is_trivially_move_constructible_v<Signal> == true);
 
 }  // namespace grape::probe

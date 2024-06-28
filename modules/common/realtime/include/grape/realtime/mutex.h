@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <cstring>
-#include <format>
-
 #include <pthread.h>
 
 #include "grape/realtime/system_error.h"
@@ -47,26 +44,21 @@ inline Mutex::Mutex() {
   {
     const auto result = pthread_mutexattr_init(&attr);
     if (result != 0) {
-      panic<SystemException>(
-          std::strerror(result),
-          SystemError{ .code = result, .function_name = "pthread_mutexattr_init" });
+      throw SystemError{ .code = result, .function_name = "pthread_mutexattr_init" };
     }
   }
 
   {
     const auto result = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
     if (result != 0) {
-      panic<SystemException>(
-          std::strerror(result),
-          SystemError{ .code = result, .function_name = "pthread_mutexattr_setprotocol" });
+      throw SystemError{ .code = result, .function_name = "pthread_mutexattr_setprotocol" };
     }
   }
 
   {
     const auto result = pthread_mutex_init(&mutex_, &attr);
     if (result != 0) {
-      panic<SystemException>(std::strerror(result),
-                             SystemError{ .code = result, .function_name = "pthread_mutex_init" });
+      throw SystemError{ .code = result, .function_name = "pthread_mutex_init" };
     }
   }
 }
@@ -80,8 +72,7 @@ inline Mutex::~Mutex() {
 inline void Mutex::lock() {
   const auto result = pthread_mutex_lock(&mutex_);
   if (result != 0) {
-    panic<SystemException>(std::strerror(result),
-                           SystemError{ .code = result, .function_name = "pthread_mutex_lock" });
+    throw SystemError{ .code = result, .function_name = "pthread_mutex_lock" };
   }
 }
 

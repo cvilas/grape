@@ -4,6 +4,7 @@
 
 #include <print>
 
+#include "grape/exception.h"
 #include "grape/realtime/schedule.h"
 
 //=================================================================================================
@@ -15,6 +16,7 @@ auto main() -> int {
     const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS);
     if (not is_cpu_set) {
       const auto error = is_cpu_set.error();
+      // NOLINTNEXTLINE(concurrency-mt-unsafe)
       std::println("Could not set CPU affinity. {}: {}", error.function_name, strerror(error.code));
       return EXIT_FAILURE;
     }
@@ -27,6 +29,7 @@ auto main() -> int {
                                        .priority = RT_PRIORITY });
     if (not is_scheduled) {
       const auto error = is_scheduled.error();
+      // NOLINTNEXTLINE(concurrency-mt-unsafe)
       std::println("Could not set RT schedule. {}: {}", error.function_name, strerror(error.code));
       return EXIT_FAILURE;
     }

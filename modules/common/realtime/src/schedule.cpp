@@ -30,7 +30,7 @@ auto lockMemory() -> std::expected<void, SystemError> {
   // RAM not being returned to the OS.)
   {
     const auto disable = -1;
-    const auto code = mallopt(M_TRIM_THRESHOLD, disable);
+    const auto code = mallopt(M_TRIM_THRESHOLD, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
       return std::unexpected(
           SystemError{ .code = code, .function_name = "mallopt(M_TRIM_THRESHOLD)" });
@@ -41,7 +41,7 @@ auto lockMemory() -> std::expected<void, SystemError> {
   // heap memory for new allocations
   {
     const auto disable = 0;
-    const auto code = mallopt(M_MMAP_MAX, disable);
+    const auto code = mallopt(M_MMAP_MAX, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
       return std::unexpected(SystemError{ .code = code, .function_name = "mallopt(M_MMAP_MAX)" });
     }

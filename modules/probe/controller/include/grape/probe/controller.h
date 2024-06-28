@@ -61,24 +61,21 @@ struct BufferConfig {
 };
 
 //=================================================================================================
-/// List of operational errors
-enum class Error : std::uint8_t {
-  BufferUnavailable,  //!< No free buffer available
-  BufferTooSmall,     //!< Buffer is incorrectly sized
-  SignalNotFound,     //!< Signal not found
-  RoleMismatch,       //!< Expected and actual role of data do not match
-  TypeMismatch,       //!< Expected and actual type of data do not match
-  SizeMismatch,       //!< Expected and actual size of data do not match
-};
-
-using ProbeException = grape::Exception<Error>;
-
-//=================================================================================================
 /// Probe controller runs on the embedded process, and provides mechanisms to
-/// - capture periodic snapshots of registered signals
-/// - synchronise values of control variables with queued updates
+/// - capture periodic snapshots of registered signals (see snap() and flush())
+/// - synchronise values of control variables with queued updates (see qset() and sync())
 class Controller {
 public:
+  /// List of operational errors
+  enum class Error : std::uint8_t {
+    BufferUnavailable,  //!< No free buffer available
+    BufferTooSmall,     //!< Buffer is incorrectly sized
+    SignalNotFound,     //!< Signal not found
+    RoleMismatch,       //!< Expected and actual role of data do not match
+    TypeMismatch,       //!< Expected and actual type of data do not match
+    SizeMismatch,       //!< Expected and actual size of data do not match
+  };
+
   /// Signature for function to receive log records
   using Receiver = std::function<void(const std::vector<Signal>&, std::span<const std::byte>)>;
 
@@ -103,6 +100,7 @@ public:
   /// @param name Identyfing name of the controllable as set in configuration
   /// @param value State update to set
   /// @return void on success, otherwise an error code that identifies the failure
+  /// @note This method should be called from non-realtime part of the process
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
   template <NumericType T>
@@ -112,14 +110,25 @@ public:
   /// @param name Identyfing name of the controllable as set in configuration
   /// @param value State update to set
   /// @return void on success, otherwise an error code that identifies the failure
+  /// @note This method should be called from non-realtime part of the process
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
   template <NumericType T>
   [[nodiscard]] auto qset(const std::string& name,
                           std::span<const T> value) -> std::expected<void, Error>;
 
+  /// Queue an update for a controllable with data specified in raw bytes. This will take effect on
+  /// next call to sync().
+  /// @param name Identyfing name of the controllable as set in configuration
+  /// @param value State update to set
+  /// @return void on success, otherwise an error code that identifies the failure
+  /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
+  /// release buffers
+  [[nodiscard]] auto qset(const std::string& name,
+                          std::span<const std::byte> value) -> std::expected<void, Error>;
+
   /// Update control variables to values from calls to qset() since the last call to this method
-  /// @note This method should be called before starting an iteration of realtime process loop
+  /// @note This method should be called at the top of realtime process update step
   void sync();
 
 private:
@@ -129,6 +138,8 @@ private:
   realtime::FIFOBuffer snaps_;
   realtime::FIFOBuffer pending_syncs_;
 };
+
+using ControllerException = grape::Exception<Controller::Error>;
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
@@ -145,7 +156,6 @@ auto PinConfig::pin(const std::string& name, std::span<const T> var,
 
   signals_.emplace_back(Signal{ .name = name.c_str(),        //
                                 .address = addr,             //
-                                .element_size = sizeof(T),   //
                                 .num_elements = var.size(),  //
                                 .type = toTypeId<T>(),       //
                                 .role = role });
@@ -162,46 +172,9 @@ auto Controller::qset(const std::string& name, const T& value) -> std::expected<
 template <NumericType T>
 auto Controller::qset(const std::string& name,
                       std::span<const T> value) -> std::expected<void, Error> {
-  const auto& signals = pins_.signals();
-
-  const auto it = std::find_if(controllables_begin_, signals.end(), [&name](const auto& s) {
-    return (0 == name.compare(s.name.cStr()));  // NOLINT(readability-string-compare)
-  });
-
-  if (it == signals.end()) {
-    return std::unexpected(Error::SignalNotFound);
-  }
-  if (Signal::Role::Control != it->role) {
-    return std::unexpected(Error::RoleMismatch);
-  }
-  if (toTypeId<T>() != it->type) {
-    return std::unexpected(Error::TypeMismatch);
-  }
-  if (value.size() != it->num_elements) {
-    return std::unexpected(Error::SizeMismatch);
-  }
-
-  // Queue the update as [offset|data]
-  using SignalVectorOffset =
-      std::iterator_traits<std::vector<Signal>::const_iterator>::difference_type;
-  const SignalVectorOffset offset = std::distance(signals.begin(), it);
-  auto buffer_check = std::expected<void, Error>{};
-  const auto writer = [&offset, &value, &buffer_check](std::span<std::byte> buffer) {
-    const auto offset_size = sizeof(SignalVectorOffset);
-    const auto value_size = value.size_bytes();
-    if (offset_size + value_size > buffer.size_bytes()) {
-      // this should never happen
-      buffer_check = std::unexpected(Error::BufferTooSmall);
-      return;
-    }
-    std::memcpy(buffer.data(), &offset, offset_size);
-    std::memcpy(buffer.data() + offset_size, value.data(), value_size);
-  };
-
-  if (not pending_syncs_.visitToWrite(writer)) {
-    return std::unexpected(Error::BufferUnavailable);
-  }
-  return buffer_check;
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  const auto* const data_ptr = reinterpret_cast<const std::byte*>(value.data());
+  return qset(name, { data_ptr, value.size_bytes() });
 }
 
 }  // namespace grape::probe

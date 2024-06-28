@@ -40,7 +40,7 @@ void print(std::string_view name, std::span<const std::byte> data) {
 void sink(const std::vector<grape::probe::Signal>& signals, std::span<const std::byte> data) {
   auto offset = 0u;
   for (const auto& s : signals) {
-    const auto size_bytes = s.element_size * s.num_elements;
+    const auto size_bytes = length(s.type) * s.num_elements;
     using TID = grape::probe::TypeId;
     switch (s.type) {
         // clang-format off
@@ -94,7 +94,8 @@ auto main(int argc, const char* argv[]) -> int {
     // create the probe controller
     auto probe = grape::probe::Controller(std::move(pin_config), BUFFER_CONFIG, sink);
 
-    // process function periodically updates variables
+    // Process function: In real use-cases, this could be executing in a privileged
+    // time sensitive context in a separate thread. Here, we just periodically update variables
     const auto process = [&probe, &timestamp, &amplitude, &frequency, &waveforms]() {
       static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(100);
       const auto ts_start = std::chrono::high_resolution_clock::now();
@@ -119,8 +120,10 @@ auto main(int argc, const char* argv[]) -> int {
         std::this_thread::sleep_until(ts + LOOP_PERIOD);
       }
     };
+    //-------------------------------------------------------------------------------
 
-    // monitor function periodically receives batched updates
+    // Monitor function: In real use-cases, this would be executing in non realtime context. Here,
+    // we periodically receive batched updates and show how to queue a control variable update
     const auto monitor = [&probe]() {
       static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(1000);
       double amplitude = {};
@@ -140,6 +143,7 @@ auto main(int argc, const char* argv[]) -> int {
         std::this_thread::sleep_until(ts + LOOP_PERIOD);
       }
     };
+    //-------------------------------------------------------------------------------
 
     auto th = std::thread(process);  //!< run process in a separate thread
     monitor();                       //!< monitor the process in main thread
@@ -147,8 +151,8 @@ auto main(int argc, const char* argv[]) -> int {
       th.join();
     }
     return EXIT_SUCCESS;
-  } catch (const grape::probe::ProbeException& ex) {
-    grape::probe::ProbeException::consume();
+  } catch (const grape::probe::ControllerException& ex) {
+    grape::probe::ControllerException::consume();
     return EXIT_FAILURE;
   } catch (...) {
     grape::AbstractException::consume();
