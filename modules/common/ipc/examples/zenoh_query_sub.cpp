@@ -28,10 +28,11 @@
 void dataHandler(const z_sample_t* sample, void* arg) {
   (void)arg;
   z_owned_str_t keystr = z_keyexpr_to_string(sample->keyexpr);
-  const auto str =
+  const auto payload =
       std::string(reinterpret_cast<const char*>(sample->payload.start), sample->payload.len);
-  std::println(">> Received {} ('{}': '{}')", grape::ipc::toString(sample->kind), z_loan(keystr),
-               str);
+  std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::toString(sample->kind),
+               z_loan(keystr), grape::ipc::toString(sample->timestamp), payload);
+
   z_drop(z_move(keystr));
 }
 
