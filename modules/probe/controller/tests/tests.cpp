@@ -3,17 +3,18 @@
 //=================================================================================================
 
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "grape/probe/controller.h"
 
-namespace grape::plant::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("[Controller is configured correctly]", "[controller]") {
-  double timestamp = 0.;
-  double amplitude = 1.;
-  double frequency = 1.;
+  const double timestamp = 0.;
+  const double amplitude = 1.;
+  const double frequency = 1.;
   std::vector<double> waveforms = { 0., 0. };
 
   // configure the pins
@@ -76,9 +77,10 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
 
   // Check after sync, the control variable is set to latest value from qset
   probe.sync();
-  CHECK(amplitude_setting == amplitude);
+  constexpr auto EPSILON = 0.0001;
+  CHECK_THAT(amplitude, Catch::Matchers::WithinRel(amplitude_setting, EPSILON));
 }
 
 // NOLINTEND(cert-err58-cpp)
 
-}  // namespace grape::plant::tests
+}  // namespace

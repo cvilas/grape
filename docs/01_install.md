@@ -4,14 +4,14 @@
 
 OS               | Architecture  | Compiler
 -----------------|---------------|----------------
-Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
+Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang19
 
 ## Setup build environment
 
 - Install the basic tools
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
-  doxygen graphviz linux-generic python3-dev python3-pip python-is-python3 libssl-dev \
+  ccache doxygen graphviz linux-generic python3-dev python3-pip python-is-python3 \
   iproute2 net-tools iftop htop
   ```
 - Install latest cmake and helpers
@@ -67,13 +67,10 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
   - Rust
     ```bash
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    ```
-  - Setup [sccache](https://github.com/mozilla/sccache)
-    ```bash
+    sudo apt install libssl-dev
     cargo install sccache --locked
     ```
-
-    To cache Rust builds, add following lines to `$HOME/.cargo/config.toml`
+  - To cache Rust builds, add following lines to `$HOME/.cargo/config.toml`
     ```toml
     [build]
     rustc-wrapper="sccache"
@@ -81,7 +78,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | GCC14, Clang18
 
 ## Configure and build
 
-Note (Jan 2023) Use the clang toolchain to build the project. GCC-14 does not support all features we use.
+Note (June 2024) Use the clang toolchain to build the project. GCC-14 does not support all features we use.
 
 ```bash
 git clone git@github.com:cvilas/grape

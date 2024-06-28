@@ -117,7 +117,7 @@ endif()
 # Configure compiler cache
 option(ENABLE_CACHE "Enable cache if available" ON)
 if(ENABLE_CACHE)
-  set(CACHE_PROGRAM_OPTIONS "sccache" "ccache")
+  set(CACHE_PROGRAM_OPTIONS "ccache" "sccache")
   foreach(CACHE_OPTION IN LISTS CACHE_PROGRAM_OPTIONS)
     find_program(CACHE_BIN ${CACHE_OPTION})
     if(CACHE_BIN)

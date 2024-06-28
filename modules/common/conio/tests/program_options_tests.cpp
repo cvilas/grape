@@ -5,9 +5,12 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/conio/program_options.h"
 
-namespace grape::conio::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
+
+using ProgramOptions = grape::conio::ProgramOptions;
+using ProgramDescription = grape::conio::ProgramDescription;
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Returns error on duplicate declaration of options", "[program_options]") {
@@ -123,4 +126,4 @@ TEST_CASE("Ensures 'help' is always available", "[program_options]") {
 }
 
 // NOLINTEND(cert-err58-cpp)
-}  // namespace grape::conio::tests
+}  // namespace

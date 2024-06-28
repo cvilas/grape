@@ -14,6 +14,7 @@
 #endif
 #include <type_traits>
 
+#include "grape/exception.h"
 #include "grape/realtime/system_error.h"
 
 namespace grape::realtime {
@@ -130,15 +131,13 @@ inline void Thread::threadFunction() noexcept {
     }
 
     config_.teardown();
-  } catch (const grape::realtime::SystemException& ex) {
-    const auto& context = ex.data();
-    const auto fname = context.function_name;
+  } catch (const grape::realtime::SystemError& ex) {
+    const auto fname = ex.function_name;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "\n(syscall: %.*s) ",  //
                           static_cast<int>(fname.length()), fname.data());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "\nThread '%s' terminated", config_.name.c_str());
-    grape::realtime::SystemException::consume();
   } catch (...) {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = fprintf(stderr, "\nThread '%s' terminated", config_.name.c_str());

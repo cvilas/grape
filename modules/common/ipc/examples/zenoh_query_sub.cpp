@@ -24,6 +24,8 @@
 // Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_query_sub.c
 //=================================================================================================
 
+namespace {
+
 //-------------------------------------------------------------------------------------------------
 void dataHandler(const z_sample_t* sample, void* arg) {
   (void)arg;
@@ -35,6 +37,8 @@ void dataHandler(const z_sample_t* sample, void* arg) {
 
   z_drop(z_move(keystr));
 }
+
+}  // namespace
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {

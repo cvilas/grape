@@ -5,7 +5,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/realtime/mutex.h"
 
-namespace grape::realtime::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
@@ -40,4 +40,4 @@ TEST_CASE("Mutex functionality", "[Mutex]") {
 
 // NOLINTEND(cert-err58-cpp)
 
-}  // namespace grape::realtime::tests
+}  // namespace

@@ -7,7 +7,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/log/logger.h"
 
-namespace grape::log::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
@@ -60,4 +60,4 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
 
 // NOLINTEND(cert-err58-cpp)
 
-}  // namespace grape::log::tests
+}  // namespace

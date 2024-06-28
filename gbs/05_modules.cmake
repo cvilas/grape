@@ -761,7 +761,8 @@ endif(NOT CMAKE_CROSSCOMPILING)
 FetchContent_Declare(
   benchmark
   GIT_REPOSITORY https://github.com/google/benchmark.git
-  GIT_TAG main #TODO: Specify version > v1.8.3
+  GIT_TAG main # TODO: Specify version > v1.8.3
+  GIT_SHALLOW TRUE
   EXCLUDE_FROM_ALL)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "")

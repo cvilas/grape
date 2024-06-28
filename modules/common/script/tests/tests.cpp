@@ -9,12 +9,12 @@
 #include "grape/exception.h"
 #include "grape/script/script.h"
 
-namespace grape::script::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
 
 // test configuration script
-static constexpr std::string_view TEST_CONFIG = R"(
+constexpr std::string_view TEST_CONFIG = R"(
 name = "Jane Smith"
 age = 65
 is_qualified = true
@@ -135,4 +135,4 @@ TEST_CASE("errroneous script throws exception", "[script]") {
 
 // NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
 
-}  // namespace grape::script::tests
+}  // namespace

@@ -58,7 +58,7 @@ inline auto toString(const zenohc::StrArrayView& arr) -> std::string {
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toNanoSeconds(const zenohc::Timestamp& ts) -> std::uint64_t {
+inline auto toNanoSeconds(const zenohc::Timestamp& ts) -> std::uint64_t {
   // NTP64 timestamping: https://docs.rs/zenoh/0.7.2-rc/zenoh/time/struct.NTP64.html
   const auto ntp64 = ts.get_time();
   const auto seconds = static_cast<std::uint32_t>(ntp64 >> 32U);

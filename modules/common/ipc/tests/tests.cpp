@@ -4,7 +4,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-namespace grape::ipc::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
@@ -14,4 +14,4 @@ TEST_CASE("[example test]", "[ipc]") {
 
 // NOLINTEND(cert-err58-cpp)
 
-}  // namespace grape::ipc::tests
+}  // namespace

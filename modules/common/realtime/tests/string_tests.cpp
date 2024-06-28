@@ -7,7 +7,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/realtime/fixed_string.h"
 
-namespace grape::realtime::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
 
@@ -160,4 +160,4 @@ TEST_CASE("Size in stack", "[FixedString]") {
 
 // NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
 
-}  // namespace grape::realtime::tests
+}  // namespace

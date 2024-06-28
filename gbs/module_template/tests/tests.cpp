@@ -4,7 +4,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 
-namespace grape::@module@::tests {
+namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
@@ -14,4 +14,4 @@ TEST_CASE("[Test]", "[@module@]") {
 
 // NOLINTEND(cert-err58-cpp)
 
-} // namespace grape::@module@::tests
+} // namespace 
