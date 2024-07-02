@@ -7,8 +7,8 @@ declare_module(
   DEPENDS_ON_MODULES "base"
   DEPENDS_ON_EXTERNAL_PROJECTS zenohcxx)
 
-find_package(zenohc REQUIRED)
-find_package(zenohcxx REQUIRED)
+find_package(zenohc ${ZENOHC_VERSION_REQUIRED} REQUIRED)
+find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} REQUIRED)
 
 # library sources
 set(SOURCES include/grape/ipc/ipc.h src/ipc.cpp README.md)

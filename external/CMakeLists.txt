@@ -8,11 +8,12 @@
 # configured and built at configuration time.
 # =================================================================================================
 
-cmake_minimum_required(VERSION 3.27.3)
+cmake_minimum_required(VERSION 3.28.3)
 project(grape-external LANGUAGES C CXX)
 
 find_package(Git REQUIRED)
 include(ExternalProject)
+include(${CMAKE_CURRENT_LIST_DIR}/third_party_versions.cmake)
 
 # -------------------------------------------------------------------------------------------------
 # Setup baseline build configuration
@@ -49,32 +50,30 @@ endmacro()
 # TODO: Pin to specific version number when released
 if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
   # install zenoh-c first 
-  # set(zenohc_VERSION_REQUIRED 0.11.0.0) # TODO
-  find_package(zenohc QUIET) # ${zenohc_VERSION_REQUIRED} QUIET)
+  find_package(zenohc QUIET) # ${ZENOHC_VERSION_REQUIRED} QUIET)
   if(zenohc_FOUND)
     message(STATUS "zenohc: Using version ${zenohc_VERSION} from ${zenohc_DIR}")
     add_dummy_target(zenohc)
   else()
-    message(STATUS "zenohc: Building ${zenohc_VERSION_REQUIRED} from source")
+    message(STATUS "zenohc: Building ${ZENOHC_VERSION_REQUIRED} from source")
     ExternalProject_Add(
       zenohc
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-c.git"
-      GIT_TAG main # TODO v${zenohc_VERSION_REQUIRED}
+      GIT_TAG main # TODO v${ZENOHC_VERSION_REQUIRED}
       GIT_SHALLOW true
       CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} -DCMAKE_VERBOSE_MAKEFILE=ON)
   endif()
 
-  # set(zenohcxx_VERSION_REQUIRED 0.11.0.0) # TODO
-  find_package(zenohcxx QUIET) # TODO ${zenohcxx_VERSION_REQUIRED} QUIET)
+  find_package(zenohcxx QUIET) # TODO ${ZENOHCXX_VERSION_REQUIRED} QUIET)
   if(zenohcxx_FOUND)
     message(STATUS "zenohcxx: Using version ${zenohcxx_VERSION} from ${zenohcxx_DIR}")
     add_dummy_target(zenohcxx)
   else()
-    message(STATUS "zenohcxx: Building ${zenohcxx_VERSION_REQUIRED} from source")
+    message(STATUS "zenohcxx: Building ${ZENOHCXX_VERSION_REQUIRED} from source")
     ExternalProject_Add(
       zenohcxx
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-cpp.git"
-      GIT_TAG main # TODO v${zenohcxx_VERSION_REQUIRED}
+      GIT_TAG main # TODO v${ZENOHCXX_VERSION_REQUIRED}
       GIT_SHALLOW true
       SOURCE_SUBDIR install # configure the 'install' sub-project to avoid building zenoh-c again
       DEPENDS zenohc

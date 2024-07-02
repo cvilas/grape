@@ -7,7 +7,7 @@ declare_module(
   DEPENDS_ON_MODULES probe_controller
   DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
 
-find_package(SDL3 REQUIRED)
+find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 
 # library sources
 set(SOURCES src/monitor.cpp README.md include/grape/probe/monitor.h)

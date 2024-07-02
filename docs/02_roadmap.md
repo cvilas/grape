@@ -27,7 +27,8 @@
   - Select a rendering backend: vsg, ogre, raylib, something else
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
-- Set zenoh version to 1.0.0
+- Pin zenoh version to 1.0.0
+- Pin SDL3 version to 3.x
 - Implement new zenoh features as examples
   - matched pub/sub discovery
   - Other new features: https://zenoh.io/blog/2024-04-30-zenoh-electrode/
@@ -36,9 +37,6 @@
 
 ## Phase 4 - Refactor
 
-- Have a single place to maintain version numbers of all external dependencies
-  - Single versions file maybe
-  - Add version to find_package() calls within modules 
 - Allow examples and tests to depend on external dependencies that the main project does not depend on
 - Refactor gbs template files to make it project agnostic
   - Replace occurances of 'grape' with @CMAKE_PROJECT_NAME@ in all files
@@ -99,7 +97,7 @@
 - md5sum
 - factory using crtp (see scratch)
 - [ftxui](https://github.com/ArthurSonzogni/FTXUI) based terminal UI apps
-- Consider integrating mp_uints library
+- Consider integrating mp_units library
 
 ## Notes
 
