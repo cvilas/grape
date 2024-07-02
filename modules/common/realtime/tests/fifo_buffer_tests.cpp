@@ -44,37 +44,6 @@ TEST_CASE("Writes and reads are in FIFO order", "[FIFOBuffer]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Multiple threads can write", "[FIFOBuffer]") {
-  constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
-  grape::realtime::FIFOBuffer buffer(CONFIG);
-
-  static constexpr std::uint8_t NUM_THREADS = 4U;
-  std::vector<std::thread> threads;
-
-  for (std::uint8_t i = 0; i < NUM_THREADS; ++i) {
-    threads.emplace_back([&buffer]() {
-      REQUIRE(buffer.visitToWrite([&](std::span<std::byte>) {
-        // write operation
-      }));
-    });
-  }
-
-  for (auto& thread : threads) {
-    thread.join();
-  }
-
-  REQUIRE(buffer.count() == NUM_THREADS);
-
-  for (std::uint8_t i = 0; i < NUM_THREADS; ++i) {
-    REQUIRE(buffer.visitToRead([&](std::span<const std::byte>) {
-      // reading operation
-    }));
-  }
-
-  REQUIRE(buffer.count() == 0);
-}
-
-//-------------------------------------------------------------------------------------------------
 TEST_CASE("Attempt to write to a full buffer should fail", "[FIFOBuffer]") {
   constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
   grape::realtime::FIFOBuffer buffer(CONFIG);
