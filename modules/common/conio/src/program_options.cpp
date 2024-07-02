@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <print>
 
+#include <unistd.h>  // _exit()
+
 namespace grape::conio {
 
 //-------------------------------------------------------------------------------------------------
@@ -66,7 +68,7 @@ auto ProgramDescription::parse(int argc, const char** argv) const
       if (key == ProgramOptions::HELP_KEY) {
         // print help and exit if it was specified
         std::println(stderr, "{}", it->value);
-        exit(0);
+        _exit(EXIT_SUCCESS);
       } else {
         it->value = ((pos == std::string::npos) ? "" : kv.substr(pos + 1));
       }
