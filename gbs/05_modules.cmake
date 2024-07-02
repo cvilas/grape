@@ -428,7 +428,7 @@ endmacro()
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.6.0
+  GIT_TAG v${CATCH2_VERSION_REQUIRED}
   GIT_SHALLOW TRUE
   EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(Catch2)
@@ -761,7 +761,7 @@ endif(NOT CMAKE_CROSSCOMPILING)
 FetchContent_Declare(
   benchmark
   GIT_REPOSITORY https://github.com/google/benchmark.git
-  GIT_TAG main # TODO: Specify version > v1.8.3
+  GIT_TAG v${BENCHMARK_VERSION_REQUIRED}
   GIT_SHALLOW TRUE
   EXCLUDE_FROM_ALL)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
