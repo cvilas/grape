@@ -18,8 +18,8 @@ ProgramOptions::ProgramOptions(std::vector<ProgramOptions::Option>&& options)
 
 //-------------------------------------------------------------------------------------------------
 auto ProgramOptions::hasOption(const std::string& key) const -> bool {
-  return (options_.end() != std::find_if(options_.begin(), options_.end(),
-                                         [&key](const auto& opt) { return key == opt.key; }));
+  return (options_.end() !=
+          std::ranges::find_if(options_, [&key](const auto& opt) { return key == opt.key; }));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -57,8 +57,8 @@ auto ProgramDescription::parse(int argc, const char** argv) const
       const std::string kv = arg.substr(2);
       const size_t pos = kv.find('=');
       const auto key = kv.substr(0, pos);
-      const auto it = std::find_if(tmp_options.begin(), tmp_options.end(),
-                                   [&key](const auto& opt) { return key == opt.key; });
+      const auto it =
+          std::ranges::find_if(tmp_options, [&key](const auto& opt) { return key == opt.key; });
 
       if (it == tmp_options.end()) {
         return std::unexpected(Error{ .code = Error::Code::Undeclared, .key = key });
@@ -83,11 +83,9 @@ auto ProgramDescription::parse(int argc, const char** argv) const
   }
 
   // Check for duplicate declarations
-  std::sort(tmp_options.begin(), tmp_options.end(),
-            [](const auto& a, const auto& b) { return a.key < b.key; });
-  const auto dup_it =
-      std::adjacent_find(tmp_options.begin(), tmp_options.end(),
-                         [](const auto& a, const auto& b) { return a.key == b.key; });
+  std::ranges::sort(tmp_options, [](const auto& a, const auto& b) { return a.key < b.key; });
+  const auto dup_it = std::ranges::adjacent_find(
+      tmp_options, [](const auto& a, const auto& b) { return a.key == b.key; });
   if (dup_it != tmp_options.end()) {
     return std::unexpected(Error{ .code = Error::Code::Redeclared, .key = dup_it->key });
   }
