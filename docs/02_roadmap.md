@@ -24,17 +24,14 @@
 - zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
 - HW accelerated 3D graphics
   - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
-  - Select a rendering backend: vsg, ogre, raylib, something else
+  - Select a scenegraph engine: vsg, ogre, raylib, something else
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 - Pin zenoh version to 1.0.0
   - Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
   - Make sure static libs are built and installed when requested.
-- Pin SDL3 version to 3.x
-- Implement new zenoh features as examples
-  - matched pub/sub discovery
-  - Other new features: https://zenoh.io/blog/2024-04-30-zenoh-electrode/
-- Demonstrate hard realtime capability with Ubuntu 24.04 on X86 and RaspberryPi
+  - Implement new zenoh features as examples
+- Document how to configure Raspberry Pi5 with Ubuntu realtime kernel for low latency
   - https://ubuntu.com/blog/real-time-kernel-tuning
 
 ## Phase 4 - Refactor
@@ -47,8 +44,6 @@
   - Study Quill to understand how to reduce overhead even more
 - Refactor thread class out of realtime and put it in 'grape'
   - Insert logging to capture timer overruns in the loop
-- Study [SPSC FIFO](https://youtu.be/K3P_Lmq6pw0) and review [implementation](https://github.com/CharlesFrasch/cppcon2023)
-- Benchmark `FIFOBuffer` against [SPSC fifo](https://github.com/CharlesFrasch/cppcon2023) and improve performance where possible
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
 
 ## Phase 5 - CI
@@ -75,6 +70,8 @@
   - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
   - consider magic_enum and other options and choose one
   - refactor existing `toString()` functions
+- Implement shared memory
+- Implement SPMC queue using externally provided memory (heap or shared memory)
 - HW IO
   - CANopen
   - joystick
