@@ -26,9 +26,8 @@ TEST_CASE("Writes and reads are in FIFO order", "[FIFOBuffer]") {
   // write
   for (std::size_t i = 0; i < CONFIG.num_frames; ++i) {
     const auto test_data = std::vector<std::byte>(CONFIG.frame_length, static_cast<std::byte>(i));
-    REQUIRE(buffer.visitToWrite([&test_data](std::span<std::byte> frame) {
-      std::copy(test_data.begin(), test_data.end(), frame.begin());
-    }));
+    REQUIRE(buffer.visitToWrite(
+        [&test_data](std::span<std::byte> frame) { std::ranges::copy(test_data, frame.begin()); }));
     REQUIRE(buffer.count() == i + 1);
   }
 
@@ -36,7 +35,7 @@ TEST_CASE("Writes and reads are in FIFO order", "[FIFOBuffer]") {
   for (std::size_t i = 0; i < CONFIG.num_frames; ++i) {
     std::vector<std::byte> read_data(CONFIG.frame_length, static_cast<std::byte>(0xff));
     REQUIRE(buffer.visitToRead([&read_data](std::span<const std::byte> frame) {
-      std::copy(frame.begin(), frame.end(), read_data.begin());
+      std::ranges::copy(frame, read_data.begin());
     }));
     REQUIRE(buffer.count() == CONFIG.num_frames - i - 1);
     REQUIRE(std::vector<std::byte>(CONFIG.frame_length, static_cast<std::byte>(i)) == read_data);

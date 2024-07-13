@@ -55,11 +55,11 @@ auto PinConfig::sort() -> std::vector<Signal>::const_iterator {
   };
 
   // sort for locality and faster access to signals later on
-  std::sort(signals_.begin(), signals_.end(), sort_by_role_and_address);
+  std::ranges::sort(signals_, sort_by_role_and_address);
 
   // return the location of first controllable
-  return std::find_if(signals_.begin(), signals_.end(),
-                      [](const Signal& s) { return s.role == Signal::Role::Control; });
+  return std::ranges::find_if(signals_,
+                              [](const Signal& s) { return s.role == Signal::Role::Control; });
 }
 
 //-------------------------------------------------------------------------------------------------

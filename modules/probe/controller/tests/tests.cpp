@@ -34,7 +34,7 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
     return ((a.role == b.role) ? (a.address < b.address) : (a.role == Signal::Role::Watch));
   };
 
-  CHECK(std::is_sorted(signals.begin(), signals.end(), sort_predicate));
+  CHECK(std::ranges::is_sorted(signals, sort_predicate));
   CHECK(std::all_of(controllables_start, signals.end(),
                     [r = Role::Control](const auto& s) { return s.role == r; }));
   CHECK(std::all_of(signals.begin(), controllables_start,
