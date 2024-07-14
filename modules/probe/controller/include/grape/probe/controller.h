@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cinttypes>
 #include <expected>
+#include <ranges>
 #include <span>
 #include <string>
 #include <vector>
@@ -42,7 +43,7 @@ public:
   /// Reorder the signals array by their location in the process address space but partition it to
   /// put watchables first and controllables after.
   /// @return Location of first controllable in the array
-  [[nodiscard]] auto sort() -> std::vector<Signal>::const_iterator;
+  [[nodiscard]] auto sort() -> std::ranges::subrange<std::vector<Signal>::const_iterator>;
 
 private:
   std::vector<Signal> signals_;
@@ -133,7 +134,7 @@ public:
 
 private:
   PinConfig pins_;
-  std::vector<Signal>::const_iterator controllables_begin_;
+  std::ranges::subrange<std::vector<Signal>::const_iterator> controllables_;
   Receiver receiver_;
   realtime::FIFOBuffer snaps_;
   realtime::FIFOBuffer pending_syncs_;

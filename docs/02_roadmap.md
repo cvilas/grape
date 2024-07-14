@@ -25,8 +25,9 @@
   - :done: Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
   - :done: Make sure static libs are built and installed when requested.
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
+  - New examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 - C++/Python interop
-  - Data serdes backend (low overhead, type-safe, fast): zenoh default serdes, *flatbuffers*, protobufs
+  - Data serdes backend (low overhead, type-safe, fast): zenoh serdes, *flatbuffers*
   - concept `serialisable`
   - Code interop (do we even need it if data structures are interoperable with IPC?): swig, pybind11 
 
