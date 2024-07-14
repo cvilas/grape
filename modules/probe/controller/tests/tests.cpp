@@ -20,25 +20,27 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   // configure the pins
   using Role = grape::probe::Signal::Role;
   auto pins = grape::probe::PinConfig()
-                  .pin("timestamp", timestamp, Role::Watch)    //
-                  .pin("amplitude", amplitude, Role::Control)  //
-                  .pin("frequency", frequency, Role::Control)  //
+                  .pin("timestamp", timestamp, Role::Timestamp)  //
+                  .pin("amplitude", amplitude, Role::Control)    //
+                  .pin("frequency", frequency, Role::Control)    //
                   .pin("waveforms", std::span<const double>{ waveforms }, Role::Watch);
 
   using Signal = grape::probe::Signal;
-  const auto controllables_start = pins.sort();
+  const auto controllables = pins.sort();
+  CHECK(controllables.size() == 2);
   const auto& signals = pins.signals();
 
-  // check pins are sorted and controllables are at the back
+  // check pins are sorted by address and role
   const auto sort_predicate = [](const Signal& a, const Signal& b) {
-    return ((a.role == b.role) ? (a.address < b.address) : (a.role == Signal::Role::Watch));
+    if (a.role == b.role) {
+      return (a.address < b.address);
+    }
+    return (a.role < b.role);
   };
 
   CHECK(std::ranges::is_sorted(signals, sort_predicate));
-  CHECK(std::all_of(controllables_start, signals.end(),
-                    [r = Role::Control](const auto& s) { return s.role == r; }));
-  CHECK(std::all_of(signals.begin(), controllables_start,
-                    [r = Role::Watch](const auto& s) { return s.role == r; }));
+  CHECK(std::ranges::all_of(controllables,
+                            [r = Role::Control](const auto& s) { return s.role == r; }));
 
   // configure the capture buffers
   static constexpr auto BUFFER_CONFIG = grape::probe::BufferConfig{

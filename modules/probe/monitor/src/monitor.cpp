@@ -87,7 +87,7 @@ ScrollingBuffer::ScrollingBuffer(std::size_t length,
   signal_offsets_in_frame_.resize(num_signals);
   for (auto signal_number = 0u; signal_number < num_signals; ++signal_number) {
     const auto& signal_info = signals_info_.at(signal_number);
-    if (signal_info.name.cStr() == std::string("timestamp")) {
+    if (signal_info.role == grape::probe::Signal::Role::Timestamp) {
       timestamp_offset_in_frame_ = frame_size_;
     }
     signal_offsets_in_frame_[signal_number] = frame_size_;
@@ -437,7 +437,7 @@ void Monitor::drawPlots() {
   for (auto signal_number = 0u; signal_number < signals_info.size(); ++signal_number) {
     const auto signal = signals_info.at(signal_number);
     const auto* signal_name = signal.name.cStr();
-    if (signal_name == std::string("timestamp")) {
+    if (signal.role == Signal::Role::Timestamp) {
       continue;
     }
     if (signal.role == Signal::Role::Watch) {

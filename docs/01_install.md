@@ -4,7 +4,7 @@
 
 OS               | Architecture  | Compiler
 -----------------|---------------|----------------
-Ubuntu 24.04 LTS | Arm64, X86_64 | clang-18 ~~gcc-14~~
+Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 ~~gcc-14~~
 
 ## Setup build environment
 
@@ -33,7 +33,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-18 ~~gcc-14~~
 
     ```bash
     wget https://apt.llvm.org/llvm.sh
-    export CLANG_VERSION=18 # Replace with latest version number
+    export CLANG_VERSION=19 # Replace with latest version number
     chmod +x llvm.sh
     sudo ./llvm.sh $CLANG_VERSION
     sudo apt install clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
