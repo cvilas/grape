@@ -95,7 +95,7 @@ template <typename T, class DATA_T>
 constexpr void panic(std::string message, DATA_T data,                                 //
                      std::source_location location = std::source_location::current(),  //
                      utils::StackTrace trace = utils::StackTrace::current()) {
-  throw T{ message, data, location, trace };
+  throw T{ std::move(message), data, location, std::move(trace) };
 }
 
 }  // namespace grape

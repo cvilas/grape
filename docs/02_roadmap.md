@@ -17,13 +17,16 @@
 
 ## Phase 3 - Multimodel data logging and visualisation - part 2
 
-- Production-ready implementation of Monitor (See TODO in Monitor/README)
-- [mcap](https://mcap.dev/) reader/writer
+- Improvements to `probe::Monitor` (See TODO in Monitor/README)
+- Disk logging
+  - csv reader/writer
+  - [mcap](https://mcap.dev/) reader/writer
 - Pin zenoh version to 1.0.0
   - Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
   - Make sure static libs are built and installed when requested.
   - Implement new zenoh features as examples
 - C++/Python interop
+  - Choose Python support backend: swig, pybind11 
   - Choose serdes backend: low overhead, type-safe, fast
   - concept `serialisable`
 
@@ -44,6 +47,13 @@
 - HW IO
   - CANopen
   - joystick
+  - midi
+- Math library
+  - Delay line
+  - Low pass filter
+  - Differentiator
+  - Integrator
+  - Matrix operations
 - Behaviour trees: Consider building from first principles
 - FSM: introspectable, visualise state transition graph using graphviz.
 - PoC IPC experiments

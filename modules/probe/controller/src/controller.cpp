@@ -48,24 +48,27 @@ auto PinConfig::signals() const -> const std::vector<Signal>& {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto PinConfig::sort() -> std::vector<Signal>::const_iterator {
-  const auto sort_by_role_and_address = [](const Signal& i1, const Signal& i2) -> bool {
-    // if roles are the same, compare by address; otherwise, watchables come first
-    return ((i1.role == i2.role) ? (i1.address < i2.address) : (i1.role == Signal::Role::Watch));
+auto PinConfig::sort() -> std::ranges::subrange<std::vector<Signal>::const_iterator> {
+  const auto compare_by_role_and_address = [](const Signal& i1, const Signal& i2) -> bool {
+    // compare by role, and if roles are the same, then compare by address
+    if (i1.role == i2.role) {
+      return (i1.address < i2.address);
+    }
+    return (i1.role < i2.role);
   };
 
-  // sort for locality and faster access to signals later on
-  std::ranges::sort(signals_, sort_by_role_and_address);
+  // sort by role and locality for faster access to signals
+  std::ranges::sort(signals_, compare_by_role_and_address);
 
-  // return the location of first controllable
-  return std::ranges::find_if(signals_,
-                              [](const Signal& s) { return s.role == Signal::Role::Control; });
+  // return sub-range of Role::Control
+  return std::ranges::equal_range(signals_, Signal::Role::Control, {},
+                                  [](const auto& s) { return s.role; });
 }
 
 //-------------------------------------------------------------------------------------------------
 Controller::Controller(PinConfig&& pins, const BufferConfig& buffer_config, Receiver&& receiver)
   : pins_{ std::move(pins) }
-  , controllables_begin_(pins_.sort())
+  , controllables_(pins_.sort())
   , receiver_(std::move(receiver))
   , snaps_({ .frame_length = calcSnapFrameSize(pins_.signals()),
              .num_frames = buffer_config.snap_buffer_capacity })
@@ -139,8 +142,8 @@ auto Controller::qset(const std::string& name,
                       std::span<const std::byte> value) -> std::expected<void, Error> {
   const auto& signals = pins_.signals();
 
-  const auto it = std::find_if(controllables_begin_, signals.end(),
-                               [&name](const auto& s) { return (name == s.name.cStr()); });
+  const auto it = std::ranges::find_if(controllables_,
+                                       [&name](const auto& s) { return (name == s.name.cStr()); });
 
   if (it == signals.end()) {
     return std::unexpected(Error::SignalNotFound);
