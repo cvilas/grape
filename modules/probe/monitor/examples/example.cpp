@@ -45,9 +45,9 @@ auto main() -> int {
     // configure the pins
     using Role = grape::probe::Signal::Role;
     auto pin_config = grape::probe::PinConfig()
-                          .pin("timestamp", timestamp, Role::Watch)    //
-                          .pin("amplitude", amplitude, Role::Control)  //
-                          .pin("frequency", frequency, Role::Control)  //
+                          .pin("timestamp", timestamp, Role::Timestamp)  //
+                          .pin("amplitude", amplitude, Role::Control)    //
+                          .pin("frequency", frequency, Role::Control)    //
                           .pin("waveforms", std::span<const double>{ waveforms }, Role::Watch);
 
     // configure the capture buffers

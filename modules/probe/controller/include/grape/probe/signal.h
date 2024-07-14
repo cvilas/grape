@@ -19,8 +19,9 @@ struct Signal {
 
   /// Describes how the signal is utilised
   enum class Role : std::uint8_t {
-    Watch,   //!< logging only (read only)
-    Control  //!< loggable and remotely settable (read and write)
+    Timestamp,  //!< Signal designated as timestamp. Only one such instance should exist
+    Watch,      //!< Signal designated for logging only (read only)
+    Control     //!< Signal designated for logging _and_ remote control (read and write)
   };
 
   static constexpr auto MAX_NAME_LENGTH = 63;

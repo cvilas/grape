@@ -54,6 +54,7 @@
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
   - New examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 - External deps: Replace git clone with direct download of tarballs
+- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Phase 5 - Robotics core
 
@@ -83,7 +84,6 @@
   - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Phase 6 - 3D graphics
 
