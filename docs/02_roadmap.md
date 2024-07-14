@@ -24,6 +24,7 @@
   - [mcap](https://mcap.dev/) reader/writer
 - Pin zenoh version to 1.0.0
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
+  - New examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 
 ## Phase 4 - Robotics core
 

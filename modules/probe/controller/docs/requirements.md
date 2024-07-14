@@ -1,5 +1,5 @@
 # Probe design guidelines
- 
+
 ## Definitions
 
 - Plant: The real-time (RT) controlled process, likely running on an embedded processor  
@@ -22,7 +22,7 @@
 - Controller 
   - _Shall_ provide mechanism to register Watchables that are available for remote observation from the Monitor
   - _Shall_ provide mechanism to register Controllables that are available for remote observation and manipulation from the Monitor
-  - _Shall_ transport records to the Monitor in batches periodically at a user-defined rate which could be slower than the process update date. Rationale: Although records are captured at the end of every process update step, transmitting them to the Monitor at the same rate may not be efficient for high process update frequencies.   
+  - _Shall_ transport records to the Monitor in batches periodically at a user-defined rate which could be slower than the process update date. Rationale: Although records are captured at the end of every process update step, transmitting them to the Monitor at the same rate may not be efficient for high process update frequencies.
 - Monitor
   - _Shall_ provide mechanism to start/stop monitoring
   - _Shall_ provide mechanism to select Watchables for display in the appropriate format (2D plot, bar graph, analogue meters, digital indicators)
