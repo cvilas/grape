@@ -44,11 +44,11 @@ define_module_example(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
-define_module_example(
-  NAME zenoh_query_sub
-  SOURCES zenoh_query_sub.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
+#define_module_example(
+#  NAME zenoh_query_sub
+#  SOURCES zenoh_query_sub.cpp
+#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+#  PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME zenoh_query_get
@@ -92,11 +92,11 @@ define_module_example(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
-define_module_example(
-  NAME zenoh_pub_cache
-  SOURCES zenoh_pub_cache.cpp examples_utils.h
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
+#define_module_example(
+#  NAME zenoh_pub_cache
+#  SOURCES zenoh_pub_cache.cpp examples_utils.h
+#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+#  PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME zenoh_sub
@@ -104,11 +104,11 @@ define_module_example(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
-define_module_example(
-  NAME zenoh_pull
-  SOURCES zenoh_pull.cpp examples_utils.h
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
+#define_module_example(
+#  NAME zenoh_pull
+#  SOURCES zenoh_pull.cpp examples_utils.h
+#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+#  PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME zenoh_pub_client

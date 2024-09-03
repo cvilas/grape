@@ -26,31 +26,22 @@ auto main() -> int {
     static constexpr auto PARAM = "default";
     static constexpr auto QUERY = "hello";
 
-    auto config = zenohc::Config();
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Sending Query '{}?{}/{}'...", KEY, PARAM, QUERY);
-    auto opts = zenohc::GetOptions();
-    opts.set_value(QUERY);
-    opts.set_target(Z_QUERY_TARGET_ALL);  //!< query all matching queryables
-
     static constexpr auto MAX_REPLIES = 16;  //!< handle these many replies
-    auto [send, recv] = zenohc::reply_fifo_new(MAX_REPLIES);
-    if (not session.get(KEY, PARAM, std::move(send), opts)) {
-      std::println("Query unsuccessful");
-      return EXIT_FAILURE;
+    auto replies = session.get(KEY, PARAM, zenoh::channels::FifoChannel(MAX_REPLIES),
+                               { .target = zenoh::QueryTarget::Z_QUERY_TARGET_ALL,
+                                 .payload = zenoh::Bytes::serialize(QUERY) });
+
+    for (auto res = replies.recv(); std::holds_alternative<zenoh::Reply>(res);
+         res = replies.recv()) {
+      const auto& sample = std::get<zenoh::Reply>(res).get_ok();
+      std::println(">> Received ('{}' : '{}')", sample.get_keyexpr().as_string_view(),
+                   sample.get_payload().deserialize<std::string>());
     }
 
-    auto reply = zenohc::Reply(nullptr);
-    for (recv(reply); reply.check(); recv(reply)) {
-      try {
-        auto sample = grape::ipc::expect<zenohc::Sample>(reply.get());
-        std::println(">> Received ('{}' : '{}')", sample.get_keyexpr().as_string_view(),
-                     sample.get_payload().as_string_view());
-      } catch (const std::exception& ex) {
-        std::println("Exception in reply: {}", ex.what());
-      }
-    }
     return EXIT_SUCCESS;
   } catch (...) {
     grape::AbstractException::consume();

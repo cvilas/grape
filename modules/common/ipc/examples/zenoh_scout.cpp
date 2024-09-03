@@ -2,9 +2,9 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <chrono>
+#include <atomic>
 #include <print>
-#include <thread>
+#include <ranges>
 
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
@@ -14,28 +14,34 @@
 // scouting works in a deployment consisting of peers, clients and routers, see
 // https://zenoh.io/docs/getting-started/deployment/
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_scout.c
+// Derived from:
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_scout.cxx
 //=================================================================================================
-
-namespace {
-
-//-------------------------------------------------------------------------------------------------
-void onDiscovery(const zenohc::HelloView& hello) {
-  std::println("Hello from pid: {}, WhatAmI: {}, locators: {}",
-               grape::ipc::toString(hello.get_id()), grape::ipc::toString(hello.get_whatami()),
-               grape::ipc::toString(hello.get_locators()));
-}
-
-}  // namespace
 
 //=================================================================================================
 auto main() -> int {
   try {
-    zenohc::ScoutingConfig config;
+    std::atomic_flag done_flag = ATOMIC_FLAG_INIT;
+
+    const auto on_hello = [](const zenoh::Hello& hello) {
+      std::println("Hello from pid: {}, WhatAmI: {}, locators: {}",
+                   grape::ipc::toString(hello.get_id()), grape::ipc::toString(hello.get_whatami()),
+                   hello.get_locators());
+    };
+
+    const auto on_good_bye = [&done_flag]() {
+      done_flag.test_and_set();
+      done_flag.notify_one();
+    };
+
     std::println("Scouting..");
-    const auto success = zenohc::scout(std::move(config), onDiscovery);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::println("{}", success ? "success" : "failed");
+    auto config = zenoh::Config::create_default();
+    static constexpr auto SCOUT_DURATION = std::chrono::milliseconds(4000);
+    zenoh::scout(std::move(config), on_hello, on_good_bye,
+                 { .timeout_ms = SCOUT_DURATION.count() });
+    done_flag.wait(false);
+    std::println("done");
+
     return EXIT_SUCCESS;
   } catch (...) {
     grape::AbstractException::consume();

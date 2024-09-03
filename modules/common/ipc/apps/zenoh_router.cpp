@@ -62,25 +62,17 @@ auto main(int argc, const char* argv[]) -> int {
       throw grape::conio::ProgramOptions::Error{ addr_opt.error() };
     }
 
-    zenohc::Config config;
-
     // configure as router
-    if (not config.insert_json(Z_CONFIG_MODE_KEY, R"("router")")) {
-      std::println("Setting mode failed");
-      return EXIT_FAILURE;
-    }
+    auto config = zenoh::Config::create_default();
+    config.insert_json(Z_CONFIG_MODE_KEY, R"("router")");
 
-    const auto listener_endpoint =
-        std::format(R"(["tcp/{}:{}"])", addr_opt.value(), port_opt.value());
-    if (not config.insert_json(Z_CONFIG_LISTEN_KEY, listener_endpoint.c_str())) {
-      std::println("Setting listening to {} failed", listener_endpoint);
-      return EXIT_FAILURE;
-    }
+    const auto listen_on = std::format(R"(["tcp/{}:{}"])", addr_opt.value(), port_opt.value());
+    config.insert_json(Z_CONFIG_LISTEN_KEY, listen_on);
 
     // start session
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
-    std::println("Router listening on {}", listener_endpoint);
-    std::println("PID: {}", grape::ipc::toString(session.info_zid()));
+    auto session = zenoh::Session::open(std::move(config));
+    std::println("Router listening on {}", listen_on);
+    std::println("PID: {}", grape::ipc::toString(session.get_zid()));
 
     std::println("Press ctrl-c to exit");
     s_exit.wait(false);

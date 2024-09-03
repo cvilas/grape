@@ -27,38 +27,46 @@ auto main() -> int {
     static constexpr auto PARAM = "default";
     static constexpr auto QUERY = "hello";
 
-    auto config = zenohc::Config();
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Sending Query '{}?{}/{}'...", KEY, PARAM, QUERY);
-    auto opts = zenohc::GetOptions();
-    opts.set_value(QUERY);
-    opts.set_target(Z_QUERY_TARGET_ALL);  //!< query all matching queryables
-
     static constexpr auto MAX_REPLIES = 16;  //!< handle these many replies
-    auto [send, recv] = zenohc::reply_non_blocking_fifo_new(MAX_REPLIES);  //!< non-blocking
-    if (not session.get(KEY, PARAM, std::move(send), opts)) {
-      std::println("Query unsuccessful");
-      return EXIT_FAILURE;
-    }
+    auto replies = session.get(KEY, PARAM, zenoh::channels::FifoChannel(MAX_REPLIES),
+                               { .target = zenoh::QueryTarget::Z_QUERY_TARGET_ALL,
+                                 .payload = zenoh::Bytes::serialize(QUERY) });
 
-    auto reply = zenohc::Reply(nullptr);
-    static constexpr auto WAIT_FOR_RESPONSE = std::chrono::seconds(1);
-    for (bool success = recv(reply); !success || reply.check(); success = recv(reply)) {
-      try {
-        if (!success) {
-          std::print(".");
-          std::this_thread::sleep_for(WAIT_FOR_RESPONSE);
-          continue;
-        }
-        auto sample = grape::ipc::expect<zenohc::Sample>(reply.get());
-        std::println("\n>> Received ('{}' : '{}')", sample.get_keyexpr().as_string_view(),
-                     sample.get_payload().as_string_view());
-      } catch (const std::exception& ex) {
-        std::println("Exception in reply: {}", ex.what());
+    auto poll = true;
+    while (poll) {
+      const auto res = replies.try_recv();
+
+      // handle response
+      if (std::holds_alternative<zenoh::Reply>(res)) {
+        const auto& sample = std::get<zenoh::Reply>(res).get_ok();
+        std::println(">> Received ('{}' : '{}')", sample.get_keyexpr().as_string_view(),
+                     sample.get_payload().deserialize<std::string>());
       }
-    }
+
+      // handle error
+      if (std::holds_alternative<zenoh::channels::RecvError>(res)) {
+        switch (std::get<zenoh::channels::RecvError>(res)) {
+          case zenoh::channels::RecvError::Z_NODATA: {
+            std::println("No data available yet");
+            static constexpr auto WAIT_FOR_REPLY = std::chrono::milliseconds(1000);
+            std::this_thread::sleep_for(WAIT_FOR_REPLY);
+            break;
+          }
+          case zenoh::channels::RecvError::Z_DISCONNECTED: {
+            std::println("Channel disconnected");
+            poll = false;
+            break;
+          }
+        }  // error type
+      }  // recv error
+    }  // while
+
     return EXIT_SUCCESS;
+
   } catch (...) {
     grape::AbstractException::consume();
     return EXIT_FAILURE;

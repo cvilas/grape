@@ -42,21 +42,19 @@ auto main(int argc, const char* argv[]) -> int {
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
-    zenohc::Config config;
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Declaring Publisher on '{}'", key);
-    auto pub = grape::ipc::expect<zenohc::Publisher>(session.declare_publisher(key));
+    auto pub = session.declare_publisher(key);
 
-    zenohc::PublisherPutOptions options;
-    options.set_encoding(Z_ENCODING_PREFIX_TEXT_PLAIN);
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
     uint64_t idx = 0;
     while (true) {
       const auto msg = std::format("[{}] {}", idx++, value);
       std::println("Publishing Data ('{} : {})", key, msg);
-      pub.put(msg);
+      pub.put(zenoh::Bytes::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;

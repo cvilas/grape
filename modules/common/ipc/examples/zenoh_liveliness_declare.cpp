@@ -6,14 +6,12 @@
 #include <thread>
 
 #include "examples_utils.h"
-#include "grape/conio/conio.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
 // Declares a liveliness token on a given key expression. This token will be seen alive by the
-// zenoh_get_liveliness and zenoh_sub_liveliness until user explicitely drops the token by
-// pressing 'd' or implicitely dropped by terminating or killing this example.
+// zenoh_get_liveliness and zenoh_sub_liveliness until the token is undeclared.
 //
 // Typical usage:
 // ```bash
@@ -22,7 +20,8 @@
 //
 // Paired with example: zenoh_liveliness_get, zenoh_liveliness_sub
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_liveliness.c
+// Derived from:
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/zenohc/z_liveliness.cxx
 //=================================================================================================
 
 //=================================================================================================
@@ -41,39 +40,17 @@ auto main(int argc, const char* argv[]) -> int {
     }
     const auto& args = args_opt.value();
 
-    zenohc::Config config;
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
-
-    //----
-    // Note: The rest of this application uses the C API because the C++ API does not expose
-    // liveliness yet (Dec 2023)
-    //----
-
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    auto token = zc_owned_liveliness_token_t();
-    const auto toggle_liveliness = [&session, &token, &key] {
-      if (!z_check(token)) {
-        token = zc_liveliness_declare_token(session.loan(), z_keyexpr(key.c_str()), nullptr);
-        std::println("Liveliness token {}", z_check(token) ? "declared" : "declaration failed");
-      } else {
-        z_drop(z_move(token));
-        std::println("Liveliness token undeclared");
-      }
-    };
 
-    toggle_liveliness();
+    std::println("Declaring liveliness token for '{}'", key);
+    [[maybe_unused]] const auto token = session.liveliness_declare_token(key);
 
-    std::println("Enter 'd' to undeclare/declare liveliness token for '{}', 'q' to quit...", key);
+    std::println("Press CTRL-C to undeclare token and quit");
     while (true) {
-      const auto c = grape::conio::kbhit() ? grape::conio::getch() : 0;
-      if (c == 'q') {
-        break;
-      }
-      if (c == 'd') {
-        toggle_liveliness();
-      }
-      static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
+      static constexpr auto LOOP_WAIT = std::chrono::milliseconds(1000);
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;

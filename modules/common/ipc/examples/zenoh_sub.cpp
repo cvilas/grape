@@ -40,7 +40,11 @@ auto main(int argc, const char* argv[]) -> int {
     const auto& args = args_opt.value();
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
 
-    zenohc::Config config;
+    auto config = zenoh::Config::create_default();
+
+    //-----------------------------------------
+    // TODO: Review and confirm shared memory configuration is correct
+    //-----------------------------------------
 
     // Enable shared-memory on the subscriber to take advantage of publishers on the same host who
     // may be publishing over shared-memory. See also zenoh_pub_shm.cpp
@@ -53,22 +57,20 @@ auto main(int argc, const char* argv[]) -> int {
     // notify subscribers of the shared-memory segment to read. Therefore, for very small messages,
     // shared-memory transport could be less efficient than using the default network transport
     // to directly carry the payload
-    if (not config.insert_json("transport/shared_memory/enabled", "true")) {
-      std::println("Error enabling Shared Memory");
-      return EXIT_FAILURE;
-    }
+    config.insert_json("transport/shared_memory/enabled", "true");
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Declaring Subscriber on '{}'", key);
-    const auto cb = [](const zenohc::Sample& sample) {
+    const auto cb = [](const zenoh::Sample& sample) {
+      const auto ts = sample.get_timestamp();
       std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::toString(sample.get_kind()),
                    sample.get_keyexpr().as_string_view(),
-                   grape::ipc::toString(sample.get_timestamp()),
-                   sample.get_payload().as_string_view());
+                   (ts ? grape::ipc::toString(ts.value()) : "--no timestamp--"),
+                   sample.get_payload().deserialize<std::string>());
     };
 
-    auto subs = grape::ipc::expect<zenohc::Subscriber>(session.declare_subscriber(key, cb));
+    auto subs = session.declare_subscriber(key, cb, zenoh::closures::none);
     std::println("Subscriber on '{}' declared", subs.get_keyexpr().as_string_view());
 
     std::println("Press any key to exit");

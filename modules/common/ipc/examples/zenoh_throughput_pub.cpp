@@ -19,7 +19,8 @@
 //
 // Paired with example: zenoh_throughput_sub.cpp
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_pub_thr.c
+// Derived from:
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pub_thr.cxx
 //=================================================================================================
 
 //=================================================================================================
@@ -40,14 +41,14 @@ auto main(int argc, const char* argv[]) -> int {
     const auto value = std::vector<uint8_t>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 
-    auto config = zenohc::Config();
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     static constexpr auto TOPIC = "grape/ipc/example/zenoh/throughput";
-    zenohc::PublisherOptions popt;
-    popt.set_congestion_control(zenohc::CongestionControl::Z_CONGESTION_CONTROL_BLOCK);
-    auto pub = grape::ipc::expect<zenohc::Publisher>(session.declare_publisher(TOPIC, popt));
+    auto pub =
+        session.declare_publisher(TOPIC, { .congestion_control = Z_CONGESTION_CONTROL_BLOCK });
 
+    std::println("Press CTRL-C to quit");
     while (true) {
       pub.put(value);
     }

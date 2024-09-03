@@ -10,27 +10,31 @@
 //=================================================================================================
 // Example program gets unique IDs of endpoints the Zenoh session knows about.
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_info.c
+// Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_info.cxx
 //=================================================================================================
 
 //=================================================================================================
 auto main() -> int {
   try {
-    zenohc::Config config;
+    auto config = zenoh::Config::create_default();
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto session = zenoh::Session::open(std::move(config));
 
-    const auto print_id = [](const zenohc::Id& id) {
+    const auto print_id = [](const zenoh::Id& id) {
       std::println("\t{}", grape::ipc::toString(id));
     };
     std::println("Own id:");
-    print_id(session.info_zid());
+    print_id(session.get_zid());
 
     std::println("Router ids:");
-    session.info_routers_zid(print_id);
+    for (const auto zid : session.get_routers_z_id()) {
+      print_id(zid);
+    }
 
     std::println("Peer ids:");
-    session.info_peers_zid(print_id);
+    for (const auto zid : session.get_peers_z_id()) {
+      print_id(zid);
+    }
     return EXIT_SUCCESS;
   } catch (...) {
     grape::AbstractException::consume();

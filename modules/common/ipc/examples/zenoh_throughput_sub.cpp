@@ -17,7 +17,8 @@
 //
 // Paired with example: zenoh_throughput_pub.cpp
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_sub_thr.c
+// Derived from:
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_sub_thr.cxx
 //=================================================================================================
 
 namespace {
@@ -46,16 +47,16 @@ void Statistics::print() const {
 //=================================================================================================
 auto main() -> int {
   try {
-    auto config = zenohc::Config();
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     Statistics stats;
 
     static constexpr auto TOPIC = "grape/ipc/example/zenoh/throughput";
-    const auto cb = [&stats](const zenohc::Sample& sample) {
+    const auto cb = [&stats](const zenoh::Sample& sample) {
       static constexpr std::array<char, 4> PROGRESS{ '|', '/', '-', '\\' };
       std::print("\r[{}]", PROGRESS.at(stats.msg_count % 4));
-      stats.total_bytes += sample.get_payload().get_len();
+      stats.total_bytes += sample.get_payload().size();
       if (stats.msg_count == 0) {
         stats.start = std::chrono::high_resolution_clock::now();
         stats.msg_count++;
@@ -68,15 +69,13 @@ auto main() -> int {
       }
     };
 
-    auto sub = grape::ipc::expect<zenohc::Subscriber>(session.declare_subscriber(TOPIC, cb));
+    auto sub = session.declare_subscriber(TOPIC, cb, zenoh::closures::none);
 
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
     while (not grape::conio::kbhit()) {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
-    sub.drop();
-
     std::println("Exiting. Final stats:");
     stats.print();
 

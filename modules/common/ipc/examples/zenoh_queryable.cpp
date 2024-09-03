@@ -15,37 +15,32 @@
 //
 // Paired with examples: zenoh_query_get.cpp, zenoh_query_get_channel.cpp
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_queryable.c
+// Derived from:
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_queryable.cxx
 //=================================================================================================
-
-namespace {
-
-//-------------------------------------------------------------------------------------------------
-void queryHandler(const zenohc::Query& query) {
-  const auto keystr = query.get_keyexpr();
-  const auto pred = query.get_parameters();
-  const auto payload = query.get_value();
-  std::println(">> Received Query '{}?{}' with value '{}'", keystr.as_string_view(),
-               pred.as_string_view(), payload.get_payload().as_string_view());
-  auto options = zenohc::QueryReplyOptions();
-  options.set_encoding(Z_ENCODING_PREFIX_TEXT_PLAIN);
-  static constexpr auto QUERY_RESULTS = "This is a response from Queryable";
-  query.reply(keystr, QUERY_RESULTS, options);
-}
-
-}  // namespace
 
 //=================================================================================================
 auto main() -> int {
   try {
-    auto config = zenohc::Config();
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     static constexpr auto KEY = "grape/ipc/example/zenoh/queryable";
 
     std::println("Declaring Queryable on '{}'", KEY);
-    auto qable =
-        grape::ipc::expect<zenohc::Queryable>(session.declare_queryable(KEY, queryHandler));
+    const auto on_query = [](const zenoh::Query& query) {
+      const auto& keyexpr = query.get_keyexpr();
+      const auto params = query.get_parameters();
+      const auto payload = query.get_payload();
+      std::println(">> Received Query '{}?{}' with value '{}'", keyexpr.as_string_view(), params,
+                   payload.has_value() ? payload->get().deserialize<std::string>() : "none");
+      const auto* const response = "This is a response from Queryable";
+      query.reply(keyexpr, zenoh::Bytes::serialize(response),
+                  { .encoding = zenoh::Encoding("text/plain") });
+    };
+
+    const auto on_drop_queryable = []() { std::println("Destroying queryable"); };
+    [[maybe_unused]] auto qable = session.declare_queryable(KEY, on_query, on_drop_queryable);
 
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
