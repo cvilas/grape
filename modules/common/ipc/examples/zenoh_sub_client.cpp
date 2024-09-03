@@ -58,32 +58,28 @@ auto main(int argc, const char* argv[]) -> int {
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto router = grape::ipc::ex::getOptionOrThrow<std::string>(args, "router");
 
-    zenohc::Config config;
+    auto config = zenoh::Config::create_default();
 
     // configure as client
-    if (not config.insert_json(Z_CONFIG_MODE_KEY, R"("client")")) {
-      std::println("Setting mode failed");
-      return EXIT_FAILURE;
-    }
+    config.insert_json(Z_CONFIG_MODE_KEY, R"("client")");
 
     // configure router to connect to
     const auto router_endpoint = std::format(R"(["tcp/{}"])", router);
-    if (not config.insert_json(Z_CONFIG_CONNECT_KEY, router_endpoint.c_str())) {
-      std::println("Error setting endpoint {}", router_endpoint);
-      return EXIT_FAILURE;
-    }
+    config.insert_json(Z_CONFIG_CONNECT_KEY, router_endpoint);
 
     // open session and print some info
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto session = zenoh::Session::open(std::move(config));
     std::println("Configured as client for router at {}", router_endpoint);
 
-    const auto cb = [](const zenohc::Sample& sample) {
+    const auto cb = [](const zenoh::Sample& sample) {
+      const auto ts = sample.get_timestamp();
       std::println(">> Received {} ([{}] '{}' : '{}')", grape::ipc::toString(sample.get_kind()),
-                   grape::ipc::toString(sample.get_timestamp()),
-                   sample.get_keyexpr().as_string_view(), sample.get_payload().as_string_view());
+                   (ts ? grape::ipc::toString(ts.value()) : "--no timestamp--"),
+                   sample.get_keyexpr().as_string_view(),
+                   sample.get_payload().deserialize<std::string>());
     };
 
-    auto subs = grape::ipc::expect<zenohc::Subscriber>(session.declare_subscriber(key, cb));
+    auto subs = session.declare_subscriber(key, cb, zenoh::closures::none);
     std::println("Subscriber started on '{}'", subs.get_keyexpr().as_string_view());
 
     std::println("Press ctrl-c to exit");

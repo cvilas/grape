@@ -47,10 +47,9 @@ endmacro()
 
 # -------------------------------------------------------------------------------------------------
 # zenohcxx
-# TODO: Pin to specific version number when released
 if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
   # install zenoh-c first 
-  find_package(zenohc QUIET) # ${ZENOHC_VERSION_REQUIRED} QUIET)
+  find_package(zenohc ${ZENOHC_VERSION_REQUIRED} QUIET)
   if(zenohc_FOUND)
     message(STATUS "zenohc: Using version ${zenohc_VERSION} from ${zenohc_DIR}")
     add_dummy_target(zenohc)
@@ -59,12 +58,14 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       zenohc
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-c.git"
-      GIT_TAG main # TODO v${ZENOHC_VERSION_REQUIRED}
+      GIT_TAG ${ZENOHC_VERSION_REQUIRED}
       GIT_SHALLOW true
-      CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} -DCMAKE_VERBOSE_MAKEFILE=ON)
+      CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+      -DZENOHC_BUILD_WITH_UNSTABLE_API=ON -DZENOHC_BUILD_WITH_SHARED_MEMORY=ON # shm requires both
+      -DCMAKE_VERBOSE_MAKEFILE=ON)
   endif()
 
-  find_package(zenohcxx QUIET) # TODO ${ZENOHCXX_VERSION_REQUIRED} QUIET)
+  find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} QUIET)
   if(zenohcxx_FOUND)
     message(STATUS "zenohcxx: Using version ${zenohcxx_VERSION} from ${zenohcxx_DIR}")
     add_dummy_target(zenohcxx)
@@ -73,11 +74,10 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       zenohcxx
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-cpp.git"
-      GIT_TAG main # TODO v${ZENOHCXX_VERSION_REQUIRED}
+      GIT_TAG ${ZENOHCXX_VERSION_REQUIRED}
       GIT_SHALLOW true
-      SOURCE_SUBDIR install # configure the 'install' sub-project to avoid building zenoh-c again
       DEPENDS zenohc
-      CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS})
+      CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} -DZENOHCXX_ZENOHC=ON -DZENOHCXX_ZENOHPICO=OFF)
   endif()
 endif()
 

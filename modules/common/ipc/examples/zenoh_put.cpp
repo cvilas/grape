@@ -41,18 +41,12 @@ auto main(int argc, const char* argv[]) -> int {
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
-    zenohc::Config config;
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Putting Data ('{}': '{}')...", key, value);
-    zenohc::PutOptions options;
-    options.set_encoding(Z_ENCODING_PREFIX_TEXT_PLAIN);
-
-    if (not session.put(key, value, options)) {
-      std::println("Put failed");
-      return EXIT_FAILURE;
-    }
+    session.put(key, zenoh::Bytes::serialize(value), { .encoding = zenoh::Encoding("text/plain") });
 
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {

@@ -27,7 +27,6 @@
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    static constexpr size_t NUM_PUTS = 10;
     static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
@@ -44,7 +43,11 @@ auto main(int argc, const char* argv[]) -> int {
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
-    zenohc::Config config;
+    auto config = zenoh::Config::create_default();
+
+    //-----------------------------------------
+    // TODO: Review and confirm shared memory configuration is correct
+    //-----------------------------------------
 
     // Enable the publisher to operate over shared-memory. Note that shared-memory should also be
     // enabled on the subscriber side (see zenoh_sub.cpp).
@@ -57,37 +60,36 @@ auto main(int argc, const char* argv[]) -> int {
     // notify subscribers of the shared-memory segment to read. Therefore, for very small messages,
     // shared-memory transport could be less efficient than using the default network transport
     // to directly carry the payload
-    if (not config.insert_json("transport/shared_memory/enabled", "true")) {
-      std::println("Error enabling Shared Memory");
-      return EXIT_FAILURE;
-    }
+    config.insert_json("transport/shared_memory/enabled", "true");
 
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
-
-    std::println("Creating shared-memory manager...");
-    const auto shm_id = grape::ipc::toString(session.info_zid());
-    static constexpr size_t MAX_MSG_SIZE = 256;
-    static constexpr auto SHM_SIZE = NUM_PUTS * MAX_MSG_SIZE;
-    auto shm_manager =
-        grape::ipc::expect<zenohc::ShmManager>(shm_manager_new(session, shm_id.c_str(), SHM_SIZE));
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Declaring Publisher on '{}'...", key);
-    auto pub = grape::ipc::expect<zenohc::Publisher>(session.declare_publisher(key));
+    auto pub = session.declare_publisher(key);
 
-    // Get shared-memory segments, write data into it, then publish
-    zenohc::PublisherPutOptions options;
-    options.set_encoding(Z_ENCODING_PREFIX_TEXT_PLAIN);
+    std::println("Creating shared-memory manager...");
+    static constexpr auto SHM_SIZE = 65536u;
+    static constexpr auto SHM_ALIGN = 2u;
+    auto shm_provider = zenoh::PosixShmProvider(
+        zenoh::MemoryLayout(SHM_SIZE, zenoh::AllocAlignment({ SHM_ALIGN })));
+
+    std::println("Press CTRL-C to quit...");
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
-    for (size_t idx = 0; idx < NUM_PUTS; ++idx) {
-      auto shm_buf = grape::ipc::expect<zenohc::Shmbuf>(shm_manager.alloc(MAX_MSG_SIZE));
-      const auto msg = std::format("[{}] {}", idx, value);
-      std::copy_n(msg.begin(), std::min(MAX_MSG_SIZE, msg.length()), shm_buf.ptr());
-      std::println("Putting Data ('{}' : '{}')", key, shm_buf.as_string_view());
-      auto payload = shm_buf.into_payload();
-      pub.put_owned(std::move(payload), options);
+    for (int idx = 0; idx < std::numeric_limits<int>::max(); ++idx) {
       std::this_thread::sleep_for(LOOP_WAIT);
+      const auto msg = std::format("[{}] {}", idx, value);
+      std::println("Putting Data ('{}' : '{}')", key, msg);
+
+      std::println("Allocating SHM buffer...");
+      const auto len = msg.length();
+      auto alloc_result = shm_provider.alloc_gc_defrag_blocking(len, zenoh::AllocAlignment({ 0 }));
+      auto&& buf = std::get<zenoh::ZShmMut>(std::move(alloc_result));
+      std::memcpy(buf.data(), msg.data(), len);
+      pub.put(zenoh::Bytes::serialize(std::move(buf)),
+              { .encoding = zenoh::Encoding("text/plain") });
     }
+
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);

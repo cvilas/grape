@@ -40,33 +40,31 @@ auto main(int argc, const char* argv[]) -> int {
     const auto& args = args_opt.value();
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
 
-    zenohc::Config config;
+    auto config = zenoh::Config::create_default();
 
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto session = zenoh::Session::open(std::move(config));
 
-    const auto cb = [](const zenohc::Sample& sample) {
+    const auto cb = [](const zenoh::Sample& sample) {
+      const auto ts = sample.get_timestamp();
+
       std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::toString(sample.get_kind()),
                    sample.get_keyexpr().as_string_view(),
-                   grape::ipc::toString(sample.get_timestamp()),
-                   sample.get_payload().as_string_view());
-      const auto& attachments = sample.get_attachment();
-      if (attachments.check()) {
-        attachments.iterate([](const zenohc::BytesView& k, const zenohc::BytesView& v) -> bool {
-          std::println("   attachment: {}: {}", k.as_string_view(), v.as_string_view());
-          return true;
-        });
-
-        // reads particular attachment item
-        auto index = attachments.get("index");
-        if (index != "") {
-          std::println("   message number: {}", index.as_string_view());
+                   (ts ? grape::ipc::toString(ts.value()) : "--no timestamp--"),
+                   sample.get_payload().deserialize<std::string>());
+      const auto maybe_attachments = sample.get_attachment();
+      if (maybe_attachments.has_value()) {
+        const auto attachments =
+            maybe_attachments->get().deserialize<std::unordered_map<std::string, std::string>>();
+        for (auto&& [k, v] : attachments) {
+          std::println("   attachment: {}: {}", k, v);
         }
       }
+      return true;
     };
 
     std::println("Declaring Subscriber on '{}'", key);
-    auto subs = grape::ipc::expect<zenohc::Subscriber>(session.declare_subscriber(key, cb));
+    auto subs = session.declare_subscriber(key, cb, zenoh::closures::none);
     std::println("Subscriber on '{}' declared", subs.get_keyexpr().as_string_view());
 
     std::println("Press any key to exit");

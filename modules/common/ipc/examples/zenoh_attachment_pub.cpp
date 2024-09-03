@@ -45,23 +45,17 @@ auto main(int argc, const char* argv[]) -> int {
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
-    zenohc::Config config;
+    auto config = zenoh::Config::create_default();
 
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Declaring Publisher on '{}'", key);
-    auto pub = grape::ipc::expect<zenohc::Publisher>(session.declare_publisher(key));
-
-    zenohc::PublisherPutOptions options;
-    options.set_encoding(Z_ENCODING_PREFIX_TEXT_PLAIN);
+    auto pub = session.declare_publisher(key);
 
     // allocate and set attachment map
-    auto attachment = std::map<std::string, std::string>{};
-    options.set_attachment(attachment);
-
-    // Insert an attachment
-    attachment.insert(std::pair("source", "C++"));
+    auto attachment =
+        std::map<std::string, std::string>{ { "lang", "C++" }, { "domain", "robotics" } };
 
     // periodically publish data with attachments
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
@@ -70,7 +64,8 @@ auto main(int argc, const char* argv[]) -> int {
       const auto msg = std::format("[{}] {}", idx++, value);
       std::println("Publishing Data ('{} : {})", key, msg);
       attachment["index"] = std::to_string(idx);
-      pub.put(msg, options);
+      pub.put(zenoh::Bytes::serialize(msg), { .encoding = zenoh::Encoding("text/plain"),
+                                              .attachment = zenoh::Bytes::serialize(attachment) });
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;

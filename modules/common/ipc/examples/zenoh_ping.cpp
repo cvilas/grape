@@ -25,7 +25,7 @@
 //
 // Paired with example: zenoh_pong.cpp
 //
-// Derived from https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_ping.c
+// Derived from https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_ping.cxx
 //=================================================================================================
 
 //=================================================================================================
@@ -52,12 +52,12 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Number of pings: {}", num_pings);
 
     // prepare session
-    auto config = zenohc::Config();
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     // prepare publisher
     static constexpr auto PING_KEY = "grape/ipc/example/zenoh/ping";
-    auto pub = grape::ipc::expect<zenohc::Publisher>(session.declare_publisher(PING_KEY));
+    auto pub = session.declare_publisher(PING_KEY);
 
     std::mutex pong_mut;
     std::condition_variable pong_cond;
@@ -65,14 +65,13 @@ auto main(int argc, const char* argv[]) -> int {
 
     // prepare subscriber
     static constexpr auto PONG_KEY = "grape/ipc/example/zenoh/pong";
-    const auto cb = [&pong_mut, &pong_cond, &pong_received](const zenohc::Sample& sample) {
-      const auto payload = sample.sample_payload_rcinc();
-      std::print("Pong [{} bytes] ", payload.get_payload().get_len());
+    const auto cb = [&pong_mut, &pong_cond, &pong_received](const zenoh::Sample& sample) {
+      std::print("Pong [{} bytes] ", sample.get_payload().size());
       const std::lock_guard lk(pong_mut);
       pong_received = true;
       pong_cond.notify_one();
     };
-    auto sub = grape::ipc::expect<zenohc::Subscriber>(session.declare_subscriber(PONG_KEY, cb));
+    auto sub = session.declare_subscriber(PONG_KEY, cb, zenoh::closures::none);
 
     // ping-pong
     static constexpr auto PONG_WAIT_TIMEOUT = std::chrono::milliseconds(10000);

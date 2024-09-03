@@ -56,8 +56,8 @@ auto main(int argc, const char* argv[]) -> int {
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     std::println("Declaring querying subscriber on '{}'...", key);
 
-    auto config = zenohc::Config();
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     //----
     // Note: The rest of this application uses the C API because the C++ API does not expose

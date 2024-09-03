@@ -18,9 +18,10 @@
 // zenoh_liveliness_get [--key=my/key/expression/**]
 // ```
 //
-// Paired with example: zenoh_liveliness_declare, zenoh_liveliness_sub
+// Paired with example: zenoh_liveliness_declare
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_get_liveliness.c
+// Derived from:
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/zenohc/z_get_liveliness.cxx
 //=================================================================================================
 
 //=================================================================================================
@@ -38,34 +39,26 @@ auto main(int argc, const char* argv[]) -> int {
     }
     const auto& args = args_opt.value();
 
-    zenohc::Config config;
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
-
-    //----
-    // Note: The rest of this application uses the C API because the C++ API does not expose
-    // liveliness yet (Dec 2023)
-    //----
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    const auto keystr = z_keyexpr(key.c_str());
     std::println("Sending liveliness query for '{}'...", key);
-    static constexpr auto FIFO_BOUND = 16;
-    z_owned_reply_channel_t channel = zc_reply_fifo_new(FIFO_BOUND);
-    zc_liveliness_get(session.loan(), keystr, z_move(channel.send), nullptr);
-    z_owned_reply_t reply = z_reply_null();
-    for (z_call(channel.recv, &reply); z_check(reply); z_call(channel.recv, &reply)) {
-      if (z_reply_is_ok(&reply)) {
-        const z_sample_t sample = z_reply_ok(&reply);
-        z_owned_str_t sample_keystr = z_keyexpr_to_string(sample.keyexpr);
-        std::println(">> Alive token ('{}')", z_loan(sample_keystr));
-        z_drop(z_move(sample_keystr));
+    static constexpr auto FIFO_LENGTH = 16u;
+    auto replies = session.liveliness_get(key, zenoh::channels::FifoChannel(FIFO_LENGTH));
+
+    for (auto res = replies.recv(); std::holds_alternative<zenoh::Reply>(res);
+         res = replies.recv()) {
+      const auto& reply = std::get<zenoh::Reply>(res);
+      if (reply.is_ok()) {
+        const auto& sample = reply.get_ok();
+        std::println(">> Alive token ('{}')", sample.get_keyexpr().as_string_view());
       } else {
         std::println("Received an error");
       }
     }
-    z_drop(z_move(reply));
-    z_drop(z_move(channel));
+
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);

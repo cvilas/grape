@@ -13,7 +13,7 @@
 //=================================================================================================
 // Example program creates a caching publisher and periodically writes a value on the specified key.
 //
-// A caching publisher is a publisher with in-memory storage. It exposes a Queryable for such that
+// A caching publisher is a publisher with in-memory storage. It exposes a Queryable such that
 // querying subscribers can receive past publications. Of course, it also works with regular
 // subscribers
 //
@@ -46,16 +46,13 @@ auto main(int argc, const char* argv[]) -> int {
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
-    zenohc::Config config;
+    auto config = zenoh::Config::create_default();
 
     // enable timestamping
-    if (not config.insert_json(Z_CONFIG_ADD_TIMESTAMP_KEY, "true")) {
-      std::println("Error enabling timestamps");
-      return EXIT_FAILURE;
-    }
+    config.insert_json(Z_CONFIG_ADD_TIMESTAMP_KEY, "true");
 
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto session = zenoh::Session::open(std::move(config));
 
     //----
     // Note: The rest of this application uses the C API because the C++ API does not expose

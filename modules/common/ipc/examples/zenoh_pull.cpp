@@ -21,7 +21,7 @@
 //
 // Paired with example: zenoh_put.cpp, zenoh_pub_delete.cpp
 //
-// Derived from
+// Derived from:
 // https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pull.cxx
 //=================================================================================================
 
@@ -40,17 +40,18 @@ auto main(int argc, const char* argv[]) -> int {
     const auto& args = args_opt.value();
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
 
-    zenohc::Config config;
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
-    std::println("Declaring PullSubscriber on '{}'...", key);
-    const auto cb = [](const zenohc::Sample& sample) {
+    const auto cb = [](const zenoh::Sample& sample) {
       std::println(">> Received {} ('{}' : '{}')", grape::ipc::toString(sample.get_kind()),
-                   sample.get_keyexpr().as_string_view(), sample.get_payload().as_string_view());
+                   sample.get_keyexpr().as_string_view(),
+                   sample.get_payload().deserialize<std::string>());
     };
 
-    auto sub = grape::ipc::expect<zenohc::PullSubscriber>(session.declare_pull_subscriber(key, cb));
+    std::println("Declaring PullSubscriber on '{}'...", key);
+    auto sub = session.declare_subscriber(key, cb, zenoh::closures::none);
 
     std::println("Press any key to pull data... and 'q' to quit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);

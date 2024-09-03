@@ -42,16 +42,12 @@ auto main(int argc, const char* argv[]) -> int {
     const auto& args = args_opt.value();
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
 
-    zenohc::Config config;
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     std::println("Deleting resources matching '{}'...", key);
-    zenohc::ErrNo error{};
-    if (not session.delete_resource(key, error)) {
-      std::println("Delete failed with error {}", error);
-      return EXIT_FAILURE;
-    }
+    session.delete_resource(key);
 
     // Note: The same result can be accomplished by calling delete_resource() on a publisher.
 

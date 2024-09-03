@@ -6,7 +6,6 @@
 #include <thread>
 
 #include "examples_utils.h"
-#include "grape/conio/conio.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
@@ -23,29 +22,11 @@
 // zenoh_liveliness_sub [--key=key/expression/**]
 // ```
 //
-// Paired with example: zenoh_liveliness_declare, zenoh_liveliness_sub
+// Paired with example: zenoh_liveliness_declare
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_sub_liveliness.c
+// Derived from:
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/zenohc/z_sub_liveliness.cxx
 //=================================================================================================
-
-namespace {
-
-//-------------------------------------------------------------------------------------------------
-void dataHandler(const z_sample_t* sample, void* arg) {
-  (void)arg;
-  z_owned_str_t keystr = z_keyexpr_to_string(sample->keyexpr);
-  switch (sample->kind) {
-    case Z_SAMPLE_KIND_PUT:
-      std::println(">> New alive token ('{}')", z_loan(keystr));
-      break;
-    case Z_SAMPLE_KIND_DELETE:
-      std::println(">> Dropped token ('{}')", z_loan(keystr));
-      break;
-  }
-  z_drop(z_move(keystr));
-}
-
-}  // namespace
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
@@ -62,36 +43,32 @@ auto main(int argc, const char* argv[]) -> int {
     }
     const auto& args = args_opt.value();
 
-    zenohc::Config config;
     std::println("Opening session...");
-    auto session = grape::ipc::expect<zenohc::Session>(open(std::move(config)));
-
-    //----
-    // Note: The rest of this application uses the C API because the C++ API does not expose
-    // liveliness yet (Dec 2023)
-    //----
+    auto config = zenoh::Config::create_default();
+    auto session = zenoh::Session::open(std::move(config));
 
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    std::println("Declaring liveliness subscriber on '{}'...", key);
-    const auto keystr = z_keyexpr(key.c_str());
-    z_owned_closure_sample_t callback = z_closure(dataHandler);
-    auto sub = zc_liveliness_declare_subscriber(session.loan(), keystr, z_move(callback), nullptr);
-    if (!z_check(sub)) {
-      std::println("Unable to declare liveliness subscriber.");
-      return EXIT_FAILURE;
-    }
 
-    std::println("Enter 'q' to quit...");
-    while (true) {
-      const auto c = grape::conio::kbhit() ? grape::conio::getch() : 0;
-      if (c == 'q') {
-        break;
+    const auto cb = [](const zenoh::Sample& sample) {
+      switch (sample.get_kind()) {
+        case Z_SAMPLE_KIND_PUT:
+          std::println(">> New alive token ('{}')", sample.get_keyexpr().as_string_view());
+          break;
+        case Z_SAMPLE_KIND_DELETE:
+          std::println(">> Dropped token ('{}')", sample.get_keyexpr().as_string_view());
+          break;
       }
-      static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
+    };
+
+    std::println("Declaring liveliness subscriber on '{}'...", key);
+    [[maybe_unused]] auto sub =
+        session.liveliness_declare_subscriber(key, cb, zenoh::closures::none);
+
+    std::println("Press CTRL-C to quit...");
+    while (true) {
+      static constexpr auto LOOP_WAIT = std::chrono::milliseconds(1000);
       std::this_thread::sleep_for(LOOP_WAIT);
     }
-
-    z_undeclare_subscriber(z_move(sub));
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);
