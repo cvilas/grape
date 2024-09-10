@@ -4,11 +4,11 @@
 
 OS               | Architecture  | Compiler
 -----------------|---------------|----------------
-Ubuntu 24.04 LTS | Arm64, X86_64 | Clang19 (GCC15?)
+Ubuntu 24.04 LTS | Arm64, X86_64 | clang-18 ~~gcc-14~~
 
 ## Setup build environment
 
-- Install the basic 
+- Install the basic tools
 
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
@@ -33,7 +33,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | Clang19 (GCC15?)
 
     ```bash
     wget https://apt.llvm.org/llvm.sh
-    export CLANG_VERSION=19 # Replace with latest version number
+    export CLANG_VERSION=18 # Replace with latest version number
     chmod +x llvm.sh
     sudo ./llvm.sh $CLANG_VERSION
     sudo apt install clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
@@ -46,11 +46,11 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | Clang19 (GCC15?)
     --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-$CLANG_VERSION 
     ```
 
-  - GCC
+  - GCC (Your mileage may vary!)
 
     ```bash
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    export GCC_VERSION=15 # Replace with latest version number
+    export GCC_VERSION=14 # Replace with latest version number
     sudo apt update
     sudo apt install g++-$GCC_VERSION gcc-$GCC_VERSION gfortran-$GCC_VERSION
     
@@ -87,9 +87,15 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | Clang19 (GCC15?)
     rustc-wrapper="sccache"
     ```
 
+- (Desktop only) For graphical applications, install GL and windowing libraries 
+
+  ```bash
+  sudo apt install libgl-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxkbcommon-dev
+  ```
+
 ## Configure and build
 
-Note (June 2024) Use the clang toolchain to build the project. GCC-14 does not support all features we use.
+Note (June 2024) Use clang toolchain to build the project. GCC does not support all features we use.
 
 ```bash
 git clone git@github.com:cvilas/grape
