@@ -17,13 +17,16 @@
 
 ## Phase 3 - Multimodel data logging and visualisation - part 2
 
-- Production-ready implementation of Monitor (See TODO in Monitor/README)
-- [mcap](https://mcap.dev/) reader/writer
+- Improvements to `probe::Monitor` (See TODO in Monitor/README)
+- Disk logging
+  - csv reader/writer
+  - [mcap](https://mcap.dev/) reader/writer
 - Pin zenoh version to 1.0.0
   - Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
   - Make sure static libs are built and installed when requested.
-  - Implement new zenoh features as examples
+  - Fix examples: pub_cache, query_sub, pull
 - C++/Python interop
+  - Choose Python support backend: swig, pybind11 
   - Choose serdes backend: low overhead, type-safe, fast
   - concept `serialisable`
 
@@ -31,7 +34,7 @@
 
 - Configure Raspberry Pi5 [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
 - Study
-  - [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
+  - :done: [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
   - [boost-ext/reflect](https://github.com/boost-ext/reflect)
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
@@ -44,6 +47,13 @@
 - HW IO
   - CANopen
   - joystick
+  - midi
+- Math library
+  - Delay line
+  - Low pass filter
+  - Differentiator
+  - Integrator
+  - Matrix operations
 - Behaviour trees: Consider building from first principles
 - FSM: introspectable, visualise state transition graph using graphviz.
 - PoC IPC experiments
@@ -94,9 +104,11 @@
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Review all negated checks in `.clang-tidy`
 
-## Phase 9 - Demo application - Rover
+## Phase 9 - Demo applications
 
-- Mars Rover (joystick teleop, FPV, mission control)
+- Zenoh interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
+- [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
+- [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
 
 ## Phase 10 - Utilities
 
