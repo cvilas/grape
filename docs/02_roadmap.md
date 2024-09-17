@@ -22,13 +22,13 @@
   - csv reader/writer
   - [mcap](https://mcap.dev/) reader/writer
 - Pin zenoh version to 1.0.0
-  - Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
-  - Make sure static libs are built and installed when requested.
-  - Fix examples: pub_cache, query_sub, pull
+  - :done: Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
+  - :done: Make sure static libs are built and installed when requested.
+  - Fix examples: pub_cache, query_sub, pull, shm pub/sub
 - C++/Python interop
-  - Choose Python support backend: swig, pybind11 
-  - Choose serdes backend: low overhead, type-safe, fast
+  - Data serdes backend (low overhead, type-safe, fast): zenoh default serdes, *flatbuffers*, protobufs
   - concept `serialisable`
+  - Code interop (do we even need it if data structures are interoperable with IPC?): swig, pybind11 
 
 ## Phase 4 - Robotics core
 
@@ -74,6 +74,7 @@
   - [Vulkan in 30 minutes](https://renderdoc.org/vulkan-in-30-minutes.html)
   - [Vulkan Tutorial](https://vulkan-tutorial.com/)
   - [Vulkan guide](https://vkguide.dev/)
+  - [Flecs and ECS](https://github.com/SanderMertens/flecs)
 - HW accelerated 3D graphics
   - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
   - Select a scenegraph engine: vsg, ogre, raylib, something else
@@ -106,6 +107,8 @@
 
 ## Phase 9 - Demo applications
 
+- Office environment (CO2, temperature, light) dashboard
+- Network camera and viewer for industrial monitoring, diagnostics
 - Zenoh interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
 - [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
 - [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
