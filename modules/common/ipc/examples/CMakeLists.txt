@@ -44,11 +44,8 @@ define_module_example(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
-#define_module_example(
-#  NAME query_sub
-#  SOURCES query_sub.cpp
-#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-#  PUBLIC_LINK_LIBS grape::conio)
+# define_module_example( NAME query_sub SOURCES query_sub.cpp PUBLIC_INCLUDE_PATHS
+# $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME query_get
@@ -92,11 +89,8 @@ define_module_example(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
-#define_module_example(
-#  NAME pub_cache
-#  SOURCES pub_cache.cpp examples_utils.h
-#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-#  PUBLIC_LINK_LIBS grape::conio)
+# define_module_example( NAME pub_cache SOURCES pub_cache.cpp examples_utils.h PUBLIC_INCLUDE_PATHS
+# $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME sub
@@ -104,11 +98,8 @@ define_module_example(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
-#define_module_example(
-#  NAME pull
-#  SOURCES pull.cpp examples_utils.h
-#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-#  PUBLIC_LINK_LIBS grape::conio)
+# define_module_example( NAME pull SOURCES pull.cpp examples_utils.h PUBLIC_INCLUDE_PATHS
+# $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME pub_client
