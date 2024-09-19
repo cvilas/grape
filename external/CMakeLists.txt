@@ -18,8 +18,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/third_party_versions.cmake)
 # -------------------------------------------------------------------------------------------------
 # Setup baseline build configuration
 # -------------------------------------------------------------------------------------------------
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                      "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/")
 set_directory_properties(PROPERTIES EP_UPDATE_DISCONNECTED 1) # skip update step
 
 # Collect common arguments to configure external projects
@@ -48,17 +47,17 @@ endmacro()
 # -------------------------------------------------------------------------------------------------
 # zenohcxx
 if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
-  # install zenoh-c first 
+  # install zenoh-c first
   find_package(zenohc ${ZENOHC_VERSION_REQUIRED} QUIET)
   if(zenohc_FOUND)
     message(STATUS "zenohc: Using version ${zenohc_VERSION} from ${zenohc_DIR}")
     add_dummy_target(zenohc)
   else()
     message(STATUS "zenohc: Building ${ZENOHC_VERSION_REQUIRED} from source")
-    set(ZENOHC_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
-      -DZENOHC_BUILD_WITH_UNSTABLE_API=ON
-      -DZENOHC_BUILD_WITH_SHARED_MEMORY=ON # shm requires both
-      -DCMAKE_VERBOSE_MAKEFILE=ON)
+    set(ZENOHC_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+        -DZENOHC_BUILD_WITH_UNSTABLE_API=ON
+        -DZENOHC_BUILD_WITH_SHARED_MEMORY=ON # shm requires both
+        -DCMAKE_VERBOSE_MAKEFILE=ON)
     ExternalProject_Add(
       zenohc
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-c.git"
@@ -73,10 +72,10 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
     add_dummy_target(zenohcxx)
   else()
     message(STATUS "zenohcxx: Building ${ZENOHCXX_VERSION_REQUIRED} from source")
-    set(ZENOHCXX_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
-    -DZENOHCXX_ZENOHC=ON
-    -DZENOHCXX_ZENOHPICO=OFF
-    -DZENOHCXX_EXAMPLES_PROTOBUF=OFF)
+    set(ZENOHCXX_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+        -DZENOHCXX_ZENOHC=ON 
+        -DZENOHCXX_ZENOHPICO=OFF
+        -DZENOHCXX_EXAMPLES_PROTOBUF=OFF)
     ExternalProject_Add(
       zenohcxx
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-cpp.git"
@@ -97,16 +96,79 @@ if(glfw3 IN_LIST EXTERNAL_PROJECTS_LIST)
   else()
     message(STATUS "GLFW3: Building ${GLFW3_VERSION_REQUIRED} from source")
     set(GLFW3_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
-    -DGLFW_BUILD_DOCS=OFF
-    -DGLFW_BUILD_EXAMPLES=OFF
-    -DGLFW_BUILD_TESTS=OFF
-    -DGLFW_BUILD_X11=ON
-    -DGLFW_BUILD_WAYLAND=ON)
+        -DGLFW_BUILD_DOCS=OFF 
+        -DGLFW_BUILD_EXAMPLES=OFF
+        -DGLFW_BUILD_TESTS=OFF 
+        -DGLFW_BUILD_X11=ON 
+        -DGLFW_BUILD_WAYLAND=ON)
     ExternalProject_Add(
       glfw3
       GIT_REPOSITORY "https://github.com/glfw/glfw.git"
       GIT_TAG ${GLFW3_VERSION_REQUIRED}
       GIT_SHALLOW true
       CMAKE_ARGS ${GLFW3_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# FlatBuffers
+if(flatbuffers IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(flatbuffers ${FLATBUFFERS_VERSION_REQUIRED} QUIET)
+  if(flatbuffers_FOUND)
+    message(STATUS "FlatBuffers: Using version ${flatbuffers_VERSION} from ${flatbuffers_DIR}")
+    add_dummy_target(flatbuffers)
+  else()
+    message(STATUS "FlatBuffers: Building ${FLATBUFFERS_VERSION_REQUIRED} from source")
+    set(FLATBUFFERS_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+        -DFLATBUFFERS_BUILD_FLATC=OFF
+        -DFLATBUFFERS_BUILD_FLATLIB=ON 
+        -DFLATBUFFERS_BUILD_TESTS=OFF)
+    ExternalProject_Add(
+      flatbuffers
+      GIT_REPOSITORY "https://github.com/google/flatbuffers.git"
+      GIT_TAG v${FLATBUFFERS_VERSION_REQUIRED}
+      GIT_SHALLOW true
+      CMAKE_ARGS ${FLATBUFFERS_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# MessagePack
+if(msgpack-cxx IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(msgpack-cxx ${MSGPACK_VERSION_REQUIRED} QUIET)
+  if(msgpack-cxx_FOUND)
+    message(STATUS "MesssagePack: Using version ${msgpack-cxx_VERSION} from ${msgpack-cxx_DIR}")
+    add_dummy_target(msgpack-cxx)
+  else()
+    message(STATUS "MessagePack: Building ${MSGPACK_VERSION_REQUIRED} from source")
+    set(MSGPACK_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+        -DMSGPACK_USE_BOOST=OFF 
+        -DMSGPACK_BUILD_DOCS=OFF
+        -DMSGPACK_BUILD_EXAMPLES=OFF 
+        -DMSGPACK_BUILD_TESTS=OFF)
+    ExternalProject_Add(
+      msgpack-cxx
+      GIT_REPOSITORY "https://github.com/msgpack/msgpack-c.git"
+      GIT_TAG cpp-${MSGPACK_VERSION_REQUIRED}
+      GIT_SHALLOW true
+      CMAKE_ARGS ${MSGPACK_CMAKE_ARGS})
+  endif()
+endif()
+
+# --------------------------------------------------------------------------------------------------
+# Fast CDR
+if(fastcdr IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(fastcdr ${FASTCDR_VERSION_REQUIRED} QUIET)
+  if(fastcdr_FOUND)
+    message(STATUS "Fast-CDR: Using version ${fastcdr_VERSION} from ${fastcdr_DIR}")
+    add_dummy_target(fastcdr)
+  else()
+    message(STATUS "Fast-CDR: Building ${FASTCDR_VERSION_REQUIRED} from source")
+    ExternalProject_Add(
+      fastcdr
+      GIT_REPOSITORY "https://github.com/eprosima/fastcdr.git"
+      GIT_TAG v${FASTCDR_VERSION_REQUIRED}
+      GIT_SHALLOW true
+      CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS})
   endif()
 endif()

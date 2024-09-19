@@ -17,24 +17,18 @@
 
 ## Phase 3 - Multimodel data logging and visualisation - part 2
 
-- Improvements to `probe::Monitor` (See TODO in Monitor/README)
+- Serialisation (See TODO in [README](../modules/common/serdes/README.md))
+- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 - Disk logging
   - csv reader/writer
   - [mcap](https://mcap.dev/) reader/writer
 - Pin zenoh version to 1.0.0
-  - :done: Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
-  - :done: Make sure static libs are built and installed when requested.
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
-- C++/Python interop
-  - Data serdes backend (low overhead, type-safe, fast): zenoh default serdes, *flatbuffers*, protobufs
-  - concept `serialisable`
-  - Code interop (do we even need it if data structures are interoperable with IPC?): swig, pybind11 
 
 ## Phase 4 - Robotics core
 
-- Configure Raspberry Pi5 [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
+- Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
 - Study
-  - :done: [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
   - [boost-ext/reflect](https://github.com/boost-ext/reflect)
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
@@ -137,6 +131,7 @@ auto main() -> int {
 
 ## References
 
+- [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
 - C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)
 - C++20 features: <https://youtu.be/N1gOSgZy7h4>
 - Interfaces with C++20 concept: <https://concepts.godbolt.org/z/PjGb466cr>
