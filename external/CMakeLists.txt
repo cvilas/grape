@@ -55,14 +55,16 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
     add_dummy_target(zenohc)
   else()
     message(STATUS "zenohc: Building ${ZENOHC_VERSION_REQUIRED} from source")
+    set(ZENOHC_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
+      -DZENOHC_BUILD_WITH_UNSTABLE_API=ON
+      -DZENOHC_BUILD_WITH_SHARED_MEMORY=ON # shm requires both
+      -DCMAKE_VERBOSE_MAKEFILE=ON)
     ExternalProject_Add(
       zenohc
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-c.git"
       GIT_TAG ${ZENOHC_VERSION_REQUIRED}
       GIT_SHALLOW true
-      CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
-      -DZENOHC_BUILD_WITH_UNSTABLE_API=ON -DZENOHC_BUILD_WITH_SHARED_MEMORY=ON # shm requires both
-      -DCMAKE_VERBOSE_MAKEFILE=ON)
+      CMAKE_ARGS ${ZENOHC_CMAKE_ARGS})
   endif()
 
   find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} QUIET)
@@ -71,13 +73,17 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
     add_dummy_target(zenohcxx)
   else()
     message(STATUS "zenohcxx: Building ${ZENOHCXX_VERSION_REQUIRED} from source")
+    set(ZENOHCXX_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
+    -DZENOHCXX_ZENOHC=ON
+    -DZENOHCXX_ZENOHPICO=OFF
+    -DZENOHCXX_EXAMPLES_PROTOBUF=OFF)
     ExternalProject_Add(
       zenohcxx
       GIT_REPOSITORY "https://github.com/eclipse-zenoh/zenoh-cpp.git"
       GIT_TAG ${ZENOHCXX_VERSION_REQUIRED}
       GIT_SHALLOW true
       DEPENDS zenohc
-      CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} -DZENOHCXX_ZENOHC=ON -DZENOHCXX_ZENOHPICO=OFF)
+      CMAKE_ARGS ${ZENOHCXX_CMAKE_ARGS})
   endif()
 endif()
 

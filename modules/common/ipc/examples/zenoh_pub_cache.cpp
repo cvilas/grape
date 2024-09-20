@@ -49,7 +49,7 @@ auto main(int argc, const char* argv[]) -> int {
     auto config = zenoh::Config::create_default();
 
     // enable timestamping
-    config.insert_json(Z_CONFIG_ADD_TIMESTAMP_KEY, "true");
+    config.insert_json5(Z_CONFIG_ADD_TIMESTAMP_KEY, "true");
 
     std::println("Opening session...");
     auto session = zenoh::Session::open(std::move(config));

@@ -64,10 +64,10 @@ auto main(int argc, const char* argv[]) -> int {
 
     // configure as router
     auto config = zenoh::Config::create_default();
-    config.insert_json(Z_CONFIG_MODE_KEY, R"("router")");
+    config.insert_json5(Z_CONFIG_MODE_KEY, R"("router")");
 
     const auto listen_on = std::format(R"(["tcp/{}:{}"])", addr_opt.value(), port_opt.value());
-    config.insert_json(Z_CONFIG_LISTEN_KEY, listen_on);
+    config.insert_json5(Z_CONFIG_LISTEN_KEY, listen_on);
 
     // start session
     auto session = zenoh::Session::open(std::move(config));
