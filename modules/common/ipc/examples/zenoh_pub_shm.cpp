@@ -60,7 +60,7 @@ auto main(int argc, const char* argv[]) -> int {
     // notify subscribers of the shared-memory segment to read. Therefore, for very small messages,
     // shared-memory transport could be less efficient than using the default network transport
     // to directly carry the payload
-    config.insert_json("transport/shared_memory/enabled", "true");
+    config.insert_json5("transport/shared_memory/enabled", "true");
 
     std::println("Opening session...");
     auto session = zenoh::Session::open(std::move(config));

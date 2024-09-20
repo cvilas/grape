@@ -61,11 +61,11 @@ auto main(int argc, const char* argv[]) -> int {
     auto config = zenoh::Config::create_default();
 
     // configure as client
-    config.insert_json(Z_CONFIG_MODE_KEY, R"("client")");
+    config.insert_json5(Z_CONFIG_MODE_KEY, R"("client")");
 
     // configure router to connect to
     const auto router_endpoint = std::format(R"(["tcp/{}"])", router);
-    config.insert_json(Z_CONFIG_CONNECT_KEY, router_endpoint);
+    config.insert_json5(Z_CONFIG_CONNECT_KEY, router_endpoint);
 
     // open session and print some info
     auto session = zenoh::Session::open(std::move(config));
