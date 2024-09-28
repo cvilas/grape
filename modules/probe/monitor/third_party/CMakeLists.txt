@@ -2,6 +2,8 @@
 # Copyright (C) 2024 GRAPE Contributors
 # =================================================================================================
 
+find_package(OpenGL REQUIRED)
+
 # -------------------------------------------------------------------------------------------------
 # Integrate imgui sources
 set(IMGUI_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
@@ -27,7 +29,7 @@ set(IMGUI_SOURCES
 
 add_library(imguilib OBJECT ${IMGUI_SOURCES})
 target_include_directories(imguilib PRIVATE ${IMGUI_SOURCES_DIR})
-target_link_libraries(imguilib PUBLIC glfw GL)
+target_link_libraries(imguilib PUBLIC glfw OpenGL::GL)
 set_target_properties(imguilib PROPERTIES CXX_CLANG_TIDY "")
 set_target_properties(imguilib PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
 set_target_properties(imguilib PROPERTIES POSITION_INDEPENDENT_CODE ON) # force -fPIC
