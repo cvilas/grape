@@ -2,36 +2,38 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#include <algorithm>
 #include <print>
 #include <thread>
 
 #include "examples_utils.h"
-#include "grape/conio/conio.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// Example program that creates a subscriber. The subscriber will be notified of each put or delete
-// made on any key expression matching the subscriber key expression, and will print this
-// notification.
+// Example program creates a publisher on shared memory and periodically writes a value on the
+// specified key. The published value will be received by all matching subscribers.
 //
 // Typical usage:
 // ```bash
-// zenoh_sub [--key="demo/**"]
+// pub_shm [--key=demo/example/test --value="Hello World"]
 // ```
-// Paired with example: zenoh_put.cpp, zenoh_pub.cpp, zenoh_pub_shm.cpp, zenoh_delete.cpp
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_sub.cxx
+// Paired with example: sub.cpp
+//
+// Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/zenohc/z_pub_shm.cxx
 //=================================================================================================
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
+    static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
 
     const auto args_opt =
-        grape::conio::ProgramDescription("Subscriber listening for data on specified key")
+        grape::conio::ProgramDescription("Periodic shared-memory publisher example")
             .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+            .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
             .parse(argc, argv);
 
     if (not args_opt.has_value()) {
@@ -39,6 +41,7 @@ auto main(int argc, const char* argv[]) -> int {
     }
     const auto& args = args_opt.value();
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
     auto config = zenoh::Config::create_default();
 
@@ -46,8 +49,8 @@ auto main(int argc, const char* argv[]) -> int {
     // TODO: Review and confirm shared memory configuration is correct
     //-----------------------------------------
 
-    // Enable shared-memory on the subscriber to take advantage of publishers on the same host who
-    // may be publishing over shared-memory. See also zenoh_pub_shm.cpp
+    // Enable the publisher to operate over shared-memory. Note that shared-memory should also be
+    // enabled on the subscriber side (see zenoh_sub.cpp).
     //
     // Note 1: Shared memory transport is used only if both the publisher and the subscriber are on
     // the same host and are configured to use shared-memory. When on different hosts, they
@@ -58,26 +61,34 @@ auto main(int argc, const char* argv[]) -> int {
     // shared-memory transport could be less efficient than using the default network transport
     // to directly carry the payload
     config.insert_json5("transport/shared_memory/enabled", "true");
+
     std::println("Opening session...");
     auto session = zenoh::Session::open(std::move(config));
 
-    std::println("Declaring Subscriber on '{}'", key);
-    const auto cb = [](const zenoh::Sample& sample) {
-      const auto ts = sample.get_timestamp();
-      std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::toString(sample.get_kind()),
-                   sample.get_keyexpr().as_string_view(),
-                   (ts ? grape::ipc::toString(ts.value()) : "--no timestamp--"),
-                   sample.get_payload().deserialize<std::string>());
-    };
+    std::println("Declaring Publisher on '{}'...", key);
+    auto pub = session.declare_publisher(key);
 
-    auto subs = session.declare_subscriber(key, cb, zenoh::closures::none);
-    std::println("Subscriber on '{}' declared", subs.get_keyexpr().as_string_view());
+    std::println("Creating shared-memory manager...");
+    static constexpr auto SHM_SIZE = 65536u;
+    static constexpr auto SHM_ALIGN = 2u;
+    auto shm_provider = zenoh::PosixShmProvider(
+        zenoh::MemoryLayout(SHM_SIZE, zenoh::AllocAlignment({ SHM_ALIGN })));
 
-    std::println("Press any key to exit");
-    static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
-    while (not grape::conio::kbhit()) {
+    std::println("Press CTRL-C to quit...");
+    static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
+    for (int idx = 0; idx < std::numeric_limits<int>::max(); ++idx) {
       std::this_thread::sleep_for(LOOP_WAIT);
+      const auto msg = std::format("[{}] {}", idx, value);
+      std::println("Putting Data ('{}' : '{}')", key, msg);
+
+      std::println("Allocating SHM buffer...");
+      const auto len = msg.length();
+      auto alloc_result = shm_provider.alloc_gc_defrag_blocking(len, zenoh::AllocAlignment({ 0 }));
+      auto&& buf = std::get<zenoh::ZShmMut>(std::move(alloc_result));
+      std::memcpy(buf.data(), msg.data(), len);
+      pub.put(std::move(buf), { .encoding = zenoh::Encoding("text/plain") });
     }
+
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);

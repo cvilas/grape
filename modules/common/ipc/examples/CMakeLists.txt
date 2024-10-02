@@ -3,151 +3,151 @@
 # =================================================================================================
 
 define_module_example(
-  NAME zenoh_scout
-  SOURCES zenoh_scout.cpp
+  NAME scout
+  SOURCES scout.cpp
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_info
-  SOURCES zenoh_info.cpp
+  NAME info
+  SOURCES info.cpp
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_ping
-  SOURCES zenoh_ping.cpp
+  NAME ping
+  SOURCES ping.cpp
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_pong
-  SOURCES zenoh_pong.cpp
+  NAME pong
+  SOURCES pong.cpp
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_throughput_pub
-  SOURCES zenoh_throughput_pub.cpp examples_utils.h
+  NAME throughput_pub
+  SOURCES throughput_pub.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_throughput_sub
-  SOURCES zenoh_throughput_sub.cpp
+  NAME throughput_sub
+  SOURCES throughput_sub.cpp
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_queryable
-  SOURCES zenoh_queryable.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-#define_module_example(
-#  NAME zenoh_query_sub
-#  SOURCES zenoh_query_sub.cpp
-#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-#  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME zenoh_query_get
-  SOURCES zenoh_query_get.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME zenoh_query_get_channel
-  SOURCES zenoh_query_get_channel.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME zenoh_query_get_channel_non_blocking
-  SOURCES zenoh_query_get_channel_non_blocking.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME zenoh_put
-  SOURCES zenoh_put.cpp examples_utils.h
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME zenoh_pub
-  SOURCES zenoh_pub.cpp examples_utils.h
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME zenoh_pub_delete
-  SOURCES zenoh_pub_delete.cpp examples_utils.h
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME zenoh_pub_shm
-  SOURCES zenoh_pub_shm.cpp examples_utils.h
+  NAME queryable
+  SOURCES queryable.cpp
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 #define_module_example(
-#  NAME zenoh_pub_cache
-#  SOURCES zenoh_pub_cache.cpp examples_utils.h
+#  NAME query_sub
+#  SOURCES query_sub.cpp
 #  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
 #  PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_sub
-  SOURCES zenoh_sub.cpp examples_utils.h
+  NAME query_get
+  SOURCES query_get.cpp
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME query_get_channel
+  SOURCES query_get_channel.cpp
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME query_get_channel_non_blocking
+  SOURCES query_get_channel_non_blocking.cpp
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME put
+  SOURCES put.cpp examples_utils.h
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME pub
+  SOURCES pub.cpp examples_utils.h
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME pub_delete
+  SOURCES pub_delete.cpp examples_utils.h
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME pub_shm
+  SOURCES pub_shm.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 #define_module_example(
-#  NAME zenoh_pull
-#  SOURCES zenoh_pull.cpp examples_utils.h
+#  NAME pub_cache
+#  SOURCES pub_cache.cpp examples_utils.h
 #  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
 #  PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_pub_client
-  SOURCES zenoh_pub_client.cpp examples_utils.h
+  NAME sub
+  SOURCES sub.cpp examples_utils.h
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC_LINK_LIBS grape::conio)
+
+#define_module_example(
+#  NAME pull
+#  SOURCES pull.cpp examples_utils.h
+#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+#  PUBLIC_LINK_LIBS grape::conio)
+
+define_module_example(
+  NAME pub_client
+  SOURCES pub_client.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_sub_client
-  SOURCES zenoh_sub_client.cpp examples_utils.h
+  NAME sub_client
+  SOURCES sub_client.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_liveliness_declare
-  SOURCES zenoh_liveliness_declare.cpp examples_utils.h
+  NAME liveliness_declare
+  SOURCES liveliness_declare.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_liveliness_sub
-  SOURCES zenoh_liveliness_sub.cpp examples_utils.h
+  NAME liveliness_sub
+  SOURCES liveliness_sub.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_liveliness_get
-  SOURCES zenoh_liveliness_get.cpp examples_utils.h
+  NAME liveliness_get
+  SOURCES liveliness_get.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_attachment_pub
-  SOURCES zenoh_attachment_pub.cpp examples_utils.h
+  NAME attachment_pub
+  SOURCES attachment_pub.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME zenoh_attachment_sub
-  SOURCES zenoh_attachment_sub.cpp examples_utils.h
+  NAME attachment_sub
+  SOURCES attachment_sub.cpp examples_utils.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)

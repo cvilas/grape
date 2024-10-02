@@ -19,10 +19,10 @@
 //
 // Typical usage:
 // ```bash
-// zenoh_pub_cache [--key=demo/example/test --value="Hello World"]
+// pub_cache [--key=demo/example/test --value="Hello World"]
 // ```
 //
-// Paired with example: zenoh_query_sub.cpp, zenoh_sub.cpp
+// Paired with example: query_sub.cpp, sub.cpp
 //
 // Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_pub_cache.c
 //=================================================================================================

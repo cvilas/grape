@@ -17,7 +17,7 @@
 // between the two. The pong application waits for samples on the first key expression and replies
 // by writing back the received data on the second key expression.
 //
-// Paired with example: zenoh_ping.cpp
+// Paired with example: ping.cpp
 //
 // Derived from https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pong.cxx
 //=================================================================================================

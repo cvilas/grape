@@ -3,24 +3,23 @@
 //=================================================================================================
 
 #include <print>
-#include <thread>
 
 #include "examples_utils.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// Example program creates a publisher and periodically writes a value on the specified key. The
-// published value will be received by all matching subscribers.
+// Example program that puts a path/value into Zenoh. The path/value will be received by all
+// matching subscribers.
 //
 // Typical usage:
 // ```bash
-// zenoh_pub [--key=demo/example/test --value="Hello World"]
+// put [--key="demo/example/test" --value="Hello World"]
 // ```
 //
-// Paired with example: zenoh_sub.cpp
+// Paired with example: sub.cpp
 //
-// Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pub.cxx
+// Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_put.cxx
 //=================================================================================================
 
 //=================================================================================================
@@ -30,7 +29,7 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
 
     const auto args_opt =
-        grape::conio::ProgramDescription("Periodic publisher example")
+        grape::conio::ProgramDescription("Puts a specified value on specified key")
             .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
             .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
             .parse(argc, argv);
@@ -46,17 +45,9 @@ auto main(int argc, const char* argv[]) -> int {
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
 
-    std::println("Declaring Publisher on '{}'", key);
-    auto pub = session.declare_publisher(key);
+    std::println("Putting Data ('{}': '{}')...", key, value);
+    session.put(key, zenoh::ext::serialize(value), { .encoding = zenoh::Encoding("text/plain") });
 
-    static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
-    uint64_t idx = 0;
-    while (true) {
-      const auto msg = std::format("[{}] {}", idx++, value);
-      std::println("Publishing Data ('{} : {})", key, msg);
-      pub.put(zenoh::Bytes::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
-      std::this_thread::sleep_for(LOOP_WAIT);
-    }
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);

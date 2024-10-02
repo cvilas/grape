@@ -19,7 +19,7 @@
 // a subscriber might join late (after publisher has started), but must receive historical data
 // from a publisher in order to initialise and function.
 //
-// Paired with example: zenoh_pub_cache.cpp
+// Paired with example: pub_cache.cpp
 //
 // Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_query_sub.c
 //=================================================================================================
