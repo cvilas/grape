@@ -13,8 +13,8 @@
 // Example program demonstrates how to interact with a queryable to perform a query and
 // non-blocking wait for an iterator of results _synchronously_ without a callback.
 //
-// Paired with: zenoh_queryable.cpp.
-// See also: zenoh_query_get.cpp, zenoh_query_get_channel.cpp, zenoh_query_sub.cpp
+// Paired with: queryable.cpp.
+// See also: query_get.cpp, query_get_channel.cpp, query_sub.cpp
 //
 // Derived from:
 // https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/zenohc/z_get_channel.cxx
@@ -34,7 +34,7 @@ auto main() -> int {
     static constexpr auto MAX_REPLIES = 16;  //!< handle these many replies
     auto replies = session.get(KEY, PARAM, zenoh::channels::FifoChannel(MAX_REPLIES),
                                { .target = zenoh::QueryTarget::Z_QUERY_TARGET_ALL,
-                                 .payload = zenoh::Bytes::serialize(QUERY) });
+                                 .payload = zenoh::ext::serialize(QUERY) });
 
     auto poll = true;
     while (poll) {
@@ -44,7 +44,7 @@ auto main() -> int {
       if (std::holds_alternative<zenoh::Reply>(res)) {
         const auto& sample = std::get<zenoh::Reply>(res).get_ok();
         std::println(">> Received ('{}' : '{}')", sample.get_keyexpr().as_string_view(),
-                     sample.get_payload().deserialize<std::string>());
+                     sample.get_payload().as_string());
       }
 
       // handle error

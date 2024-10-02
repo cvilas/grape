@@ -14,7 +14,7 @@
 // Example program demonstrates how to interact with a queryable to perform a query, and receive
 // an iterator of results _asynchronously_ via a callback.
 //
-// Paired with: zenoh_queryable.cpp. See also zenoh_query_get_channel.cpp
+// Paired with: queryable.cpp. See also query_get_channel.cpp
 //
 // Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_get.cxx
 //=================================================================================================
@@ -37,10 +37,9 @@ auto main() -> int {
         const auto& sample = reply.get_ok();
         const auto& keystr = sample.get_keyexpr();
         std::println(">> Received ('{}': '{}')", keystr.as_string_view(),
-                     sample.get_payload().deserialize<std::string>());
+                     sample.get_payload().as_string());
       } else {
-        std::println("Received error: {}",
-                     reply.get_err().get_payload().deserialize<std::string>());
+        std::println("Received error: {}", reply.get_err().get_payload().as_string());
       }
     };
 
@@ -51,7 +50,7 @@ auto main() -> int {
 
     // prepare and dispatch request
     session.get(KEY, PARAM, on_reply, on_done,
-                { .target = Z_QUERY_TARGET_ALL, .payload = zenoh::Bytes::serialize(QUERY) });
+                { .target = Z_QUERY_TARGET_ALL, .payload = zenoh::ext::serialize(QUERY) });
     done_flag.wait(false);
     std::println("done");
 

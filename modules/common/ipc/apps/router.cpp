@@ -16,9 +16,9 @@
 // https://zenoh.io/docs/getting-started/deployment/
 //
 // Typical usage:
-// zenoh_router [--port=1234]
+// router [--port=1234]
 //
-// Paired with: zenoh_sub_client, zenoh_pub_client
+// Paired with: sub_client, pub_client
 //=================================================================================================
 
 namespace {

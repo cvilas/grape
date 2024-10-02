@@ -15,7 +15,7 @@
 // Subscribing end of the pair of example programs to measure throughput between a publisher and a
 // subscriber.
 //
-// Paired with example: zenoh_throughput_pub.cpp
+// Paired with example: throughput_pub.cpp
 //
 // Derived from:
 // https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_sub_thr.cxx

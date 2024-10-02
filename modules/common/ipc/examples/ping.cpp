@@ -20,10 +20,10 @@
 //
 // Typical usage:
 // ```code
-// zenoh_ping [--size=8 --pings=100]
+// ping [--size=8 --pings=100]
 // ```
 //
-// Paired with example: zenoh_pong.cpp
+// Paired with example: pong.cpp
 //
 // Derived from https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_ping.cxx
 //=================================================================================================

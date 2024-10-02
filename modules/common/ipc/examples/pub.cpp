@@ -10,55 +10,53 @@
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// Queries currently alive tokens that match a given key expression. To learn how tokens are
-// declared, see zenoh_liveliness_declare.
+// Example program creates a publisher and periodically writes a value on the specified key. The
+// published value will be received by all matching subscribers.
 //
 // Typical usage:
 // ```bash
-// zenoh_liveliness_get [--key=my/key/expression/**]
+// pub [--key=demo/example/test --value="Hello World"]
 // ```
 //
-// Paired with example: zenoh_liveliness_declare
+// Paired with example: sub.cpp
 //
-// Derived from:
-// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/zenohc/z_get_liveliness.cxx
+// Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pub.cxx
 //=================================================================================================
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/**";
+    static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
+    static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
 
     const auto args_opt =
-        grape::conio::ProgramDescription("Queries liveliness token")
-            .declareOption<std::string>("key", "key expression to query liveliness of", DEFAULT_KEY)
+        grape::conio::ProgramDescription("Periodic publisher example")
+            .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+            .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
             .parse(argc, argv);
 
     if (not args_opt.has_value()) {
       throw grape::conio::ProgramOptions::Error{ args_opt.error() };
     }
     const auto& args = args_opt.value();
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
 
     std::println("Opening session...");
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
 
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    std::println("Sending liveliness query for '{}'...", key);
-    static constexpr auto FIFO_LENGTH = 16u;
-    auto replies = session.liveliness_get(key, zenoh::channels::FifoChannel(FIFO_LENGTH));
+    std::println("Declaring Publisher on '{}'", key);
+    auto pub = session.declare_publisher(key);
 
-    for (auto res = replies.recv(); std::holds_alternative<zenoh::Reply>(res);
-         res = replies.recv()) {
-      const auto& reply = std::get<zenoh::Reply>(res);
-      if (reply.is_ok()) {
-        const auto& sample = reply.get_ok();
-        std::println(">> Alive token ('{}')", sample.get_keyexpr().as_string_view());
-      } else {
-        std::println("Received an error");
-      }
+    static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
+    uint64_t idx = 0;
+    while (true) {
+      const auto msg = std::format("[{}] {}", idx++, value);
+      std::println("Publishing Data ('{} : {})", key, msg);
+      pub.put(zenoh::ext::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
+      std::this_thread::sleep_for(LOOP_WAIT);
     }
-
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);

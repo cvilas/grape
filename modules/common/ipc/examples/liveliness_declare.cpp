@@ -3,54 +3,55 @@
 //=================================================================================================
 
 #include <print>
+#include <thread>
 
 #include "examples_utils.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// Publishing end of the pair of example programs to measure throughput between a publisher and a
-// subscriber.
+// Declares a liveliness token on a given key expression. This token will be seen alive by the
+// subscribers until the token is undeclared.
 //
 // Typical usage:
-// ```code
-// zenoh_throughput_pub [--size=8]
+// ```bash
+// liveliness_declare [--key=group1/member1]
 // ```
 //
-// Paired with example: zenoh_throughput_sub.cpp
+// Paired with example: liveliness_get, liveliness_sub
 //
 // Derived from:
-// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pub_thr.cxx
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/zenohc/z_liveliness.cxx
 //=================================================================================================
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    static constexpr auto DEFAULT_PAYLOAD_SIZE = 8;
-    static constexpr uint8_t DEFAULT_PAYLOAD_FILL = 1;
+    static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/liveliness";
 
     const auto args_opt =
-        grape::conio::ProgramDescription("Publisher end of throughput measurement example")
-            .declareOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE)
+        grape::conio::ProgramDescription("Declares/undeclares liveliness token")
+            .declareOption<std::string>("key", "key expression to declare liveliness token on",
+                                        DEFAULT_KEY)
             .parse(argc, argv);
+
     if (not args_opt.has_value()) {
       throw grape::conio::ProgramOptions::Error{ args_opt.error() };
     }
     const auto& args = args_opt.value();
-    const auto payload_size = grape::ipc::ex::getOptionOrThrow<size_t>(args, "size");
-    const auto value = std::vector<uint8_t>(payload_size, DEFAULT_PAYLOAD_FILL);
-    std::println("Payload size: {} bytes", payload_size);
 
+    std::println("Opening session...");
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
+    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
 
-    static constexpr auto TOPIC = "grape/ipc/example/zenoh/throughput";
-    auto pub =
-        session.declare_publisher(TOPIC, { .congestion_control = Z_CONGESTION_CONTROL_BLOCK });
+    std::println("Declaring liveliness token for '{}'", key);
+    [[maybe_unused]] const auto token = session.liveliness_declare_token(key);
 
-    std::println("Press CTRL-C to quit");
+    std::println("Press CTRL-C to undeclare token and quit");
     while (true) {
-      pub.put(value);
+      static constexpr auto LOOP_WAIT = std::chrono::milliseconds(1000);
+      std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {

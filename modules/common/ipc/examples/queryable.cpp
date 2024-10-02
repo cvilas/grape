@@ -13,7 +13,7 @@
 // Example program that declares a queryable. The queryable will be triggered on remote calls on the
 // designated topic, and will return a value to the querier.
 //
-// Paired with examples: zenoh_query_get.cpp, zenoh_query_get_channel.cpp
+// Paired with examples: query_get.cpp, query_get_channel.cpp
 //
 // Derived from:
 // https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_queryable.cxx
@@ -33,9 +33,9 @@ auto main() -> int {
       const auto params = query.get_parameters();
       const auto payload = query.get_payload();
       std::println(">> Received Query '{}?{}' with value '{}'", keyexpr.as_string_view(), params,
-                   payload.has_value() ? payload->get().deserialize<std::string>() : "none");
+                   payload.has_value() ? payload->get().as_string() : "none");
       const auto* const response = "This is a response from Queryable";
-      query.reply(keyexpr, zenoh::Bytes::serialize(response),
+      query.reply(keyexpr, zenoh::ext::serialize(response),
                   { .encoding = zenoh::Encoding("text/plain") });
     };
 

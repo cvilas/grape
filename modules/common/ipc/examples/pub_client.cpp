@@ -1,73 +1,94 @@
 //=================================================================================================
-// Copyright (C) 2024 GRAPE Contributors
+// Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <map>
+#include <atomic>
+#include <csignal>
 #include <print>
 #include <thread>
 
 #include "examples_utils.h"
-#include "grape/conio/conio.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// The Attachment feature enables users to attach metadata to the payload. The data and metadata
-// can come from different memory regions, avoiding the need to copy both into a new buffer and
-// then serializing them as a single payload. In principle this is similar to vectored I/O:
-// https://en.wikipedia.org/wiki/Vectored_I/O
+// Example program that creates a 'client' publisher. Clients connect to other peers and clients
+// via routers. For a description of clients and routers, see
+// https://zenoh.io/docs/getting-started/deployment/. This publisher periodically writes a value on
+// the specified key. The published value will be received by all matching subscribers.
 //
 // Typical usage:
 // ```bash
-// zenoh_attachment_pub [--key=demo/example/test --value="Hello World"]
+// pub_client [--key="topic_name" --value="string text" --router="ip:port"]
 // ```
 //
-// Paired with example: zenoh_attachment_sub.cpp
+// Paired with: sub_client.cpp, router.cpp
 //
 //=================================================================================================
+
+namespace {
+
+//-------------------------------------------------------------------------------------------------
+std::atomic_bool s_exit = false;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+
+void onSignal(int /*signum*/) {
+  s_exit = true;
+}
+
+}  // namespace
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    static constexpr auto DEFAULT_VALUE = "Put from attachment publisher";
+    std::ignore = signal(SIGINT, onSignal);
+    std::ignore = signal(SIGTERM, onSignal);
+
     static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
+    static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
+    static constexpr auto DEFAULT_ROUTER = "localhost:7447";
 
     const auto args_opt =
-        grape::conio::ProgramDescription("Attachment publisher example")
+        grape::conio::ProgramDescription("Example publisher operating in 'client' mode")
             .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
             .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
+            .declareOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER)
             .parse(argc, argv);
 
     if (not args_opt.has_value()) {
       throw grape::conio::ProgramOptions::Error{ args_opt.error() };
     }
     const auto& args = args_opt.value();
+
     const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
     const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
+    const auto router = grape::ipc::ex::getOptionOrThrow<std::string>(args, "router");
 
     auto config = zenoh::Config::create_default();
 
-    std::println("Opening session...");
+    // configure as client
+    config.insert_json5(Z_CONFIG_MODE_KEY, R"("client")");
+
+    // configure router to connect to.
+    const auto router_endpoint = std::format(R"(["tcp/{}"])", router);
+    config.insert_json5(Z_CONFIG_CONNECT_KEY, router_endpoint);
+
+    // open session and print some info
     auto session = zenoh::Session::open(std::move(config));
+    std::println("Configured as client for router at {}", router_endpoint);
 
-    std::println("Declaring Publisher on '{}'", key);
     auto pub = session.declare_publisher(key);
+    std::println("Publisher created on '{}'", key);
 
-    // allocate and set attachment map
-    auto attachment =
-        std::map<std::string, std::string>{ { "lang", "C++" }, { "domain", "robotics" } };
-
-    // periodically publish data with attachments
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
     uint64_t idx = 0;
-    while (true) {
+    std::println("Press ctrl-c to exit");
+    while (not s_exit) {
       const auto msg = std::format("[{}] {}", idx++, value);
       std::println("Publishing Data ('{} : {})", key, msg);
-      attachment["index"] = std::to_string(idx);
-      pub.put(zenoh::Bytes::serialize(msg), { .encoding = zenoh::Encoding("text/plain"),
-                                              .attachment = zenoh::Bytes::serialize(attachment) });
+      pub.put(zenoh::ext::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
       std::this_thread::sleep_for(LOOP_WAIT);
     }
+
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);

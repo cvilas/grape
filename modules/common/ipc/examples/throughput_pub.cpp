@@ -5,52 +5,53 @@
 #include <print>
 
 #include "examples_utils.h"
-#include "grape/conio/conio.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
 
 //=================================================================================================
-// Example program that publishes a sample with Samplekind::Delete. Such messages can be
-// interpreted by subscribers and storages however they want, such as "delete all data for keys
-// included by this sample's key expression". Run this program with zenoh_sub in another terminal
-// to witness the interaction.
+// Publishing end of the pair of example programs to measure throughput between a publisher and a
+// subscriber.
 //
 // Typical usage:
 // ```code
-// zenoh_pub_delete [--key="demo/**"]
+// throughput_pub [--size=8]
 // ```
 //
-// Paired with example: zenoh_sub.cpp
+// Paired with example: throughput_sub.cpp
 //
 // Derived from:
-// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_delete.cxx
+// https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pub_thr.cxx
 //=================================================================================================
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
+    static constexpr auto DEFAULT_PAYLOAD_SIZE = 8;
+    static constexpr uint8_t DEFAULT_PAYLOAD_FILL = 1;
 
     const auto args_opt =
-        grape::conio::ProgramDescription("Notifies deletion of data on specified key")
-            .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+        grape::conio::ProgramDescription("Publisher end of throughput measurement example")
+            .declareOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE)
             .parse(argc, argv);
-
     if (not args_opt.has_value()) {
       throw grape::conio::ProgramOptions::Error{ args_opt.error() };
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto payload_size = grape::ipc::ex::getOptionOrThrow<size_t>(args, "size");
+    const auto value = std::vector<uint8_t>(payload_size, DEFAULT_PAYLOAD_FILL);
+    std::println("Payload size: {} bytes", payload_size);
 
-    std::println("Opening session...");
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
 
-    std::println("Deleting resources matching '{}'...", key);
-    session.delete_resource(key);
+    static constexpr auto TOPIC = "grape/ipc/example/zenoh/throughput";
+    auto pub =
+        session.declare_publisher(TOPIC, { .congestion_control = Z_CONGESTION_CONTROL_BLOCK });
 
-    // Note: The same result can be accomplished by calling delete_resource() on a publisher.
-
+    std::println("Press CTRL-C to quit");
+    while (true) {
+      pub.put(value);
+    }
     return EXIT_SUCCESS;
   } catch (const grape::conio::ProgramOptions::Error& ex) {
     std::ignore = std::fputs(toString(ex).c_str(), stderr);
