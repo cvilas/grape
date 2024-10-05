@@ -43,7 +43,7 @@ with section("parse"):
         'PRIVATE_LINK_LIBS': '*'
       }
     },
-    'define_module_executable': {
+    'define_nodule_app': {
       'flags': [],
       'kwargs': {
         'NAME': '*',

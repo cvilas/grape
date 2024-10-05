@@ -2,4 +2,4 @@
 # Copyright (C) 2023 GRAPE Contributors
 # =================================================================================================
 
-define_module_executable(NAME show_version SOURCES show_version.cpp)
+define_nodule_app(NAME show_version SOURCES show_version.cpp)

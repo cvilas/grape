@@ -36,7 +36,7 @@ Modules can be fully self-contained, or depend on other modules or external proj
   - Declare dependencies to other modules by modifying `declare_module()`
   - Add example programs in `examples` sub-directory with `define_module_example()`
   - Add test programs in `tests` sub-directory with `define_module_test()`
-  - Add executables in `apps` sub-directory with `define_module_executable()`
+  - Add executables in `apps` sub-directory with `define_nodule_app()`
   - Add documentation files in `docs` sub-directory.
   - Update the `README.md` with information relevant to other developers or users.
 
@@ -51,7 +51,7 @@ Note that after configuration,
 - `make tests` builds all unit tests
 - `make check` builds and run tests, and generates a test report.
 - `make docs` generates source code documentation using doxygen
-- `make install` builds and installs targets
+- `make install` builds and installs library and app targets
 - `<install_location>/bin/uninstall.sh` uninstalls everything
 
 ## References
