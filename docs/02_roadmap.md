@@ -25,10 +25,9 @@
   - :done: Review zenohc and zenohcxx installation steps are correct in external/CMakeLists.txt.
   - :done: Make sure static libs are built and installed when requested.
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
-- C++/Python interop
-  - Data serdes backend (low overhead, type-safe, fast): zenoh default serdes, *flatbuffers*, protobufs
-  - concept `serialisable`
-  - Code interop (do we even need it if data structures are interoperable with IPC?): swig, pybind11 
+- serdes
+  - :done: Choose serdes backends (C++/Python interop, low overhead, type-safe, fast)
+  - polish it up for wide use
 
 ## Phase 4 - Robotics core
 
