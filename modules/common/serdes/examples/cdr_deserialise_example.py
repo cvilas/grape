@@ -29,7 +29,7 @@ class CDRReader:
         self.buf = byte_buffer
         self.pos = 0
 
-        # NOTE 1: By default eprosima::fastcdr::Cdr does not REPR_ID and REPR_OPT. 
+        # NOTE 1: By default eprosima::fastcdr::Cdr does not report REPR_ID and REPR_OPT. 
         # NOTE 2: Assume Little-Endian encoding (would have been set in REPR_ID)
         #self.align(2)
         #self.repr_id = struct.unpack('<H', self.buf[self.pos:self.pos + 2])[0]
@@ -49,7 +49,7 @@ class CDRReader:
         return slice
 
     def align(self, alignment):
-        modulo = (self.pos + 4) % alignment
+        modulo = self.pos % alignment
         if modulo > 0:
             self.pos += alignment - modulo
 
