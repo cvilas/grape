@@ -31,6 +31,7 @@ In decreasing order of priority:
   template<typename SerialiserType, typename DataType>
   void deserialize(SerialiserType&, DataType&)  
   ```
+- Good documentation (spec., usage)
 - Error handling preferably as return codes instead of exceptions
 - Suitable for resource-constrained systems (eg: bare metal systems)
 - Minimal additional software dependencies
@@ -41,10 +42,6 @@ In decreasing order of priority:
 [Note 2] Enables type-safe deserialisation, introspection (as text or JSON, for instance), version control and backwards compatibility. Beware, this comes at a cost in terms of reduced performance and increased data sizes
 
 ### Options
-
-*tl;dr:* Prefer to use FastCDR! 
-
-*Longer version:*
 
 For POD types and data structures based on them, in many cases, this may be all you need:
 
@@ -76,33 +73,46 @@ The main advantage With `zenoh::Bytes` is convenience, as it comes with Zenoh IP
 Representative [benchmarks](./examples/bench.cpp) for the rest of them: 
 
 ```text
-------------------------------------------------------------------
-Benchmark                        Time             CPU   Iterations
-------------------------------------------------------------------
-bmFastCDRSerialize            12.7 ns         12.7 ns     53660564
-bmFastCDRDeserialize          23.5 ns         23.4 ns     30604937
-bmCDRSerialize                24.3 ns         24.3 ns     28724470
-bmCDRDeserialize              34.6 ns         34.6 ns     21413645
-bmMsgpackSerialize            45.7 ns         45.7 ns     15186918
-bmMsgpackDeserialize           109 ns          109 ns      6421654
-bmFlexBufferSerialize          155 ns          155 ns      4447683
-bmFlexBufferDeserialize       29.2 ns         29.2 ns     23926965
+
+// benchmarked data structure
+struct Person {
+  std::string name;
+  int32_t id{};
+  std::string email;
+  std::vector<float> scores;
+};
+
+-------------------------------------------------------------
+Benchmark                     CPU Time  Serialised Data Size
+-------------------------------------------------------------
+bmFastCDRSerialize            12.7 ns   58 bytes
+bmFastCDRDeserialize          23.5 ns    
+bmCDRSerialize                24.3 ns   64 bytes
+bmCDRDeserialize              34.6 ns   
+bmMsgpackSerialize            45.7 ns   48 bytes
+bmMsgpackDeserialize           109 ns
+bmFlexBufferSerialize          155 ns   63 bytes
+bmFlexBufferDeserialize       29.2 ns   
 ```
 
-FastCDR is simple and extremely fast. A drawback is that it modifies the CDR standard. Therefore  encoder/decoder in other languages would have to be implemented by reverse engineering the C++ implementation to do so. But it needs to be done only once.
+serdes          | C++/Python interop | encode speed | decode speed | API simplicity | Documentation 
+----------------|--------------------|--------------|--------------|----------------|---------------
+FastCDR/FastCDR | -                  | =======      | ====         | ====           | =
+FastCDR/CDR     | -                  | ======       | ===          | ====           | ==
+Messagepack     | ====               | ===          | =            | ===            | ====
+Flexbuffers     | ====               | =            | ===          | ==             | ===
 
-The next obvious candidate is CDR (also provided by FastCDR library), which implements Extended CDR version 2 (see chapter 10 of the [DDS interoperability wire protocol](https://www.omg.org/spec/DDSI-RTPS/)).
+FastCDR is simple and extremely fast. Drawbacks are that it modifies the CDR standard, the spec is not well documented, and there is no out-of-the-box Python support. Reverse engineering the C++ implementation for a Python deserialiser may not be too hard though. If speed is the main criterion, the next obvious candidate is CDR (also provided by FastCDR library), which implements Extended CDR version 2 (see chapter 10 of the [DDS interoperability wire protocol](https://www.omg.org/spec/DDSI-RTPS/)).
 
-Where painless interoperability across programming languages is the main objective, MessagePack is the clear choice. 
+Messagepack wins overall for painless interoperability, fairly simple API, smallest serialised data size (wire efficiency), good documentation and reasonable performance.
 
-With FastBuffer, the main advantage is its flexibility in representation. Serialisation is terribily slow, but deserialisation is incredibly fast. It's  possible to deference individual elements in the serialised object without deserialising the entire object. But I am not sure how useful this actually is in practice.
+With FastBuffer, the main advantage is incredibly fast deserialisation. It's  possible to deference individual elements in the serialised object without deserialising the entire object. Serialisation is the slowest of all tested protocols.
 
 ## TODO
 
-- Generic API to pick any supported serialisation mechanism at runtime.
+- Generic API to pick any supported serialisation mechanism at runtime. See [reflect-cpp](https://github.com/getml/reflect-cpp)
 - Python XCDRv2 decoder module
 - Python FastCDR decoder module
-- Add XCDRv2 spec to docs (chapter 10 of https://www.omg.org/spec/DDSI-RTPS/)
 - Advanced example: serialise complex data structure composed of other data structures
   - flexbuffer
   - msgpack

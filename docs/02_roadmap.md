@@ -30,7 +30,6 @@
 - Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
 - Study
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
-  - [boost-ext/reflect](https://github.com/boost-ext/reflect)
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
 - enum-to-string and string-to-enum
   - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
