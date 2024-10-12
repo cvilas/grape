@@ -365,7 +365,7 @@ macro(define_module_example)
 endmacro()
 
 #==================================================================================================
-# macro: define_nodule_app
+# macro: define_module_app
 #
 # Description:
 #   Macro to define exectuable targets
@@ -383,7 +383,7 @@ endmacro()
 #   [PUBLIC_LINK_LIBS] : (list, optional) Public link dependencies. See 'PUBLIC' keyword in `target_link_libraries`
 #   [PRIVATE_LINK_LIBS]: (list, optional) Private link dependencies. See 'PRIVATE' keyword in `target_link_libraries`
 #
-macro(define_nodule_app)
+macro(define_module_app)
   set(flags "")
   set(single_opts NAME)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS
