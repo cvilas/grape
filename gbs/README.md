@@ -36,7 +36,7 @@ Modules can be fully self-contained, or depend on other modules or external proj
   - Declare dependencies to other modules by modifying `declare_module()`
   - Add example programs in `examples` sub-directory with `define_module_example()`
   - Add test programs in `tests` sub-directory with `define_module_test()`
-  - Add executables in `apps` sub-directory with `define_nodule_app()`
+  - Add executables in `apps` sub-directory with `define_module_app()`
   - Add documentation files in `docs` sub-directory.
   - Update the `README.md` with information relevant to other developers or users.
 
