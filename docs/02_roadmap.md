@@ -17,6 +17,7 @@
 
 ## Phase 3 - Data recording and playback
 
+- External deps: Replace git clone with direct download of tarballs
 - Disk logging and playback
   - Requirements analysis
   - Narrow down options: [mcap](https://mcap.dev/), others
