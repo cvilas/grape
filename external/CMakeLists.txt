@@ -139,4 +139,23 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
   endif()
 endif()
 
+# -------------------------------------------------------------------------------------------------
+# mcap
+if(mcap IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(mcap ${MCAP_VERSION_REQUIRED} QUIET)
+  if(mcap_FOUND)
+    message(STATUS "mcap: Using version ${mcap_VERSION} from ${mcap_DIR}")
+    add_dummy_target(mcap)
+  else()
+    message(STATUS "mcap: Building ${MCAP_VERSION_REQUIRED} from source")
+    set(MCAP_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} )
+    ExternalProject_Add(
+      mcap
+      GIT_REPOSITORY "https://github.com/cvilas/mcap.git"
+      GIT_TAG "feat/cmake"
+      GIT_SHALLOW true
+      SOURCE_SUBDIR cpp
+      CMAKE_ARGS ${MCAP_CMAKE_ARGS})
+  endif()
+endif()
 
