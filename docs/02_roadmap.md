@@ -15,15 +15,22 @@
 - :done: Implement `probe::Controller`
 - :done: Implement `probe::Monitor` PoC
 
-## Phase 3 - Multimodel data logging and visualisation - part 2
+## Phase 3 - Data recording and playback
 
-- Serialisation (See TODO in [README](../modules/common/serdes/README.md))
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
-- Disk logging
-  - csv reader/writer
-  - [mcap](https://mcap.dev/) reader/writer
+- Disk logging and playback
+  - Requirements analysis
+  - Narrow down options: [mcap](https://mcap.dev/), others
+- IPC wrapper API
+  - Do we need it? Compare against past DDS approach
+- Generic serdes API (See TODO in [README](../modules/common/serdes/README.md))
+  - reduce supported options
+- Generic plotting api
+  - Requirements analysis
+  - Narrow down options: qt6, implot
 - Pin zenoh version to 1.0.0
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
+  - New examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
+- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Phase 4 - Robotics core
 
