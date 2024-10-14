@@ -114,7 +114,7 @@ TEST_CASE("Default value is overridden when optional argument is specified", "[p
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Detects unspecified option", "[program_options]") {
   const auto args = ProgramDescription("unspecified option test").parse(0, nullptr);
-  REQUIRE(args.has_value());
+  REQUIRE(args.has_value() == true);
   REQUIRE_FALSE(args.value().hasOption("key3"));
 }
 
