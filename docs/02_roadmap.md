@@ -31,9 +31,8 @@
   - IEEE 802.3af/at compliant PoE router/switch
 - PoC zenoh video capture/display
   - Study [zenoh-demo](https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam)
-- Requirements analysis
-- Implement basic example for AV capture, streaming and display
-  - Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
+  - Requirements analysis
+  - Implement basic example for AV capture, streaming and display: Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
 - Implement advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client
