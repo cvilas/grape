@@ -15,16 +15,23 @@
 - :done: Implement `probe::Controller`
 - :done: Implement `probe::Monitor` PoC
 
-## Phase 3 - Multimodel data logging and visualisation - part 2
+## Phase 3 - Data recording and playback
 
 - :done: Serialisation
-- Disk logging
+- Disk logging and playback
+  - Requirements analysis
   - Trial [mcap](https://mcap.dev/) reader/writer
   - Replay recording with plotjuggler
 - Sensor data visualisation
   - Evaluate [rerun](https://rerun.io/)
+- Generic plotting api
+  - Requirements analysis
+  - Narrow down options: qt6, implot
+- IPC wrapper API
+  - Do we need it? Compare against past DDS approach
 - Pin zenoh version to 1.0.0
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
+- External deps: Replace git clone with direct download of tarballs
 - Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Phase 4 - Robotics core
