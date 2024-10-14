@@ -28,8 +28,7 @@
   - IEEE 802.3at compliant PoE router/switch
 - PoC zenoh video capture/display
   - Study [zenoh-demo](https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam)
-  - Requirements analysis
-  - Implement basic example for AV capture, streaming and display: Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
+  - Implement basic example: Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> GLFW viewer
 - ROS2 interop
   - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
 - Disk recording and playback for time-series multi-modal data ([TODO](../modules/common/recorder/README.md))
