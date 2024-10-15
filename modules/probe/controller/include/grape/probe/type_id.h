@@ -25,7 +25,7 @@ struct IsNumeric : std::disjunction<                    //
                        std::is_same<T, double>          //
                        > {};
 
-static_assert(sizeof(float) == 4, "Requires platform with 4-byte single precision float type");
+static_assert(sizeof(float) == 4);
 static_assert(sizeof(double) == 2 * sizeof(float));
 
 template <typename T>
