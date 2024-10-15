@@ -17,13 +17,15 @@
 
 ## Phase 3 - Multimodel data logging and visualisation - part 2
 
-- Serialisation (See TODO in [README](../modules/common/serdes/README.md))
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
+- :done: Serialisation
 - Disk logging
-  - csv reader/writer
-  - [mcap](https://mcap.dev/) reader/writer
+  - Trial [mcap](https://mcap.dev/) reader/writer
+  - Replay recording with plotjuggler
+- Sensor data visualisation
+  - Evaluate [rerun](https://rerun.io/)
 - Pin zenoh version to 1.0.0
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
+- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Phase 4 - Robotics core
 
