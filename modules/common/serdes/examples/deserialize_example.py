@@ -6,18 +6,6 @@
 
 import struct
 
-# Define the State class for deserialized data
-class State:
-    def __init__(self, name, timestamp, position):
-        self.name = name
-        self.timestamp = timestamp
-        self.position = position
-
-    def __repr__(self):
-        return f"State(name={self.name}, timestamp={self.timestamp}, position={self.position})"
-
-import struct
-
 # Define a decoding class
 class Deserialiser:
     def __init__(self, byte_buffer):
@@ -83,6 +71,16 @@ class Deserialiser:
         length = self.read_uint32() 
         return [element_reader() for _ in range(length)]
 
+# Define the State class for deserialized data
+class State:
+    def __init__(self, name, timestamp, position):
+        self.name = name
+        self.timestamp = timestamp
+        self.position = position
+
+    def __repr__(self):
+        return f"State(name={self.name}, timestamp={self.timestamp}, position={self.position})"
+    
 # Read binary serialised data from the file
 def read_file(filename):
     with open(filename, 'rb') as file:
