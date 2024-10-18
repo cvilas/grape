@@ -46,6 +46,7 @@
   - refactor existing `toString()` functions
 - Shared memory
 - Single producer multiple consumer queue using externally specified memory (heap or shared memory)
+- Timers and watchdogs
 - HW IO
   - CANopen
   - joystick
