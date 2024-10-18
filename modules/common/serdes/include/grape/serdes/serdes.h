@@ -5,7 +5,7 @@
 #pragma once
 
 #include <array>
-#include <bit>
+#include <bit>  // for endian check
 #include <span>
 #include <string>
 #include <vector>
@@ -38,14 +38,7 @@ public:
   }
 
   [[nodiscard]] auto pack(const std::string& value) -> bool {
-    if (not pack(static_cast<std::uint32_t>(value.size()))) {
-      return false;
-    }
-    if (not pack(std::span<const char>{ value.c_str(), value.size() })) {
-      stream_.rewind(sizeof(std::uint32_t));  // undo encoding string size
-      return false;
-    }
-    return true;
+    return packWithSize(std::span<const char>{ value.c_str(), value.size() });
   }
 
   template <arithmetic T>
@@ -55,14 +48,7 @@ public:
 
   template <arithmetic T>
   [[nodiscard]] auto pack(const std::vector<T>& data) -> bool {
-    if (not pack(static_cast<std::uint32_t>(data.size()))) {
-      return false;
-    }
-    if (not pack(std::span<const T>{ data.begin(), data.size() })) {
-      stream_.rewind(sizeof(std::uint32_t));  // undo encoding data size
-      return false;
-    }
-    return true;
+    return packWithSize(std::span<const T>{ data.begin(), data.size() });
   }
 
   template <arithmetic T, std::size_t N>
@@ -71,6 +57,18 @@ public:
   }
 
 private:
+  template <arithmetic T>
+  [[nodiscard]] auto packWithSize(std::span<const T> data) -> bool {
+    if (not pack(static_cast<std::uint32_t>(data.size()))) {
+      return false;
+    }
+    if (not pack(data)) {
+      stream_.rewind(sizeof(std::uint32_t));  // undo encoding data size
+      return false;
+    }
+    return true;
+  }
+
   template <arithmetic T>
   [[nodiscard]] auto pack(std::span<const T> data) -> bool {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
