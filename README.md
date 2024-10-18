@@ -10,7 +10,8 @@ GRAPE provides facilities to develop large distributed and embedded control appl
 It's also a hobby project that demonstrates [principles](https://github.com/cvilas/guidance) that I follow in software development, and serves as a playground to evaluate [modern C++ techniques](./docs/03_modern_cpp.md) in writing simple, expressive, and performant code for industrial applications. Features of this repo that I consider interesting:
 
 - A [modular build system](./gbs/README.md)
-- A performant [logging library](./modules/common/log/README.md)
+- A fast [logging library](./modules/common/log/README.md)
+- A fast [serialisation library](./modules/common/serdes/README.md)
 - A powerful [configuration and scripting system](./modules/common/script/README.md)
 - Facilities for low latency [realtime systems](./modules/common/realtime/README.md)
 - A stubbornly strict [command line parser](./modules/common/conio/include/grape/conio/program_options.h)
