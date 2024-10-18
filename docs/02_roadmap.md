@@ -25,6 +25,7 @@
   - Evaluate [rerun](https://rerun.io/)
 - Pin zenoh version to 1.0.0
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
+  - New examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 - Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Phase 4 - Robotics core
