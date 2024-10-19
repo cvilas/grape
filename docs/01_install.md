@@ -95,7 +95,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-18 ~~gcc-14~~
 
 ## Configure and build
 
-Note (June 2024) Use clang toolchain to build the project. GCC does not support all features we use.
+Note (Oct 2024) Use clang toolchain to build the project. GCC does not support all features we use.
 
 ```bash
 git clone git@github.com:cvilas/grape

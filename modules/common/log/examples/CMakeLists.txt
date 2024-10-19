@@ -22,3 +22,4 @@ define_module_example(
   PRIVATE_LINK_LIBS benchmark::benchmark
   PUBLIC_LINK_LIBS "")
 set_target_properties(grape_log_spdlog_bench PROPERTIES CXX_CLANG_TIDY "") # disable spdlog warnings
+set_target_properties(grape_log_spdlog_bench PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")

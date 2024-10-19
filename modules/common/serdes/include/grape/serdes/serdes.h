@@ -84,7 +84,7 @@ template <ReadableStream Stream>
 class Deserialiser {
 public:
   /// Initialise
-  /// @param data Serialised data to decode
+  /// @param stream Serialised data to decode
   explicit Deserialiser(Stream& stream) : stream_(stream) {
   }
 

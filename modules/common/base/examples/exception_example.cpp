@@ -16,7 +16,7 @@ constexpr auto toString(const Error& er) -> std::string_view {
       return "Bad";
     case Error::RealBad:
       return "RealBad";
-  };
+  }
   std::unreachable();
 };
 

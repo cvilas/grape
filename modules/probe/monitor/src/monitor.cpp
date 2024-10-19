@@ -2,8 +2,6 @@
 // Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
-#define GL_SILENCE_DEPRECATION
-
 #include "grape/probe/monitor.h"
 
 #include <cstdio>
@@ -11,6 +9,10 @@
 #include <mutex>
 #include <print>
 #include <shared_mutex>
+
+#if defined(__APPLE__)
+#define GL_SILENCE_DEPRECATION
+#endif
 
 #include <GLFW/glfw3.h>
 
@@ -161,34 +163,24 @@ auto convert(grape::probe::TypeId tid, const std::byte* bytes) -> double {
   switch (tid) {
     case TID::Int8:
       return static_cast<double>(*reinterpret_cast<const std::int8_t*>(bytes));
-      break;
     case TID::Uint8:
       return static_cast<double>(*reinterpret_cast<const std::uint8_t*>(bytes));
-      break;
     case TID::Int16:
       return static_cast<double>(*reinterpret_cast<const std::int16_t*>(bytes));
-      break;
     case TID::Uint16:
       return static_cast<double>(*reinterpret_cast<const std::uint16_t*>(bytes));
-      break;
     case TID::Int32:
       return static_cast<double>(*reinterpret_cast<const std::int32_t*>(bytes));
-      break;
     case TID::Uint32:
       return static_cast<double>(*reinterpret_cast<const std::uint32_t*>(bytes));
-      break;
     case TID::Int64:
       return static_cast<double>(*reinterpret_cast<const std::int64_t*>(bytes));
-      break;
     case TID::Uint64:
       return static_cast<double>(*reinterpret_cast<const std::uint64_t*>(bytes));
-      break;
     case TID::Float32:
       return static_cast<double>(*reinterpret_cast<const float*>(bytes));
-      break;
     case TID::Float64:
       return static_cast<double>(*reinterpret_cast<const double*>(bytes));
-      break;
   }
   // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
   std::unreachable();
@@ -198,16 +190,16 @@ auto convert(grape::probe::TypeId tid, const std::byte* bytes) -> double {
 auto toImGuiDataType(grape::probe::TypeId id) -> ImGuiDataType {
   switch (id) {
       // clang-format off
-    case grape::probe::TypeId::Int8: return ImGuiDataType_S8; break;
-    case grape::probe::TypeId::Uint8: return ImGuiDataType_U8; break;
-    case grape::probe::TypeId::Int16: return ImGuiDataType_S16; break;
-    case grape::probe::TypeId::Uint16: return ImGuiDataType_U16; break;
-    case grape::probe::TypeId::Int32: return ImGuiDataType_S32; break;
-    case grape::probe::TypeId::Uint32: return ImGuiDataType_U32;break;
-    case grape::probe::TypeId::Int64: return ImGuiDataType_S64; break;
-    case grape::probe::TypeId::Uint64: return ImGuiDataType_U64; break;
-    case grape::probe::TypeId::Float32: return ImGuiDataType_Float; break;
-    case grape::probe::TypeId::Float64: return ImGuiDataType_Double; break;
+    case grape::probe::TypeId::Int8: return ImGuiDataType_S8;
+    case grape::probe::TypeId::Uint8: return ImGuiDataType_U8;
+    case grape::probe::TypeId::Int16: return ImGuiDataType_S16;
+    case grape::probe::TypeId::Uint16: return ImGuiDataType_U16;
+    case grape::probe::TypeId::Int32: return ImGuiDataType_S32;
+    case grape::probe::TypeId::Uint32: return ImGuiDataType_U32;
+    case grape::probe::TypeId::Int64: return ImGuiDataType_S64;
+    case grape::probe::TypeId::Uint64: return ImGuiDataType_U64;
+    case grape::probe::TypeId::Float32: return ImGuiDataType_Float;
+    case grape::probe::TypeId::Float64: return ImGuiDataType_Double;
       // clang-format on
   }
   std::unreachable();

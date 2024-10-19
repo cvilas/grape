@@ -135,7 +135,7 @@ constexpr auto toString(ConfigScript::Error code) -> std::string_view {
   switch (code) {
     case ConfigScript::Error::Unloadable:
       return "Unloadable";
-  };
+  }
   return "";
 }
 
@@ -146,7 +146,7 @@ constexpr auto toString(ConfigTable::Error code) -> std::string_view {
       return "NotFound";
     case ConfigTable::Error::Unparsable:
       return "Unparsable";
-  };
+  }
   return "";
 }
 

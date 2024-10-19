@@ -2,12 +2,14 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#define GL_SILENCE_DEPRECATION
-
 #include <cstdlib>
 #include <print>
 #include <stdexcept>
 #include <string>
+
+#if defined(__APPLE__)
+#define GL_SILENCE_DEPRECATION
+#endif
 
 #include <GLFW/glfw3.h>
 
