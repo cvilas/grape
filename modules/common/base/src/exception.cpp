@@ -9,6 +9,10 @@
 
 namespace grape {
 
+//-------------------------------------------------------------------------------------------------
+AbstractException::~AbstractException() = default;
+
+//-------------------------------------------------------------------------------------------------
 void AbstractException::consume() noexcept {
   // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
   try {

@@ -22,9 +22,9 @@ void consumeExceptions() noexcept {
     if (std::current_exception() != nullptr) {
       throw;
     }
-  } catch (const grape::probe::MonitorException& ex) {
+  } catch (const grape::probe::MonitorException&) {
     grape::probe::MonitorException::consume();
-  } catch (const grape::probe::ControllerException& ex) {
+  } catch (const grape::probe::ControllerException&) {
     grape::probe::ControllerException::consume();
   } catch (...) {
     grape::AbstractException::consume();

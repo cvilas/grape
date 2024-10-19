@@ -23,7 +23,7 @@ class BasicFixedString {
 public:
   constexpr BasicFixedString() noexcept {
     data_.fill('\0');
-  };
+  }
 
   template <std::size_t M>
   // NOLINTNEXTLINE(google-explicit-constructor,cppcoreguidelines-avoid-c-arrays)

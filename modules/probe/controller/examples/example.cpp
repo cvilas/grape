@@ -56,7 +56,7 @@ void sink(const std::vector<grape::probe::Signal>& signals, std::span<const std:
       case TID::Float32: print<float>(s.name.str(), data.subspan(offset, size_bytes)); break;
       case TID::Float64: print<double>(s.name.str(), data.subspan(offset, size_bytes)); break;
         // clang-format on
-    };
+    }
     offset += size_bytes;
   }
   std::println("");
@@ -152,7 +152,7 @@ auto main(int argc, const char* argv[]) -> int {
       th.join();
     }
     return EXIT_SUCCESS;
-  } catch (const grape::probe::ControllerException& ex) {
+  } catch (const grape::probe::ControllerException&) {
     grape::probe::ControllerException::consume();
     return EXIT_FAILURE;
   } catch (...) {

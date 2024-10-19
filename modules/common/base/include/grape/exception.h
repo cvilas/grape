@@ -30,7 +30,7 @@ public:
   /// except custom data set by user in the derived classes
   static void consume() noexcept;
 
-  virtual ~AbstractException() = default;
+  virtual ~AbstractException();
 };
 
 //=================================================================================================
