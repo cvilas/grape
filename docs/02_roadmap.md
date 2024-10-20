@@ -94,7 +94,8 @@
   - [Flecs and ECS](https://github.com/SanderMertens/flecs)
 - HW accelerated 3D graphics
   - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
-  - Select a scenegraph engine: vsg, ogre, raylib, something else
+  - Select a scenegraph engine: vsg, ogre, raylib
+  - Consider custom scenegraph using existing khronos libs
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 

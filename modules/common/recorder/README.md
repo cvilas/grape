@@ -9,7 +9,12 @@ Disk recording and playback facility
 ### Requirements
 
 - Interoperable across C++ and Python
-- Independent of serialisation (i.e., API works on raw data stream)
+- Independent of serialisation (i.e., API works on raw data streams)
+- Supports multiple data streams
+- Able to attach arbitrary user-defined metadata to data streams
+  - Text
+  - Schema
+  - Arbitrary struct
 - Able to record and replay at rates comparable source data rates
 - API independent of but adaptable to pub/sub IPC
 
