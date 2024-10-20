@@ -15,19 +15,47 @@
 - :done: Implement `probe::Controller`
 - :done: Implement `probe::Monitor` PoC
 
-## Phase 3 - Multimodel data logging and visualisation - part 2
+## Phase 3 - grapecam
 
 - :done: Serialisation
 - Disk logging
+  - Requirements analysis
   - Trial [mcap](https://mcap.dev/) reader/writer
   - Replay recording with plotjuggler
+- Implement camera HW:
+  - [Raspberry Pi 5](https://thepihut.com/products/raspberry-pi-5)
+  - [High Quality camera module](https://thepihut.com/products/raspberry-pi-high-quality-camera-module)
+  - [Camera mounting plate](https://thepihut.com/products/mounting-plate-for-high-quality-camera)
+  - [Mic](https://thepihut.com/products/mini-usb-microphone)
+  - [PoE+ HAT](https://thepihut.com/products/uctronics-poe-hat-for-raspberry-pi-5-with-active-cooler-802-3af-at) 
+  - IEEE 802.3af/at compliant PoE router/switch
+- PoC zenoh video capture/display
+  - Study [zenoh-demo](https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam)
+- Requirements analysis
+- Implement basic example for AV capture, streaming and display
+  - Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
+- Implement advanced streaming
+  - Choose backend for audio/video device handling and stream processing
+  - Implement AV streaming server and client
+- Consider reinstating MessagePack for serdes (commit 5df54c0c0433ee4207fcab51f25730c1246af6a3)
+  - Add MessagePack to benchmark
+  - Reinstate example C++ and Py programs
+  
+## Phase 4 - Multimodel data logging and visualisation - part 2
+
 - Sensor data visualisation
   - Evaluate [rerun](https://rerun.io/)
+- Generic plotting api
+  - Requirements analysis
+  - Narrow down options: qt6, implot
+- IPC wrapper API
+  - Do we need it? Compare against past DDS approach
 - Pin zenoh version to 1.0.0
   - Fix examples: pub_cache, query_sub, pull, shm pub/sub
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
+  - New examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
+- External deps: Replace git clone with direct download of tarballs
 
-## Phase 4 - Robotics core
+## Phase 5 - Robotics core
 
 - Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
 - Study
@@ -55,12 +83,7 @@
   - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
-
-## Phase 5 - Audio and Video streaming
-
-- PoC zenoh video capture/display: https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam
-- Choose backend for audio/video device handling and stream processing
-- Implement basic examples for AV capture, streaming and display
+- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Phase 6 - 3D graphics
 
