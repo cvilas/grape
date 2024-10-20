@@ -2,6 +2,8 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#define SPDLOG_USE_STD_FORMAT
+
 #include <fstream>
 
 #include <benchmark/benchmark.h>
