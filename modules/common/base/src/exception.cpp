@@ -22,7 +22,7 @@ void AbstractException::consume() noexcept {
   } catch (const AbstractException& ex) {
     const auto& loc = ex.where();
     const auto loc_fname = utils::truncate(loc.file_name(), "modules");
-    std::ignore = fprintf(stderr, "\n%s\nin\n%s\nat\n%.*s:%d", ex.what().c_str(),  //
+    std::ignore = fprintf(stderr, "\n%s\nin\n%s\nat\n%.*s:%u", ex.what().c_str(),  //
                           loc.function_name(),                                     //
                           static_cast<int>(loc_fname.length()), loc_fname.data(), loc.line());
     std::ignore = fprintf(stderr, "\nBacktrace:");
