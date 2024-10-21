@@ -31,9 +31,8 @@
   - IEEE 802.3af/at compliant PoE router/switch
 - PoC zenoh video capture/display
   - Study [zenoh-demo](https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam)
-- Requirements analysis
-- Implement basic example for AV capture, streaming and display
-  - Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
+  - Requirements analysis
+  - Implement basic example for AV capture, streaming and display: Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
 - Implement advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client
@@ -95,7 +94,8 @@
   - [Flecs and ECS](https://github.com/SanderMertens/flecs)
 - HW accelerated 3D graphics
   - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
-  - Select a scenegraph engine: vsg, ogre, raylib, something else
+  - Select a scenegraph engine: vsg, ogre, raylib
+  - Consider custom scenegraph using existing khronos libs
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 
