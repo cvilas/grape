@@ -39,6 +39,8 @@
 - Consider reinstating MessagePack for serdes (commit 5df54c0c0433ee4207fcab51f25730c1246af6a3)
   - Add MessagePack to benchmark
   - Reinstate example C++ and Py programs
+- ROS2 interop
+  - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
   
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 

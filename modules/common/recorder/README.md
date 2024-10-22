@@ -10,17 +10,16 @@ Disk recording and playback facility
 
 - Interoperable across C++ and Python
 - Independent of serialisation (i.e., API works on raw data streams)
-- Supports multiple data streams
-- Able to attach arbitrary user-defined metadata to data streams
-  - Text
+- Supports arbitray number of data sources updating at arbitrary data-rates up to 1kHz
+- Able to record and replay at source data rates
+- Able to attach arbitrary user-defined metadata to data streams. Use-cases include:
+  - Text description
   - Schema
-  - Arbitrary struct
-- Able to record and replay at rates comparable source data rates
 - API independent of but adaptable to pub/sub IPC
 
 ### TODO
 
-- Requirements analysis
+- :done: Requirements analysis
 - Narrow down options: [mcap](https://mcap.dev/), [zenoh storage](https://github.com/eclipse-zenoh/zenoh-backend-filesystem), others
 - IPC, serdes and record/replay go together in a robotic system. Develop PoC as follows
   - Plant produces sensor data on different IPC channels
