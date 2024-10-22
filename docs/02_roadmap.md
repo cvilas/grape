@@ -20,7 +20,8 @@
 - :done: Serialisation
 - Disk logging
   - Requirements analysis
-  - Trial [mcap](https://mcap.dev/) reader/writer
+  - Review [mcap](https://mcap.dev/) reader/writer
+  - Review [DataTamer](https://github.com/PickNikRobotics/data_tamer). Development seems to be stalled on this project.
   - Replay recording with plotjuggler
 - Implement camera HW:
   - [Raspberry Pi 5](https://thepihut.com/products/raspberry-pi-5)
