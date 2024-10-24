@@ -20,7 +20,10 @@ Disk recording and playback facility
 ### TODO
 
 - :done: Requirements analysis
-- Narrow down options: [mcap](https://mcap.dev/), [zenoh storage](https://github.com/eclipse-zenoh/zenoh-backend-filesystem), others
+- Trial [mcap](https://mcap.dev/)
+  - write to disk
+  - read from disk
+  - benchmark
 - IPC, serdes and record/replay go together in a robotic system. Develop PoC as follows
   - Plant produces sensor data on different IPC channels
   - Data is recorded to disk
