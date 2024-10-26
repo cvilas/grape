@@ -38,9 +38,8 @@ TEST_CASE("Construction from const buffer", "[FixedString]") {
   using FixedString24 = grape::realtime::FixedString<23>;
   constexpr std::array<char, 24> BUFFER{ 'H', 'e', 'l', 'l', 'o', ' ', 'W',
                                          'o', 'r', 'l', 'd', '!', '\0' };
-  constexpr size_t BUFFER_STR_SIZE = 12;
 
-  constexpr FixedString24 STR(BUFFER.data(), BUFFER_STR_SIZE);
+  constexpr FixedString24 STR(BUFFER.data());
 
   CHECK("Hello World!"s == STR.cStr());
   CHECK(12 == STR.length());
@@ -73,7 +72,7 @@ TEST_CASE("Move construction", "[FixedString]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Copy assignment", "[FixedString]") {
-  constexpr FixedString8 STR1{ "1234", 4 };
+  constexpr FixedString8 STR1{ "1234" };
   FixedString8 str2{ "lmnopqrstuvxyz" };
 
   CHECK("1234"s == STR1.cStr());
@@ -86,7 +85,7 @@ TEST_CASE("Copy assignment", "[FixedString]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Move assignment", "[FixedString]") {
-  constexpr FixedString8 STR1{ "1234", 4 };
+  constexpr FixedString8 STR1{ "1234" };
   FixedString8 str2{ "lmnopqrstuvxyz" };
   str2 = std::move(STR1);  // NOLINT(performance-move-const-arg)
 
@@ -95,7 +94,7 @@ TEST_CASE("Move assignment", "[FixedString]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Using with string_view", "[FixedString]") {
-  static constexpr FixedString8 STR{ "abcdefghij", 10 };
+  static constexpr FixedString8 STR{ "abcdefghij" };
   constexpr auto STR_SUB_STR = STR.str().substr(0, 2);
   constexpr auto STR_STR = STR.str();
   constexpr auto STR_LENGTH = STR.length();
@@ -156,6 +155,33 @@ TEST_CASE("Swap", "[FixedString]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Size in stack", "[FixedString]") {
   CHECK(8 == sizeof(FixedString8));
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Construct with format string", "[FixedString]") {
+  SECTION("Format string fits within capacity") {
+    grape::realtime::FixedString<20> str("{} + {} = {}", 2, 3, 5);
+    REQUIRE(std::string_view(str.data()) == "2 + 3 = 5");
+    REQUIRE(str.length() == 9);
+  }
+
+  SECTION("Format string exceeds capacity") {
+    grape::realtime::FixedString<10> str("Long string: {}", "too long");
+    REQUIRE(std::string_view(str.data()) == "Long strin");
+    REQUIRE(str.length() == 10);
+  }
+
+  SECTION("Empty format string") {
+    grape::realtime::FixedString<5> str("", 42);
+    REQUIRE(std::string_view(str.data()).empty());
+    REQUIRE(str.length() == 0);
+  }
+
+  SECTION("Format string with multiple types") {
+    grape::realtime::FixedString<30> str("{} {} {:.2f}", "Answer:", 42, 1.23456);
+    REQUIRE(std::string_view(str.data()) == "Answer: 42 1.23");
+    REQUIRE(str.length() == 15);
+  }
 }
 
 // NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
