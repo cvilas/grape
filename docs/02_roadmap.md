@@ -43,8 +43,6 @@
   
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 
-- Make logger suitable for realtime threads
-  - Remove support for `std::string` (use of `std::format`) in the frontend. Provide alternative formatting mechanism that does not allocate memory.
 - Sensor data visualisation
   - Evaluate [rerun](https://rerun.io/)
 - Generic plotting api

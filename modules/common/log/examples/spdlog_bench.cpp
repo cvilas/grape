@@ -9,6 +9,7 @@
 #include <benchmark/benchmark.h>
 
 #include "grape/log/logger.h"
+#include "grape/log/macros.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/spdlog.h"
 
@@ -34,11 +35,11 @@ auto bmGrapeLog(benchmark::State& state) {
   };
   config.logger_name = "benchmark_grapelog";
 
-  auto logger = std::make_unique<grape::log::Logger>(std::move(config));
+  auto logger = grape::log::Logger(std::move(config));
   auto i = 0uz;
   for (auto s : state) {
     (void)s;
-    logger->log(grape::log::Severity::Info, std::format("Log number {:d}", i++));
+    GRAPE_LOG(logger, grape::log::Severity::Info, "Log number {:d}", i++);
   }
 }
 
