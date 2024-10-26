@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <expected>
 #include <span>
 

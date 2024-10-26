@@ -5,6 +5,8 @@
 
 #include "grape/exception.h"
 
+#include <exception>
+
 #include "grape/utils/utils.h"
 
 namespace grape {

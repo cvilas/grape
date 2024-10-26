@@ -8,7 +8,6 @@
 #include "examples_utils.h"
 #include "grape/conio/conio.h"
 #include "grape/exception.h"
-#include "grape/ipc/ipc.h"
 
 //=================================================================================================
 // Example program creates a caching publisher and periodically writes a value on the specified key.

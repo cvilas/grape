@@ -5,7 +5,6 @@
 #include "grape/script/script.h"
 
 #include "grape/exception.h"
-#include "grape/utils/utils.h"
 #include "lua.hpp"
 
 namespace grape::script {

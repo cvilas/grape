@@ -6,6 +6,7 @@
 #include <cmath>
 #include <csignal>
 #include <cstdlib>
+#include <exception>
 #include <numbers>
 #include <print>
 #include <thread>
