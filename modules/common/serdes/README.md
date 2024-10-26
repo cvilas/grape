@@ -45,5 +45,5 @@ In decreasing order of priority:
 
 ### Development
 
-A few [third party libraries](./docs/benchmarking/benchmarking.md) were considered initially. Benchmarking showed that nothing beats a simple data packing/unpacking scheme. So, that's what is implemented. Additionally, the first-principles approach meant that every single requirement stated previously could be met.
+A few third party libraries were considered initially. [Benchmarking](./docs/benchmarking/benchmarking.md) showed that nothing beats a simple data packing/unpacking scheme. So, that's what is implemented. Additionally, the first-principles approach meant that every single requirement stated previously could be met.
 

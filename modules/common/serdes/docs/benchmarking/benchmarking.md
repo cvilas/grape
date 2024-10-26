@@ -73,13 +73,13 @@ FastCDR/CDR     | =                  | ======       | ===          | ====       
 Messagepack     | ====               | ===          | =            | ===            | ====
 Flexbuffers     | ====               | =            | ===          | ==             | ===
 
-FastCDR is simple and extremely fast. It modifies the existing CDR standard by essentially eliminating padding bytes added for alignment. There is no out-of-the-box Python support and documentation is scarce. The next obvious candidate is CDR itself (also provided by FastCDR library), which implements Extended CDR version 2 (see chapter 10 of the [DDS interoperability wire protocol](https://www.omg.org/spec/DDSI-RTPS/)).
+FastCDR is simple and extremely fast. It modifies the existing CDR standard by essentially eliminating padding bytes added for alignment. There is no out-of-the-box Python support. The library also provides an implementation of CDR itself, specifically Extended CDR version 2. This is slightly slower but the advantage is that the spec is straightforward and well documented (see chapter 10 of the [DDS interoperability wire protocol](https://www.omg.org/spec/DDSI-RTPS/)), so we could write our own Python modules to support it.
 
-Messagepack wins overall for painless interoperability, fairly simple API, good documentation and reasonable performance. It also produces the smallest serialised data size for high wire-level efficiency. The benchmarked data structure contained 44 bytes of data. MessagePack just adds 4 bytes in overhead.
+Messagepack wins overall for painless interoperability, simple extensible API, good documentation and reasonable performance. It also produces the smallest serialised data size for high wire-level efficiency. The benchmarked data structure contained 44 bytes of data. MessagePack just adds 4 bytes in overhead.
 
 With FlatBuffers, deserialisation speed was genuinely impressive. On the contrary, serialisation speed was genuinely unimpressive.
 
-After reviewing third-party libraries, curiosity led me to implement a proof of concept custom serialiser that uses a simple byte-packing scheme. Turns out it performed better than FastCDR, the best performing amongst the third-party options in the above list. In retrospect, this is unsurprising - the two are conceptually equivalent after all. Additionally, the custom serialiser code is way shorter and simpler thanks to Modern C++ (`std::span`, `concept`).
+After reviewing third-party libraries, a proof of concept custom serialiser using a simple byte-packing scheme was implemented, just to see how well it would perform. Turns out it was comparable to FastCDR, the best performing in the list above. In retrospect, this is unsurprising - the two are conceptually equivalent after all. Additionally, the custom serialiser code is way shorter and simpler thanks to Modern C++ (`std::span`, `concept`).
 
 ## How to benchmark against third-party serialisation libraries
 

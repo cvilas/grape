@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <concepts>
+#include <cstddef>
+
 namespace grape::serdes {
 
 //-------------------------------------------------------------------------------------------------
