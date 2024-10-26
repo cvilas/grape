@@ -5,6 +5,7 @@
 #pragma once
 
 #include <array>
+#include <format>
 #include <string_view>
 
 namespace grape::realtime {
@@ -40,10 +41,13 @@ public:
     data_.at(length) = '\0';
   }
 
-  constexpr BasicFixedString(const CharT* str, std::size_t length) {
-    const auto usable_length = std::min(length, N);
-    Traits::copy(data_.data(), str, usable_length);
-    data_.at(usable_length) = '\0';
+  /// Constructs a formatted string
+  /// @param fmt format string (see std::format)
+  /// @param args Arguments to format
+  template <typename... Args>
+  explicit BasicFixedString(const std::format_string<Args...> fmt, Args&&... args) {
+    const auto result = std::format_to_n(data_.data(), N, fmt, std::forward<Args>(args)...);
+    data_.at(std::min(N, static_cast<std::size_t>(result.size))) = '\0';
   }
 
   [[nodiscard]] constexpr auto cStr() const noexcept -> const CharT* {
