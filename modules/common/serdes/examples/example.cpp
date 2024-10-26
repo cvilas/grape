@@ -2,9 +2,13 @@
 // Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
+#include <array>
 #include <fstream>
 #include <optional>
 #include <print>
+#include <span>
+#include <string>
+#include <vector>
 
 #include "grape/serdes/serdes.h"
 #include "grape/serdes/stream.h"
@@ -21,7 +25,7 @@ struct State {
 
 //-------------------------------------------------------------------------------------------------
 // generic file writer
-inline auto writeToFile(std::span<const char> data, const std::string& filename) -> bool {
+auto writeToFile(std::span<const char> data, const std::string& filename) -> bool {
   auto file = std::ofstream(filename, std::ios::binary);
   if (not file) {
     std::println(stderr, "Failed to open '{}' for writing", filename);
@@ -34,7 +38,7 @@ inline auto writeToFile(std::span<const char> data, const std::string& filename)
 
 //-------------------------------------------------------------------------------------------------
 // generic file reader
-inline auto readFromFile(const std::string& filename) -> std::optional<std::vector<char>> {
+auto readFromFile(const std::string& filename) -> std::optional<std::vector<char>> {
   auto file = std::ifstream(filename, std::ios::binary | std::ios::ate);
   if (not file) {
     std::println(stderr, "Failed to open '{}' for reading", filename);

@@ -38,12 +38,13 @@
 - Implement advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client
-- Consider reinstating MessagePack for serdes (commit 5df54c0c0433ee4207fcab51f25730c1246af6a3)
-  - Add MessagePack to benchmark
-  - Reinstate example C++ and Py programs
+- ROS2 interop
+  - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
   
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 
+- Make logger suitable for realtime threads
+  - Remove support for `std::string` (use of `std::format`) in the frontend. Provide alternative formatting mechanism that does not allocate memory.
 - Sensor data visualisation
   - Evaluate [rerun](https://rerun.io/)
 - Generic plotting api
