@@ -6,6 +6,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "grape/log/logger.h"
+#include "grape/log/macros.h"
 
 namespace {
 
@@ -26,9 +27,10 @@ TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
   auto logger = std::make_unique<grape::log::Logger>(std::move(config));
 
   const std::string log_str = "This should appear in logs";
-  logger->log(grape::log::Severity::Error, log_str);                           //!< above threshold
-  logger->log(grape::log::Severity::Debug, "This should not appear in logs");  //!< below threshold
-  logger.reset();  //!< destroying the logger forces queue to flush
+  GRAPE_LOG((*logger), grape::log::Severity::Error, "{}", log_str);  //!< above threshold
+  GRAPE_LOG((*logger), grape::log::Severity::Debug,
+            "This should not appear in logs");  //!< below threshold
+  logger.reset();                               //!< destroying the logger forces queue to flush
   REQUIRE(stream == log_str);
 }
 
@@ -50,7 +52,7 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   // push messages beyond queue capacity before the logs get flushed
   static constexpr auto NUM_MESSAGES = QUEUE_CAPACITY * 3;
   for (std::size_t i = 0; i < NUM_MESSAGES; ++i) {
-    logger.log(grape::log::Severity::Debug, std::format("Message no. {}", i));
+    GRAPE_LOG(logger, grape::log::Severity::Debug, "Message no. {}", i);
   }
   REQUIRE(num_logs == 0);                          //!< not flushed yet
   std::this_thread::sleep_for(FLUSH_WAIT_PERIOD);  //!< wait for flush
