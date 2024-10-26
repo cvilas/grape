@@ -2,7 +2,6 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <algorithm>
 #include <print>
 #include <thread>
 

@@ -3,7 +3,6 @@
 //=================================================================================================
 
 #include <print>
-#include <thread>
 
 #include "examples_utils.h"
 #include "grape/exception.h"

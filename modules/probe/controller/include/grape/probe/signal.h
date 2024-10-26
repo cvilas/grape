@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <cinttypes>
-
 #include "grape/probe/type_id.h"
 #include "grape/realtime/fixed_string.h"
 

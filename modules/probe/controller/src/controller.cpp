@@ -4,9 +4,9 @@
 
 #include "grape/probe/controller.h"
 
+#include <algorithm>
 #include <cstring>  // std::memcpy
 #include <numeric>  // std::accumulate
-#include <thread>
 
 namespace {
 

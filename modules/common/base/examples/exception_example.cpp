@@ -6,7 +6,6 @@
 #include <utility>
 
 #include "grape/exception.h"
-#include "grape/utils/utils.h"
 
 namespace {
 enum class Error : uint8_t { Bad, RealBad };

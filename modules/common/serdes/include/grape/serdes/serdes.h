@@ -6,7 +6,6 @@
 
 #include <array>
 #include <bit>  // for endian check
-#include <cinttypes>
 #include <span>
 #include <string>
 #include <vector>

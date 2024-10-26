@@ -6,7 +6,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <print>
-#include <span>
 
 #include "examples_utils.h"
 #include "grape/exception.h"
