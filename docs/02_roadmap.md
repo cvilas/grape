@@ -18,11 +18,7 @@
 ## Phase 3 - grapecam
 
 - :done: Serialisation
-- Disk logging
-  - Requirements analysis
-  - Trial [mcap](https://mcap.dev/) reader/writer
-  - Review [DataTamer](https://github.com/PickNikRobotics/data_tamer). Development seems to be stalled on this project. 
-  - Replay recording with plotjuggler
+- Disk logging for time-series multimodal data([TODO](../modules/common/recorder/README.md))
 - Implement camera HW:
   - [Raspberry Pi 5](https://thepihut.com/products/raspberry-pi-5)
   - [High Quality camera module](https://thepihut.com/products/raspberry-pi-high-quality-camera-module)
@@ -32,27 +28,23 @@
   - IEEE 802.3af/at compliant PoE router/switch
 - PoC zenoh video capture/display
   - Study [zenoh-demo](https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam)
-- Requirements analysis
-- Implement basic example for AV capture, streaming and display
-  - Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
-- Implement advanced streaming
-  - Choose backend for audio/video device handling and stream processing
-  - Implement AV streaming server and client
+  - Requirements analysis
+  - Implement basic example for AV capture, streaming and display: Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
 - ROS2 interop
   - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
   
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 
-- Sensor data visualisation
-  - Evaluate [rerun](https://rerun.io/)
 - Generic plotting api
   - Requirements analysis
   - Narrow down options: qt6, implot
+- Fix zenoh examples: pub_cache, query_sub, pull, shm pub/sub
+- New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 - IPC wrapper API
   - Do we need it? Compare against past DDS approach
-- Pin zenoh version to 1.0.0
-  - Fix examples: pub_cache, query_sub, pull, shm pub/sub
-  - New examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
+- Implement advanced streaming
+  - Choose backend for audio/video device handling and stream processing
+  - Implement AV streaming server and client
 - External deps: Replace git clone with direct download of tarballs
 - Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
@@ -68,6 +60,8 @@
   - refactor existing `toString()` functions
 - Shared memory
 - Single producer multiple consumer queue using externally specified memory (heap or shared memory)
+- Consider removing `MPSCQueue`. It's unused.
+- Rename `FIFOBuffer` to `MPSCQueue`
 - HW IO
   - CANopen
   - joystick
@@ -93,9 +87,12 @@
   - [Vulkan Tutorial](https://vulkan-tutorial.com/)
   - [Vulkan guide](https://vkguide.dev/)
   - [Flecs and ECS](https://github.com/SanderMertens/flecs)
+  - [CLoudPeek](https://github.com/Geekgineer/CloudPeek/tree/main): Could serve as a starting point for custom viewer
+  - [USD](https://developer.nvidia.com/usd#nvidia)
+  - glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
 - HW accelerated 3D graphics
-  - Select scene description format: [USD](https://developer.nvidia.com/usd#nvidia), glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
-  - Select a scenegraph engine: vsg, ogre, raylib, something else
+  - Design scene description format using our scripting engine
+  - Design scenegraph library using existing khronos libs
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
   - Implement scenegraph in our scripting language and have it render by the backend
 
