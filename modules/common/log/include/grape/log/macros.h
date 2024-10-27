@@ -9,7 +9,9 @@
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 #define GRAPE_LOG(logger, level, fmt, ...)                                                         \
-  logger.log(level, std::source_location::current(), fmt, ##__VA_ARGS__)
+  do {                                                                                             \
+    (logger).log(level, std::source_location::current(), fmt, ##__VA_ARGS__);                      \
+  } while (false)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 #pragma clang diagnostic pop
