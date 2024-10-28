@@ -15,7 +15,7 @@ auto main() -> int {
     using FixedString64 = grape::realtime::FixedString<63>;
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
-    static constexpr FixedString8 STRING = "abcdefghij";  //!< this will get truncated to fit
+    static constexpr FixedString8 STRING("abcdefghij");  //!< this will get truncated to fit
     constexpr auto SUB_STRING = STRING.str().substr(0, 2);
     constexpr auto STRING_LENGTH = STRING.length();
     std::println("String='{}', length={}", STRING.str(), STRING_LENGTH);

@@ -27,15 +27,14 @@ public:
   }
 
   template <std::size_t M>
-  // NOLINTNEXTLINE(google-explicit-constructor,cppcoreguidelines-avoid-c-arrays)
-  consteval BasicFixedString(const CharT (&str)[M]) {
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
+  consteval explicit BasicFixedString(const CharT (&str)[M]) {
     const auto length = std::min(M - 1, N);
     Traits::copy(data_.data(), str, length);
     data_.at(length) = '\0';
   }
 
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr BasicFixedString(const CharT* str) {
+  constexpr explicit BasicFixedString(const CharT* str) {
     const auto length = std::min(Traits::length(str), N);
     Traits::copy(data_.data(), str, length);
     data_.at(length) = '\0';

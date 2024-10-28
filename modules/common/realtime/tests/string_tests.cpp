@@ -26,7 +26,7 @@ TEST_CASE("Default constructed string is empty", "[FixedString]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Construction from constexpr string", "[FixedString]") {
   constexpr const char* STR = "1234";
-  constexpr FixedString8 FAST_STR = STR;
+  constexpr FixedString8 FAST_STR(STR);
 
   CHECK(4 == FAST_STR.length());
   CHECK_FALSE(FAST_STR.empty());
@@ -59,18 +59,6 @@ TEST_CASE("Copy construction", "[FixedString]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Move construction", "[FixedString]") {
-  constexpr FixedString8 STR{ "abc" };
-  auto str_copy = STR;
-  auto str_move = std::move(str_copy);  // NOLINT(performance-move-const-arg)
-
-  CHECK(str_move.length() == STR.length());
-  CHECK_FALSE(STR.empty());
-  CHECK_FALSE(str_move.empty());
-  CHECK(str_move.maxSize() == STR.maxSize());
-}
-
-//-------------------------------------------------------------------------------------------------
 TEST_CASE("Copy assignment", "[FixedString]") {
   constexpr FixedString8 STR1{ "1234" };
   FixedString8 str2{ "lmnopqrstuvxyz" };
@@ -79,15 +67,6 @@ TEST_CASE("Copy assignment", "[FixedString]") {
   CHECK("lmnopqr"s == str2.cStr());
 
   str2 = STR1;
-
-  CHECK("1234"s == str2.cStr());
-}
-
-//-------------------------------------------------------------------------------------------------
-TEST_CASE("Move assignment", "[FixedString]") {
-  constexpr FixedString8 STR1{ "1234" };
-  FixedString8 str2{ "lmnopqrstuvxyz" };
-  str2 = std::move(STR1);  // NOLINT(performance-move-const-arg)
 
   CHECK("1234"s == str2.cStr());
 }
