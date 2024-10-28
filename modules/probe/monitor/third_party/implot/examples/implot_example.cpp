@@ -195,6 +195,7 @@ public:
 };
 
 //-------------------------------------------------------------------------------------------------
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void ImplotExample::demoRealtimePlot() {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,cppcoreguidelines-pro-type-vararg)
   ImGui::Begin("Plots");

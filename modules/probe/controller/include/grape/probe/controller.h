@@ -152,7 +152,7 @@ auto PinConfig::pin(const std::string& name, std::span<const T> var,
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto addr = reinterpret_cast<std::uintptr_t>(var.data());
 
-  signals_.emplace_back(Signal{ .name = name.c_str(),        //
+  signals_.emplace_back(Signal{ .name{ name.c_str() },       //
                                 .address = addr,             //
                                 .num_elements = var.size(),  //
                                 .type = toTypeId<T>(),       //

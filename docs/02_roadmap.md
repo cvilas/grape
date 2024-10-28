@@ -18,6 +18,11 @@
 ## Phase 3 - grapecam
 
 - :done: Serialisation
+- Review the use of std::expected<void,Error>. Did we go overboard with it?
+  - realtime/schedule.h
+  - probe/controller.h
+- grape::app
+  - Add grape::app class and introduce logging, and messaging support there. Do this in the context of grapecam development
 - Disk logging for time-series multimodal data([TODO](../modules/common/recorder/README.md))
 - Implement camera HW:
   - [Raspberry Pi 5](https://thepihut.com/products/raspberry-pi-5)
@@ -78,6 +83,7 @@
   - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
+- Introduce [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
 
 ## Phase 6 - 3D graphics
 
@@ -155,6 +161,7 @@ auto main() -> int {
 - [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
 - C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)
 - C++20 features: <https://youtu.be/N1gOSgZy7h4>
+- Practical [C++26 Reflection](https://youtu.be/cqQ7v6xdZRw)
 - Interfaces with C++20 concept: <https://concepts.godbolt.org/z/PjGb466cr>
 - Clean code: <https://youtu.be/9ch7tZN4jeI>
 - IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above
