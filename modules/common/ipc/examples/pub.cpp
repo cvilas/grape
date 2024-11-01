@@ -49,6 +49,12 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Declaring Publisher on '{}'", key);
     auto pub = session.declare_publisher(key);
 
+    // attach a callback to detect if any listeners exist
+    pub.declare_background_matching_listener(
+        [](const zenoh::Publisher::MatchingStatus& s) {
+          std::println("Subscribers {}", s.matching ? "listening" : "not listening");
+        },
+        zenoh::closures::none);
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
     uint64_t idx = 0;
     while (true) {
