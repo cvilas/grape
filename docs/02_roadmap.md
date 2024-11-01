@@ -14,29 +14,25 @@
 
 - :done: Implement `probe::Controller`
 - :done: Implement `probe::Monitor` PoC
+- :done: Serialization
 
 ## Phase 3 - grapecam
 
-- :done: Serialisation
-- Review the use of std::expected<void,Error>. Did we go overboard with it?
-  - realtime/schedule.h
-  - probe/controller.h
-- grape::app
-  - Add grape::app class and introduce logging, and messaging support there. Do this in the context of grapecam development
-- Disk logging for time-series multimodal data([TODO](../modules/common/recorder/README.md))
+- Add grape::app class: introduce logging and messaging support
 - Implement camera HW:
   - [Raspberry Pi 5](https://thepihut.com/products/raspberry-pi-5)
   - [High Quality camera module](https://thepihut.com/products/raspberry-pi-high-quality-camera-module)
   - [Camera mounting plate](https://thepihut.com/products/mounting-plate-for-high-quality-camera)
   - [Mic](https://thepihut.com/products/mini-usb-microphone)
   - [PoE+ HAT](https://thepihut.com/products/uctronics-poe-hat-for-raspberry-pi-5-with-active-cooler-802-3af-at) 
-  - IEEE 802.3af/at compliant PoE router/switch
+  - IEEE 802.3at compliant PoE router/switch
 - PoC zenoh video capture/display
   - Study [zenoh-demo](https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam)
   - Requirements analysis
   - Implement basic example for AV capture, streaming and display: Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
 - ROS2 interop
   - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
+- Disk recording and playback for time-series multi-modal data ([TODO](../modules/common/recorder/README.md))
   
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 
@@ -100,18 +96,17 @@
   - Design scene description format using our scripting engine
   - Design scenegraph library using existing khronos libs
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
-  - Implement scenegraph in our scripting language and have it render by the backend
 
 ## Phase 7 - Refactor
 
 - Support external dependencies on examples and tests that the main project does not depend on
-- Refactor gbs template files to make it project agnostic
-  - Replace occurances of 'grape' with @CMAKE_PROJECT_NAME@ in all files
-- Refactor logging
-  - Study [Quill](https://github.com/odygrd/quill) to understand how to reduce overhead even more
+- Study [Quill](https://github.com/odygrd/quill) on how to reduce logging overhead
 - Refactor thread class out of realtime and put it in 'grape'
   - Insert logging to capture timer overruns in the loop
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
+- Review the use of std::expected<void,Error>.
+  - realtime/schedule.h
+  - probe/controller.h
 
 ## Phase 8 - CI
 
