@@ -1,8 +1,8 @@
 //=================================================================================================
-// Copyright (C) @year@ GRAPE Contributors
+// Copyright (C) @year@ @project@ contributors
 //=================================================================================================
 
-#include "grape/@module@/@module@.h"
+#include "@project@/@module@/@module@.h"
 
 #include <cstdlib>
 
