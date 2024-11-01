@@ -6,7 +6,6 @@
 
 #include "grape/exception.h"
 #include "grape/log/logger.h"
-#include "grape/log/macros.h"
 
 //=================================================================================================
 // Demonstrates how to redirect logs to a custom output stream in a custom format
@@ -21,7 +20,7 @@ auto main(int argc, const char* argv[]) -> int {
     };
 
     auto logger = grape::log::Logger(std::move(config));
-    GRAPE_LOG(logger, grape::log::Severity::Info, "{}", "Message to custom output stream");
+    grape::log::Log(logger, grape::log::Severity::Info, "{}", "Message to custom output stream");
     return EXIT_SUCCESS;
   } catch (...) {
     grape::AbstractException::consume();

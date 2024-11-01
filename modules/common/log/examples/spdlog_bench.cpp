@@ -9,7 +9,6 @@
 #include <benchmark/benchmark.h>
 
 #include "grape/log/logger.h"
-#include "grape/log/macros.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/spdlog.h"
 
@@ -39,7 +38,7 @@ auto bmGrapeLog(benchmark::State& state) {
   auto i = 0uz;
   for (auto s : state) {
     (void)s;
-    GRAPE_LOG(logger, grape::log::Severity::Info, "Log number {:d}", i++);
+    grape::log::Log(logger, grape::log::Severity::Info, "Log number {:d}", i++);
   }
 }
 
@@ -48,11 +47,10 @@ auto bmGrapeLog(benchmark::State& state) {
 
 constexpr auto MAX_ITERATIONS = 1000000U;
 
-// NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
+// NOLINTBEGIN(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmSpdlog)->Iterations(MAX_ITERATIONS);
-
-// NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmGrapeLog)->Iterations(MAX_ITERATIONS);
+// NOLINTEND(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay,modernize-use-trailing-return-type)
 BENCHMARK_MAIN();

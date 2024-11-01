@@ -6,11 +6,32 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "grape/log/logger.h"
-#include "grape/log/macros.h"
+#include "grape/log/severity.h"
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
+// NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+
+TEST_CASE("Basic logging api works", "[log]") {
+  std::string stream;
+  static constexpr auto QUEUE_CAPACITY = 10u;
+
+  auto config = grape::log::Config();
+  config.threshold = grape::log::Severity::Debug;
+  config.sink = [&stream](const grape::log::Record& r) {
+    stream.append(std::format("{}", r.message.cStr()));
+  };
+  config.queue_capacity = QUEUE_CAPACITY;
+
+  auto logger = grape::log::Logger(std::move(config));
+
+  /// Explicitly specify variadic template arguments types list
+  grape::log::Log<int, float>(logger, grape::log::Severity::Info, "{} {}", 5, 3.14f,
+                              std::source_location::current());
+
+  /// Use the deduction guide for arguments with defaulted source location
+  grape::log::Log(logger, grape::log::Severity::Info, "{} {}", 5, 3.14);
+}
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
@@ -26,11 +47,11 @@ TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
 
   auto logger = std::make_unique<grape::log::Logger>(std::move(config));
 
-  const std::string log_str = "This should appear in logs";
-  GRAPE_LOG((*logger), grape::log::Severity::Error, "{}", log_str);  //!< above threshold
-  GRAPE_LOG((*logger), grape::log::Severity::Debug,
-            "This should not appear in logs");  //!< below threshold
-  logger.reset();                               //!< destroying the logger forces queue to flush
+  const auto* const log_str = "This should appear in logs";
+  grape::log::Log(*logger, grape::log::Severity::Error, "{}", log_str);  //!< above threshold
+  grape::log::Log(*logger, grape::log::Severity::Debug,
+                  "This should not appear in logs");  //!< below threshold
+  logger.reset();  //!< destroying the logger forces queue to flush
   REQUIRE(stream == log_str);
 }
 
@@ -52,7 +73,7 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   // push messages beyond queue capacity before the logs get flushed
   static constexpr auto NUM_MESSAGES = QUEUE_CAPACITY * 3;
   for (std::size_t i = 0; i < NUM_MESSAGES; ++i) {
-    GRAPE_LOG(logger, grape::log::Severity::Debug, "Message no. {}", i);
+    grape::log::Log(logger, grape::log::Severity::Debug, "Message no. {}", i);
   }
   REQUIRE(num_logs == 0);                          //!< not flushed yet
   std::this_thread::sleep_for(FLUSH_WAIT_PERIOD);  //!< wait for flush
@@ -60,6 +81,6 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   REQUIRE(logger.missedLogs() == NUM_MESSAGES - QUEUE_CAPACITY);  //!< check overflow
 }
 
-// NOLINTEND(cert-err58-cpp)
+// NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
 
 }  // namespace
