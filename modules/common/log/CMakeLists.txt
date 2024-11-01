@@ -14,7 +14,6 @@ set(SOURCES
     include/grape/log/default_formatter.h
     include/grape/log/default_sink.h
     include/grape/log/logger.h
-    include/grape/log/macros.h
     include/grape/log/record.h
     include/grape/log/severity.h
     src/logger.cpp)

@@ -11,6 +11,7 @@
 
 namespace grape::log {
 
+//=================================================================================================
 /// @brief A buffered lock-free logger suitable for realtime applications
 class Logger {
 public:
@@ -61,4 +62,26 @@ private:
   struct Backend;
   std::unique_ptr<Backend> backend_{ nullptr };
 };
+
+//=================================================================================================
+// Generic logging interface (recommended user interface for logging)
+template <typename... Args>
+struct Log {
+  /// Log a message to any logger
+  /// @param logger The specific logger to use
+  /// @param severity Severity level
+  /// @param fmt message format string
+  /// @param args Message args to be formatted
+  /// @param location location in source
+  Log(Logger& logger, Severity severity, std::format_string<Args...> fmt, Args&&... args,
+      const std::source_location& location = std::source_location::current()) {
+    logger.log(severity, location, fmt, std::forward<Args>(args)...);
+  }
+};
+
+/// CTAD deduction guide for the above template when using defaulted source location
+/// (See https://www.cppstories.com/2021/non-terminal-variadic-args/)
+template <typename... Args>
+Log(Logger& l, Severity s, std::format_string<Args...> fmt, Args&&... args) -> Log<Args...>;
+
 }  // namespace grape::log
