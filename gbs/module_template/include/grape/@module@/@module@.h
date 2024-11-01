@@ -1,10 +1,10 @@
 //=================================================================================================
-// Copyright (C) @year@ GRAPE Contributors
+// Copyright (C) @year@ @project@ contributors
 //=================================================================================================
 
 #pragma once
 
-namespace grape::@module@ {
+namespace @project@::@module@ {
 /// \addtogroup @module@ @module@ module
 /// @{
 

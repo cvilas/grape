@@ -1,5 +1,5 @@
 # =================================================================================================
-# Copyright (C) @year@ GRAPE Contributors
+# Copyright (C) @year@ @project@ contributors
 # =================================================================================================
 
 declare_module(
@@ -8,7 +8,7 @@ declare_module(
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
-set(SOURCES src/@module@.cpp README.md include/grape/@module@/@module@.h)
+set(SOURCES src/@module@.cpp README.md include/@project@/@module@/@module@.h)
 
 # library target
 define_module_library(
