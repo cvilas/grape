@@ -48,7 +48,6 @@ set(GCC_WARNINGS
   -Wconversion 
   -Wcast-qual 
   -Wpointer-arith 
-  -Wstrict-prototypes
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")

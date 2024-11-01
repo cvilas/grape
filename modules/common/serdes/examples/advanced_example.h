@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "grape/serdes/concepts.h"
 #include "grape/serdes/serdes.h"
 

@@ -18,18 +18,8 @@
 
 ## Phase 3 - grapecam
 
-- Add grape::app class: introduce logging and messaging support
-- Implement camera HW:
-  - [Raspberry Pi 5](https://thepihut.com/products/raspberry-pi-5)
-  - [High Quality camera module](https://thepihut.com/products/raspberry-pi-high-quality-camera-module)
-  - [Camera mounting plate](https://thepihut.com/products/mounting-plate-for-high-quality-camera)
-  - [Mic](https://thepihut.com/products/mini-usb-microphone)
-  - [PoE+ HAT](https://thepihut.com/products/uctronics-poe-hat-for-raspberry-pi-5-with-active-cooler-802-3af-at) 
-  - IEEE 802.3at compliant PoE router/switch
-- PoC zenoh video capture/display
-  - Study [zenoh-demo](https://github.com/eclipse-zenoh/zenoh-demos/tree/master/computer-vision/zcam)
-  - Requirements analysis
-  - Implement basic example for AV capture, streaming and display: Camera configuration -> capture -> compress -> serialise -> publish -> subscribe -> deserialiser -> decompress -> view
+- Add grape::app class: introduce logging, configuration and messaging support
+- Implement [grapecam](https://github.com/cvilas/grapecam)
 - ROS2 interop
   - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
 - Disk recording and playback for time-series multi-modal data ([TODO](../modules/common/recorder/README.md))

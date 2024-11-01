@@ -17,6 +17,7 @@ It's also a hobby project that demonstrates [principles](https://github.com/cvil
 - A stubbornly strict [command line parser](./modules/common/conio/include/grape/conio/program_options.h)
 - A scalable [message-passing backend](./modules/common/ipc/README.md)
 - Minimal external dependencies
+- Supports the latest release of C++ standard (and compilers)
 
 ## Getting Started
 
