@@ -2,6 +2,8 @@
 // Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
+#include <stdexcept>
+
 #include <benchmark/benchmark.h>
 
 #include "advanced_example.h"

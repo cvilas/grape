@@ -4,7 +4,7 @@
 
 OS               | Architecture  | Compiler
 -----------------|---------------|----------------
-Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 ~~gcc-14~~
+Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 gcc-14
 
 ## Setup build environment
 
@@ -95,12 +95,22 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 ~~gcc-14~~
 
 ## Configure and build
 
-Note (Oct 2024) Use clang toolchain to build the project. GCC does not support all features we use.
+Note (Nov 2024): Clang toolchain is recommended to build the project:
 
 ```bash
 git clone git@github.com:cvilas/grape
 mkdir -p grape/build
 cd grape/build
 cmake .. -DBUILD_MODULES=all -DCMAKE_TOOLCHAIN_FILE=$PWD/../toolchains/toolchain_clang.cmake -GNinja
+ninja
+```
+
+With GCC, your mileage may vary. Try building the project as follows
+
+```bash
+git clone git@github.com:cvilas/grape
+mkdir -p grape/build_gcc
+cd grape/build_gcc
+cmake .. -DBUILD_MODULES=all -DENABLE_LINTER=OFF -DENABLE_CACHE=OFF -GNinja
 ninja
 ```

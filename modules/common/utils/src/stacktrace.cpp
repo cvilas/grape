@@ -5,6 +5,7 @@
 #include "grape/utils/stacktrace.h"
 
 #include <array>
+#include <memory>
 
 #include <execinfo.h>
 

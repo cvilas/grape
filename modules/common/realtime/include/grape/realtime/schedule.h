@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <span>
 
 #include <sys/types.h>

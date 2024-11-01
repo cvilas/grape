@@ -2,6 +2,8 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#include <numbers>
+
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "grape/exception.h"
@@ -65,7 +67,7 @@ TEST_CASE("[configuration script tests]", "[script]") {
 
     // reads math expressions
     const auto circ = table.value().read<float>("circumference");
-    static constexpr auto EXPECTED_CIRC = 2. * M_PI * EXPECTED_RADIUS;
+    static constexpr auto EXPECTED_CIRC = 2. * std::numbers::pi * EXPECTED_RADIUS;
     CHECK(circ.has_value());
 
     CHECK_THAT(static_cast<double>(circ.value()),
