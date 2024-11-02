@@ -8,6 +8,8 @@
 #include <cstring>  // std::memcpy
 #include <numeric>  // std::accumulate
 
+#include "grape/exception.h"
+
 namespace {
 
 using Signal = grape::probe::Signal;
@@ -77,8 +79,8 @@ Controller::Controller(PinConfig&& pins, const BufferConfig& buffer_config, Rece
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Controller::snap() -> std::expected<void, Error> {
-  auto buffer_check = std::expected<void, Error>{};
+auto Controller::snap() -> Error {
+  auto buffer_check = Error::None;
   const auto writer = [&signals = pins_.signals(), &buffer_check](std::span<std::byte> buffer) {
     auto offset = 0UL;
     const auto buffer_size = buffer.size_bytes();
@@ -87,7 +89,7 @@ auto Controller::snap() -> std::expected<void, Error> {
       auto* dest = static_cast<void*>(buffer.data() + offset);
       offset += count;
       if (offset > buffer_size) {
-        buffer_check = std::unexpected(Error::BufferTooSmall);
+        buffer_check = Error::BufferTooSmall;
         return;
       }
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
@@ -97,7 +99,7 @@ auto Controller::snap() -> std::expected<void, Error> {
   };
 
   if (not snaps_.visitToWrite(writer)) {
-    return std::unexpected(Error::BufferUnavailable);
+    return Error::BufferUnavailable;
   }
   return buffer_check;
 }
@@ -127,7 +129,7 @@ void Controller::sync() {
     const auto count = it->num_elements * length(it->type);
     if (offset_size + count > buffer.size_bytes()) {
       // this should never happen
-      panic<ControllerException>("Sync buffer too small", Error::BufferTooSmall);
+      panic<Exception>("Sync buffer too small");
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
     std::memcpy(reinterpret_cast<void*>(it->address), buffer.data() + offset_size, count);
@@ -138,34 +140,33 @@ void Controller::sync() {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Controller::qset(const std::string& name,
-                      std::span<const std::byte> value) -> std::expected<void, Error> {
+auto Controller::qset(const std::string& name, std::span<const std::byte> value) -> Error {
   const auto& signals = pins_.signals();
 
   const auto it = std::ranges::find_if(controllables_,
                                        [&name](const auto& s) { return (name == s.name.cStr()); });
 
   if (it == signals.end()) {
-    return std::unexpected(Error::SignalNotFound);
+    return Error::SignalNotFound;
   }
   if (Signal::Role::Control != it->role) {
-    return std::unexpected(Error::RoleMismatch);
+    return Error::RoleMismatch;
   }
   if (value.size_bytes() != it->num_elements * length(it->type)) {
-    return std::unexpected(Error::SizeMismatch);
+    return Error::SizeMismatch;
   }
 
   // Queue the update as [offset|data]
   using SignalVectorOffset =
       std::iterator_traits<std::vector<Signal>::const_iterator>::difference_type;
   const SignalVectorOffset offset = std::distance(signals.begin(), it);
-  auto buffer_check = std::expected<void, Error>{};
+  auto buffer_check = Error::None;
   const auto writer = [&offset, &value, &buffer_check](std::span<std::byte> buffer) {
     const auto offset_size = sizeof(SignalVectorOffset);
     const auto value_size = value.size_bytes();
     if (offset_size + value_size > buffer.size_bytes()) {
       // this should never happen
-      buffer_check = std::unexpected(Error::BufferTooSmall);
+      buffer_check = Error::BufferTooSmall;
       return;
     }
     std::memcpy(buffer.data(), &offset, offset_size);
@@ -173,7 +174,7 @@ auto Controller::qset(const std::string& name,
   };
 
   if (not pending_syncs_.visitToWrite(writer)) {
-    return std::unexpected(Error::BufferUnavailable);
+    return Error::BufferUnavailable;
   }
   return buffer_check;
 }

@@ -58,7 +58,7 @@ auto main() -> int {
     s_exit.wait(false);
     return EXIT_SUCCESS;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

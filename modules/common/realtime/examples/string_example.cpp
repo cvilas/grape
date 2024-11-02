@@ -24,7 +24,7 @@ auto main() -> int {
     const FixedString64 string64{ "{} + {} = {}", 2, 3, 5 };
     std::println("{}", string64.str());
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

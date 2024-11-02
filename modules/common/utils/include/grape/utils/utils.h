@@ -5,8 +5,7 @@
 #pragma once
 
 #include <cstdlib>
-
-#include <cxxabi.h>
+#include <string>
 
 namespace grape::utils {
 
@@ -28,22 +27,11 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
                                                  str.substr(0, end_pos);
 }
 
-/*
-/// Return user-readable name for specified type
-template <typename T>
-auto getTypeName() -> std::string {
-  // From https://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname
-  const auto* const mangled_name = typeid(T).name();
-  int status{ 0 };
-  std::unique_ptr<char, void (*)(void*)> res{
-    abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status), std::free
-  };
-  return (status == 0) ? res.get() : mangled_name;
-}
-*/
+/// Transforms C++ ABI identifiers (eg: RTTI symbols) to names used in the source code
+[[nodiscard]] auto demangle(const char* mangled_name) -> std::string;
 
 /// Return user-readable name for specified type
-template <class T>
+template <typename T>
 constexpr auto getTypeName() -> std::string_view {
   // From https://stackoverflow.com/a/35943472/9929294
   // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)

@@ -6,7 +6,6 @@
 #include <cmath>
 #include <csignal>
 #include <cstdlib>
-#include <exception>
 #include <numbers>
 #include <print>
 #include <thread>
@@ -14,25 +13,6 @@
 #include "grape/exception.h"
 #include "grape/probe/controller.h"
 #include "grape/probe/monitor.h"
-
-namespace {
-
-//-------------------------------------------------------------------------------------------------
-void consumeExceptions() noexcept {
-  try {
-    if (std::current_exception() != nullptr) {
-      throw;
-    }
-  } catch (const grape::probe::MonitorException&) {
-    grape::probe::MonitorException::consume();
-  } catch (const grape::probe::ControllerException&) {
-    grape::probe::ControllerException::consume();
-  } catch (...) {
-    grape::AbstractException::consume();
-  }
-}
-
-}  // namespace
 
 //=================================================================================================
 auto main() -> int {
@@ -64,8 +44,8 @@ auto main() -> int {
     auto probe = grape::probe::Controller(std::move(pin_config), BUFFER_CONFIG, data_sink);
     monitor.setSender([&probe](const std::string& name, std::span<const std::byte> data) {
       const auto ret = probe.qset(name, data);
-      if (not ret.has_value()) {
-        grape::panic<grape::probe::ControllerException>(std::format("{}", name), ret.error());
+      if (ret != grape::probe::Controller::Error::None) {
+        grape::panic<grape::Exception>(std::format("{}: {}", name, toString(ret)));
       }
     });
 
@@ -87,7 +67,7 @@ auto main() -> int {
           //----- process step update end ------
 
           // Grab snapshot of all registered variables
-          if (not probe.snap()) {
+          if (probe.snap() != grape::probe::Controller::Error::None) {
             std::println("Could not snap");
           }
 
@@ -97,7 +77,7 @@ auto main() -> int {
           std::this_thread::sleep_until(ts + LOOP_PERIOD);
         }
       } catch (...) {
-        consumeExceptions();
+        grape::Exception::print();
         exit_flag = true;
       }
     };
@@ -114,7 +94,7 @@ auto main() -> int {
           std::this_thread::sleep_until(ts + LOOP_PERIOD);
         }
       } catch (...) {
-        consumeExceptions();
+        grape::Exception::print();
         exit_flag = true;
       }
     };
@@ -131,7 +111,7 @@ auto main() -> int {
     }
     return EXIT_SUCCESS;
   } catch (...) {
-    consumeExceptions();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

@@ -7,29 +7,29 @@
 
 ## Discovery
 
-- `zenoh_scout`: The process of discovering Zenoh applications is called scouting. This example prints details of endpoints visible to a Zenoh session.
-- `zenoh_info`: A simpler example that just prints the IDs for the session and the other routers and peers visible to it.
-- `zenoh_liveliness_declare`, `zenoh_liveliness_get`, `zenoh_liveliness_sub`: Demonstrates how to enable liveliness tracking on a key expression. This feature enables automatic notification when entities, endpoints or services of interest come alive or drop away.
+- `scout`: The process of discovering Zenoh applications is called scouting. This example prints details of endpoints visible to a Zenoh session.
+- `info`: A simpler example that just prints the IDs for the session and the other routers and peers visible to it.
+- `liveliness_declare`, `liveliness_get`, `liveliness_sub`: Demonstrates how to enable liveliness tracking on a key expression. This feature enables automatic notification when entities, endpoints or services of interest come alive or drop away.
 
 ## Latency and throughput
 
-- `zenoh_ping`, `zenoh_pong`: Performs roundtrip latency measurement between a pair of endpoints.
-- `zenoh_throughput_pub`, `zenoh_throughput_sub`: Performs throughput measurement between a pair of endpoints.
+- `ping`, `pong`: Performs roundtrip latency measurement between a pair of endpoints.
+- `throughput_pub`, `throughput_sub`: Performs throughput measurement between a pair of endpoints.
 
 ## pub/sub
 
-- `zenoh_put`, `zenoh_pub`, `zenoh_pub_delete`: Demonstrates a couple of different ways to publish data values over keys. The `put` example shows how a session can directly put data on the bus without a publisher. The `delete` example shows how to notify subscribers to delete previously published data. Note that data encoding can be specified within `PublisherPutOptions` for every publish event, enabling publishers to post different data types over the same key. The subscribers receive encoding information with the data sample.
-- `zenoh_sub`, `zenoh_pull`: Demonstrates different ways to receive data from matched publishers. The receiver can either poll for the latest data (`pull`) or receive them as they become available (`sub`) via a callback.
-- `zenoh_pub_cache`, `zenoh_query_sub`: Demonstrates a publisher with historical storage, and how a subscriber can retrieve that history of past publications on startup.
-- `zenoh_attachment_pub`, `zenoh_attachment_sub`: Demonstrates how to modify the publisher and subscriber to transport attachments or auxilliary payloads with the main data payload.
+- `put`, `pub`, `pub_delete`: Demonstrates a couple of different ways to publish data values over keys. The `put` example shows how a session can directly put data on the bus without a publisher. The `delete` example shows how to notify subscribers to delete previously published data. Note that data encoding can be specified within `PublisherPutOptions` for every publish event, enabling publishers to post different data types over the same key. The subscribers receive encoding information with the data sample.
+- `sub`, `pull`: Demonstrates different ways to receive data from matched publishers. The receiver can either poll for the latest data (`pull`) or receive them as they become available (`sub`) via a callback.
+- `pub_cache`, `query_sub`: Demonstrates a publisher with historical storage, and how a subscriber can retrieve that history of past publications on startup.
+- `attachment_pub`, `attachment_sub`: Demonstrates how to modify the publisher and subscriber to transport attachments or auxilliary payloads with the main data payload.
 
 ### Shared memory transport
 
-- `zenoh_pub_shm`,`zenoh_sub`: Demonstrates how shared-memory can be used to transport data between endpoints. Shared-memory transport is used only if both the publisher and the subscriber are on the same host and are configured to use shared-memory. When on different hosts, they automatically fallback to using the network transport layer. Additionally, with shared-memory enabled, the publisher still uses the network transport layer to notify subscribers of the shared-memory segment to read. Therefore, for very small messages, shared-memory transport could be less efficient than using the default network transport to directly carry the payload. This also means that the key benefit of using shared-memory is to improve data throughput and not latency.
+- `pub_shm`,`sub`: Demonstrates how shared-memory can be used to transport data between endpoints. Shared-memory transport is used only if both the publisher and the subscriber are on the same host and are configured to use shared-memory. When on different hosts, they automatically fallback to using the network transport layer. Additionally, with shared-memory enabled, the publisher still uses the network transport layer to notify subscribers of the shared-memory segment to read. Therefore, for very small messages, shared-memory transport could be less efficient than using the default network transport to directly carry the payload. This also means that the key benefit of using shared-memory is to improve data throughput and not latency.
 
 ## Remote procedure call
 
-- `zenoh_queryable`, `zenoh_query_get`, `zenoh_query_get_channel`, `zenoh_get_channel_non_blocking`: Demonstrates how to instantiate a service (`queryable`) that waits for and replies to remote requests. The endpoints requesting the service can process the response asynchronously via callback (`get`), or synchronously (`get_channel`, `get_channel_non_blocking`). For more on channels [see here](https://zenoh-cpp.readthedocs.io/en/latest/channels.html).
+- `queryable`, `query_get`, `query_get_channel`, `get_channel_non_blocking`: Demonstrates how to instantiate a service (`queryable`) that waits for and replies to remote requests. The endpoints requesting the service can process the response asynchronously via callback (`get`), or synchronously (`get_channel`, `get_channel_non_blocking`). For more on channels [see here](https://zenoh-cpp.readthedocs.io/en/latest/channels.html).
 
 ## Brokered and routed communications
 
@@ -37,14 +37,14 @@ The default peer-to-peer communication strategy may be undesirable in large dist
 
 Note that routers can also be used with nodes operating as `peers`. In this case 'gossip' scouting can be used and multicast scouting turned off to improve network efficiency and scalability. For more on scouting mechanism, see [deployment patterns](https://zenoh.io/docs/getting-started/deployment/) for zenoh applications.
 
-- `zenoh_router`, `zenoh_pub_client`, `zenoh_sub_client`: Demonstrates how to instantiate a router and clients that associate with it. Although not in the `router` example, a session configured as router can have publishers and subscribers just like any other.
+- `router`, `pub_client`, `sub_client`: Demonstrates how to instantiate a router and clients that associate with it. Although not in the `router` example, a session configured as router can have publishers and subscribers just like any other.
 
 ## Configuration
 
 - All parameters available for configuring a Zenoh session are described in this [default configuration file](https://github.com/eclipse-zenoh/zenoh/blob/master/DEFAULT_CONFIG.json5).
 - Some of the examples above demonstrate how the parameters can be set/modified. For instance,
-  - `zenoh_pub_shm` enables shared-memory transport
-  - `zenoh_pub_cache` enables timestamping
+  - `pub_shm` enables shared-memory transport
+  - `pub_cache` enables timestamping
 - There is more on configuration [here](https://zenoh.io/docs/manual/configuration/)
 
 ## Introspection tools

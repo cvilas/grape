@@ -42,10 +42,6 @@ auto main() -> int {
   try {
     ImplotExample ex;
     ex.run();
-  } catch (const std::string& ex) {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = std::fprintf(stderr, "%s\n", ex.c_str());
-    return EXIT_FAILURE;
   } catch (const std::exception& ex) {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = std::fprintf(stderr, "%s\n", ex.what());
@@ -67,7 +63,7 @@ void ImplotExample::glfwEerrorCb(int error, const char* description) {
 ImplotExample::ImplotExample() {
   glfwSetErrorCallback(ImplotExample::glfwEerrorCb);
   if (GLFW_FALSE == glfwInit()) {
-    throw std::format("Error: glfwInit");
+    throw std::runtime_error("Error: glfwInit");
   }
 
   // Decide GL+GLSL versions
@@ -93,7 +89,7 @@ ImplotExample::ImplotExample() {
   window_ = glfwCreateWindow(WIN_W, WIN_H, "Implot example", nullptr, nullptr);
   if (window_ == nullptr) {
     glfwTerminate();
-    throw std::format("Error: glfwCreateWindow");
+    throw std::runtime_error("Error: glfwCreateWindow");
   }
   glfwMakeContextCurrent(window_);
   glfwSwapInterval(1);  // Enable vsync

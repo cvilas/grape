@@ -5,6 +5,7 @@
 #pragma once
 
 #include "grape/conio/program_options.h"
+#include "grape/exception.h"
 
 namespace grape::ipc::ex {
 
@@ -13,7 +14,7 @@ template <conio::StringStreamable T>
 auto getOptionOrThrow(const conio::ProgramOptions& args, const std::string& key) -> T {
   const auto opt = args.getOption<T>(key);
   if (not opt.has_value()) {
-    throw conio::ProgramOptions::Error{ opt.error() };
+    grape::panic<grape::Exception>(toString(opt.error()));
   }
   return opt.value();
 }

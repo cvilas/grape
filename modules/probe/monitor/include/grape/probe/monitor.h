@@ -9,7 +9,6 @@
 #include <span>
 #include <vector>
 
-#include "grape/exception.h"
 #include "grape/probe/signal.h"
 
 namespace grape::probe {
@@ -43,5 +42,17 @@ private:
   std::unique_ptr<Impl> impl_;
 };
 
-using MonitorException = Exception<Monitor::Error>;
+//-------------------------------------------------------------------------------------------------
+[[nodiscard]] constexpr auto toString(const Monitor::Error& code) -> std::string_view {
+  switch (code) {
+    case Monitor::Error::Renderer:
+      return "Renderer";
+    case Monitor::Error::SignalNotFound:
+      return "SignalNotFound";
+    case Monitor::Error::SizeMismatch:
+      return "SizeMismatch";
+  }
+  return {};
+}
+
 }  // namespace grape::probe

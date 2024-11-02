@@ -4,9 +4,11 @@
 
 #pragma once
 
+#include <format>
+
 #include <pthread.h>
 
-#include "grape/realtime/system_error.h"
+#include "grape/exception.h"
 
 namespace grape::realtime {
 
@@ -44,21 +46,24 @@ inline Mutex::Mutex() {
   {
     const auto result = pthread_mutexattr_init(&attr);
     if (result != 0) {
-      throw SystemError{ .code = result, .function_name = "pthread_mutexattr_init" };
+      // NOLINTNEXTLINE(concurrency-mt-unsafe)
+      panic<Exception>(std::format("[pthread_mutexattr_init]: {}", strerror(result)));
     }
   }
 
   {
     const auto result = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
     if (result != 0) {
-      throw SystemError{ .code = result, .function_name = "pthread_mutexattr_setprotocol" };
+      // NOLINTNEXTLINE(concurrency-mt-unsafe)
+      panic<Exception>(std::format("[pthread_mutexattr_setprotocol]: {}", strerror(result)));
     }
   }
 
   {
     const auto result = pthread_mutex_init(&mutex_, &attr);
     if (result != 0) {
-      throw SystemError{ .code = result, .function_name = "pthread_mutex_init" };
+      // NOLINTNEXTLINE(concurrency-mt-unsafe)
+      panic<Exception>(std::format("[pthread_mutex_init]: {}", strerror(result)));
     }
   }
 }
@@ -72,7 +77,8 @@ inline Mutex::~Mutex() {
 inline void Mutex::lock() {
   const auto result = pthread_mutex_lock(&mutex_);
   if (result != 0) {
-    throw SystemError{ .code = result, .function_name = "pthread_mutex_lock" };
+    // NOLINTNEXTLINE(concurrency-mt-unsafe)
+    panic<Exception>(std::format("[pthread_mutex_lock]: {}", strerror(result)));
   }
 }
 

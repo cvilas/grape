@@ -111,7 +111,7 @@ auto main(int argc, const char* argv[]) -> int {
         //----- process step update end ------
 
         // Grab snapshot of all registered variables
-        if (not probe.snap()) {
+        if (probe.snap() != grape::probe::Controller::Error::None) {
           std::println("Could not snap");
         }
 
@@ -137,7 +137,7 @@ auto main(int argc, const char* argv[]) -> int {
         // Queue update for a control parameter
         static constexpr auto AMPLITUDE_DELTA = 0.1;
         desired_amplitude += AMPLITUDE_DELTA;
-        if (not probe.qset("amplitude", desired_amplitude)) {
+        if (probe.qset("amplitude", desired_amplitude) != grape::probe::Controller::Error::None) {
           std::println("Error setting control variable");
         }
 
@@ -152,11 +152,8 @@ auto main(int argc, const char* argv[]) -> int {
       th.join();
     }
     return EXIT_SUCCESS;
-  } catch (const grape::probe::ControllerException&) {
-    grape::probe::ControllerException::consume();
-    return EXIT_FAILURE;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

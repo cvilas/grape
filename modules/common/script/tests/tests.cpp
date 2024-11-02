@@ -4,6 +4,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
+#include "grape/exception.h"
 #include "grape/script/script.h"
 
 namespace {
@@ -126,8 +127,7 @@ TEST_CASE("errroneous script throws exception", "[script]") {
     name = "Jane Smith", -- syntax error: ',' character
   )";
 
-  CHECK_THROWS_AS(grape::script::ConfigScript(std::string(ERROR_SCRIPT)),
-                  grape::script::ConfigScriptException);
+  CHECK_THROWS_AS(grape::script::ConfigScript(std::string(ERROR_SCRIPT)), grape::Exception);
 }
 
 // NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)

@@ -34,7 +34,7 @@ auto main(int argc, const char* argv[]) -> int {
             .declareOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE)
             .parse(argc, argv);
     if (not args_opt.has_value()) {
-      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+      grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
     const auto payload_size = grape::ipc::ex::getOptionOrThrow<size_t>(args, "size");
@@ -53,11 +53,8 @@ auto main(int argc, const char* argv[]) -> int {
       pub.put(value);
     }
     return EXIT_SUCCESS;
-  } catch (const grape::conio::ProgramOptions::Error& ex) {
-    std::ignore = std::fputs(toString(ex).c_str(), stderr);
-    return EXIT_FAILURE;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

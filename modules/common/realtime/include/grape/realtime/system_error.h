@@ -13,8 +13,8 @@ namespace grape::realtime {
 ///
 /// @note For list of system error codes, see `errno -l` (On Ubuntu `sudo apt install moreutils`)
 struct SystemError {
-  int code;  //!< error code (errno) set by failing system call or library function
-  std::string_view function_name;  //!< name of failing system call or library function
+  int code{ 0 };                   //!< error code (errno) set by failing system call
+  std::string_view function_name;  //!< name of failing system call
 };
 
 }  // namespace grape::realtime

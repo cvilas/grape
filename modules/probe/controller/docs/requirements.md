@@ -68,7 +68,7 @@ Controller::qset(const std::string& name, std::span<const T> value);
 // subscribe to mulitple signals simultaneously
 using Data = std::span<std::byte>;
 using Callback = std::function<void(std::span<Signal>, std::span<Data>)>;
-Monitor::watch(std::span<std::string> names, Callback cb) -> std::expected<void, Error>;
+Monitor::watch(std::span<std::string> names, Callback cb) -> Error>;
 
 // Set a scalar signal 
 template <typename T>
@@ -76,7 +76,7 @@ Monitor::set(const std::string& name, const T& value);
 
 // Set a sequence signal
 template <typename T>
-Monitor::set(const std::string& name, std::span<const T> value) -> std::expected<void, Error>;
+Monitor::set(const std::string& name, std::span<const T> value) -> Error;
 
 // (optional) Push data to controller
 void Monitor::sync();

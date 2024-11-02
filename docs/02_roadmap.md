@@ -104,9 +104,6 @@
 - Refactor thread class out of realtime and put it in 'grape'
   - Insert logging to capture timer overruns in the loop
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
-- Review the use of std::expected<void,Error>.
-  - realtime/schedule.h
-  - probe/controller.h
 
 ## Phase 8 - CI
 

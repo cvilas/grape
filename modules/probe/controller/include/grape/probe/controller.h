@@ -4,13 +4,11 @@
 
 #pragma once
 
-#include <expected>
 #include <ranges>
 #include <span>
 #include <string>
 #include <vector>
 
-#include "grape/exception.h"
 #include "grape/probe/signal.h"
 #include "grape/realtime/fifo_buffer.h"
 
@@ -66,6 +64,7 @@ class Controller {
 public:
   /// List of operational errors
   enum class Error : std::uint8_t {
+    None,               //!< No errors. Operation succeeded.
     BufferUnavailable,  //!< No free buffer available
     BufferTooSmall,     //!< Buffer is incorrectly sized
     SignalNotFound,     //!< Signal not found
@@ -86,9 +85,9 @@ public:
   /// Take a snapshot of current state of watchables and controllables. These values are pushed to
   /// data receiver on subsequent call to flush().
   /// @note This method should be called at the end of a single iteration of realtime process loop
-  /// @return void if snapshot was captured successfully; Error::BufferUnavailable if we ran
+  /// @return Error::None if snapshot was captured successfully; Error::BufferUnavailable if we ran
   /// out of internal buffers. In this case, flush() more frequently to release buffers.
-  [[nodiscard]] auto snap() -> std::expected<void, Error>;
+  [[nodiscard]] auto snap() -> Error;
 
   /// Push records captured from previous calls to snap() into the data receiver.
   /// @note This method should only be called from the non-realtime part of the process.
@@ -97,33 +96,31 @@ public:
   /// Queue an update for a scalar controllable. This will take effect on next call to sync().
   /// @param name Identyfing name of the controllable as set in configuration
   /// @param value State update to set
-  /// @return void on success, otherwise an error code that identifies the failure
+  /// @return Error::None on success, otherwise an error code that identifies the failure
   /// @note This method should be called from non-realtime part of the process
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
   template <NumericType T>
-  [[nodiscard]] auto qset(const std::string& name, const T& value) -> std::expected<void, Error>;
+  [[nodiscard]] auto qset(const std::string& name, const T& value) -> Error;
 
   /// Queue an update for a vector controllable. This will take effect on next call to sync().
   /// @param name Identyfing name of the controllable as set in configuration
   /// @param value State update to set
-  /// @return void on success, otherwise an error code that identifies the failure
+  /// @return Error::None on success, otherwise an error code that identifies the failure
   /// @note This method should be called from non-realtime part of the process
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
   template <NumericType T>
-  [[nodiscard]] auto qset(const std::string& name,
-                          std::span<const T> value) -> std::expected<void, Error>;
+  [[nodiscard]] auto qset(const std::string& name, std::span<const T> value) -> Error;
 
   /// Queue an update for a controllable with data specified in raw bytes. This will take effect on
   /// next call to sync().
   /// @param name Identyfing name of the controllable as set in configuration
   /// @param value State update to set
-  /// @return void on success, otherwise an error code that identifies the failure
+  /// @return Error::None on success, otherwise an error code that identifies the failure
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
-  [[nodiscard]] auto qset(const std::string& name,
-                          std::span<const std::byte> value) -> std::expected<void, Error>;
+  [[nodiscard]] auto qset(const std::string& name, std::span<const std::byte> value) -> Error;
 
   /// Update control variables to values from calls to qset() since the last call to this method
   /// @note This method should be called at the top of realtime process update step
@@ -136,8 +133,6 @@ private:
   realtime::FIFOBuffer snaps_;
   realtime::FIFOBuffer pending_syncs_;
 };
-
-using ControllerException = grape::Exception<Controller::Error>;
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
@@ -162,17 +157,37 @@ auto PinConfig::pin(const std::string& name, std::span<const T> var,
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto Controller::qset(const std::string& name, const T& value) -> std::expected<void, Error> {
+auto Controller::qset(const std::string& name, const T& value) -> Error {
   return qset<T>(name, { &value, 1 });
 }
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto Controller::qset(const std::string& name,
-                      std::span<const T> value) -> std::expected<void, Error> {
+auto Controller::qset(const std::string& name, std::span<const T> value) -> Error {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto* const data_ptr = reinterpret_cast<const std::byte*>(value.data());
   return qset(name, { data_ptr, value.size_bytes() });
+}
+
+//-------------------------------------------------------------------------------------------------
+[[nodiscard]] constexpr auto toString(const Controller::Error& code) -> std::string_view {
+  switch (code) {
+    case Controller::Error::None:
+      return "None";
+    case Controller::Error::BufferUnavailable:
+      return "BufferUnavailable";
+    case Controller::Error::BufferTooSmall:
+      return "BufferTooSmall";
+    case Controller::Error::SignalNotFound:
+      return "SignalNotFound";
+    case Controller::Error::RoleMismatch:
+      return "RoleMismatch";
+    case Controller::Error::TypeMismatch:
+      return "TypeMismatch";
+    case Controller::Error::SizeMismatch:
+      return "SizeMismatch";
+  }
+  return {};
 }
 
 }  // namespace grape::probe
