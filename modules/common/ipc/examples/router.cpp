@@ -6,6 +6,7 @@
 #include <csignal>
 #include <print>
 
+#include "examples_utils.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/ipc/ipc.h"
@@ -49,24 +50,17 @@ auto main(int argc, const char* argv[]) -> int {
             .parse(argc, argv);
 
     if (not args_opt.has_value()) {
-      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+      grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-
-    const auto port_opt = args.getOption<int>("port");
-    if (not port_opt.has_value()) {
-      throw grape::conio::ProgramOptions::Error{ port_opt.error() };
-    }
-    const auto addr_opt = args.getOption<std::string>("address");
-    if (not addr_opt.has_value()) {
-      throw grape::conio::ProgramOptions::Error{ addr_opt.error() };
-    }
+    const auto port = grape::ipc::ex::getOptionOrThrow<int>(args, "port");
+    const auto addr = grape::ipc::ex::getOptionOrThrow<std::string>(args, "address");
 
     // configure as router
     auto config = zenoh::Config::create_default();
     config.insert_json5(Z_CONFIG_MODE_KEY, R"("router")");
 
-    const auto listen_on = std::format(R"(["tcp/{}:{}"])", addr_opt.value(), port_opt.value());
+    const auto listen_on = std::format(R"(["tcp/{}:{}"])", addr, port);
     config.insert_json5(Z_CONFIG_LISTEN_KEY, listen_on);
 
     // start session
@@ -78,14 +72,8 @@ auto main(int argc, const char* argv[]) -> int {
     s_exit.wait(false);
 
     return EXIT_SUCCESS;
-  } catch (const grape::conio::ProgramOptions::Error& ex) {
-    const auto code_str = toString(ex.code);
-    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Option '%s' %.*s", ex.key.c_str(),
-                          static_cast<int>(code_str.length()), code_str.data());
-    return EXIT_FAILURE;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

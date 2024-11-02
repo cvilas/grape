@@ -59,10 +59,10 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   auto probe = grape::probe::Controller(std::move(pins), BUFFER_CONFIG, sink);
 
   // Check we can snap expected number of times
-  CHECK(probe.snap().has_value());
-  CHECK(probe.snap().has_value());
-  CHECK(probe.snap().has_value());
-  CHECK_FALSE(probe.snap().has_value());
+  CHECK(probe.snap() == grape::probe::Controller::Error::None);
+  CHECK(probe.snap() == grape::probe::Controller::Error::None);
+  CHECK(probe.snap() == grape::probe::Controller::Error::None);
+  CHECK(probe.snap() != grape::probe::Controller::Error::None);
 
   // Check subsequent flush yields expected number of records
   probe.flush();
@@ -71,10 +71,11 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   // Check we can qset expected number of times
   static constexpr auto AMPLITUDE_DELTA = 0.1;
   auto amplitude_setting = 0.0;
-  CHECK(probe.qset("amplitude", amplitude_setting).has_value());
+  CHECK(probe.qset("amplitude", amplitude_setting) == grape::probe::Controller::Error::None);
   amplitude_setting += AMPLITUDE_DELTA;
-  CHECK(probe.qset("amplitude", amplitude_setting).has_value());
-  CHECK_FALSE(probe.qset("amplitude", amplitude_setting + AMPLITUDE_DELTA).has_value());
+  CHECK(probe.qset("amplitude", amplitude_setting) == grape::probe::Controller::Error::None);
+  CHECK(probe.qset("amplitude", amplitude_setting + AMPLITUDE_DELTA) !=
+        grape::probe::Controller::Error::None);
 
   // Check after sync, the control variable is set to latest value from qset
   probe.sync();

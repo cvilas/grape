@@ -209,4 +209,5 @@ auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T,
 [[nodiscard]] inline auto toString(const ProgramOptions::Error& ex) -> std::string {
   return std::format("Option '{}' {}", ex.key, toString(ex.code));
 }
+
 }  // namespace grape::conio

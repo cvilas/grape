@@ -14,14 +14,13 @@
 namespace grape::realtime {
 
 //-------------------------------------------------------------------------------------------------
-auto lockMemory() -> std::expected<void, SystemError> {
+auto lockMemory() -> SystemError {
   // The implementation here follows from John Ogness' talk, 'A Checklist for Writing Linux
   // Real-Time Applications' at Embedded Liux Conference Europe 2020. See docs.
 #ifdef __linux__
   // Lock all current and future process address space into RAM, preventing paging into swap area
   if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
-    const auto err = errno;
-    return std::unexpected(SystemError{ .code = err, .function_name = "mlockall" });
+    return SystemError{ .code = errno, .function_name = "mlockall" };
   }
 
   // Heap trimming: when the amount of contiguous free memory at the top of the  heap  grows
@@ -32,8 +31,7 @@ auto lockMemory() -> std::expected<void, SystemError> {
     const auto disable = -1;
     const auto code = mallopt(M_TRIM_THRESHOLD, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
-      return std::unexpected(
-          SystemError{ .code = code, .function_name = "mallopt(M_TRIM_THRESHOLD)" });
+      return SystemError{ .code = code, .function_name = "mallopt(M_TRIM_THRESHOLD)" };
     }
   }
 
@@ -43,18 +41,17 @@ auto lockMemory() -> std::expected<void, SystemError> {
     const auto disable = 0;
     const auto code = mallopt(M_MMAP_MAX, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
-      return std::unexpected(SystemError{ .code = code, .function_name = "mallopt(M_MMAP_MAX)" });
+      return SystemError{ .code = code, .function_name = "mallopt(M_MMAP_MAX)" };
     }
   }
   return {};
 #else
-  return std::unexpected(SystemError{ .code = ENOSYS, .function_name = "lockMemory" });
+  return SystemError{ .code = ENOSYS, .function_name = "lockMemory" };
 #endif
 }
 
 //-------------------------------------------------------------------------------------------------
-auto setCpuAffinity(std::span<const unsigned int> cpus,
-                    pid_t pid) -> std::expected<void, SystemError> {
+auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> SystemError {
 #ifdef __linux__
   cpu_set_t mask;
   CPU_ZERO(&mask);
@@ -62,32 +59,30 @@ auto setCpuAffinity(std::span<const unsigned int> cpus,
     CPU_SET(i, &mask);
   }
   if (0 != sched_setaffinity(pid, sizeof(mask), &mask)) {
-    const auto err = errno;
-    return std::unexpected(SystemError{ .code = err, .function_name = "sched_setaffinity" });
+    return SystemError{ .code = errno, .function_name = "sched_setaffinity" };
   }
   return {};
 #else
   (void)cpus;
   (void)pid;
-  return std::unexpected(SystemError{ .code = ENOSYS, .function_name = "setCpuAffinity" });
+  return SystemError{ .code = ENOSYS, .function_name = "setCpuAffinity" };
 #endif
 }
 
 //-------------------------------------------------------------------------------------------------
-auto setSchedule(Schedule schedule, pid_t pid) -> std::expected<void, SystemError> {
+auto setSchedule(Schedule schedule, pid_t pid) -> SystemError {
 #ifdef __linux__
   sched_param param{};
   param.sched_priority = schedule.priority;
   const auto prio = (schedule.policy == Schedule::Policy::Realtime ? SCHED_FIFO : SCHED_OTHER);
   if (0 != sched_setscheduler(pid, prio, &param)) {
-    const auto err = errno;
-    return std::unexpected(SystemError{ .code = err, .function_name = "sched_setscheduler" });
+    return SystemError{ .code = errno, .function_name = "sched_setscheduler" };
   }
   return {};
 #else
   (void)schedule;
   (void)pid;
-  return std::unexpected(SystemError{ .code = ENOSYS, .function_name = "setSchedule" });
+  return SystemError{ .code = ENOSYS, .function_name = "setSchedule" };
 #endif
 }
 

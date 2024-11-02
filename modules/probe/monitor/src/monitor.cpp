@@ -10,6 +10,8 @@
 #include <print>
 #include <shared_mutex>
 
+#include "grape/exception.h"
+
 #if defined(__APPLE__)
 #define GL_SILENCE_DEPRECATION
 #endif
@@ -94,8 +96,8 @@ ScrollingBuffer::ScrollingBuffer(std::size_t length,
     frame_size_ += grape::probe::length(signal_info.type) * signal_info.num_elements;
   }
   if (timestamp_offset_in_frame_ == std::numeric_limits<std::size_t>::max()) {
-    grape::panic<grape::probe::MonitorException>("Timestamp",
-                                                 grape::probe::Monitor::Error::SignalNotFound);
+    grape::panic<grape::Exception>(
+        std::format("Timestamp {}", toString(grape::probe::Monitor::Error::SignalNotFound)));
   }
   frame_data_.resize(length_ * frame_size_);
 }
@@ -104,9 +106,8 @@ ScrollingBuffer::ScrollingBuffer(std::size_t length,
 void ScrollingBuffer::addFrame(std::span<const std::byte> frame) {
   const auto passed_frame_size = frame.size_bytes();
   if (passed_frame_size != frame_size_) {
-    grape::panic<grape::probe::MonitorException>(
-        std::format("Expected frame size: {} bytes, got {} bytes", frame_size_, passed_frame_size),
-        grape::probe::Monitor::Error::SizeMismatch);
+    grape::panic<grape::Exception>(
+        std::format("Expected frame size: {} bytes, got {} bytes", frame_size_, passed_frame_size));
   }
   using OffsetType = std::vector<std::byte>::difference_type;
   const auto offset = static_cast<OffsetType>(head_index_ * frame_size_);
@@ -294,7 +295,7 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
   glfwSetErrorCallback(Monitor::glfwEerrorCb);
 
   if (GLFW_FALSE == glfwInit()) {
-    panic<MonitorException>("Error: glfwInit", Error::Renderer);
+    panic<Exception>(std::format("glfwInit: {}", toString(Error::Renderer)));
   }
 
   // Decide GL+GLSL versions
@@ -320,7 +321,7 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
   impl_->window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Monitor", nullptr, nullptr);
   if (impl_->window == nullptr) {
     glfwTerminate();
-    panic<MonitorException>("Error: glfwCreateWindow", Error::Renderer);
+    panic<Exception>(std::format("glfwCreateWindow: {}", toString(Error::Renderer)));
   }
   glfwMakeContextCurrent(impl_->window);
   glfwSwapInterval(1);  // Enable vsync
@@ -329,7 +330,7 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
   IMGUI_CHECKVERSION();
   impl_->imgui_ctx = ImGui::CreateContext();
   if (nullptr == impl_->imgui_ctx) {
-    panic<MonitorException>("Error: ImGui::CreateContext", Error::Renderer);
+    panic<Exception>(std::format("ImGui::CreateContext: {}", toString(Error::Renderer)));
   }
   ImGuiIO& io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // NOLINT(hicpp-signed-bitwise)

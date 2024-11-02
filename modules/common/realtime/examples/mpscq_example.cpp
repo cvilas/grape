@@ -76,7 +76,7 @@ auto main() -> int {
     t2.join();
     return EXIT_SUCCESS;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

@@ -37,7 +37,7 @@ auto main() -> int {
     }
     return EXIT_SUCCESS;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <expected>
 #include <span>
 
 #include <sys/types.h>
@@ -16,16 +15,15 @@ namespace grape::realtime {
 /// Lock process address space into physical memory to avoid page faults and resulting unbounded
 /// memory access latency. Usually called on application startup and before creation of any threads.
 /// @note This function is a no-op on any OS except Linux
-/// @return void on success, system error on failure
-[[nodiscard]] auto lockMemory() -> std::expected<void, SystemError>;
+/// @return 0 error code, else information on failure
+[[nodiscard]] auto lockMemory() -> SystemError;
 
 /// Set CPU affinity for a thread in Linux.
 /// @note This function is a no-op on any OS except Linux
 /// @param cpus List of CPU indices, starting at 0
 /// @param pid Linux specific thread ID, typically returned by gettid() (0=calling thread)
-/// @return void on success, system error on failure
-[[nodiscard]] auto setCpuAffinity(std::span<const unsigned int> cpus,
-                                  pid_t pid = 0) -> std::expected<void, SystemError>;
+/// @return 0 error code, else information on failure
+[[nodiscard]] auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid = 0) -> SystemError;
 
 /// Thread scheduling parameters
 struct Schedule {
@@ -55,8 +53,7 @@ struct Schedule {
 ///    limits.conf`.
 /// @param schedule Scheduling parameters.
 /// @param pid Linux specific thread ID, typically returned by gettid() (0=calling thread)
-/// @return void on success, system error on failure
-[[nodiscard]] auto setSchedule(Schedule schedule,
-                               pid_t pid = 0) -> std::expected<void, SystemError>;
+/// @return 0 error code, else information on failure
+[[nodiscard]] auto setSchedule(Schedule schedule, pid_t pid = 0) -> SystemError;
 
 }  // namespace grape::realtime

@@ -9,8 +9,6 @@
 #include <filesystem>
 #include <memory>
 
-#include "grape/exception.h"
-
 struct lua_State;  //!< Internal detail. Don't worry about it!
 
 namespace grape::script {
@@ -52,8 +50,6 @@ private:
   static void exitLua(lua_State* state);
   std::shared_ptr<lua_State> lua_state_;
 };
-
-using ConfigScriptException = Exception<ConfigScript::Error>;
 
 //=================================================================================================
 /// A configuration table is a collection of key-value pairs or an array of values. See example

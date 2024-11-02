@@ -19,7 +19,7 @@ auto main(int argc, const char* argv[]) -> int {
     grape::log::Log(logger, grape::log::Severity::Note, "message='{}'", "A formatted log message");
     return EXIT_SUCCESS;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

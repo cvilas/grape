@@ -17,18 +17,18 @@ auto main(int argc, const char* argv[]) -> int {
             .parse(argc, argv);
 
     if (not args_opt.has_value()) {
-      throw grape::conio::ProgramOptions::Error{ args_opt.error() };
+      throw std::runtime_error(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
 
     const auto port_opt = args.getOption<int>("port");
     if (not port_opt.has_value()) {
-      throw grape::conio::ProgramOptions::Error{ port_opt.error() };
+      throw std::runtime_error(toString(port_opt.error()));
     }
 
     const auto addr_opt = args.getOption<std::string>("address");
     if (not addr_opt.has_value()) {
-      throw grape::conio::ProgramOptions::Error{ addr_opt.error() };
+      throw std::runtime_error(toString(addr_opt.error()));
     }
 
     // help is always available. Specify '--help' on command line or get it directly as here.
@@ -39,12 +39,6 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("The IP address in use is {}", addr_opt.value());
 
     return EXIT_SUCCESS;
-  } catch (const grape::conio::ProgramOptions::Error& ex) {
-    const auto code_str = toString(ex.code);
-    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Option '%s' %.*s", ex.key.c_str(),
-                          static_cast<int>(code_str.length()), code_str.data());
-    return EXIT_FAILURE;
   } catch (const std::exception& ex) {
     /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::ignore = std::fprintf(stderr, "Exception %s\n", ex.what());

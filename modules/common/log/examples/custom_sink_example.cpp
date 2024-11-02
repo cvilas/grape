@@ -23,7 +23,7 @@ auto main(int argc, const char* argv[]) -> int {
     grape::log::Log(logger, grape::log::Severity::Info, "{}", "Message to custom output stream");
     return EXIT_SUCCESS;
   } catch (...) {
-    grape::AbstractException::consume();
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

@@ -3,7 +3,7 @@
 // MIT License
 //=================================================================================================
 
-#include <utility>
+#include <format>
 
 #include "grape/exception.h"
 
@@ -16,13 +16,10 @@ constexpr auto toString(const Error& er) -> std::string_view {
     case Error::RealBad:
       return "RealBad";
   }
-  std::unreachable();
 };
 
-using WorkException = grape::Exception<Error>;
-
 void functionThatThrows() {
-  grape::panic<WorkException>("Boom!!", Error::RealBad);
+  grape::panic<grape::Exception>(std::format("Boom!! [{}]", toString(Error::RealBad)));
 }
 
 void doWork() {
@@ -36,15 +33,8 @@ auto main() -> int {
   try {
     doWork();
     return EXIT_SUCCESS;
-  } catch (const WorkException& ex) {  // handle exceptions you care about
-    const auto code_str = toString(ex.data());
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = fprintf(stderr, "Error code: %.*s\n",  //
-                          static_cast<int>(code_str.length()), code_str.data());
-    WorkException::consume();
-    return EXIT_FAILURE;
-  } catch (...) {  // default handle all other exceptions
-    grape::AbstractException::consume();
+  } catch (...) {
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

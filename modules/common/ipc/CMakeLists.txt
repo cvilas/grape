@@ -26,6 +26,5 @@ define_module_library(
   PUBLIC_LINK_LIBS zenohc::lib)
 
 # Subprojects
-add_subdirectory(apps)
 add_subdirectory(examples)
 add_subdirectory(tests)
