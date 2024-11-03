@@ -4,6 +4,8 @@
 
 #include "grape/script/script.h"
 
+#include <format>
+
 #include "grape/exception.h"
 #include "lua.hpp"
 
