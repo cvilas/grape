@@ -27,7 +27,7 @@ void Exception::print() noexcept {
     std::ignore = fprintf(stderr, "\nBacktrace:");
     auto i = 0u;
     for (const auto& s : ex.trace().trace()) {
-      std::ignore = fprintf(stderr, "\n#%d: %s", i++, s.c_str());
+      std::ignore = fprintf(stderr, "\n#%u: %s", i++, s.c_str());
     }
   } catch (const std::exception& ex) {
     std::ignore = fprintf(stderr, "\nException: %s", ex.what());

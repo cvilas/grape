@@ -24,8 +24,7 @@ set(CLANG_WARNINGS -Weverything
   -Wno-ctad-maybe-unsupported
   -Wno-global-constructors
   -Wno-weak-vtables
-  -Wno-exit-time-destructors
-  -Wno-gnu-zero-variadic-macro-arguments)
+  -Wno-exit-time-destructors)
 
 # GCC warnings
 set(GCC_WARNINGS
