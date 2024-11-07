@@ -28,6 +28,7 @@
 #endif
 
 #include "implot.h"
+#ifndef IMGUI_DISABLE
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -148,12 +149,10 @@ struct ScrollingBuffer {
 struct RollingBuffer {
     float Span;
     ImVector<ImVec2> Data;
-
     RollingBuffer() {
         Span = 10.0f;
         Data.reserve(2000);
     }
-    
     void AddPoint(float x, float y) {
         float xmod = fmodf(x, Span);
         if (!Data.empty() && xmod < Data.back().x)
@@ -2479,3 +2478,5 @@ void PlotCandlestick(const char* label_id, const double* xs, const double* opens
 }
 
 } // namespace MyImplot
+
+#endif // #ifndef IMGUI_DISABLE
