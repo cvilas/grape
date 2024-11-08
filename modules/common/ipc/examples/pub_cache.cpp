@@ -8,6 +8,7 @@
 #include "examples_utils.h"
 #include "grape/conio/conio.h"
 #include "grape/exception.h"
+#include "grape/ipc/ipc.h"
 
 //=================================================================================================
 // Example program creates a caching publisher and periodically writes a value on the specified key.
@@ -53,22 +54,12 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Opening session...");
     auto session = zenoh::Session::open(std::move(config));
 
-    //----
-    // Note: The rest of this application uses the C API because the C++ API does not expose
-    // caching publication yet (Dec 2023)
-    //----
-
     static constexpr auto PUB_HISTORY = 10;
-    auto pub_cache_opts = ze_publication_cache_options_default();
+    auto pub_cache_opts = zenoh::Session::PublicationCacheOptions();
     pub_cache_opts.history = PUB_HISTORY;
 
     std::println("Declaring publication cache on '{}'...", key);
-    auto pub_cache =
-        ze_declare_publication_cache(session.loan(), z_keyexpr(key.c_str()), &pub_cache_opts);
-    if (!z_check(pub_cache)) {
-      std::println("Unable to declare publication cache for key expression!");
-      return EXIT_FAILURE;
-    }
+    auto pub_cache = session.declare_publication_cache(key, std::move(pub_cache_opts));
 
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
@@ -76,11 +67,9 @@ auto main(int argc, const char* argv[]) -> int {
     while (not grape::conio::kbhit()) {
       const auto msg = std::format("[{}] {}", idx++, value);
       std::println("Publishing Data ('{} : {})", key, msg);
-      z_put(session.loan(), z_keyexpr(key.c_str()), reinterpret_cast<const uint8_t*>(msg.data()),
-            msg.length(), nullptr);
+      session.put(key, zenoh::ext::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
       std::this_thread::sleep_for(LOOP_WAIT);
     }
-    z_drop(z_move(pub_cache));
 
     return EXIT_SUCCESS;
   } catch (...) {

@@ -29,7 +29,7 @@
 - Generic plotting api
   - Requirements analysis
   - Narrow down options: qt6, implot
-- Fix zenoh examples: pub_cache, query_sub, pull, shm pub/sub
+- Fix zenoh examples: query_sub, pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 - IPC wrapper API
   - Do we need it? Compare against past DDS approach
