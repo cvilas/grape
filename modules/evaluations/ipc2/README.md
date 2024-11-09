@@ -23,9 +23,12 @@ Intra-process, inter-process and inter-host communication
 
 ## Zenoh
 
-[Zenoh](https://zenoh.io/docs/overview/what-is-zenoh/) was chosen as the initial candidate for IPC after considering a [few options](./docs/ipc_options.md). See [examples](./examples/README.md) for usage patterns and capabilities.
+[Zenoh](https://zenoh.io/docs/overview/what-is-zenoh/) was chosen as the initial candidate for IPC 
+after considering a [few options](../../common/ipc/docs/ipc_options.md). 
+See [examples](./examples/README.md) for usage patterns and capabilities.
 
 - To evaluate Zenoh, install Rust toolchain
+
   ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
@@ -39,6 +42,7 @@ Intra-process, inter-process and inter-host communication
   ```
 
 - To cache Rust builds, add following lines to `$HOME/.cargo/config.toml`
+
   ```toml
   [build]
   rustc-wrapper="sccache"

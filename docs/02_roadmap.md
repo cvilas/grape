@@ -14,18 +14,14 @@
 
 ## Ongoing
 
-- Write note on how to write grape applications in app/README
-- Teleop controller
 - Implement [grapecam](https://github.com/cvilas/grapecam)
-- IPC
-  - Implement queryable/query API
-  - Implement zero-copy read and write
-  - Implement Reliable/BestEffort QoS
-  - Implement History QoS
-- Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
-  - [reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder)
+- Implement systemd service target
+- Implement queryable/query API
+- Implement zero-copy read and write
+- Implement Teleop controller
+- Implement behaviour tree 
 
-## Robotics core
+## Device IO
 
 - HW IO
   - CANopen
@@ -40,19 +36,18 @@
 - Refactor multi-producer single-consumer queue
   - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
   - Rename it for clarity
-- Math library
-  - Delay line
-  - Low pass filter
-  - Differentiator
-  - Integrator
-  - Matrix operations
-- Behaviour trees: Consider building from first principles
-- FSM: introspectable, visualisable state transition graph using graphviz.
-- Introduce [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
 - Refactor thread class out of realtime and put it in 'grape'
   - Insert logging to capture timer overruns in the loop
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
 - replace `grape::realtime::SystemError` with `std::errc`
+
+## Math library
+
+- Delay line
+- Low pass filter
+- Differentiator
+- Integrator
+- Matrix operations
 
 ## Visualisation
 
@@ -75,9 +70,12 @@
     - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
     - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
     - Implement a basic scenegraph example and check performance in MacOS and Linux
+- Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
+  - [reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder)
 
 ## CI and build robustness
 
+- Introduce [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
   - Fail the CI if clang-format changes code
