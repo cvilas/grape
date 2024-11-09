@@ -13,21 +13,14 @@
 
 ## Dec 2024
 
-- Cross compile for Arm64 from X86 
-  - with gcc toolchain
-  - with clang toolchain
 - grapecam
   - Implement grape::app. ([README](../modules/common/app/README.md))
   - Implement [grapecam](https://github.com/cvilas/grapecam)
-  - Implement `isatty()` to identify terminal and print colored logs (see `cpptrace::istty`)
 - plot
   - Generic plotting API and `plottable`concept
   - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
 - Record and replay ([reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder))
 - Define behaviour for `experimental` flag in `declare_module` and implement it
-- Review [ecal](https://github.com/eclipse-ecal/ecal). Is it an alternative to zenoh?
-- delete `/tmp/ctcache-*` and fix linter warnings
-- update `clang-tidy-cache`. Does it fix linter caching problems?
 
 ## Jan 2025
 
@@ -105,9 +98,6 @@
 
 ## CI and build robustness
 
-- Fix GCC builds
-  - `std::expected` not available with -DENABLE_LINTER=ON
-  - sccache breaks build with -DENABLE_CACHE=ON
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
   - Fail the CI if clang-format changes code
@@ -117,6 +107,7 @@
 - Implement CI build using github workflow  
 - Integrate cpack to generate artifacts
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
+- Support GCC builds without restrictions
 
 ## Demo applications
 
