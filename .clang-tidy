@@ -51,8 +51,6 @@ Checks: '-*,
 HeaderFilterRegex: '/grape/modules/'
 
 CheckOptions:
-  - { key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor, value: 1 }
-  - { key: cppcoreguidelines-avoid-do-while.IgnoreMacros,       value: 1}
   - { key: readability-identifier-naming.ConstexprVariableCase, value: UPPER_CASE }
   - { key: readability-identifier-naming.GlobalConstantCase,    value: UPPER_CASE }
   - { key: readability-identifier-naming.NamespaceCase,         value: lower_case }
@@ -73,5 +71,5 @@ CheckOptions:
   - { key: readability-function-cognitive-complexity.Threshold,                     value: 40 }
   - { key: readability-function-cognitive-complexity.DescribeBasicIncrements,       value: 0 }
   - { key: readability-function-cognitive-complexity.IgnoreMacros,                  value: 1 }
-  - { key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic, value: 1}
+  - { key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic, value: 1} 
 ...
