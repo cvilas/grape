@@ -67,6 +67,10 @@ Session::Session(const Config& config) {
     case Config::Scope::Network:
       ecal_config.registration.network_enabled = true;
       ecal_config.transport_layer.udp.mode = eCAL::Types::UDPMode::NETWORK;
+      // ecal_config.publisher.layer.tcp.enable = true;
+      // ecal_config.publisher.layer.udp.enable = false;
+      // ecal_config.subscriber.layer.tcp.enable = true;
+      // ecal_config.subscriber.layer.udp.enable = false;
       break;
   }
   eCAL::Initialize(ecal_config, config.name);
