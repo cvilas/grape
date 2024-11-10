@@ -2,7 +2,7 @@
 
 ## Brief
 
-Configuration and scripting support.
+Configuration and scripting support using [Lua](https://www.lua.org/).
 
 ## Design considerations
 
@@ -18,29 +18,26 @@ Configuration and scripting support.
     ```
   - Verifiable for correctness 
   - Extendable as an application programming language for end-users to directly interact with Grape 
-    applications (inspired by Roblox Studio that allow behaviors via user-defined lua scripts).
+    applications (inspired by Roblox Studio that allow behaviors via user-defined Lua scripts).
 
 ### Why Lua
 
-It's a simple scripting language to learn, easily picked up by even school students. Yet, it is 
-powerful and provides a simple API for interoperability with C/C++ in both directions; i.e. lua code
-can call C/C++ functions and vice-versa.
+- Simple to learn.  
+- Powerful fully featured programming language
+- Provides simple API for C/C++ interoperability in both directions; i.e. Lua code can call C/C++
+  functions and vice-versa.
 
-Here's a great [Lua course](https://pikuma.com/courses/learn-lua-scripting-language-roblox) 
+Here's a good [Lua course](https://pikuma.com/courses/learn-lua-scripting-language-roblox) 
 for those who wish to learn Lua and how to integrate Lua with C/C++.
 
-### Why is Lua sources integrated directly into our codebase?
+Lua is integrated directly into the module (not as an external project), for the following reasons:
 
-- Lua cannot be built like other external dependencies. It is distributed with a Makefile 
-  and hardcodes compiler and build options, making it impossible to build it with different 
-  toolchains or different targets. 
-- As a consequence of the above, a custom CMake build script is required. For the sake of 
-  consistency, sources are integrated as well, not just the build script.
-- Custom build script eliminates additional external dependencies (eg: readline) and 
-  per-platform idiosyncracies.
-- Lua is stable and releases are infrequent. Minor releases are years apart. Therefore updating 
-  Lua sources (if we ever need to) is not a major maintenance overhead.
-- Lua codebase consists of a handful of C files. Easily manageable.
+- Lua is distributed with a Makefile that hardcodes compiler and build options, making it 
+  impossible to build with different toolchains. A custom CMake build script is provided to 
+  overcome this problem. For consistency, it makes sense to integrare sources with the build script.
+- Custom build script eliminates external dependencies (eg: readline) and platform idiosyncracies.
+- Lua releases are infrequent. Minor releases are years apart. The codebase consists of a handful 
+  of C files. Therefore the maintenance overhead is negligible.
 
 ### Copyright considerations
 
