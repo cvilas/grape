@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <filesystem>
 #include <string>
 
 namespace grape::utils {
@@ -29,6 +30,12 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 
 /// Transforms C++ ABI identifiers (eg: RTTI symbols) to names used in the source code
 [[nodiscard]] auto demangle(const char* mangled_name) -> std::string;
+
+/// @return Full path of the program being executed
+[[nodiscard]] auto getProgramPath() -> std::filesystem::path;
+
+/// @return host name
+[[nodiscard]] auto getHostName() -> std::string;
 
 /// Return user-readable name for specified type
 template <typename T>

@@ -17,6 +17,7 @@ set(SOURCES
   src/utils.cpp 
   src/version.cpp 
   README.md 
+  include/grape/utils/enums.h
   include/grape/utils/stacktrace.h
   include/grape/utils/utils.h 
   include/grape/utils/version.h)
@@ -33,5 +34,6 @@ define_module_library(
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 
 # Subprojects
+add_subdirectory(examples)
 add_subdirectory(tests)
 add_subdirectory(apps)

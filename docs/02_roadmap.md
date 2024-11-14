@@ -18,21 +18,17 @@
 
 ## Phase 3 - grapecam
 
-- Add grape::app class: introduce logging, configuration and messaging support
+- Implement grape::app. ([README](../modules/common/app/README.md))
 - Implement [grapecam](https://github.com/cvilas/grapecam)
-- ROS2 interop
-  - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
-- Disk recording and playback for time-series multi-modal data ([TODO](../modules/common/recorder/README.md))
   
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 
+- Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
 - Generic plotting api
   - Requirements analysis
   - Narrow down options: qt6, implot
 - Fix zenoh examples: query_sub, pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
-- IPC wrapper API
-  - Do we need it? Compare against past DDS approach
 - Implement advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client
@@ -45,10 +41,6 @@
 - Study
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
-- enum-to-string and string-to-enum
-  - enum to string: Copy the general idea from here: <https://godbolt.org/z/6MxYznfbf>
-  - consider magic_enum and other options and choose one
-  - refactor existing `toString()` functions
 - Shared memory
 - Single producer multiple consumer queue using externally specified memory (heap or shared memory)
 - Consider removing `MPSCQueue`. It's unused.
@@ -70,6 +62,9 @@
   - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 - Introduce [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
+- ROS2 interop
+  - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
+  - Propose a design
 
 ## Phase 6 - 3D graphics
 
@@ -85,6 +80,7 @@
 - HW accelerated 3D graphics
   - Design scene description format using our scripting engine
   - Design scenegraph library using existing khronos libs
+    - Decision: Use Qt3D? See [scratch](https://github.com/cvilas/scratch)/3dvis/qt 
   - Implement a basic scenegraph example and check performance in MacOS and Linux VM
 
 ## Phase 7 - Refactor
@@ -94,6 +90,7 @@
 - Refactor thread class out of realtime and put it in 'grape'
   - Insert logging to capture timer overruns in the loop
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
+- replace `grape::realtime::SystemError` with `std::errc`
 
 ## Phase 8 - CI
 
@@ -118,7 +115,7 @@
 
 ## Phase 10 - Utilities
 
-- utility: hostname, hostaddress, isportinuse, programname, programpath, execute, flag_set
+- utility: hostaddress, isportinuse, execute, flag_set
 - file cache
 - md5sum
 - factory using crtp (see scratch)

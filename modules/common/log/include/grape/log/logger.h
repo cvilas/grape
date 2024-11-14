@@ -7,6 +7,7 @@
 #include <source_location>
 
 #include "grape/log/config.h"
+#include "grape/log/severity.h"
 #include "grape/realtime/fifo_buffer.h"
 
 namespace grape::log {
