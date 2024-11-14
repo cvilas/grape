@@ -20,38 +20,39 @@
 # - Use of language features that may cause performance issues
 
 # Enable rule sets. Some checks are turned off because they are flagged by multiple rule-sets
-Checks:          '-*,
-                 bugprone-*,
-                 -bugprone-easily-swappable-parameters,
-                 cert-*,
-                 concurrency-*,
-                 cppcoreguidelines-*,
-                 clang-analyzer-*,
-                 -clang-analyzer-optin.core.EnumCastOutOfRange, # for catch2,
-                 google-*,
-                 -google-runtime-references,
-                 -google-readability-todo,
-                 hicpp-*,
-                 -hicpp-uppercase-literal-suffix,
-                 -hicpp-avoid-c-arrays,           # duplicates cppcoreguidelines-avoid-c-arrays,
-                 -hicpp-no-array-decay,           # duplicates cppcoreguidelines-pro-bounds-array-to-pointer-decay,
-                 -hicpp-special-member-functions, # duplicates cppcoreguidelines-special-member-functions,
-                 -hicpp-vararg,                   # duplicates cppcoreguidelines-pro-type-vararg,
-                 misc-*,
-                 -misc-include-cleaner,
-                 modernize-*,
-                 -modernize-avoid-c-arrays,       # duplicates cppcoreguidelines-avoid-c-arrays
-                 performance-*,
-                 -performance-move-const-arg,     # duplicates hicpp-move-const-arg
-                 readability-*,
-                 -readability-uppercase-literal-suffix,
-                 -readability-simplify-boolean-expr,
-                 -readability-magic-numbers,
-                 -readability-function-cognitive-complexity,
-                 -readability-redundant-access-specifiers,
-                 -readability-identifier-length,
-                 -readability-braces-around-statements
-                  '
+Checks: '-*,
+        bugprone-*,
+        -bugprone-easily-swappable-parameters,
+        -bugprone-misplaced-widening-cast,
+        cert-*,
+        concurrency-*,
+        cppcoreguidelines-*,
+        clang-analyzer-*,
+        -clang-analyzer-optin.core.EnumCastOutOfRange, # for catch2,
+        google-*,
+        -google-runtime-references,
+        -google-readability-todo,
+        hicpp-*,
+        -hicpp-uppercase-literal-suffix,
+        -hicpp-avoid-c-arrays,           # duplicates cppcoreguidelines-avoid-c-arrays,
+        -hicpp-no-array-decay,           # duplicates cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+        -hicpp-special-member-functions, # duplicates cppcoreguidelines-special-member-functions,
+        -hicpp-vararg,                   # duplicates cppcoreguidelines-pro-type-vararg,
+        misc-*,
+        -misc-include-cleaner,
+        modernize-*,
+        -modernize-avoid-c-arrays,       # duplicates cppcoreguidelines-avoid-c-arrays
+        performance-*,
+        -performance-move-const-arg,     # duplicates hicpp-move-const-arg
+        readability-*,
+        -readability-uppercase-literal-suffix,
+        -readability-simplify-boolean-expr,
+        -readability-magic-numbers,
+        -readability-function-cognitive-complexity,
+        -readability-redundant-access-specifiers,
+        -readability-identifier-length,
+        -readability-braces-around-statements
+        '
 
 # Upgrade warnings to errors
 # WarningsAsErrors: '*'

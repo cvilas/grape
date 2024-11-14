@@ -4,7 +4,7 @@
 
 declare_module(
   NAME log
-  DEPENDS_ON_MODULES "realtime"
+  DEPENDS_ON_MODULES "realtime;utils"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
@@ -21,7 +21,7 @@ set(SOURCES
 # library target
 define_module_library(
   NAME log
-  PUBLIC_LINK_LIBS grape::realtime
+  PUBLIC_LINK_LIBS grape::utils grape::realtime
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

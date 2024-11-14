@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "grape/probe/signal.h"
+#include "grape/utils/enums.h"
 
 namespace grape::probe {
 
@@ -44,15 +45,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const Monitor::Error& code) -> std::string_view {
-  switch (code) {
-    case Monitor::Error::Renderer:
-      return "Renderer";
-    case Monitor::Error::SignalNotFound:
-      return "SignalNotFound";
-    case Monitor::Error::SizeMismatch:
-      return "SizeMismatch";
-  }
-  return {};
+  return enums::enum_name(code);
 }
 
 }  // namespace grape::probe

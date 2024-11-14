@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "grape/utils/enums.h"
 #include "grape/utils/utils.h"
 
 namespace grape::conio {
@@ -190,19 +191,7 @@ auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T,
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_view {
-  switch (code) {
-    case ProgramOptions::Error::Code::Undeclared:
-      return "Undeclared";
-    case ProgramOptions::Error::Code::Redeclared:
-      return "Redeclared";
-    case ProgramOptions::Error::Code::Undefined:
-      return "Undefined";
-    case ProgramOptions::Error::Code::Unparsable:
-      return "Unparsable";
-    case ProgramOptions::Error::Code::TypeMismatch:
-      return "TypeMismatch";
-  }
-  return {};
+  return enums::enum_name(code);
 }
 
 //-------------------------------------------------------------------------------------------------

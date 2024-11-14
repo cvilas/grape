@@ -13,7 +13,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 gcc-14
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
   ccache doxygen graphviz linux-generic python3-dev python3-pip python-is-python3 \
-  iproute2 net-tools iftop htop
+  iproute2 net-tools iftop htop nvtop
   ```
 
 - Install latest cmake and helpers
@@ -90,7 +90,8 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 gcc-14
 - (Desktop only) For graphical applications, install GL and windowing libraries 
 
   ```bash
-  sudo apt install libgl-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxkbcommon-dev
+  sudo apt install libgl-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+  libxkbcommon-dev libwayland-dev wayland-protocols
   ```
 
 ## Configure and build

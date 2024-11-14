@@ -11,6 +11,7 @@
 
 #include "grape/probe/signal.h"
 #include "grape/realtime/fifo_buffer.h"
+#include "grape/utils/enums.h"
 
 namespace grape::probe {
 
@@ -171,23 +172,7 @@ auto Controller::qset(const std::string& name, std::span<const T> value) -> Erro
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const Controller::Error& code) -> std::string_view {
-  switch (code) {
-    case Controller::Error::None:
-      return "None";
-    case Controller::Error::BufferUnavailable:
-      return "BufferUnavailable";
-    case Controller::Error::BufferTooSmall:
-      return "BufferTooSmall";
-    case Controller::Error::SignalNotFound:
-      return "SignalNotFound";
-    case Controller::Error::RoleMismatch:
-      return "RoleMismatch";
-    case Controller::Error::TypeMismatch:
-      return "TypeMismatch";
-    case Controller::Error::SizeMismatch:
-      return "SizeMismatch";
-  }
-  return {};
+  return enums::enum_name(code);
 }
 
 }  // namespace grape::probe

@@ -6,20 +6,14 @@
 #include <format>
 
 #include "grape/exception.h"
+#include "grape/utils/enums.h"
 
 namespace {
 enum class Error : uint8_t { Bad, RealBad };
-constexpr auto toString(const Error& er) -> std::string_view {
-  switch (er) {
-    case Error::Bad:
-      return "Bad";
-    case Error::RealBad:
-      return "RealBad";
-  }
-};
 
 void functionThatThrows() {
-  grape::panic<grape::Exception>(std::format("Boom!! [{}]", toString(Error::RealBad)));
+  grape::panic<grape::Exception>(
+      std::format("Boom!! [{}]", grape::enums::enum_name(Error::RealBad)));
 }
 
 void doWork() {

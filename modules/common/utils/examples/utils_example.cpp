@@ -1,19 +1,19 @@
 //=================================================================================================
-// Copyright (C) 2023 GRAPE Contributors
+// Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
 #include <print>
 
-#include "grape/utils/version.h"
+#include "grape/utils/utils.h"
 
 //=================================================================================================
 auto main() -> int {
   try {
-    const auto vn = grape::utils::getVersion();
-    const auto bi = grape::utils::getBuildInfo();
-    std::println("Version    : {:d}.{:d}.{:d}", vn.major, vn.minor, vn.patch);
-    std::println("Build Info : '{}' branch, '{}' profile, '{}' hash", bi.branch, bi.profile,
-                 bi.hash);
+    const auto path = grape::utils::getProgramPath();
+    const auto host_name = grape::utils::getHostName();
+    std::println("Host name: {}", host_name);
+    std::println("Program name: {}", path.filename().string());
+    std::println("Program path: {}", path.parent_path().string());
     return EXIT_SUCCESS;
   } catch (...) {
     std::ignore = std::fputs("Exception occurred", stderr);

@@ -2,8 +2,5 @@
 # Copyright (C) 2023 GRAPE Contributors
 # =================================================================================================
 
-define_module_test(
-  NAME tests
-  SOURCES utils_tests.cpp enum_tests.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS "")
+define_module_example(NAME utils_example SOURCES utils_example.cpp)
+define_module_example(NAME enums_example SOURCES enums_example.cpp)
