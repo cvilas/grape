@@ -36,6 +36,15 @@ auto main() -> int {
     /// A table of all values in the enumeration as strings
     std::println("All values: {}", grape::enums::enum_names_list<Color>);
 
+    /// Get enumeration from string
+    auto enum_str = "Blue";
+    const auto maybe_enum = grape::enums::enum_cast<Color>(enum_str);
+    if (maybe_enum.has_value()) {
+      std::println("'{}' -> '{}'", enum_str, grape::enums::enum_name(maybe_enum.value()));
+    } else {
+      std::println("Cannot convert string '{}' to valid enum of type Color", enum_str);
+    }
+
     return EXIT_SUCCESS;
   } catch (const std::exception& ex) {
     std::ignore = std::fputs(ex.what(), stderr);

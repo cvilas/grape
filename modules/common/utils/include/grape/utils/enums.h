@@ -14,7 +14,10 @@
 #pragma once
 
 #include <array>
+#include <optional>
+#include <stdexcept>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 namespace grape::enums {
@@ -119,4 +122,18 @@ constexpr auto enum_name(Enum val) -> std::string_view {
   return "";
 }
 
+//-------------------------------------------------------------------------------------------------
+// Returns the enumeration from string representation.
+template <typename Enum>
+  requires std::is_enum_v<Enum>
+constexpr auto enum_cast(std::string_view str_name) -> std::optional<Enum> {
+  auto i = std::underlying_type_t<Enum>{};
+  for (const auto& s : enum_names_list<Enum>) {
+    if (s == str_name) {
+      return static_cast<Enum>(i + enum_range<Enum>::min);
+    }
+    ++i;
+  }
+  return std::nullopt;
+}
 }  // namespace grape::enums
