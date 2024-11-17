@@ -34,10 +34,17 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 /// @return Full path of the program being executed
 [[nodiscard]] auto getProgramPath() -> std::filesystem::path;
 
+/// @return Full path to current user's home directory
+[[nodiscard]] auto getUserHomePath() -> std::filesystem::path;
+
 /// @return host name
 [[nodiscard]] auto getHostName() -> std::string;
 
-/// Return user-readable name for specified type
+/// @return Ordered list of search paths for config & data files for an application. See inline
+/// documentation in the implementation of the function for the search order.
+[[nodiscard]] auto getDataSearchPaths() -> const std::vector<std::filesystem::path>&;
+
+/// @return user-readable name for specified type
 template <typename T>
 constexpr auto getTypeName() -> std::string_view {
   // From https://stackoverflow.com/a/35943472/9929294

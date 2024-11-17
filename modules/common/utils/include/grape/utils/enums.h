@@ -8,14 +8,13 @@
 /// https://www.reddit.com/r/cpp_questions/comments/1fdwn7x/meta_programming_magic_for_enum_names/
 ///
 /// For advanced reflection support for enums
-/// - Use magic_enum (https://github.com/Neargye/magic_enum/tree/master)
+/// - Use conjure_enum (https://github.com/fix8mt/conjure_enum)
 /// - Wait for C++26 when reflections become part of the standard!
 
 #pragma once
 
 #include <array>
 #include <optional>
-#include <stdexcept>
 #include <string_view>
 #include <type_traits>
 #include <utility>

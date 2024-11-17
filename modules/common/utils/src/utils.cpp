@@ -10,6 +10,8 @@
 #include <memory>
 
 #include <cxxabi.h>
+#include <pwd.h>
+#include <sys/types.h>  // for getpwuid
 #include <unistd.h>
 
 #ifdef __APPLE__
@@ -57,6 +59,13 @@ auto getProgramPath() -> std::filesystem::path {
 }
 
 //-------------------------------------------------------------------------------------------------
+auto getUserHomePath() -> std::filesystem::path {
+  // NOLINTNEXTLINE(concurrency-mt-unsafe)
+  static const auto home_dir = std::filesystem::path(getpwuid(getuid())->pw_dir);
+  return home_dir;
+}
+
+//-------------------------------------------------------------------------------------------------
 auto getHostName() -> std::string {
   // cache the result for subsequent calls
   static const auto host_name = readHostName();
@@ -70,7 +79,31 @@ auto demangle(const char* mangled_name) -> std::string {
     abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status),  //
     std::free                                                      //
   };
-  return (status == 0) ? result.get() : mangled_name;
+  return { (status == 0) ? result.get() : mangled_name };
 }
 
+//-------------------------------------------------------------------------------------------------
+auto getDataSearchPaths() -> const std::vector<std::filesystem::path>& {
+  /// Config/data file search order:
+  /// - User-specific application configuration: $HOME/.$APP_NAME/
+  /// - Host-specific application configuration: /etc/opt/$APP_NAME/
+  /// - Default application configuration: $APP_PATH/../share/$APP_NAME/
+  /// - User-specific GRAPE configuration: $HOME/.grape/
+  /// - Host-specific GRAPE configuration: /etc/opt/grape/
+  /// - Default GRAPE configuration: $GRAPE_INSTALL_PATH/share/grape/
+  static const auto paths = [] {
+    const auto app_path = getProgramPath().parent_path();
+    const auto app_name = getProgramPath().filename().string();
+    const auto home_path = getUserHomePath();
+    return std::vector<std::filesystem::path>{
+      home_path / ("." + app_name),         //
+      ("/etc/opt/" + app_name),             //
+      app_path / ("../share/" + app_name),  //
+      home_path / (".grape"),               //
+      ("/etc/opt/grape"),                   //
+      app_path / ("../share/grape")         //
+    };
+  }();
+  return paths;
+}
 }  // namespace grape::utils
