@@ -16,6 +16,10 @@ auto main() -> int {
     std::println("User's home: {}", home_dir.string());
     std::println("Program name: {}", path.filename().string());
     std::println("Program path: {}", path.parent_path().string());
+    std::println("Data search directories for this application:");
+    for (const auto& d : grape::utils::getSearchDirs()) {
+      std::println("\t{}", d.string());
+    }
     return EXIT_SUCCESS;
   } catch (...) {
     std::ignore = std::fputs("Exception occurred", stderr);
