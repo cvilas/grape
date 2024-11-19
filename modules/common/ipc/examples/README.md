@@ -7,8 +7,8 @@
 
 ## Discovery
 
-- `scout`: The process of discovering Zenoh applications is called scouting. This example prints details of endpoints visible to a Zenoh session.
-- `info`: A simpler example that just prints the IDs for the session and the other routers and peers visible to it.
+- `scout`: Discovers Zenoh applications and prints their session details
+- `info`: Prints the session ID and the IDs of routers and peers visible to the session.
 - `liveliness_declare`, `liveliness_get`, `liveliness_sub`: Demonstrates how to enable liveliness tracking on a key expression. This feature enables automatic notification when entities, endpoints or services of interest come alive or drop away.
 
 ## Latency and throughput

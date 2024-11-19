@@ -21,27 +21,19 @@ auto main(int argc, const char* argv[]) -> int {
     }
     const auto& args = args_opt.value();
 
-    const auto port_opt = args.getOption<int>("port");
-    if (not port_opt.has_value()) {
-      throw std::runtime_error(toString(port_opt.error()));
-    }
-
-    const auto addr_opt = args.getOption<std::string>("address");
-    if (not addr_opt.has_value()) {
-      throw std::runtime_error(toString(addr_opt.error()));
-    }
+    const auto port = args.getOptionOrThrow<int>("port");
+    const auto addr = args.getOptionOrThrow<std::string>("address");
 
     // help is always available. Specify '--help' on command line or get it directly as here.
     std::println("Help text:\n{}\n", args.getOption<std::string>("help").value());
 
     // print the arguments passed. At this point, they have all been validated.
-    std::println("You specified port = {}", port_opt.value());
-    std::println("The IP address in use is {}", addr_opt.value());
+    std::println("You specified port = {}", port);
+    std::println("The IP address in use is {}", addr);
 
     return EXIT_SUCCESS;
-  } catch (const std::exception& ex) {
-    /// NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = std::fprintf(stderr, "Exception %s\n", ex.what());
+  } catch (...) {
+    grape::Exception::print();
     return EXIT_FAILURE;
   }
 }

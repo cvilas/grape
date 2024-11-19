@@ -2,12 +2,10 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
 #include <thread>
 
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Declares a liveliness token on a given key expression. This token will be seen alive by the
@@ -43,7 +41,7 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Opening session...");
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto key = args.getOptionOrThrow<std::string>("key");
 
     std::println("Declaring liveliness token for '{}'", key);
     [[maybe_unused]] const auto token = session.liveliness_declare_token(key);

@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "grape/exception.h"
 #include "grape/utils/enums.h"
 #include "grape/utils/utils.h"
 
@@ -58,11 +59,17 @@ public:
   /// @return true if option is found
   [[nodiscard]] auto hasOption(const std::string& key) const -> bool;
 
-  /// Get the value specified for a command line option
+  /// Get the value to a command line option
   /// @param key The command line option (without the '--').
   /// @return  The value of the specified option.
   template <StringStreamable T>
   [[nodiscard]] auto getOption(const std::string& key) const -> std::expected<T, Error>;
+
+  /// Get the value to a command line option or throw if the option was not specified
+  /// @param key The command line option (without the '--').
+  /// @return The value of the specified option.
+  template <StringStreamable T>
+  [[nodiscard]] auto getOptionOrThrow(const std::string& key) const -> T;
 
 private:
   friend class ProgramDescription;
@@ -111,15 +118,15 @@ public:
   /// @param default_value Default value to use if the option is not specified on the command line
   /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
-  auto declareOption(const std::string& key, const std::string& brief,
-                     const T& default_value) -> ProgramDescription&;
+  auto declareOption(const std::string& key, const std::string& brief, const T& default_value)
+      -> ProgramDescription&;
 
   /// @brief Parses and returns command line options at runtime.
   /// @param argc Number of arguments on the command line
   /// @param argv array of C-style strings
   /// @return Object containing command line options
-  [[nodiscard]] auto
-  parse(int argc, const char** argv) const -> std::expected<ProgramOptions, ProgramOptions::Error>;
+  [[nodiscard]] auto parse(int argc, const char** argv) const
+      -> std::expected<ProgramOptions, ProgramOptions::Error>;
 
 private:
   std::vector<ProgramOptions::Option> options_;
@@ -137,8 +144,8 @@ constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-auto ProgramDescription::declareOption(const std::string& key,
-                                       const std::string& brief) -> ProgramDescription& {
+auto ProgramDescription::declareOption(const std::string& key, const std::string& brief)
+    -> ProgramDescription& {
   options_.emplace_back(ProgramOptions::Option{ .key = key,
                                                 .brief = brief,
                                                 .value = "",
@@ -187,6 +194,16 @@ auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T,
   }
 
   return value;
+}
+
+//-------------------------------------------------------------------------------------------------
+template <conio::StringStreamable T>
+auto ProgramOptions::getOptionOrThrow(const std::string& key) const -> T {
+  const auto maybe_opt = getOption<T>(key);
+  if (not maybe_opt) {
+    grape::panic<grape::Exception>(toString(maybe_opt.error()));
+  }
+  return maybe_opt.value();
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -2,13 +2,11 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
 #include <thread>
 
-#include "examples_utils.h"
 #include "grape/conio/conio.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Example program that creates a subscriber. The subscriber will be notified of each put or delete
@@ -38,7 +36,7 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto key = args.getOptionOrThrow<std::string>("key");
 
     auto config = zenoh::Config::create_default();
 
@@ -64,9 +62,9 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Declaring Subscriber on '{}'", key);
     const auto cb = [](const zenoh::Sample& sample) {
       const auto ts = sample.get_timestamp();
-      std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::toString(sample.get_kind()),
+      std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::ex::toString(sample.get_kind()),
                    sample.get_keyexpr().as_string_view(),
-                   (ts ? grape::ipc::toString(ts.value()) : "--no timestamp--"),
+                   (ts ? grape::ipc::ex::toString(ts.value()) : "--no timestamp--"),
                    sample.get_payload().as_string());
     };
 

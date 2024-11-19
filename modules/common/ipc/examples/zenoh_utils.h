@@ -1,27 +1,28 @@
 //=================================================================================================
-// Copyright (C) 2023 GRAPE Contributors
+// Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
 #pragma once
 
+#define ZENOHCXX_ZENOHC  // Use the C backend for Zenoh
+
 #include <chrono>
 #include <format>
 #include <numeric>
-
-#define ZENOHCXX_ZENOHC  // Use the C backend for Zenoh
+#include <print>
 #include <zenoh.hxx>
 
-namespace grape::ipc {
+namespace grape::ipc::ex {
 
 //-------------------------------------------------------------------------------------------------
-inline auto toString(const zenoh::Id& id) -> std::string {
+[[nodiscard]] inline auto toString(const zenoh::Id& id) -> std::string {
   return std::accumulate(
       std::begin(id.bytes()), std::end(id.bytes()), std::string(),
-      [](const std::string& s, uint8_t v) { return std::format("{:02X}", v) + s; });
+      [](const std::string& s, std::uint8_t v) { return std::format("{:02X}", v) + s; });
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toString(const zenoh::WhatAmI& me) -> std::string_view {
+[[nodiscard]] constexpr auto toString(const zenoh::WhatAmI& me) -> std::string_view {
   switch (me) {
     case zenoh::WhatAmI::Z_WHATAMI_ROUTER:
       return "Router";
@@ -34,7 +35,7 @@ constexpr auto toString(const zenoh::WhatAmI& me) -> std::string_view {
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toString(zenoh::SampleKind kind) -> std::string_view {
+[[nodiscard]] constexpr auto toString(zenoh::SampleKind kind) -> std::string_view {
   switch (kind) {
     case Z_SAMPLE_KIND_PUT:
       return "Put";
@@ -45,7 +46,7 @@ constexpr auto toString(zenoh::SampleKind kind) -> std::string_view {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto toNanoSeconds(const zenoh::Timestamp& ts) -> std::uint64_t {
+[[nodiscard]] inline auto toNanoSeconds(const zenoh::Timestamp& ts) -> std::uint64_t {
   // NTP64 timestamping: https://docs.rs/zenoh/latest/zenoh/time/struct.NTP64.html
   const auto ntp64 = ts.get_time();
   const auto seconds = static_cast<std::uint32_t>(ntp64 >> 32U);
@@ -58,7 +59,7 @@ inline auto toNanoSeconds(const zenoh::Timestamp& ts) -> std::uint64_t {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto toString(const zenoh::Timestamp& ts) -> std::string {
+[[nodiscard]] inline auto toString(const zenoh::Timestamp& ts) -> std::string {
   const auto ns = std::chrono::nanoseconds(toNanoSeconds(ts));
   const auto tp = std::chrono::system_clock::time_point{
     std::chrono::duration_cast<std::chrono::system_clock::time_point::duration>(ns)
@@ -66,4 +67,4 @@ inline auto toString(const zenoh::Timestamp& ts) -> std::string {
   return std::format("{}", tp);
 }
 
-}  // namespace grape::ipc
+}  // namespace grape::ipc::ex

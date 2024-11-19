@@ -2,13 +2,11 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
 #include <thread>
 
-#include "examples_utils.h"
 #include "grape/conio/conio.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Example program to demonstrate querying subscriber.
@@ -24,22 +22,6 @@
 // Derived from: https://github.com/eclipse-zenoh/zenoh-c/blob/master/examples/z_query_sub.c
 //=================================================================================================
 
-namespace {
-
-//-------------------------------------------------------------------------------------------------
-void dataHandler(const z_sample_t* sample, void* arg) {
-  (void)arg;
-  z_owned_str_t keystr = z_keyexpr_to_string(sample->keyexpr);
-  const auto payload =
-      std::string(reinterpret_cast<const char*>(sample->payload.start), sample->payload.len);
-  std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::toString(sample->kind),
-               z_loan(keystr), grape::ipc::toString(sample->timestamp), payload);
-
-  z_drop(z_move(keystr));
-}
-
-}  // namespace
-
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
@@ -53,33 +35,27 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto key = args.getOptionOrThrow<std::string>("key");
     std::println("Declaring querying subscriber on '{}'...", key);
 
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
 
-    //----
-    // Note: The rest of this application uses the C API because the C++ API does not expose
-    // querying subscriber yet (Dec 2023)
-    //----
+    const auto cb = [](const zenoh::Sample& sample) {
+      const auto ts = sample.get_timestamp();
+      std::println(">> Received {} ('{}' : [{}] '{}')", grape::ipc::ex::toString(sample.get_kind()),
+                   sample.get_keyexpr().as_string_view(),
+                   (ts ? grape::ipc::ex::toString(ts.value()) : "--no timestamp--"),
+                   sample.get_payload().as_string());
+    };
 
-    const auto sub_opts = ze_querying_subscriber_options_default();
-    z_owned_closure_sample_t callback = z_closure(dataHandler);
-    auto sub = ze_declare_querying_subscriber(session.loan(), z_keyexpr(key.c_str()),
-                                              z_move(callback), &sub_opts);
-    if (!z_check(sub)) {
-      std::println("Unable to declare querying subscriber.");
-      return EXIT_FAILURE;
-    }
+    auto sub = session.declare_querying_subscriber(key, cb, zenoh::closures::none);
 
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
     while (not grape::conio::kbhit()) {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
-
-    z_drop(z_move(sub));
 
     return EXIT_SUCCESS;
   } catch (...) {

@@ -70,8 +70,8 @@ consteval auto extract_and_allocate_enumerator_name() -> std::string_view {
 }
 
 template <int N, int... Seq>
-constexpr auto
-add(std::integer_sequence<int, Seq...> /*unused*/) -> std::integer_sequence<int, N + Seq...> {
+constexpr auto add(std::integer_sequence<int, Seq...> /*unused*/)
+    -> std::integer_sequence<int, N + Seq...> {
   return {};
 }
 

@@ -5,11 +5,9 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
-#include <print>
 
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Example program that performs roundtrip time measurements. The ping example performs a put
@@ -44,8 +42,8 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto num_pings = grape::ipc::ex::getOptionOrThrow<size_t>(args, "pings");
-    const auto size = grape::ipc::ex::getOptionOrThrow<size_t>(args, "size");
+    const auto num_pings = args.getOptionOrThrow<size_t>("pings");
+    const auto size = args.getOptionOrThrow<size_t>("size");
 
     std::println("Payload size: {}", size);
     std::println("Number of pings: {}", num_pings);

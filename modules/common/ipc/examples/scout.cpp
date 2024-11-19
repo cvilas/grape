@@ -3,10 +3,9 @@
 //=================================================================================================
 
 #include <atomic>
-#include <print>
 
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // The process of discovering Zenoh applications is called scouting. For a discussion of how
@@ -18,14 +17,20 @@
 //=================================================================================================
 
 //=================================================================================================
-auto main() -> int {
+auto main(int argc, const char* argv[]) -> int {
   try {
+    const auto maybe_args =
+        grape::conio::ProgramDescription("Discovers Zenoh applications").parse(argc, argv);
+    if (not maybe_args) {
+      grape::panic<grape::Exception>(toString(maybe_args.error()));
+    }
+
     std::atomic_flag done_flag = ATOMIC_FLAG_INIT;
 
     const auto on_hello = [](const zenoh::Hello& hello) {
       std::println("Hello from pid: {}, WhatAmI: {}, locators: {}",
-                   grape::ipc::toString(hello.get_id()), grape::ipc::toString(hello.get_whatami()),
-                   hello.get_locators());
+                   grape::ipc::ex::toString(hello.get_id()),
+                   grape::ipc::ex::toString(hello.get_whatami()), hello.get_locators());
     };
 
     const auto on_good_bye = [&done_flag]() {

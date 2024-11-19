@@ -47,6 +47,5 @@
   - Can be used on different data links (eg: serial, bluetooth). IP is not required.
   - Indications of use in autonomous robots
   - Embeddable, even in microcontrollers
-  - Very new and under active development, sponsored by Eclipse foundation. No releases yet. 
-  - Huge ambitions for the project, with plugins for variety of messaging protocols such as DDS, MQTT, etc. This could be a good thing for building large, scalable, interoperable applications. But it could also get bloated over time, just like FastDDS. 
-
+  - Very new and under active development, sponsored by Eclipse foundation.
+  - Huge ambitions for the project, with plugins for variety of messaging protocols such as DDS, MQTT, etc. Also provides [ros2 RMW](https://github.com/ros2/rmw_zenoh). This could be a good thing for building large, scalable, interoperable applications. But it could also get bloated over time.

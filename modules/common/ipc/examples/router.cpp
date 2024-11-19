@@ -4,17 +4,14 @@
 
 #include <atomic>
 #include <csignal>
-#include <print>
+#include <string>
 
-#include "examples_utils.h"
 #include "grape/conio/program_options.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
-// Example program creates a Zenoh router. Routers route data between 'clients' and local
-// subnetworks of 'peers'. For a description of routers, see
-// https://zenoh.io/docs/getting-started/deployment/
+// Creates a Zenoh router. Routers route data between 'clients' and local subnetworks of 'peers'.
+// For a description of routers, see https://zenoh.io/docs/getting-started/deployment/
 //
 // Typical usage:
 // router [--port=1234]
@@ -41,20 +38,20 @@ auto main(int argc, const char* argv[]) -> int {
     std::ignore = signal(SIGTERM, onSignal);
 
     static constexpr auto DEFAULT_PORT = 7447;
-    static constexpr auto DEFAULT_ADDRESS = "[::]";  //!< all available interfaces
+    static constexpr auto DEFAULT_ADDRESS = "[::]";  //!< use all available interfaces
 
-    const auto args_opt =
+    const auto maybe_args =
         grape::conio::ProgramDescription("Zenoh router")
-            .declareOption<int>("port", "Port on which the service is available", DEFAULT_PORT)
+            .declareOption<std::uint16_t>("port", "IP port for the service", DEFAULT_PORT)
             .declareOption<std::string>("address", "IP address of the service", DEFAULT_ADDRESS)
             .parse(argc, argv);
 
-    if (not args_opt.has_value()) {
-      grape::panic<grape::Exception>(toString(args_opt.error()));
+    if (not maybe_args.has_value()) {
+      grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
-    const auto& args = args_opt.value();
-    const auto port = grape::ipc::ex::getOptionOrThrow<int>(args, "port");
-    const auto addr = grape::ipc::ex::getOptionOrThrow<std::string>(args, "address");
+    const auto& args = maybe_args.value();
+    const auto port = args.getOptionOrThrow<std::uint16_t>("port");
+    const auto addr = args.getOptionOrThrow<std::string>("address");
 
     // configure as router
     auto config = zenoh::Config::create_default();
@@ -66,7 +63,7 @@ auto main(int argc, const char* argv[]) -> int {
     // start session
     auto session = zenoh::Session::open(std::move(config));
     std::println("Router listening on {}", listen_on);
-    std::println("PID: {}", grape::ipc::toString(session.get_zid()));
+    std::println("PID: {}", grape::ipc::ex::toString(session.get_zid()));
 
     std::println("Press ctrl-c to exit");
     s_exit.wait(false);
