@@ -2,11 +2,8 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
-
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Example program that publishes a sample with Samplekind::Delete. Such messages can be
@@ -38,7 +35,7 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto key = args.getOptionOrThrow<std::string>("key");
 
     std::println("Opening session...");
     auto config = zenoh::Config::create_default();

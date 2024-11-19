@@ -3,12 +3,10 @@
 //=================================================================================================
 
 #include <map>
-#include <print>
 #include <thread>
 
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // The Attachment feature enables users to attach metadata to the payload. The data and metadata
@@ -41,8 +39,8 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
+    const auto key = args.getOptionOrThrow<std::string>("key");
+    const auto value = args.getOptionOrThrow<std::string>("value");
 
     auto config = zenoh::Config::create_default();
 

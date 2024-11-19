@@ -2,13 +2,12 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
 #include <thread>
 
-#include "examples_utils.h"
+
+#include "zenoh_utils.h"
 #include "grape/conio/conio.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
 
 //=================================================================================================
 // Example program demonstrates a subscriber that is notified of last put/delete by polling
@@ -38,16 +37,15 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto key = args.getOptionOrThrow<std::string>("key");
 
     std::println("Opening session...");
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
 
     const auto cb = [](const zenoh::Sample& sample) {
-      std::println(">> Received {} ('{}' : '{}')", grape::ipc::toString(sample.get_kind()),
-                   sample.get_keyexpr().as_string_view(),
-                   sample.get_payload().as_string());
+      std::println(">> Received {} ('{}' : '{}')", grape::ipc::ex::toString(sample.get_kind()),
+                   sample.get_keyexpr().as_string_view(), sample.get_payload().as_string());
     };
 
     std::println("Declaring PullSubscriber on '{}'...", key);

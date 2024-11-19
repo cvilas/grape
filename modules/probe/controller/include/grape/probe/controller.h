@@ -143,8 +143,8 @@ auto PinConfig::pin(const std::string& name, const T& var, Signal::Role role) ->
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto PinConfig::pin(const std::string& name, std::span<const T> var,
-                    Signal::Role role) -> PinConfig& {
+auto PinConfig::pin(const std::string& name, std::span<const T> var, Signal::Role role)
+    -> PinConfig& {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto addr = reinterpret_cast<std::uintptr_t>(var.data());
 

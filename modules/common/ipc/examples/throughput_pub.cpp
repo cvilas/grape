@@ -2,11 +2,8 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
-
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Publishing end of the pair of example programs to measure throughput between a publisher and a
@@ -37,7 +34,7 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto payload_size = grape::ipc::ex::getOptionOrThrow<size_t>(args, "size");
+    const auto payload_size = args.getOptionOrThrow<size_t>("size");
     const auto value = std::vector<uint8_t>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 

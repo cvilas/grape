@@ -27,7 +27,7 @@
   - Requirements analysis
   - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
-- Fix zenoh examples: query_sub, pull, shm pub/sub
+- Fix zenoh examples: pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 - PoC IPC experiments
   - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.

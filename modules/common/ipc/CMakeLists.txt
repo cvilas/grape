@@ -11,7 +11,17 @@ find_package(zenohc ${ZENOHC_VERSION_REQUIRED} REQUIRED)
 find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} REQUIRED)
 
 # library sources
-set(SOURCES include/grape/ipc/ipc.h README.md)
+set(SOURCES 
+  src/ipc_zenoh.h
+  src/session.cpp
+  src/publisher.cpp
+  src/subscriber.cpp
+  include/grape/ipc/common.h
+  include/grape/ipc/session.h
+  include/grape/ipc/topic.h
+  include/grape/ipc/publisher.h
+  include/grape/ipc/subscriber.h 
+  README.md)
 
 # library target
 define_module_library(

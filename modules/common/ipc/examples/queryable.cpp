@@ -2,12 +2,11 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
 #include <thread>
 
 #include "grape/conio/conio.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Example program that declares a queryable. The queryable will be triggered on remote calls on the

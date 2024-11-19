@@ -4,12 +4,10 @@
 
 #include <atomic>
 #include <csignal>
-#include <print>
 #include <thread>
 
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Example program that creates a 'client' publisher. Clients connect to other peers and clients
@@ -59,9 +57,9 @@ auto main(int argc, const char* argv[]) -> int {
     }
     const auto& args = args_opt.value();
 
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
-    const auto router = grape::ipc::ex::getOptionOrThrow<std::string>(args, "router");
+    const auto key = args.getOptionOrThrow<std::string>("key");
+    const auto value = args.getOptionOrThrow<std::string>("value");
+    const auto router = args.getOptionOrThrow<std::string>("router");
 
     auto config = zenoh::Config::create_default();
 

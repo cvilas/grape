@@ -4,8 +4,9 @@
 
 #include <print>
 
+#include "grape/conio/program_options.h"
 #include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/ipc/session.h"
 
 //=================================================================================================
 // Example program gets unique IDs of endpoints the Zenoh session knows about.
@@ -14,26 +15,31 @@
 //=================================================================================================
 
 //=================================================================================================
-auto main() -> int {
+auto main(int argc, const char* argv[]) -> int {
   try {
-    auto config = zenoh::Config::create_default();
+    const auto maybe_args = grape::conio::ProgramDescription(
+                                "Prints unique IDs of all endpoints this session is aware of")
+                                .parse(argc, argv);
+    if (not maybe_args) {
+      grape::panic<grape::Exception>(toString(maybe_args.error()));
+    }
     std::println("Opening session...");
-    auto session = zenoh::Session::open(std::move(config));
+    auto session = grape::ipc::Session({});
 
-    const auto print_id = [](const zenoh::Id& id) {
+    const auto print_id = [](const grape::ipc::UUID& id) {
       std::println("\t{}", grape::ipc::toString(id));
     };
     std::println("Own id:");
-    print_id(session.get_zid());
+    print_id(session.id());
 
     std::println("Router ids:");
-    for (const auto zid : session.get_routers_z_id()) {
-      print_id(zid);
+    for (const auto id : session.routers()) {
+      print_id(id);
     }
 
     std::println("Peer ids:");
-    for (const auto zid : session.get_peers_z_id()) {
-      print_id(zid);
+    for (const auto id : session.peers()) {
+      print_id(id);
     }
     return EXIT_SUCCESS;
   } catch (...) {

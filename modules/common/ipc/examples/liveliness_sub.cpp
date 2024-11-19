@@ -2,12 +2,10 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
-#include <print>
 #include <thread>
 
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Demonstrative example that subscribes to liveliness changes on tokens that match a given key
@@ -47,7 +45,7 @@ auto main(int argc, const char* argv[]) -> int {
     auto config = zenoh::Config::create_default();
     auto session = zenoh::Session::open(std::move(config));
 
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
+    const auto key = args.getOptionOrThrow<std::string>("key");
 
     const auto cb = [](const zenoh::Sample& sample) {
       switch (sample.get_kind()) {

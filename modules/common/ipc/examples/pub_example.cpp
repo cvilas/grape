@@ -5,9 +5,8 @@
 #include <print>
 #include <thread>
 
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "grape/ipc/session.h"
 
 //=================================================================================================
 // Example program creates a publisher and periodically writes a value on the specified key. The
@@ -39,28 +38,29 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    const auto value = grape::ipc::ex::getOptionOrThrow<std::string>(args, "value");
+    const auto key = args.getOptionOrThrow<std::string>("key");
+    const auto value = args.getOptionOrThrow<std::string>("value");
 
     std::println("Opening session...");
-    auto config = zenoh::Config::create_default();
-    auto session = zenoh::Session::open(std::move(config));
+    auto session = grape::ipc::Session({});
 
     std::println("Declaring Publisher on '{}'", key);
-    auto pub = session.declare_publisher(key);
-
-    // attach a callback to detect if any listeners exist
-    pub.declare_background_matching_listener(
-        [](const zenoh::Publisher::MatchingStatus& s) {
-          std::println("Subscribers {}", s.matching ? "listening" : "not listening");
-        },
-        zenoh::closures::none);
+    // auto pub = session.declare_publisher(key);
+    auto pub = session.createPublisher({ .key = key });
+    /*
+        // attach a callback to detect if any listeners exist
+        pub.declare_background_matching_listener(
+            [](const zenoh::Publisher::MatchingStatus& s) {
+              std::println("Subscribers {}", s.matching ? "listening" : "not listening");
+            },
+            zenoh::closures::none);*/
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
     uint64_t idx = 0;
     while (true) {
       const auto msg = std::format("[{}] {}", idx++, value);
       std::println("Publishing Data ('{} : {})", key, msg);
-      pub.put(zenoh::ext::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
+      // pub.put(zenoh::ext::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
+      pub.publish({ msg.data(), msg.size() });
       std::this_thread::sleep_for(LOOP_WAIT);
     }
     return EXIT_SUCCESS;

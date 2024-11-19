@@ -19,21 +19,43 @@ Intra-process, inter-process and inter-host communication
 - Scalable to 1000s of endpoints on WiFi without hidden costs (meta data traffic)
 - Provides mechanisms to track liveliness of endpoints
 - Provides mechanisms to isolate different systems on the same host or network
-- Supports multiple languages: atleast C++ and Python.
+- Supports interoperability across C++ and Python.
 
 ## Zenoh
 
-Zenoh was chosen after considering a [few options](./docs/ipc_options.md).
-
-[Zenoh](https://zenoh.io/docs/overview/what-is-zenoh/) is a new protocol under active development that meets all the above requirements with less hidden overheads compared to protocols such as DDS. Capabilities of Zenoh are best explained with examples. So head [over there](./examples/README.md).
-
-Zenoh API and data structures are directly used in grape and not abstracted away. This is because:
-
-- There are no good alternatives to Zenoh at the moment. The IPC backend is unlikely to change soon. Therefore, there are no advantages to abstracting away the interface and hiding the implementation details.
-- Zenoh is still new and evolving. API is likely to change, and new features are likely to be implemented. Providing an abstraction layer at this time would add maintenance and development overheads to keep it up to date.
-
-The decision to provide an abstract interface is deferred until API complexity or feature creep necessitates it.
+[Zenoh](https://zenoh.io/docs/overview/what-is-zenoh/) was chosen as the initial candidate for IPC after considering a [few options](./docs/ipc_options.md). See [examples](./examples/README.md) for usage patterns and capabilities.
 
 ### Copyright
 
 Use of Zenoh within this project satisfies the terms and conditions of Apache License version 2.0 under which it is distributed.
+
+## TODO
+
+- :done: Phase 1: Basic implementation of Session, Publisher, Subscriber
+- Phase 2
+  - Implement `IPAddress::fromString()`
+  - Move `IPAddress` and associated functions to utils
+  - Implement client pub and sub
+  - Implement query pub and sub
+  - Implement ping, pong
+  - Implement throughput pub and sub
+  - Implement explicit error handling (don't leave it to default)
+  - Avoid copy in createDataCallback() by using SpliceIterator
+  - Raise MR
+- Phase 3
+  - Implement liveliness
+  - Implement PutOptions and subscriber Sample fields
+    - Support attachments
+    - Support timestamping
+    - Support priority
+    - Support congestion control
+    - Support reliability
+    - Support for sample kind (put/delete)
+  - Understand the point of on_drop callback in subscriber and use it if necessary
+  - Implement shared memory
+  - Implement caching
+  - Raise MR
+- Phase 4
+  - Documentation cleanup
+  - Unit tests
+  - Lua utilities: hostname

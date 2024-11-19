@@ -4,11 +4,9 @@
 
 #include <atomic>
 #include <csignal>
-#include <print>
 
-#include "examples_utils.h"
-#include "grape/exception.h"
-#include "grape/ipc/ipc.h"
+#include "grape/conio/program_options.h"
+#include "zenoh_utils.h"
 
 //=================================================================================================
 // Example program that creates a 'client' subscriber. Clients connect to other peers and clients
@@ -48,15 +46,15 @@ auto main(int argc, const char* argv[]) -> int {
     const auto args_opt =
         grape::conio::ProgramDescription("Example subscriber operating in 'client' mode")
             .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
-            .declareOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER)
+            .declareOption<std::string>("router", "Router address and port", DEFAULT_ROUTER)
             .parse(argc, argv);
 
     if (not args_opt.has_value()) {
       grape::panic<grape::Exception>(toString(args_opt.error()));
     }
     const auto& args = args_opt.value();
-    const auto key = grape::ipc::ex::getOptionOrThrow<std::string>(args, "key");
-    const auto router = grape::ipc::ex::getOptionOrThrow<std::string>(args, "router");
+    const auto key = args.getOptionOrThrow<std::string>("key");
+    const auto router = args.getOptionOrThrow<std::string>("router");
 
     auto config = zenoh::Config::create_default();
 
@@ -73,8 +71,8 @@ auto main(int argc, const char* argv[]) -> int {
 
     const auto cb = [](const zenoh::Sample& sample) {
       const auto ts = sample.get_timestamp();
-      std::println(">> Received {} ([{}] '{}' : '{}')", grape::ipc::toString(sample.get_kind()),
-                   (ts ? grape::ipc::toString(ts.value()) : "--no timestamp--"),
+      std::println(">> Received {} ([{}] '{}' : '{}')", grape::ipc::ex::toString(sample.get_kind()),
+                   (ts ? grape::ipc::ex::toString(ts.value()) : "--no timestamp--"),
                    sample.get_keyexpr().as_string_view(), sample.get_payload().as_string());
     };
 
