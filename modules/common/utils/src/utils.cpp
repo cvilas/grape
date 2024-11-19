@@ -83,14 +83,7 @@ auto demangle(const char* mangled_name) -> std::string {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto getDataSearchPaths() -> const std::vector<std::filesystem::path>& {
-  /// Config/data file search order:
-  /// - User-specific application configuration: $HOME/.$APP_NAME/
-  /// - Host-specific application configuration: /etc/opt/$APP_NAME/
-  /// - Default application configuration: $APP_PATH/../share/$APP_NAME/
-  /// - User-specific GRAPE configuration: $HOME/.grape/
-  /// - Host-specific GRAPE configuration: /etc/opt/grape/
-  /// - Default GRAPE configuration: $GRAPE_INSTALL_PATH/share/grape/
+auto getSearchDirs() -> const std::vector<std::filesystem::path>& {
   static const auto paths = [] {
     const auto app_path = getProgramPath().parent_path();
     const auto app_name = getProgramPath().filename().string();

@@ -5,7 +5,7 @@
 declare_module(
   NAME ipc
   DEPENDS_ON_MODULES "base"
-  DEPENDS_ON_EXTERNAL_PROJECTS zenohcxx)
+  DEPENDS_ON_EXTERNAL_PROJECTS "zenohc;zenohcxx")
 
 find_package(zenohc ${ZENOHC_VERSION_REQUIRED} REQUIRED)
 find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} REQUIRED)

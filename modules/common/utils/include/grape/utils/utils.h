@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 namespace grape::utils {
 
@@ -40,9 +41,15 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 /// @return host name
 [[nodiscard]] auto getHostName() -> std::string;
 
-/// @return Ordered list of search paths for config & data files for an application. See inline
-/// documentation in the implementation of the function for the search order.
-[[nodiscard]] auto getDataSearchPaths() -> const std::vector<std::filesystem::path>&;
+/// @return Ordered list of search paths for supporting files (config, data) of an application.
+/// @note Config/data file search order:
+/// - User-specific application configuration: $HOME/.$APP_NAME/
+/// - Host-specific application configuration: /etc/opt/$APP_NAME/
+/// - Default application configuration: $APP_PATH/../share/$APP_NAME/
+/// - User-specific GRAPE configuration: $HOME/.grape/
+/// - Host-specific GRAPE configuration: /etc/opt/grape/
+/// - Default GRAPE configuration: $GRAPE_INSTALL_PATH/share/grape/
+[[nodiscard]] auto getSearchDirs() -> const std::vector<std::filesystem::path>&;
 
 /// @return user-readable name for specified type
 template <typename T>

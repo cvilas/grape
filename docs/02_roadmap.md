@@ -23,17 +23,16 @@
   
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 
-- Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
 - Generic plotting api
   - Requirements analysis
-  - Narrow down options: qt6, implot
+  - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
+- Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
 - Fix zenoh examples: query_sub, pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
-- Implement advanced streaming
-  - Choose backend for audio/video device handling and stream processing
-  - Implement AV streaming server and client
-- External deps: Replace git clone with direct download of tarballs
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
+- PoC IPC experiments
+  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 
 ## Phase 5 - Robotics core
 
@@ -43,8 +42,7 @@
   - [reflect-cpp](https://github.com/getml/reflect-cpp)
 - Shared memory
 - Single producer multiple consumer queue using externally specified memory (heap or shared memory)
-- Consider removing `MPSCQueue`. It's unused.
-- Rename `FIFOBuffer` to `MPSCQueue`
+- Consider removing `MPSCQueue`. It's unused. Rename `FIFOBuffer` to `MPSCQueue`
 - HW IO
   - CANopen
   - joystick
@@ -57,10 +55,6 @@
   - Matrix operations
 - Behaviour trees: Consider building from first principles
 - FSM: introspectable, visualise state transition graph using graphviz.
-- PoC IPC experiments
-  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 - Introduce [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
 - ROS2 interop
   - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
@@ -79,9 +73,10 @@
   - glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
 - HW accelerated 3D graphics
   - Design scene description format using our scripting engine
+    - Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scnegraph
   - Design scenegraph library using existing khronos libs
-    - Decision: Use Qt3D? See [scratch](https://github.com/cvilas/scratch)/3dvis/qt 
-  - Implement a basic scenegraph example and check performance in MacOS and Linux VM
+    - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
+    - Implement a basic scenegraph example and check performance in MacOS and Linux
 
 ## Phase 7 - Refactor
 
@@ -119,8 +114,14 @@
 - file cache
 - md5sum
 - factory using crtp (see scratch)
-- [ftxui](https://github.com/ArthurSonzogni/FTXUI) based terminal UI apps
-- Consider integrating mp_units library
+
+## Others
+
+- Implement advanced streaming
+  - Choose backend for audio/video device handling and stream processing
+  - Implement AV streaming server and client
+- External deps: Replace git clone with direct download of tarballs
+- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 
 ## Notes
 
