@@ -5,9 +5,13 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <print>
 
 #include "grape/conio/program_options.h"
-#include "zenoh_utils.h"
+#include "grape/exception.h"
+#include "grape/ipc/common.h"
+#include "grape/ipc/session.h"
+#include "ping_pong_constants.h"
 
 //=================================================================================================
 // Example program that performs roundtrip time measurements. The ping example performs a put
@@ -17,7 +21,7 @@
 //
 // Typical usage:
 // ```code
-// ping [--size=8 --pings=100]
+// ping [--size=8 --pings=100 --router="proto/address:port"]
 // ```
 //
 // Paired with example: pong.cpp
@@ -31,17 +35,17 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr size_t DEFAULT_PACKET_SIZE = 8;
     static constexpr size_t DEFAULT_NUM_PINGS = 100;
 
-    const auto args_opt =
+    const auto maybe_args =
         grape::conio::ProgramDescription("Measures roundtrip time with pong program")
-            .declareOption<size_t>("pings", "number of pings to attempt", DEFAULT_NUM_PINGS)
-            .declareOption<size_t>("size", "ping and pong payload size in bytes",
-                                   DEFAULT_PACKET_SIZE)
+            .declareOption<size_t>("pings", "Number of pings to attempt", DEFAULT_NUM_PINGS)
+            .declareOption<size_t>("size", "Payload size in bytes", DEFAULT_PACKET_SIZE)
+            .declareOption<std::string>("router", "Router locator", "none")
             .parse(argc, argv);
 
-    if (not args_opt.has_value()) {
-      grape::panic<grape::Exception>(toString(args_opt.error()));
+    if (not maybe_args.has_value()) {
+      grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
-    const auto& args = args_opt.value();
+    const auto& args = maybe_args.value();
     const auto num_pings = args.getOptionOrThrow<size_t>("pings");
     const auto size = args.getOptionOrThrow<size_t>("size");
 
@@ -49,34 +53,42 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Number of pings: {}", num_pings);
 
     // prepare session
-    auto config = zenoh::Config::create_default();
-    auto session = zenoh::Session::open(std::move(config));
+    auto config = grape::ipc::Session::Config{};
+    const auto router_str = args.getOptionOrThrow<std::string>("router");
+    if (router_str != "none") {
+      // If a router is specified, turn this into a client and connect to the router
+      config.mode = grape::ipc::Session::Mode::Client;
+      config.router = grape::ipc::Locator::fromString(router_str);
+      if (not config.router.has_value()) {
+        grape::panic<grape::Exception>(std::format("Failed to parse router '{}' ", router_str));
+      }
+      std::println("Router: '{}'", router_str);
+    }
+    auto session = grape::ipc::Session(config);
 
     // prepare publisher
-    static constexpr auto PING_KEY = "grape/ipc/example/zenoh/ping";
-    auto pub = session.declare_publisher(PING_KEY);
+    auto pub = session.createPublisher({ .key = grape::ipc::ex::ping::PING_TOPIC });
 
     std::mutex pong_mut;
     std::condition_variable pong_cond;
     bool pong_received = false;
 
     // prepare subscriber
-    static constexpr auto PONG_KEY = "grape/ipc/example/zenoh/pong";
-    const auto cb = [&pong_mut, &pong_cond, &pong_received](const zenoh::Sample& sample) {
-      std::print("Pong [{} bytes] ", sample.get_payload().size());
+    const auto cb = [&pong_mut, &pong_cond, &pong_received](std::span<const std::byte> bytes) {
+      std::print("Pong [{} bytes] ", bytes.size_bytes());
       const std::lock_guard lk(pong_mut);
       pong_received = true;
       pong_cond.notify_one();
     };
-    auto sub = session.declare_subscriber(PONG_KEY, cb, zenoh::closures::none);
+    auto sub = session.createSubscriber(grape::ipc::ex::ping::PONG_TOPIC, cb);
 
     // ping-pong
     static constexpr auto PONG_WAIT_TIMEOUT = std::chrono::milliseconds(10000);
-    const auto data = std::vector<uint8_t>(size);
+    const auto data = std::vector<char>(size);
     auto results = std::vector<std::chrono::high_resolution_clock::duration>(num_pings);
     for (size_t i = 0; i < num_pings; i++) {
       const auto ts_start = std::chrono::high_resolution_clock::now();
-      pub.put(data);
+      pub.publish(data);
       std::print("Ping ");
       std::unique_lock lk(pong_mut);
       if (pong_cond.wait_for(lk, PONG_WAIT_TIMEOUT, [&pong_received] { return pong_received; })) {

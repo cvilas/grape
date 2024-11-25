@@ -5,6 +5,7 @@
 #include <print>
 #include <thread>
 
+#include "basic_example_constants.h"
 #include "grape/conio/conio.h"
 #include "grape/conio/program_options.h"
 #include "grape/ipc/session.h"
@@ -14,17 +15,16 @@
 //
 // Typical usage:
 // ```bash
-// sub [--key="demo/**"]
+// basic_sub_example [--key="demo/**"]
 // ```
-// Paired with example: put.cpp, pub.cpp
+// Paired with example: basic_pub_example.cpp
 //
 // Derived from: https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_sub.cxx
 //=================================================================================================
 
 namespace {
 auto asString(std::span<const std::byte> bytes) -> std::string_view {
-  return { //
-           // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  return { // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
            reinterpret_cast<const char*>(bytes.data()),  //
            bytes.size_bytes()
   };
@@ -35,11 +35,9 @@ auto asString(std::span<const std::byte> bytes) -> std::string_view {
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
-
     const auto maybe_args =
         grape::conio::ProgramDescription("Subscriber listening for data on specified key")
-            .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
+            .declareOption<std::string>("key", "Key expression", grape::ipc::ex::DEFAULT_TOPIC)
             .parse(argc, argv);
 
     if (not maybe_args) {

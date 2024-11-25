@@ -17,32 +17,19 @@ TEST_CASE("Parses standard address strings to IPAddress", "[IPAddress]") {
     const auto ip = grape::utils::IPAddress::fromString("192.168.1.1");
     REQUIRE(ip.has_value());
     REQUIRE(ip->version == grape::utils::IPAddress::Version::IPv4);
-    REQUIRE(ip->bytes[0] == 192);
-    REQUIRE(ip->bytes[1] == 168);
-    REQUIRE(ip->bytes[2] == 1);
-    REQUIRE(ip->bytes[3] == 1);
+    const auto expected =
+        std::array<std::uint8_t, grape::utils::IPAddress::MAX_SEGMENTS>{ 192, 168, 1, 1 };
+    REQUIRE(ip->bytes == expected);
   }
 
   SECTION("Standard IPv6 address") {
     const auto ip = grape::utils::IPAddress::fromString("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
     REQUIRE(ip.has_value());
     REQUIRE(ip->version == grape::utils::IPAddress::Version::IPv6);
-    REQUIRE(ip->bytes[0] == 0x20);
-    REQUIRE(ip->bytes[1] == 0x01);
-    REQUIRE(ip->bytes[2] == 0x0d);
-    REQUIRE(ip->bytes[3] == 0xb8);
-    REQUIRE(ip->bytes[4] == 0x85);
-    REQUIRE(ip->bytes[5] == 0xa3);
-    REQUIRE(ip->bytes[6] == 0x00);
-    REQUIRE(ip->bytes[7] == 0x00);
-    REQUIRE(ip->bytes[8] == 0x00);
-    REQUIRE(ip->bytes[9] == 0x00);
-    REQUIRE(ip->bytes[10] == 0x8a);
-    REQUIRE(ip->bytes[11] == 0x2e);
-    REQUIRE(ip->bytes[12] == 0x03);
-    REQUIRE(ip->bytes[13] == 0x70);
-    REQUIRE(ip->bytes[14] == 0x73);
-    REQUIRE(ip->bytes[15] == 0x34);
+    const auto expected = std::array<std::uint8_t, grape::utils::IPAddress::MAX_SEGMENTS>{
+      0x20, 0x01, 0x0d, 0xb8, 0x85, 0xa3, 0x00, 0x00, 0x00, 0x00, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x34
+    };
+    REQUIRE(ip->bytes == expected);
   }
 }
 
@@ -52,22 +39,10 @@ TEST_CASE("Parses compressed IPv6 address strings to IPAddress", "[IPAddress]") 
     const auto ip = grape::utils::IPAddress::fromString("2001:db8::1234:5678");
     REQUIRE(ip.has_value());
     REQUIRE(ip->version == grape::utils::IPAddress::Version::IPv6);
-    REQUIRE(ip->bytes[0] == 0x20);
-    REQUIRE(ip->bytes[1] == 0x01);
-    REQUIRE(ip->bytes[2] == 0x0d);
-    REQUIRE(ip->bytes[3] == 0xb8);
-    REQUIRE(ip->bytes[4] == 0x00);
-    REQUIRE(ip->bytes[5] == 0x00);
-    REQUIRE(ip->bytes[6] == 0x00);
-    REQUIRE(ip->bytes[7] == 0x00);
-    REQUIRE(ip->bytes[8] == 0x00);
-    REQUIRE(ip->bytes[9] == 0x00);
-    REQUIRE(ip->bytes[10] == 0x00);
-    REQUIRE(ip->bytes[11] == 0x00);
-    REQUIRE(ip->bytes[12] == 0x12);
-    REQUIRE(ip->bytes[13] == 0x34);
-    REQUIRE(ip->bytes[14] == 0x56);
-    REQUIRE(ip->bytes[15] == 0x78);
+    const auto expected = std::array<std::uint8_t, grape::utils::IPAddress::MAX_SEGMENTS>{
+      0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78
+    };
+    REQUIRE(ip->bytes == expected);
   }
 
   SECTION("Compressed leading zeros") {
@@ -97,16 +72,6 @@ TEST_CASE("Parses compressed IPv6 address strings to IPAddress", "[IPAddress]") 
     REQUIRE(ip->version == grape::utils::IPAddress::Version::IPv6);
     REQUIRE(ip->bytes[0] == 0x20);
     REQUIRE(ip->bytes[1] == 0x01);
-    REQUIRE(ip->bytes[2] == 0x00);
-    REQUIRE(ip->bytes[3] == 0x00);
-    REQUIRE(ip->bytes[4] == 0x00);
-    REQUIRE(ip->bytes[5] == 0x00);
-    REQUIRE(ip->bytes[6] == 0x00);
-    REQUIRE(ip->bytes[7] == 0x00);
-    REQUIRE(ip->bytes[8] == 0x00);
-    REQUIRE(ip->bytes[9] == 0x00);
-    REQUIRE(ip->bytes[10] == 0x00);
-    REQUIRE(ip->bytes[11] == 0x00);
     REQUIRE(ip->bytes[12] == 0x12);
     REQUIRE(ip->bytes[13] == 0x34);
     REQUIRE(ip->bytes[14] == 0x56);

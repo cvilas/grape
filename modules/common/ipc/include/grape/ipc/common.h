@@ -9,7 +9,7 @@
 #include <cctype>
 #include <cstdint>
 #include <format>
-#include <numeric>
+#include <optional>
 #include <string>
 
 #include "grape/utils/enums.h"
@@ -18,7 +18,7 @@
 namespace grape::ipc {
 
 //=================================================================================================
-/// Defines attributes of a communication channel
+/// Defines attributes of a network connection endpoint
 struct [[nodiscard]] Locator {
   enum class Protocol { TCP, UDP };
   static constexpr auto DEFAULT_PORT = 7447;
@@ -26,6 +26,14 @@ struct [[nodiscard]] Locator {
   Protocol protocol{ Protocol::TCP };
   utils::IPAddress address{};
   std::uint16_t port{ DEFAULT_PORT };
+
+  /// Construct from string representation. String must be formatted as `protocol/address:port`.
+  /// Examples:
+  /// - ipv6 format: "tcp/[fe80::2145:12c5:9fc3:3c71]:7447"
+  /// - ipv4 format: "tcp/192.168.0.2:7447"
+  /// @param loc_str String specification of locator
+  /// @return Locator on success, nothing on parsing error
+  [[nodiscard]] static auto fromString(const std::string& loc_str) -> std::optional<Locator>;
 };
 
 //=================================================================================================
@@ -37,16 +45,23 @@ struct [[nodiscard]] UUID {
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const Locator& loc) -> std::string {
+  // ipv6 format: tcp/[fe80::2145:12c5:9fc3:3c71]:7447
+  // ipv4 format: tcp/192.168.0.2:7447
   auto proto_str = std::string(enums::enum_name(loc.protocol));
   std::ranges::transform(proto_str, proto_str.begin(), ::tolower);
-  return std::format("{}/{}:{}", proto_str, toString(loc.address), loc.port);
+  auto addr_str = toString(loc.address);
+  if (loc.address.version == utils::IPAddress::Version::IPv6) {
+    addr_str.insert(0, 1, '[');
+    addr_str.push_back(']');
+  }
+  return std::format("{}/{}:{}", proto_str, addr_str, loc.port);
 }
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const UUID& id) -> std::string {
-  return std::accumulate(
-      std::begin(id.bytes), std::end(id.bytes), std::string(),
-      [](const std::string& s, std::uint8_t v) { return std::format("{:02X}", v) + s; });
+  return std::ranges::fold_left(id.bytes, std::string(), [](const std::string& s, std::uint8_t v) {
+    return std::format("{:02X}", v) + s;
+  });
 }
 
 //-------------------------------------------------------------------------------------------------

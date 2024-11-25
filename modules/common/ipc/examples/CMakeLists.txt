@@ -22,25 +22,25 @@ define_module_example(
 
 define_module_example(
   NAME ping
-  SOURCES ping.cpp zenoh_utils.h
+  SOURCES ping.cpp ping_pong_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME pong
-  SOURCES pong.cpp zenoh_utils.h
+  SOURCES pong.cpp ping_pong_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME throughput_pub
-  SOURCES throughput_pub.cpp zenoh_utils.h
+  SOURCES throughput_pub.cpp throughput_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME throughput_sub
-  SOURCES throughput_sub.cpp zenoh_utils.h
+  SOURCES throughput_sub.cpp throughput_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
@@ -75,26 +75,14 @@ define_module_example(
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME put
-  SOURCES put.cpp zenoh_utils.h
+  NAME basic_pub_example
+  SOURCES basic_pub_example.cpp basic_example_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME pub_example
-  SOURCES pub_example.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME sub_example
-  SOURCES sub_example.cpp zenoh_utils.h
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS grape::conio)
-
-define_module_example(
-  NAME pub_delete
-  SOURCES pub_delete.cpp zenoh_utils.h
+  NAME basic_sub_example
+  SOURCES basic_sub_example.cpp basic_example_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
@@ -122,14 +110,14 @@ define_module_example(
 #  PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME pub_client
-  SOURCES pub_client.cpp zenoh_utils.h
+  NAME client_pub_example
+  SOURCES client_pub_example.cpp client_example_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME sub_client
-  SOURCES sub_client.cpp zenoh_utils.h
+  NAME client_sub_example
+  SOURCES client_sub_example.cpp client_example_constants.h
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 

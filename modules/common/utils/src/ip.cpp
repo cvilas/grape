@@ -39,7 +39,7 @@ auto getHostName() -> std::string {
 //-------------------------------------------------------------------------------------------------
 auto IPAddress::fromString(const std::string& ip_str) -> std::optional<IPAddress> {
   IPAddress addr;
-  const auto af = ((ip_str.find(':') == std::string::npos) ? AF_INET : AF_INET6);
+  const auto af = ((ip_str.find('.') == std::string::npos) ? AF_INET6 : AF_INET);
   addr.version = ((af == AF_INET) ? IPAddress::Version::IPv4 : IPAddress::Version::IPv6);
   const auto ret = inet_pton(af, ip_str.c_str(), addr.bytes.data());
   if (ret == 1) {

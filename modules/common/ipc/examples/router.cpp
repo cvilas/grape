@@ -7,6 +7,7 @@
 #include <string>
 
 #include "grape/conio/program_options.h"
+#include "grape/ipc/common.h"
 #include "zenoh_utils.h"
 
 //=================================================================================================
@@ -14,7 +15,7 @@
 // For a description of routers, see https://zenoh.io/docs/getting-started/deployment/
 //
 // Typical usage:
-// router [--port=1234]
+// router [--locator=proto/address:port]
 //
 // Paired with: sub_client, pub_client
 //=================================================================================================
@@ -37,32 +38,34 @@ auto main(int argc, const char* argv[]) -> int {
     std::ignore = signal(SIGINT, onSignal);
     std::ignore = signal(SIGTERM, onSignal);
 
-    static constexpr auto DEFAULT_PORT = 7447;
-    static constexpr auto DEFAULT_ADDRESS = "[::]";  //!< use all available interfaces
+    static constexpr auto DEFAULT_LOCATOR = "tcp/[::]:7447";
 
     const auto maybe_args =
         grape::conio::ProgramDescription("Zenoh router")
-            .declareOption<std::uint16_t>("port", "IP port for the service", DEFAULT_PORT)
-            .declareOption<std::string>("address", "IP address of the service", DEFAULT_ADDRESS)
+            .declareOption<std::string>("locator", "Server endpoint", DEFAULT_LOCATOR)
             .parse(argc, argv);
 
     if (not maybe_args.has_value()) {
       grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
     const auto& args = maybe_args.value();
-    const auto port = args.getOptionOrThrow<std::uint16_t>("port");
-    const auto addr = args.getOptionOrThrow<std::string>("address");
+
+    const auto locator_arg = args.getOptionOrThrow<std::string>("locator");
+    const auto maybe_locator = grape::ipc::Locator::fromString(locator_arg);
+    if (not maybe_locator.has_value()) {
+      grape::panic<grape::Exception>(std::format("Failed to parse locator '{}'", locator_arg));
+    }
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    const auto locator_str = std::format(R"(["{}"])", toString(maybe_locator.value()));
 
     // configure as router
     auto config = zenoh::Config::create_default();
     config.insert_json5(Z_CONFIG_MODE_KEY, R"("router")");
-
-    const auto listen_on = std::format(R"(["tcp/{}:{}"])", addr, port);
-    config.insert_json5(Z_CONFIG_LISTEN_KEY, listen_on);
+    config.insert_json5(Z_CONFIG_LISTEN_KEY, locator_str);
 
     // start session
     auto session = zenoh::Session::open(std::move(config));
-    std::println("Router listening on {}", listen_on);
+    std::println("Router listening on {}", locator_str);
     std::println("PID: {}", grape::ipc::ex::toString(session.get_zid()));
 
     std::println("Press ctrl-c to exit");

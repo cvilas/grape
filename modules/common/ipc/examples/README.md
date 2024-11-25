@@ -18,8 +18,8 @@
 
 ## pub/sub
 
-- `put`, `pub`, `pub_delete`: Demonstrates a couple of different ways to publish data values over keys. The `put` example shows how a session can directly put data on the bus without a publisher. The `delete` example shows how to notify subscribers to delete previously published data. Note that data encoding can be specified within `PublisherPutOptions` for every publish event, enabling publishers to post different data types over the same key. The subscribers receive encoding information with the data sample.
-- `sub`, `pull`: Demonstrates different ways to receive data from matched publishers. The receiver can either poll for the latest data (`pull`) or receive them as they become available (`sub`) via a callback.
+- `basic_pub_example`, `basic_sub_example`: Canonical basic publish-subscribe example
+- `pull`: Demonstrates another way to receive data from matched publishers. The receiver can poll for the latest data (`pull`) instead via a callback.
 - `pub_cache`, `query_sub`: Demonstrates a publisher with historical storage, and how a subscriber can retrieve that history of past publications on startup.
 - `attachment_pub`, `attachment_sub`: Demonstrates how to modify the publisher and subscriber to transport attachments or auxilliary payloads with the main data payload.
 

@@ -6,30 +6,26 @@
 #include <csignal>
 #include <print>
 
+#include "client_example_constants.h"
 #include "grape/conio/program_options.h"
-#include "grape/exception.h"
 #include "grape/ipc/session.h"
-#include "ping_pong_constants.h"
 
 //=================================================================================================
-// Example program that performs roundtrip time measurements. The ping example performs a put
-// operation on a key, waits for a reply from the pong example on a second key and measures the time
-// between the two. The pong application waits for samples on the first key expression and replies
-// by writing back the received data on the second key expression.
+// Example program that creates a 'client' subscriber. Clients connect to other peers and clients
+// via routers. For a description of clients and routers, see
+// https://zenoh.io/docs/getting-started/deployment/.
 //
 // Typical usage:
-// ```code
-// pong [--router="proto/address:port"]
+// ```bash
+// sub_client_example [--router="proto/address:port"]
 // ```
 //
-// Paired with example: ping.cpp
+// Paired with: pub_client.cpp, router.cpp
 //
-// Derived from https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_pong.cxx
 //=================================================================================================
 
 namespace {
 
-//-------------------------------------------------------------------------------------------------
 std::atomic_flag s_exit = false;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 void onSignal(int /*signum*/) {
@@ -37,29 +33,37 @@ void onSignal(int /*signum*/) {
   s_exit.notify_one();
 }
 
+auto asString(std::span<const std::byte> bytes) -> std::string_view {
+  return { // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+           reinterpret_cast<const char*>(bytes.data()),  //
+           bytes.size_bytes()
+  };
+};
+
 }  // namespace
 
-//-------------------------------------------------------------------------------------------------
+//=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
     std::ignore = signal(SIGINT, onSignal);
     std::ignore = signal(SIGTERM, onSignal);
 
-    const auto maybe_args = grape::conio::ProgramDescription("Responds to ping program")
-                                .declareOption<std::string>("router", "Router locator", "none")
-                                .parse(argc, argv);
+    const auto maybe_args =
+        grape::conio::ProgramDescription("Example subscriber operating in 'client' mode")
+            .declareOption<std::string>("router", "Router locator",
+                                        grape::ipc::ex::client::DEFAULT_ROUTER)
+            .parse(argc, argv);
 
     if (not maybe_args.has_value()) {
       grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
     const auto& args = maybe_args.value();
 
-    // prepare session
+    // configure as client to the specified router
     auto config = grape::ipc::Session::Config{};
+    config.mode = grape::ipc::Session::Mode::Client;
     const auto router_str = args.getOptionOrThrow<std::string>("router");
     if (router_str != "none") {
-      // If a router is specified, turn this into a client and connect to the router
-      config.mode = grape::ipc::Session::Mode::Client;
       config.router = grape::ipc::Locator::fromString(router_str);
       if (not config.router.has_value()) {
         grape::panic<grape::Exception>(std::format("Failed to parse router '{}' ", router_str));
@@ -67,18 +71,18 @@ auto main(int argc, const char* argv[]) -> int {
       std::println("Router: '{}'", router_str);
     }
     auto session = grape::ipc::Session(config);
-    auto pub = session.createPublisher({ .key = grape::ipc::ex::ping::PONG_TOPIC });
 
-    const auto cb = [&pub](const std::span<const std::byte> bytes) {
-      const auto payload_len = bytes.size_bytes();
-      pub.publish(bytes);
-      std::println("pong [{} bytes]", payload_len);
+    const auto message_callback = [](std::span<const std::byte> bytes) {
+      // Reinterpret message as string
+      std::println("{}", asString(bytes));
     };
 
-    auto sub = session.createSubscriber(grape::ipc::ex::ping::PING_TOPIC, cb);
+    auto subs = session.createSubscriber(grape::ipc::ex::client::TOPIC, message_callback);
+    std::println("Subscriber started on '{}'", grape::ipc::ex::client::TOPIC);
 
     std::println("Press ctrl-c to exit");
     s_exit.wait(false);
+
     return EXIT_SUCCESS;
   } catch (...) {
     grape::Exception::print();
