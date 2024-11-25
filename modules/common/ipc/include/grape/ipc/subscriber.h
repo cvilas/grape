@@ -28,7 +28,7 @@ public:
   ~Subscriber();
   Subscriber(const Subscriber&) = delete;
   auto operator=(const Subscriber&) = delete;
-  Subscriber(Subscriber&&) noexcept = delete;
+  Subscriber(Subscriber&&) noexcept = default;
   auto operator=(Subscriber&&) noexcept = delete;
 
 private:

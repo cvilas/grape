@@ -4,10 +4,16 @@
 
 #include <atomic>
 #include <csignal>
+#include <cstdint>
+#include <print>
 #include <thread>
 
+#include "client_example_constants.h"
 #include "grape/conio/program_options.h"
-#include "zenoh_utils.h"
+#include "grape/exception.h"
+#include "grape/ipc/common.h"
+#include "grape/ipc/session.h"
+#include "grape/utils/ip.h"
 
 //=================================================================================================
 // Example program that creates a 'client' publisher. Clients connect to other peers and clients
@@ -17,7 +23,7 @@
 //
 // Typical usage:
 // ```bash
-// pub_client [--key="topic_name" --value="string text" --router="ip:port"]
+// pub_client_example [--router="proto/address:port"]
 // ```
 //
 // Paired with: sub_client.cpp, router.cpp
@@ -41,49 +47,42 @@ auto main(int argc, const char* argv[]) -> int {
     std::ignore = signal(SIGINT, onSignal);
     std::ignore = signal(SIGTERM, onSignal);
 
-    static constexpr auto DEFAULT_KEY = "grape/ipc/example/zenoh/put";
-    static constexpr auto DEFAULT_VALUE = "Put from Zenoh C++!";
-    static constexpr auto DEFAULT_ROUTER = "localhost:7447";
+    static constexpr auto DEFAULT_MSG = "Hi from publishing client";
 
-    const auto args_opt =
+    const auto maybe_args =
         grape::conio::ProgramDescription("Example publisher operating in 'client' mode")
-            .declareOption<std::string>("key", "Key expression", DEFAULT_KEY)
-            .declareOption<std::string>("value", "Data to put on the key", DEFAULT_VALUE)
-            .declareOption<std::string>("router", "Router adress and port", DEFAULT_ROUTER)
+            .declareOption<std::string>("router", "Router locator",
+                                        grape::ipc::ex::client::DEFAULT_ROUTER)
             .parse(argc, argv);
 
-    if (not args_opt.has_value()) {
-      grape::panic<grape::Exception>(toString(args_opt.error()));
+    if (not maybe_args.has_value()) {
+      grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
-    const auto& args = args_opt.value();
+    const auto& args = maybe_args.value();
 
-    const auto key = args.getOptionOrThrow<std::string>("key");
-    const auto value = args.getOptionOrThrow<std::string>("value");
-    const auto router = args.getOptionOrThrow<std::string>("router");
+    // configure as client to the specified router
+    auto config = grape::ipc::Session::Config{};
+    config.mode = grape::ipc::Session::Mode::Client;
+    const auto router_str = args.getOptionOrThrow<std::string>("router");
+    if (router_str != "none") {
+      config.router = grape::ipc::Locator::fromString(router_str);
+      if (not config.router.has_value()) {
+        grape::panic<grape::Exception>(std::format("Failed to parse router '{}' ", router_str));
+      }
+      std::println("Router: '{}'", router_str);
+    }
+    auto session = grape::ipc::Session(config);
 
-    auto config = zenoh::Config::create_default();
-
-    // configure as client
-    config.insert_json5(Z_CONFIG_MODE_KEY, R"("client")");
-
-    // configure router to connect to.
-    const auto router_endpoint = std::format(R"(["tcp/{}"])", router);
-    config.insert_json5(Z_CONFIG_CONNECT_KEY, router_endpoint);
-
-    // open session and print some info
-    auto session = zenoh::Session::open(std::move(config));
-    std::println("Configured as client for router at {}", router_endpoint);
-
-    auto pub = session.declare_publisher(key);
-    std::println("Publisher created on '{}'", key);
+    auto pub = session.createPublisher({ .key = grape::ipc::ex::client::TOPIC });
+    std::println("Publisher created on '{}'", grape::ipc::ex::client::TOPIC);
 
     static constexpr auto LOOP_WAIT = std::chrono::seconds(1);
     uint64_t idx = 0;
     std::println("Press ctrl-c to exit");
     while (not s_exit) {
-      const auto msg = std::format("[{}] {}", idx++, value);
-      std::println("Publishing Data ('{} : {})", key, msg);
-      pub.put(zenoh::ext::serialize(msg), { .encoding = zenoh::Encoding("text/plain") });
+      const auto msg = std::format("[{}] {}", idx++, DEFAULT_MSG);
+      std::println("Publishing message: '{}'", msg);
+      pub.publish({ msg.data(), msg.size() });
       std::this_thread::sleep_for(LOOP_WAIT);
     }
 

@@ -22,19 +22,6 @@ namespace grape::ipc::ex {
 }
 
 //-------------------------------------------------------------------------------------------------
-[[nodiscard]] constexpr auto toString(const zenoh::WhatAmI& me) -> std::string_view {
-  switch (me) {
-    case zenoh::WhatAmI::Z_WHATAMI_ROUTER:
-      return "Router";
-    case zenoh::WhatAmI::Z_WHATAMI_PEER:
-      return "Peer";
-    case zenoh::WhatAmI::Z_WHATAMI_CLIENT:
-      return "Client";
-  }
-  return "";
-}
-
-//-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(zenoh::SampleKind kind) -> std::string_view {
   switch (kind) {
     case Z_SAMPLE_KIND_PUT:

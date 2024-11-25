@@ -4,7 +4,7 @@
 
 #include "grape/ipc/subscriber.h"
 
-#include "ipc_zenoh.h"
+#include "ipc_zenoh.h"  // should be included before zenoh headers
 
 namespace {}
 

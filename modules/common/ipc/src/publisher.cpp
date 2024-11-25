@@ -4,16 +4,24 @@
 
 #include "grape/ipc/publisher.h"
 
-#include "ipc_zenoh.h"
+#include "ipc_zenoh.h"  // should be included before zenoh headers
 
 namespace grape::ipc {
 //-------------------------------------------------------------------------------------------------
 Publisher::~Publisher() = default;
 
 //-------------------------------------------------------------------------------------------------
-void Publisher::publish(std::span<const char> bytes) {
-  const auto bytes_view = std::string_view(bytes.data(), bytes.size());
+void Publisher::publish(std::span<const std::byte> bytes) {
+  const auto bytes_view = std::string_view(
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+      reinterpret_cast<const char*>(bytes.data()),  //
+      bytes.size_bytes());
   impl_->put(bytes_view);
+}
+
+//-------------------------------------------------------------------------------------------------
+void Publisher::publish(std::span<const char> bytes) {
+  impl_->put(std::string_view{ bytes.data(), bytes.size() });
 }
 
 //-------------------------------------------------------------------------------------------------

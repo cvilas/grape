@@ -2,8 +2,11 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#include <print>
+
 #include "grape/conio/program_options.h"
-#include "zenoh_utils.h"
+#include "grape/ipc/session.h"
+#include "throughput_constants.h"
 
 //=================================================================================================
 // Publishing end of the pair of example programs to measure throughput between a publisher and a
@@ -11,7 +14,7 @@
 //
 // Typical usage:
 // ```code
-// throughput_pub [--size=8]
+// throughput_pub [--size=8 --router="proto/address:port"]
 // ```
 //
 // Paired with example: throughput_sub.cpp
@@ -24,30 +27,40 @@
 auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_PAYLOAD_SIZE = 8;
-    static constexpr uint8_t DEFAULT_PAYLOAD_FILL = 1;
+    static constexpr char DEFAULT_PAYLOAD_FILL{ 0x01 };
 
-    const auto args_opt =
+    const auto maybe_args =
         grape::conio::ProgramDescription("Publisher end of throughput measurement example")
-            .declareOption<size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE)
+            .declareOption<std::size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE)
+            .declareOption<std::string>("router", "Router locator", "none")
             .parse(argc, argv);
-    if (not args_opt.has_value()) {
-      grape::panic<grape::Exception>(toString(args_opt.error()));
+    if (not maybe_args.has_value()) {
+      grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
-    const auto& args = args_opt.value();
+    const auto& args = maybe_args.value();
     const auto payload_size = args.getOptionOrThrow<size_t>("size");
-    const auto value = std::vector<uint8_t>(payload_size, DEFAULT_PAYLOAD_FILL);
+    const auto value = std::vector<char>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 
-    auto config = zenoh::Config::create_default();
-    auto session = zenoh::Session::open(std::move(config));
+    // prepare session
+    auto config = grape::ipc::Session::Config{};
+    const auto router_str = args.getOptionOrThrow<std::string>("router");
+    if (router_str != "none") {
+      // If a router is specified, turn this into a client and connect to the router
+      config.mode = grape::ipc::Session::Mode::Client;
+      config.router = grape::ipc::Locator::fromString(router_str);
+      if (not config.router.has_value()) {
+        grape::panic<grape::Exception>(std::format("Failed to parse router '{}' ", router_str));
+      }
+      std::println("Router: '{}'", router_str);
+    }
+    auto session = grape::ipc::Session(config);
 
-    static constexpr auto TOPIC = "grape/ipc/example/zenoh/throughput";
-    auto pub =
-        session.declare_publisher(TOPIC, { .congestion_control = Z_CONGESTION_CONTROL_BLOCK });
+    auto pub = session.createPublisher({ .key = grape::ipc::ex::throughput::TOPIC });
 
     std::println("Press CTRL-C to quit");
     while (true) {
-      pub.put(value);
+      pub.publish(value);
     }
     return EXIT_SUCCESS;
   } catch (...) {

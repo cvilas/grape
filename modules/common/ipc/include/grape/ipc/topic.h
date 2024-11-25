@@ -4,18 +4,13 @@
 
 #pragma once
 
-#include <cstdint>
 #include <string>
 
 namespace grape::ipc {
 
 //-------------------------------------------------------------------------------------------------
-enum class QoS : std::uint8_t { BestEffort, Reliable };
-
-//-------------------------------------------------------------------------------------------------
 struct Topic {
   std::string key{};
-  QoS qos{ QoS::BestEffort };
 };
 
 }  // namespace grape::ipc

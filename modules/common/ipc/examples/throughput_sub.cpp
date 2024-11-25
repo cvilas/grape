@@ -4,15 +4,23 @@
 
 #include <chrono>
 #include <cmath>
+#include <print>
 #include <thread>
 
 #include "grape/conio/conio.h"
 #include "grape/conio/program_options.h"
-#include "zenoh_utils.h"
+#include "grape/exception.h"
+#include "grape/ipc/session.h"
+#include "throughput_constants.h"
 
 //=================================================================================================
 // Subscribing end of the pair of example programs to measure throughput between a publisher and a
 // subscriber.
+//
+// Typical usage:
+// ```code
+// throughput_sub [--router="proto/address:port"]
+// ```
 //
 // Paired with example: throughput_pub.cpp
 //
@@ -44,18 +52,37 @@ void Statistics::print() const {
 }  // namespace
 
 //=================================================================================================
-auto main() -> int {
+auto main(int argc, const char* argv[]) -> int {
   try {
-    auto config = zenoh::Config::create_default();
-    auto session = zenoh::Session::open(std::move(config));
+    const auto maybe_args =
+        grape::conio::ProgramDescription("Measures throughput from publisher example")
+            .declareOption<std::string>("router", "Router locator", "none")
+            .parse(argc, argv);
+    if (not maybe_args.has_value()) {
+      grape::panic<grape::Exception>(toString(maybe_args.error()));
+    }
+    const auto& args = maybe_args.value();
+
+    // prepare session
+    auto config = grape::ipc::Session::Config{};
+    const auto router_str = args.getOptionOrThrow<std::string>("router");
+    if (router_str != "none") {
+      // If a router is specified, turn this into a client and connect to the router
+      config.mode = grape::ipc::Session::Mode::Client;
+      config.router = grape::ipc::Locator::fromString(router_str);
+      if (not config.router.has_value()) {
+        grape::panic<grape::Exception>(std::format("Failed to parse router '{}' ", router_str));
+      }
+      std::println("Router: '{}'", router_str);
+    }
+    auto session = grape::ipc::Session(config);
 
     Statistics stats;
 
-    static constexpr auto TOPIC = "grape/ipc/example/zenoh/throughput";
-    const auto cb = [&stats](const zenoh::Sample& sample) {
+    const auto cb = [&stats](std::span<const std::byte> sample) {
       static constexpr std::array<char, 4> PROGRESS{ '|', '/', '-', '\\' };
       std::print("\r[{}]", PROGRESS.at(stats.msg_count % 4));
-      stats.total_bytes += sample.get_payload().size();
+      stats.total_bytes += sample.size_bytes();
       if (stats.msg_count == 0) {
         stats.start = std::chrono::high_resolution_clock::now();
         stats.msg_count++;
@@ -68,7 +95,7 @@ auto main() -> int {
       }
     };
 
-    auto sub = session.declare_subscriber(TOPIC, cb, zenoh::closures::none);
+    auto sub = session.createSubscriber(grape::ipc::ex::throughput::TOPIC, cb);
 
     std::println("Press any key to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);

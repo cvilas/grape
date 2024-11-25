@@ -12,6 +12,7 @@ find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} REQUIRED)
 
 # library sources
 set(SOURCES 
+  src/common.cpp
   src/ipc_zenoh.h
   src/session.cpp
   src/publisher.cpp

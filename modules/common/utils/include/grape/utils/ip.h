@@ -19,6 +19,11 @@ struct [[nodiscard]] IPAddress {
   Version version{ Version::IPv4 };
   std::array<std::uint8_t, MAX_SEGMENTS> bytes{};
 
+  /// Construct from string representation. String must be formatted as follows:
+  /// - ipv6 format example: "fe80:2145:12c5:9fc3:3c71"
+  /// - ipv4 format example: "192.168.0.2"
+  /// @param ip_str String specification of IP address
+  /// @return IP address on success, nothing on parsing error
   [[nodiscard]] static auto fromString(const std::string& ip_str) -> std::optional<IPAddress>;
 };
 

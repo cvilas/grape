@@ -16,6 +16,23 @@
 // https://github.com/eclipse-zenoh/zenoh-cpp/blob/main/examples/universal/z_scout.cxx
 //=================================================================================================
 
+namespace {
+
+//-------------------------------------------------------------------------------------------------
+[[nodiscard]] constexpr auto toString(const zenoh::WhatAmI& me) -> std::string_view {
+  switch (me) {
+    case zenoh::WhatAmI::Z_WHATAMI_ROUTER:
+      return "Router";
+    case zenoh::WhatAmI::Z_WHATAMI_PEER:
+      return "Peer";
+    case zenoh::WhatAmI::Z_WHATAMI_CLIENT:
+      return "Client";
+  }
+  return "";
+}
+
+}  // namespace
+
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
@@ -29,8 +46,8 @@ auto main(int argc, const char* argv[]) -> int {
 
     const auto on_hello = [](const zenoh::Hello& hello) {
       std::println("Hello from pid: {}, WhatAmI: {}, locators: {}",
-                   grape::ipc::ex::toString(hello.get_id()),
-                   grape::ipc::ex::toString(hello.get_whatami()), hello.get_locators());
+                   grape::ipc::ex::toString(hello.get_id()), toString(hello.get_whatami()),
+                   hello.get_locators());
     };
 
     const auto on_good_bye = [&done_flag]() {
