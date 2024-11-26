@@ -4,6 +4,6 @@
 
 define_module_test(
   NAME tests
-  SOURCES utils_tests.cpp enum_tests.cpp
+  SOURCES utils_tests.cpp enum_tests.cpp ip_tests.cpp
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS "")

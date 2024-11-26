@@ -13,18 +13,9 @@
 #include <string>
 
 #include "grape/utils/enums.h"
+#include "grape/utils/ip.h"
 
 namespace grape::ipc {
-
-//=================================================================================================
-struct IPAddress {
-  enum class Version { IPv4, IPv6 };
-  static constexpr auto MAX_SEGMENTS = 16u;
-
-  Version version{ Version::IPv4 };
-  std::array<std::uint8_t, MAX_SEGMENTS> segments;
-  [[nodiscard]] static auto fromString(std::string_view ip_str) -> IPAddress;
-};
 
 //=================================================================================================
 /// Defines attributes of a communication channel
@@ -33,7 +24,7 @@ struct [[nodiscard]] Locator {
   static constexpr auto DEFAULT_PORT = 7447;
 
   Protocol protocol{ Protocol::TCP };
-  IPAddress address{};
+  utils::IPAddress address{};
   std::uint16_t port{ DEFAULT_PORT };
 };
 
@@ -43,30 +34,6 @@ struct [[nodiscard]] UUID {
   static constexpr auto LENGTH = 16u;
   std::array<std::uint8_t, LENGTH> bytes;
 };
-
-//-------------------------------------------------------------------------------------------------
-inline auto IPAddress::fromString(std::string_view ip_str) -> IPAddress {
-  (void)ip_str;
-  // resolve whether it is ipv4 or ipv6
-  // if ipv6, support also compressed ipv6 notation
-  return {};
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] constexpr auto toString(const IPAddress& addr) -> std::string {
-  if (addr.version == IPAddress::Version::IPv4) {
-    return std::format("{}.{}.{}.{}", addr.segments.at(0), addr.segments.at(1), addr.segments.at(2),
-                       addr.segments.at(3));
-  }
-  std::string result;
-  for (auto i = 0u; i < IPAddress::MAX_SEGMENTS; i += 2u) {
-    if (i > 0) {
-      result += ':';
-    }
-    result += std::format("{:02x}{:02x}", addr.segments.at(i), addr.segments.at(i + 1));
-  }
-  return result;
-}
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const Locator& loc) -> std::string {

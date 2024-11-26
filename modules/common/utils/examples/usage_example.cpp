@@ -4,6 +4,7 @@
 
 #include <print>
 
+#include "grape/utils/ip.h"
 #include "grape/utils/utils.h"
 
 //=================================================================================================
