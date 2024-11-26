@@ -38,9 +38,6 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 /// @return Full path to current user's home directory
 [[nodiscard]] auto getUserHomePath() -> std::filesystem::path;
 
-/// @return host name
-[[nodiscard]] auto getHostName() -> std::string;
-
 /// @return Ordered list of search paths for supporting files (config, data) of an application.
 /// @note Config/data file search order:
 /// - User-specific application configuration: $HOME/.$APP_NAME/

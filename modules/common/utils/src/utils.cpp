@@ -18,14 +18,6 @@
 #include <mach-o/dyld.h>
 #endif
 
-#ifndef HOST_NAME_MAX
-#ifdef _POSIX_HOST_NAME_MAX
-#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
-#else
-#define HOST_NAME_MAX 255
-#endif
-#endif
-
 namespace {
 
 //-------------------------------------------------------------------------------------------------
@@ -38,13 +30,6 @@ auto readProgramPath() -> std::filesystem::path {
   std::ignore = readlink("/proc/self/exe", program_path.data(), PATH_MAX - 1);
 #endif
   return { program_path.data() };
-}
-
-//-------------------------------------------------------------------------------------------------
-auto readHostName() -> std::string {
-  auto name = std::array<char, HOST_NAME_MAX>{};
-  std::ignore = gethostname(name.data(), name.size());
-  return { name.data() };
 }
 
 }  // namespace
@@ -63,13 +48,6 @@ auto getUserHomePath() -> std::filesystem::path {
   // NOLINTNEXTLINE(concurrency-mt-unsafe)
   static const auto home_dir = std::filesystem::path(getpwuid(getuid())->pw_dir);
   return home_dir;
-}
-
-//-------------------------------------------------------------------------------------------------
-auto getHostName() -> std::string {
-  // cache the result for subsequent calls
-  static const auto host_name = readHostName();
-  return host_name;
 }
 
 //-------------------------------------------------------------------------------------------------

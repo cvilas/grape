@@ -33,8 +33,6 @@ Use of Zenoh within this project satisfies the terms and conditions of Apache Li
 
 - :done: Phase 1: Basic implementation of Session, Publisher, Subscriber
 - Phase 2
-  - Implement `IPAddress::fromString()`
-  - Move `IPAddress` and associated functions to utils
   - Implement client pub and sub
   - Implement query pub and sub
   - Implement ping, pong

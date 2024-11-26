@@ -1,0 +1,61 @@
+//=================================================================================================
+// Copyright (C) 2024 GRAPE Contributors
+//=================================================================================================
+
+#include "grape/utils/ip.h"
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+#ifndef HOST_NAME_MAX
+#ifdef _POSIX_HOST_NAME_MAX
+#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
+#else
+#define HOST_NAME_MAX 255
+#endif
+#endif
+
+namespace {
+
+//-------------------------------------------------------------------------------------------------
+auto readHostName() -> std::string {
+  auto name = std::array<char, HOST_NAME_MAX>{};
+  std::ignore = ::gethostname(name.data(), name.size());
+  return { name.data() };
+}
+
+}  // namespace
+
+namespace grape::utils {
+
+//-------------------------------------------------------------------------------------------------
+auto getHostName() -> std::string {
+  // cache the result for subsequent calls
+  static const auto host_name = readHostName();
+  return host_name;
+}
+
+//-------------------------------------------------------------------------------------------------
+auto IPAddress::fromString(const std::string& ip_str) -> std::optional<IPAddress> {
+  IPAddress addr;
+  const auto af = ((ip_str.find(':') == std::string::npos) ? AF_INET : AF_INET6);
+  addr.version = ((af == AF_INET) ? IPAddress::Version::IPv4 : IPAddress::Version::IPv6);
+  const auto ret = inet_pton(af, ip_str.c_str(), addr.bytes.data());
+  if (ret == 1) {
+    return addr;
+  }
+  return {};
+}
+
+//-------------------------------------------------------------------------------------------------
+auto toString(const IPAddress& addr) -> std::string {
+  auto ip_str = std::array<char, INET6_ADDRSTRLEN>{ 0 };
+  const auto af = ((addr.version == IPAddress::Version::IPv4) ? AF_INET : AF_INET6);
+  if (inet_ntop(af, addr.bytes.data(), ip_str.data(), INET6_ADDRSTRLEN) == ip_str.data()) {
+    return { ip_str.data() };
+  }
+  return {};
+}
+
+}  // namespace grape::utils
