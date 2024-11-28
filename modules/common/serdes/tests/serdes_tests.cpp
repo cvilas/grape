@@ -9,7 +9,7 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 constexpr auto BUF_SIZE = 1024u;
 
@@ -102,6 +102,6 @@ TEST_CASE("Serialize array", "[serdes]") {
   REQUIRE(deserialized_arr == arr);
 }
 
-// NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 }  // namespace

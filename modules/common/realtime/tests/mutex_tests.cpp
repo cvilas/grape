@@ -7,8 +7,6 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
-
 TEST_CASE("Mutex functionality", "[Mutex]") {
   grape::realtime::Mutex mutex;
 
@@ -37,7 +35,5 @@ TEST_CASE("Mutex functionality", "[Mutex]") {
     REQUIRE_NOTHROW(mutex.unlock());
   }
 }
-
-// NOLINTEND(cert-err58-cpp)
 
 }  // namespace

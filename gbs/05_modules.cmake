@@ -331,8 +331,8 @@ add_custom_target(examples COMMENT "Building examples")
 macro(define_module_example)
   set(flags "")
   set(single_opts NAME)
-  set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS
-                 PRIVATE_LINK_LIBS)
+  set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
+      SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
 
   include(CMakeParseArguments)
   cmake_parse_arguments(TARGET_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
@@ -355,6 +355,11 @@ macro(define_module_example)
     ${TARGET_NAME} BEFORE
     PUBLIC ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
     PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
+
+  target_include_directories(
+    ${TARGET_NAME} SYSTEM BEFORE
+    PUBLIC ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
+    PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
 
   target_link_libraries(
     ${TARGET_NAME}
@@ -386,8 +391,8 @@ endmacro()
 macro(define_module_app)
   set(flags "")
   set(single_opts NAME)
-  set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS
-                 PRIVATE_LINK_LIBS)
+  set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
+      SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
 
   include(CMakeParseArguments)
   cmake_parse_arguments(TARGET_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
@@ -414,6 +419,11 @@ macro(define_module_app)
     PUBLIC ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
     PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
 
+  target_include_directories(
+    ${TARGET_NAME} SYSTEM BEFORE
+    PUBLIC ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
+    PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
+
   target_link_libraries(
     ${TARGET_NAME}
     PUBLIC ${TARGET_ARG_PUBLIC_LINK_LIBS}
@@ -430,12 +440,12 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
   GIT_TAG v${CATCH2_VERSION_REQUIRED}
   GIT_SHALLOW TRUE
-  EXCLUDE_FROM_ALL)
+  EXCLUDE_FROM_ALL
+  SYSTEM)
 FetchContent_MakeAvailable(Catch2)
 set_target_properties(Catch2 PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")
 set_target_properties(Catch2 PROPERTIES CXX_CLANG_TIDY "")
 set_target_properties(Catch2WithMain PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")
-set_target_properties(Catch2WithMain PROPERTIES CXX_CLANG_TIDY "")
 
 # ==================================================================================================
 # Adds a custom target to group all test programs built on call to `make tests`
@@ -472,8 +482,8 @@ add_dependencies(check tests) # `check` depends on `tests` target
 macro(define_module_test)
   set(flags "")
   set(single_opts NAME COMMAND WORKING_DIRECTORY)
-  set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS
-                 PRIVATE_LINK_LIBS)
+  set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
+      SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
 
   include(CMakeParseArguments)
   cmake_parse_arguments(TARGET_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
@@ -502,6 +512,11 @@ macro(define_module_test)
     ${TARGET_NAME} BEFORE
     PUBLIC ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
     PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
+
+  target_include_directories(
+    ${TARGET_NAME} SYSTEM BEFORE
+    PUBLIC ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
+    PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
 
   target_link_libraries(
     ${TARGET_NAME}
@@ -763,7 +778,8 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/google/benchmark.git
   GIT_TAG v${BENCHMARK_VERSION_REQUIRED}
   GIT_SHALLOW TRUE
-  EXCLUDE_FROM_ALL)
+  EXCLUDE_FROM_ALL
+  SYSTEM)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(benchmark)

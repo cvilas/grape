@@ -7,7 +7,7 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Count should be zero on initialization", "[FIFOBuffer]") {
@@ -66,6 +66,6 @@ TEST_CASE("Attempt to read from an empty buffer should fail", "[FIFOBuffer]") {
   REQUIRE(buffer.count() == 0);
 }
 
-// NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 }  // namespace

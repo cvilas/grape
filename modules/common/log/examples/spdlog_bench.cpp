@@ -12,6 +12,8 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/spdlog.h"
 
+namespace {
+
 //-------------------------------------------------------------------------------------------------
 auto bmSpdlog(benchmark::State& state) {
   auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("benchmark_spdlog_out.txt", true);
@@ -42,15 +44,9 @@ auto bmGrapeLog(benchmark::State& state) {
   }
 }
 
-//=================================================================================================
-// Benchmark our logger against spdlog (https://github.com/gabime/spdlog)
-
 constexpr auto MAX_ITERATIONS = 1000000U;
 
-// NOLINTBEGIN(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmSpdlog)->Iterations(MAX_ITERATIONS);
 BENCHMARK(bmGrapeLog)->Iterations(MAX_ITERATIONS);
-// NOLINTEND(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
-
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay,modernize-use-trailing-return-type)
+}  // namespace
 BENCHMARK_MAIN();

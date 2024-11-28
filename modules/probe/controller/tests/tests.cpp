@@ -10,8 +10,6 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
-
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("[Controller is configured correctly]", "[controller]") {
   const double timestamp = 0.;
@@ -82,7 +80,5 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   constexpr auto EPSILON = 0.0001;
   CHECK_THAT(amplitude, Catch::Matchers::WithinRel(amplitude_setting, EPSILON));
 }
-
-// NOLINTEND(cert-err58-cpp)
 
 }  // namespace

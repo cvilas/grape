@@ -7,8 +7,6 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
-
 using ProgramOptions = grape::conio::ProgramOptions;
 using ProgramDescription = grape::conio::ProgramDescription;
 
@@ -125,5 +123,4 @@ TEST_CASE("Ensures 'help' is always available", "[program_options]") {
   REQUIRE(args.value().hasOption("help"));
 }
 
-// NOLINTEND(cert-err58-cpp)
 }  // namespace

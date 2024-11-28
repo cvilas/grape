@@ -54,12 +54,8 @@ void bmMpscqPop(benchmark::State& state) {
 
 constexpr auto MAX_ITERATIONS = 1000000U;
 
-// NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmMpscqPush)->Iterations(MAX_ITERATIONS);
-
-// NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmMpscqPop)->Iterations(MAX_ITERATIONS);
 }  // namespace
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay,modernize-use-trailing-return-type)
 BENCHMARK_MAIN();

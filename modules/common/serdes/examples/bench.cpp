@@ -53,12 +53,9 @@ void bmDeserialize(benchmark::State& state) {
   }
 }
 
-// NOLINTBEGIN(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmSerialize);
 BENCHMARK(bmDeserialize);
-//   NOLINTEND(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 
 }  // namespace
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay,modernize-use-trailing-return-type)
 BENCHMARK_MAIN();

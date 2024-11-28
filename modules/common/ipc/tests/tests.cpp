@@ -6,12 +6,8 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
-
 TEST_CASE("[example test]", "[ipc]") {
   WARN("No IPC tests implemented");
 }
-
-// NOLINTEND(cert-err58-cpp)
 
 }  // namespace

@@ -10,7 +10,7 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 TEST_CASE("Basic logging api works", "[log]") {
   std::string stream;
@@ -81,6 +81,6 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   REQUIRE(logger.missedLogs() == NUM_MESSAGES - QUEUE_CAPACITY);  //!< check overflow
 }
 
-// NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 }  // namespace

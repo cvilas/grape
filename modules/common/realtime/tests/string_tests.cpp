@@ -9,7 +9,7 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 using FixedString8 = grape::realtime::FixedString<7>;
 using namespace std::string_literals;
@@ -163,6 +163,6 @@ TEST_CASE("Construct with format string", "[FixedString]") {
   }
 }
 
-// NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 }  // namespace
