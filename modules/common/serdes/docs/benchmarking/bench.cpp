@@ -341,7 +341,6 @@ void bmFlexBufferDeserialize(benchmark::State& state) {
   }
 }
 
-// NOLINTBEGIN(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmGrapeSerialize);
 BENCHMARK(bmGrapeDeserialize);
 BENCHMARK(bmFastCDRSerialize);
@@ -352,9 +351,7 @@ BENCHMARK(bmMsgpackSerialize);
 BENCHMARK(bmMsgpackDeserialize);
 BENCHMARK(bmFlexBufferSerialize);
 BENCHMARK(bmFlexBufferDeserialize);
-//  NOLINTEND(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 
 }  // namespace
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay,modernize-use-trailing-return-type)
 BENCHMARK_MAIN();

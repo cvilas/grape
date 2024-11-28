@@ -6,12 +6,8 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
-
 TEST_CASE("[Test]", "[monitor]") {
   WARN("No tests implemented");
 }
-
-// NOLINTEND(cert-err58-cpp)
 
 }  // namespace

@@ -11,7 +11,7 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 // test configuration script
 constexpr std::string_view TEST_CONFIG = R"(
@@ -132,6 +132,6 @@ TEST_CASE("errroneous script throws exception", "[script]") {
   CHECK_THROWS_AS(grape::script::ConfigScript(std::string(ERROR_SCRIPT)), grape::Exception);
 }
 
-// NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 }  // namespace

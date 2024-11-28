@@ -7,8 +7,6 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
-
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("string trimming") {
   constexpr auto STR = "/path/to/some/file.txt";
@@ -18,6 +16,4 @@ TEST_CASE("string trimming") {
   constexpr auto EXPECTED = "to/some/file";
   CHECK(TRUNCATED == EXPECTED);
 }
-
-// NOLINTEND(cert-err58-cpp)
 }  // namespace

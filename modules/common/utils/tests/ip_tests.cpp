@@ -9,7 +9,7 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers,bugprone-unchecked-optional-access)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,bugprone-unchecked-optional-access)
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Parses standard address strings to IPAddress", "[IPAddress]") {
@@ -185,6 +185,6 @@ TEST_CASE("Converts compressed IPv6 address to string", "[IPAddress]") {
   }
 }
 
-// NOLINTEND(cert-err58-cpp,cppcoreguidelines-avoid-magic-numbers,bugprone-unchecked-optional-access)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers,bugprone-unchecked-optional-access)
 
 }  // namespace

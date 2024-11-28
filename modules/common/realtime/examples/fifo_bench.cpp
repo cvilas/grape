@@ -74,13 +74,11 @@ constexpr auto DATA_SIZE_MULT = 2U;
 constexpr auto DATA_SIZE_MIN = 8;
 constexpr auto DATA_SIZE_MAX = 2048;
 
-// NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmFifoWrite)
     ->RangeMultiplier(DATA_SIZE_MULT)
     ->Range(DATA_SIZE_MIN, DATA_SIZE_MAX)
     ->Iterations(MAX_ITERATIONS);
 
-// NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cert-err58-cpp,cppcoreguidelines-avoid-non-const-global-variables)
 BENCHMARK(bmFifoRead)
     ->RangeMultiplier(DATA_SIZE_MULT)
     ->Range(DATA_SIZE_MIN, DATA_SIZE_MAX)
@@ -88,5 +86,4 @@ BENCHMARK(bmFifoRead)
 
 }  // namespace
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay,modernize-use-trailing-return-type)
 BENCHMARK_MAIN();

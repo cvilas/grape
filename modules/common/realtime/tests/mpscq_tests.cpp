@@ -9,8 +9,6 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-err58-cpp)
-
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Basline single producer and single consumer case", "[mpsc_queue]") {
   static constexpr std::size_t CAPACITY = 3;
@@ -84,7 +82,5 @@ TEST_CASE("Popping empty queue should return false", "[mpsc_queue]") {
 
   REQUIRE_FALSE(queue.tryPop().has_value());
 }
-
-// NOLINTEND(cert-err58-cpp)
 
 }  // namespace
