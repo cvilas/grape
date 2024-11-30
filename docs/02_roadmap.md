@@ -20,21 +20,49 @@
 
 - Implement grape::app. ([README](../modules/common/app/README.md))
 - Implement [grapecam](https://github.com/cvilas/grapecam)
-  
+
 ## Phase 4 - Multimodel data logging and visualisation - part 2
 
 - Generic plotting api
   - Requirements analysis
   - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
+
+## Phase 5 - Generalise IPC API
+
+- :done: Phase 1: Basic implementation of Session, Publisher, Subscriber
+- :done: Phase 2: router, client, throughput and latency examples
+- Phase 3
+  - Implement queryable/query API
+  - Avoid copy in createDataCallback() by using SpliceIterator
+  - Implement liveliness API
+  - Implement shared memory API
+  - Implement caching API
+  - Define topics for matched examples in a single place
+  - Raise MR
+- Phase 4
+  - Convert 'router' to a IPC application (hide zenoh internal details)
+  - Consider implementing match callbacks
+  - Implement PutOptions and subscriber Sample fields
+    - Support attachments
+    - Support timestamping
+    - Resolve how we can combine congestion control, priority and reliability settings in a coherent way to offer fewer choices at the user API layer?
+      - See [discord](https://discord.com/channels/914168414178779197/940584045287460885/1311629493445853206)
+    - Consider supporting sample kind (put/delete)
+  - Understand the point of on_drop callback in subscriber and support it if necessary
+  - Documentation cleanup
+  - Understand hybrid logical clocks
+  - Support hybrid logical clocks implementation
+  - Unit tests
+  - Lua utilities: hostname
 - Fix zenoh examples: pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 - PoC IPC experiments
   - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
   - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
-
-## Phase 5 - Robotics core
+  
+## Phase 6 - Robotics core
 
 - Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
 - Study
@@ -60,7 +88,7 @@
   - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
   - Propose a design
 
-## Phase 6 - 3D graphics
+## Phase 7 - 3D graphics
 
 - Study
   - [2D Game Engine](https://pikuma.com/courses/cpp-2d-game-engine-development)
@@ -78,7 +106,7 @@
     - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
     - Implement a basic scenegraph example and check performance in MacOS and Linux
 
-## Phase 7 - Refactor
+## Phase 8 - Refactor
 
 - Support external dependencies on examples and tests that the main project does not depend on
 - Study [Quill](https://github.com/odygrd/quill) on how to reduce logging overhead
@@ -87,7 +115,7 @@
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
 - replace `grape::realtime::SystemError` with `std::errc`
 
-## Phase 8 - CI
+## Phase 9 - CI
 
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
@@ -100,7 +128,7 @@
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Review all negated checks in `.clang-tidy`
 
-## Phase 9 - Demo applications
+## Phase 10 - Demo applications
 
 - Office environment (CO2, temperature, light) dashboard
 - Network camera and viewer for industrial monitoring, diagnostics
@@ -108,7 +136,7 @@
 - [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
 - [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
 
-## Phase 10 - Utilities
+## Phase 11 - Utilities
 
 - utility: hostaddress, isportinuse, execute, flag_set
 - file cache
