@@ -28,29 +28,3 @@ Intra-process, inter-process and inter-host communication
 ### Copyright
 
 Use of Zenoh within this project satisfies the terms and conditions of Apache License version 2.0 under which it is distributed.
-
-## TODO: Refactor to generalise the API
-
-- :done: Phase 1: Basic implementation of Session, Publisher, Subscriber
-- :done: Phase 2: router, client, throughput and latency examples
-- Phase 3
-  - Implement query pub and sub
-  - Avoid copy in createDataCallback() by using SpliceIterator
-  - Implement liveliness
-  - Implement shared memory
-  - Implement caching
-  - Define topics for matched examples in a single place
-  - Raise MR
-- Phase 4
-  - Convert 'router' to a IPC application (hide zenoh internal details)
-  - Consider implementing match callbacks
-  - Implement PutOptions and subscriber Sample fields
-    - Support attachments
-    - Support timestamping
-    - Resolve how we can combine congestion control, priority and reliability settings in a coherent way to offer fewer choices at the user API layer?
-      - See [discord](https://discord.com/channels/914168414178779197/940584045287460885/1311629493445853206)
-    - Consider supporting sample kind (put/delete)
-  - Understand the point of on_drop callback in subscriber and support it if necessary
-  - Documentation cleanup
-  - Unit tests
-  - Lua utilities: hostname
