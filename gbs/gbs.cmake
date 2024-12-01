@@ -6,6 +6,7 @@
 
 set(GBS_TEMPLATES_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+include(${GBS_TEMPLATES_DIR}/00_utilities.cmake)
 include(${GBS_TEMPLATES_DIR}/01_version.cmake)
 include(${GBS_TEMPLATES_DIR}/02_build_config.cmake)
 include(${GBS_TEMPLATES_DIR}/03_compiler_config.cmake)
@@ -84,3 +85,5 @@ message(STATUS "----------------------------------------------------------------
 message(STATUS "Configuring modules")
 message(STATUS "----------------------------------------------------------------------")
 configure_modules()
+
+#print_cmake_variables()

@@ -9,7 +9,7 @@ import sys
 import fileinput
 import datetime
 
-def create_module(module_name, project_name="grape"):
+def create_module(module_name, project_name="GRAPE"):
     """
     Generate a template module to later populate. The module is created in the current location
     :param module_name: Name of the module
