@@ -129,7 +129,7 @@ ImplotExample::~ImplotExample() {
 
 //-------------------------------------------------------------------------------------------------
 void ImplotExample::run() {
-  static constexpr auto BK_COLOR = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  static constexpr auto BK_COLOR = ImVec4(0.45F, 0.55F, 0.60F, 1.00F);
 
   while (glfwWindowShouldClose(window_) == 0) {
     glfwPollEvents();
@@ -202,12 +202,12 @@ void ImplotExample::demoRealtimePlot() {
   static ScrollingBuffer mybf(2000);
   const ImVec2 mouse = ImGui::GetMousePos();
   const ImGuiIO& io = ImGui::GetIO();
-  static auto t = 0.f;
+  static auto t = 0.F;
   t += io.DeltaTime;
-  mxbf.addPoint(t, mouse.x * 0.0005f);
-  mybf.addPoint(t, mouse.y * 0.0005f);
+  mxbf.addPoint(t, mouse.x * 0.0005F);
+  mybf.addPoint(t, mouse.y * 0.0005F);
 
-  static float history = 10.0f;
+  static float history = 10.0F;
   ImGui::SliderFloat("History", &history, 1, 30, "%.1f s");
 
   const ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
@@ -217,7 +217,7 @@ void ImplotExample::demoRealtimePlot() {
     ImPlot::SetupAxisLimits(ImAxis_X1, static_cast<double>(t - history), static_cast<double>(t),
                             ImGuiCond_Always);
     ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
-    ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
+    ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5F);
     const auto& mx = mxbf.data();
     const auto& my = mybf.data();
     ImPlot::PlotLine("Mouse X", &mx[0].x, &mx[0].y, mx.size(), 0, mxbf.offset(), 2 * sizeof(float));

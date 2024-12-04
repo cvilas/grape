@@ -50,12 +50,12 @@ public:
 
   /// Set next writing position to 'n' bytes behind the current positon
   void rewind(std::size_t n) {
-    offset_ = (n < offset_) ? (offset_ - n) : 0u;
+    offset_ = (n < offset_) ? (offset_ - n) : 0U;
   }
 
   /// Reset next writing position to the beginning of the stream buffer
   void reset() {
-    offset_ = 0u;
+    offset_ = 0U;
   }
 
 private:
@@ -93,12 +93,12 @@ public:
 
   /// Set next reading position to 'n' bytes behind the current positon
   void rewind(std::size_t n) {
-    offset_ = (n < offset_) ? (offset_ - n) : 0u;
+    offset_ = (n < offset_) ? (offset_ - n) : 0U;
   }
 
   /// Reset next reading position to the beginning of the stream buffer
   void reset() {
-    offset_ = 0u;
+    offset_ = 0U;
   }
 
 private:

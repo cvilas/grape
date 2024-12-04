@@ -20,7 +20,7 @@ auto StackTrace::current() -> StackTrace {
   const auto symbols = std::unique_ptr<char*, void (*)(void*)>(
       backtrace_symbols(stack_frames.data(), frame_count), std::free);
   trace.symbol_list_.resize(static_cast<std::size_t>(frame_count));
-  for (auto i = 1u; i < static_cast<std::size_t>(frame_count); ++i) {
+  for (auto i = 1U; i < static_cast<std::size_t>(frame_count); ++i) {
     trace.symbol_list_.at(i - 1) = symbols.get()[i];
   }
 

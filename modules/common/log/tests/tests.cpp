@@ -14,7 +14,7 @@ namespace {
 
 TEST_CASE("Basic logging api works", "[log]") {
   std::string stream;
-  static constexpr auto QUEUE_CAPACITY = 10u;
+  static constexpr auto QUEUE_CAPACITY = 10U;
 
   auto config = grape::log::Config();
   config.threshold = grape::log::Severity::Debug;
@@ -26,7 +26,7 @@ TEST_CASE("Basic logging api works", "[log]") {
   auto logger = grape::log::Logger(std::move(config));
 
   /// Explicitly specify variadic template arguments types list
-  grape::log::Log<int, float>(logger, grape::log::Severity::Info, "{} {}", 5, 3.14f,
+  grape::log::Log<int, float>(logger, grape::log::Severity::Info, "{} {}", 5, 3.14F,
                               std::source_location::current());
 
   /// Use the deduction guide for arguments with defaulted source location
@@ -36,7 +36,7 @@ TEST_CASE("Basic logging api works", "[log]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
   std::string stream;
-  static constexpr auto QUEUE_CAPACITY = 10u;
+  static constexpr auto QUEUE_CAPACITY = 10U;
 
   auto config = grape::log::Config();
   config.threshold = grape::log::Severity::Note;
@@ -60,7 +60,7 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   using namespace std::chrono_literals;
   static constexpr auto FLUSH_PERIOD = 1s;
   static constexpr auto FLUSH_WAIT_PERIOD = FLUSH_PERIOD + 500ms;
-  static constexpr auto QUEUE_CAPACITY = 5u;
+  static constexpr auto QUEUE_CAPACITY = 5U;
   std::atomic_size_t num_logs{ 0 };
   auto config = grape::log::Config();
   config.threshold = grape::log::Severity::Debug;

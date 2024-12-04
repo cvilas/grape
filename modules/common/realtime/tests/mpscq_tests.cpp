@@ -18,7 +18,7 @@ TEST_CASE("Basline single producer and single consumer case", "[mpsc_queue]") {
   REQUIRE(queue.tryPush(2));
   REQUIRE(queue.tryPush(3));
 
-  REQUIRE(queue.count() == 3u);
+  REQUIRE(queue.count() == 3U);
 
   // NOLINTBEGIN(bugprone-unchecked-optional-access)
   REQUIRE(queue.tryPop().value() == 1);
@@ -26,7 +26,7 @@ TEST_CASE("Basline single producer and single consumer case", "[mpsc_queue]") {
   REQUIRE(queue.tryPop().value() == 3);
   // NOLINTEND(bugprone-unchecked-optional-access)
 
-  REQUIRE(queue.count() == 0u);
+  REQUIRE(queue.count() == 0U);
 }
 
 //-------------------------------------------------------------------------------------------------

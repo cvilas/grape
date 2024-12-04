@@ -29,10 +29,7 @@ Checks: '-*,
         cppcoreguidelines-*,
         clang-analyzer-*,
         google-*,
-        -google-runtime-references,
-        -google-readability-todo,
         hicpp-*,
-        -hicpp-uppercase-literal-suffix,
         -hicpp-avoid-c-arrays,           # duplicates cppcoreguidelines-avoid-c-arrays,
         -hicpp-no-array-decay,           # duplicates cppcoreguidelines-pro-bounds-array-to-pointer-decay,
         -hicpp-special-member-functions, # duplicates cppcoreguidelines-special-member-functions,
@@ -44,13 +41,6 @@ Checks: '-*,
         performance-*,
         -performance-move-const-arg,     # duplicates hicpp-move-const-arg
         readability-*,
-        -readability-uppercase-literal-suffix,
-        -readability-simplify-boolean-expr,
-        -readability-magic-numbers,
-        -readability-function-cognitive-complexity,
-        -readability-redundant-access-specifiers,
-        -readability-identifier-length,
-        -readability-braces-around-statements
         '
 
 # Upgrade warnings to errors
