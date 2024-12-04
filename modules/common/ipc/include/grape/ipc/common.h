@@ -39,7 +39,7 @@ struct [[nodiscard]] Locator {
 //=================================================================================================
 /// Unique identifier
 struct [[nodiscard]] UUID {
-  static constexpr auto LENGTH = 16u;
+  static constexpr auto LENGTH = 16U;
   std::array<std::uint8_t, LENGTH> bytes;
 };
 

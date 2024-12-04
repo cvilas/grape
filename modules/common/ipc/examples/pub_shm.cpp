@@ -44,7 +44,7 @@ auto main(int argc, const char* argv[]) -> int {
     auto config = zenoh::Config::create_default();
 
     //-----------------------------------------
-    // TODO: Review and confirm shared memory configuration is correct
+    // TODO(vilas): Review and confirm shared memory configuration is correct
     //-----------------------------------------
 
     // Enable the publisher to operate over shared-memory. Note that shared-memory should also be
@@ -67,8 +67,8 @@ auto main(int argc, const char* argv[]) -> int {
     auto pub = session.declare_publisher(key);
 
     std::println("Creating shared-memory manager...");
-    static constexpr auto SHM_SIZE = 65536u;
-    static constexpr auto SHM_ALIGN = 2u;
+    static constexpr auto SHM_SIZE = 65536U;
+    static constexpr auto SHM_ALIGN = 2U;
     auto shm_provider = zenoh::PosixShmProvider(
         zenoh::MemoryLayout(SHM_SIZE, zenoh::AllocAlignment({ SHM_ALIGN })));
 

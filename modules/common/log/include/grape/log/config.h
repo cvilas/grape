@@ -12,7 +12,7 @@ namespace grape::log {
 
 /// @brief  Logger configuration
 struct Config {
-  static constexpr auto DEFAULT_QUEUE_CAPACITY = 1000u;
+  static constexpr auto DEFAULT_QUEUE_CAPACITY = 1000U;
   static constexpr auto DEFAULT_FLUSH_PERIOD = std::chrono::microseconds(1000);
   using Sink = std::function<void(const Record& r)>;
 

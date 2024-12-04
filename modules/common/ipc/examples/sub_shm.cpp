@@ -41,7 +41,7 @@ auto main(int argc, const char* argv[]) -> int {
     auto config = zenoh::Config::create_default();
 
     //-----------------------------------------
-    // TODO: Review and confirm shared memory configuration is correct
+    // TODO(vilas): Review and confirm shared memory configuration is correct
     //-----------------------------------------
 
     // Enable shared-memory on the subscriber to take advantage of publishers on the same host who

@@ -11,7 +11,7 @@
 
 namespace {
 
-constexpr auto BUFFER_INIT_SIZE = 1024u;
+constexpr auto BUFFER_INIT_SIZE = 1024U;
 
 //-------------------------------------------------------------------------------------------------
 void bmSerialize(benchmark::State& state) {

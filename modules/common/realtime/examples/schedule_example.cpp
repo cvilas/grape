@@ -11,7 +11,7 @@
 //=================================================================================================
 auto main() -> int {
   try {
-    static constexpr auto CPUS = { 1u, 2u, 3u };
+    static constexpr auto CPUS = { 1U, 2U, 3U };
 
     // Set CPU affinity
     const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS);

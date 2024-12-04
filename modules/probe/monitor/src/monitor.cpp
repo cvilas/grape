@@ -87,7 +87,7 @@ ScrollingBuffer::ScrollingBuffer(std::size_t length,
   : length_(length), signals_info_(signals_info) {
   const auto num_signals = signals_info_.size();
   signal_offsets_in_frame_.resize(num_signals);
-  for (auto signal_number = 0u; signal_number < num_signals; ++signal_number) {
+  for (auto signal_number = 0U; signal_number < num_signals; ++signal_number) {
     const auto& signal_info = signals_info_.at(signal_number);
     if (signal_info.role == grape::probe::Signal::Role::Timestamp) {
       timestamp_offset_in_frame_ = frame_size_;
@@ -214,8 +214,8 @@ auto signalDataGetter(int idx, void* buf) -> ImPlotPoint {
     return {};
   }
 
-  // TODO: pass frame_data, trace, signal_info from outside to optimise number of times they are
-  // calculated
+  // TODO(vilas): pass frame_data, trace, signal_info from outside to optimise number of times they
+  // are calculated
 
   // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   const auto* frame_data = buffer->frameData(static_cast<std::size_t>(idx));
@@ -374,7 +374,7 @@ void Monitor::setSender(Sender&& sender) {
 
 //-------------------------------------------------------------------------------------------------
 void Monitor::run() {
-  static constexpr auto BK_COLOR = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  static constexpr auto BK_COLOR = ImVec4(0.45F, 0.55F, 0.60F, 1.00F);
 
   while (glfwWindowShouldClose(impl_->window) == 0) {
     glfwPollEvents();
@@ -403,7 +403,7 @@ void Monitor::recv(const std::vector<grape::probe::Signal>& signals,
                    std::span<const std::byte> frame) {
   const std::unique_lock signals_lock(impl_->signals_lock);
   if (impl_->signals_buffer == nullptr) {
-    static constexpr auto BUFFER_MAX_SIZE = 2000u;
+    static constexpr auto BUFFER_MAX_SIZE = 2000U;
     impl_->signals_buffer = std::make_unique<ScrollingBuffer>(BUFFER_MAX_SIZE, signals);
     const std::unique_lock ctrl_lock(impl_->controllables_lock);
     impl_->controllables = std::make_unique<Controllables>(signals, frame);
@@ -416,9 +416,9 @@ void Monitor::drawPlots() {
   static constexpr auto PLOT_SIZE = ImVec2(-1, 150);
   static constexpr auto AXIS_FLAGS_X = ImPlotAxisFlags_None;
   static constexpr auto AXIS_FLAGS_Y = ImPlotAxisFlags_None | ImPlotAxisFlags_AutoFit;
-  static constexpr auto PLOT_FILL_ALPHA = 0.5f;
-  static constexpr auto MAX_HISTORY_SECONDS = 30.f;
-  static constexpr auto MIN_HISTORY_SECONDS = 1.f;
+  static constexpr auto PLOT_FILL_ALPHA = 0.5F;
+  static constexpr auto MAX_HISTORY_SECONDS = 30.F;
+  static constexpr auto MIN_HISTORY_SECONDS = 1.F;
 
   const ImGuiIO& io = ImGui::GetIO();
 
@@ -435,7 +435,7 @@ void Monitor::drawPlots() {
   ImGui::SliderFloat("History", &history, 1, MAX_HISTORY_SECONDS, "%.1f s");
 
   const auto& signals_info = impl_->signals_buffer->signalsInfo();
-  for (auto signal_number = 0u; signal_number < signals_info.size(); ++signal_number) {
+  for (auto signal_number = 0U; signal_number < signals_info.size(); ++signal_number) {
     const auto signal = signals_info.at(signal_number);
     const auto* signal_name = signal.name.cStr();
     if (signal.role == Signal::Role::Timestamp) {
@@ -446,9 +446,9 @@ void Monitor::drawPlots() {
         ImPlot::SetupAxes(nullptr, nullptr, AXIS_FLAGS_X, AXIS_FLAGS_Y);
         ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, PLOT_FILL_ALPHA);
         ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
-        // TODO: X axis limits must come from time in data history rather than t
+        // TODO(vilas): X axis limits must come from time in data history rather than t
         ImPlot::SetupAxisLimits(ImAxis_X1, t - static_cast<double>(history), t, ImGuiCond_Always);
-        for (auto trace_number = 0u; trace_number < signal.num_elements; ++trace_number) {
+        for (auto trace_number = 0U; trace_number < signal.num_elements; ++trace_number) {
           auto trace_name = std::string(signal_name);
           if (signal.num_elements > 1) {
             trace_name += "[" + std::to_string(trace_number) + "]";
@@ -457,7 +457,7 @@ void Monitor::drawPlots() {
           ImPlot::PlotLineG(trace_name.c_str(), signalDataGetter, impl_->signals_buffer.get(),
                             static_cast<int>(impl_->signals_buffer->length()),
                             /*ImPlotLineFlags*/ 0);
-          // TODO: use PlotLineEx directly when reading off separate timestamp and signal buffers
+          // TODO(vilas): use PlotLineEx directly when reading off separate timestamp and signals
         }
         ImPlot::EndPlot();
       }
@@ -475,8 +475,7 @@ void Monitor::drawControls() {
     return;
   }
 
-  // TODO:
-  // - show current values with ImGuiInputTextFlags_ReadOnly
+  // TODO(vilas): show current values with ImGuiInputTextFlags_ReadOnly
 
   ImGui::Begin("Controls");
 

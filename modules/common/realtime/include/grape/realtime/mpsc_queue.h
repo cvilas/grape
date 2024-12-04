@@ -49,7 +49,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-MPSCQueue<T>::MPSCQueue(std::size_t capacity) : items_((capacity > 0 ? capacity : 1u)) {
+MPSCQueue<T>::MPSCQueue(std::size_t capacity) : items_((capacity > 0 ? capacity : 1U)) {
 }
 
 //-------------------------------------------------------------------------------------------------

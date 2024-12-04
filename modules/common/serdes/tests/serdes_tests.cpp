@@ -11,7 +11,7 @@ namespace {
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
-constexpr auto BUF_SIZE = 1024u;
+constexpr auto BUF_SIZE = 1024U;
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Serialize arithmetic types", "[serdes]") {
@@ -22,7 +22,7 @@ TEST_CASE("Serialize arithmetic types", "[serdes]") {
   REQUIRE(ser.pack(std::uint16_t{ 1000 }));
   REQUIRE(ser.pack(std::int32_t{ -123456 }));
   REQUIRE(ser.pack(std::uint64_t{ 9876543210 }));
-  REQUIRE(ser.pack(float{ 3.14f }));
+  REQUIRE(ser.pack(float{ 3.14F }));
   REQUIRE(ser.pack(double{ 2.71828 }));
   REQUIRE(ostream.size() == sizeof(std::int8_t) + sizeof(std::uint16_t) + sizeof(std::int32_t) +
                                 sizeof(std::uint64_t) + sizeof(float) + sizeof(double));

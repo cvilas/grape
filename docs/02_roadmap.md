@@ -1,80 +1,65 @@
 # Roadmap
 
-## Phase 1 - Base
+## Completed
 
-- :done: Versioning
-- :done: Exception definitions
-- :done: Command line flags parsing
-- :done: Logging library
-- :done: Scripting library
-- :done: Message passing
-- :done: Realtime services
+- Versioning
+- Exception definitions
+- Command line flags parsing
+- Logging library
+- Scripting library
+- Message passing
+- Realtime services
+- Serialization
 
-## Phase 2 - Multimodal data logging and visualisation - part 1
+## TODO
 
-- :done: Implement `probe::Controller`
-- :done: Implement `probe::Monitor` PoC
-- :done: Serialization
-
-## Phase 3 - grapecam
+### grapecam
 
 - Implement grape::app. ([README](../modules/common/app/README.md))
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 
-## Phase 4 - Multimodel data logging and visualisation - part 2
+### Plotting
 
-- Generic plotting api
-  - Requirements analysis
-  - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
+- Requirements analysis
+- Generic plotting API and `plottable`concept
+- Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
+
+### Generalise IPC API
+
+- Implement queryable/query API
+- Avoid copy in createDataCallback() by using SpliceIterator
+- Implement liveliness API
+- Implement shared memory API
+- Implement caching API
+- Define topics for matched example programs in a single place
+- Consider implementing pub-sub match callbacks
+- Implement PutOptions and subscriber Sample fields
+  - Support attachments
+  - Support timestamping
+  - Resolve how we can combine congestion control, priority and reliability settings in a coherent way to offer fewer choices at the user API layer?
+    - See [discord](https://discord.com/channels/914168414178779197/940584045287460885/1311629493445853206)
+  - Consider supporting sample kind (put/delete)
+- Understand the point of on_drop callback in subscriber and support it if necessary
+- Documentation cleanup: examples
+- Understand hybrid logical clocks
+- Support hybrid logical clocks implementation
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
-
-## Phase 5 - Generalise IPC API
-
-- :done: Phase 1: Basic implementation of Session, Publisher, Subscriber
-- :done: Phase 2: router, client, throughput and latency examples
-- Phase 3
-  - Implement queryable/query API
-  - Avoid copy in createDataCallback() by using SpliceIterator
-  - Implement liveliness API
-  - Implement shared memory API
-  - Implement caching API
-  - Define topics for matched examples in a single place
-  - Raise MR
-- Phase 4
-  - Convert 'router' to a IPC application (hide zenoh internal details)
-  - Consider implementing match callbacks
-  - Implement PutOptions and subscriber Sample fields
-    - Support attachments
-    - Support timestamping
-    - Resolve how we can combine congestion control, priority and reliability settings in a coherent way to offer fewer choices at the user API layer?
-      - See [discord](https://discord.com/channels/914168414178779197/940584045287460885/1311629493445853206)
-    - Consider supporting sample kind (put/delete)
-  - Understand the point of on_drop callback in subscriber and support it if necessary
-  - Documentation cleanup
-  - Understand hybrid logical clocks
-  - Support hybrid logical clocks implementation
-  - Unit tests
-  - Lua utilities: hostname
 - Fix zenoh examples: pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
-- PoC IPC experiments
-  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
   
-## Phase 6 - Robotics core
+### Robotics core
 
-- Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
-- Study
-  - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
-  - [reflect-cpp](https://github.com/getml/reflect-cpp)
-- Shared memory
-- Single producer multiple consumer queue using externally specified memory (heap or shared memory)
-- Consider removing `MPSCQueue`. It's unused. Rename `FIFOBuffer` to `MPSCQueue`
 - HW IO
   - CANopen
   - joystick
   - midi
+- Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
+- Study
+  - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
+  - [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) on ROS2 interop
+- Shared memory
+- Single producer multiple consumer queue using externally specified memory (heap or shared memory)
+- Consider removing `MPSCQueue`. It's unused. Rename `FIFOBuffer` to `MPSCQueue`
 - Math library
   - Delay line
   - Low pass filter
@@ -82,13 +67,14 @@
   - Integrator
   - Matrix operations
 - Behaviour trees: Consider building from first principles
-- FSM: introspectable, visualise state transition graph using graphviz.
+- FSM: introspectable, visualisable state transition graph using graphviz.
 - Introduce [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
-- ROS2 interop
-  - Study how [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) does it
-  - Propose a design
+- Refactor thread class out of realtime and put it in 'grape'
+  - Insert logging to capture timer overruns in the loop
+- `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
+- replace `grape::realtime::SystemError` with `std::errc`
 
-## Phase 7 - 3D graphics
+### 3D visualisation
 
 - Study
   - [2D Game Engine](https://pikuma.com/courses/cpp-2d-game-engine-development)
@@ -106,17 +92,11 @@
     - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
     - Implement a basic scenegraph example and check performance in MacOS and Linux
 
-## Phase 8 - Refactor
+### CI and build robustness
 
-- Support external dependencies on examples and tests that the main project does not depend on
-- Study [Quill](https://github.com/odygrd/quill) on how to reduce logging overhead
-- Refactor thread class out of realtime and put it in 'grape'
-  - Insert logging to capture timer overruns in the loop
-- `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
-- replace `grape::realtime::SystemError` with `std::errc`
-
-## Phase 9 - CI
-
+- Fix GCC builds
+  - `std::expected` not available with -DENABLE_LINTER=ON
+  - sccache breaks build with -DENABLE_CACHE=ON
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
   - Fail the CI if clang-format changes code
@@ -124,45 +104,20 @@
   - Develop github CI build file
   - Document the usage in install instructions
 - Implement CI build using github workflow  
-- Integrate cpack to generate artifacts 
+- Integrate cpack to generate artifacts
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
-- Review all negated checks in `.clang-tidy`
 
-## Phase 10 - Demo applications
+### Demo applications
 
 - Office environment (CO2, temperature, light) dashboard
-- Network camera and viewer for industrial monitoring, diagnostics
+- Network camera and viewer for industrial monitoring
 - Zenoh interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
+- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 - [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
 - [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
-
-## Phase 11 - Utilities
-
-- utility: hostaddress, isportinuse, execute, flag_set
-- file cache
-- md5sum
-- factory using crtp (see scratch)
-
-## Others
-
 - Implement advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client
-- External deps: Replace git clone with direct download of tarballs
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
-
-## Notes
-
-- Use C++23 or newer features in development
-
-```c++
-// hello world in C++23
-import std;
-auto main() -> int {
-  std::println("Hello World!");
-  return EXIT_SUCCESS;
-}
-```
 
 ## References
 
@@ -172,4 +127,3 @@ auto main() -> int {
 - Practical [C++26 Reflection](https://youtu.be/cqQ7v6xdZRw)
 - Interfaces with C++20 concept: <https://concepts.godbolt.org/z/PjGb466cr>
 - Clean code: <https://youtu.be/9ch7tZN4jeI>
-- IoC containers for dependency injection, especially for mocking in tests: <https://github.com/ybainier/Hypodermic>. For why we should use it, see `clean code` video above

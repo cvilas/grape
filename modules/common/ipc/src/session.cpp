@@ -20,7 +20,7 @@ auto transform(const grape::ipc::Session::Config& config) -> zenoh::Config {
   if (is_router_specified) {
     zconfig.insert_json5(Z_CONFIG_CONNECT_KEY, std::format(R"(["{}"])", toString(*config.router)));
   }
-  // TODO:
+  // TODO(vilas):
   //- enable timestamp (optional)
   //- enable cache history (optional)
   //- enable shared memory (optional)
@@ -46,7 +46,7 @@ auto createDataCallback(grape::ipc::DataCallback&& user_cb)
     return nullptr;
   }
   return [cb = std::move(user_cb)](const zenoh::Sample& sample) -> void {
-    // TODO: Avoid copy. use SpliceIterator instead
+    // TODO(vilas): Avoid copy. use SpliceIterator instead
     const auto data = sample.get_payload().as_vector();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     cb({ reinterpret_cast<const std::byte*>(data.data()), data.size() });

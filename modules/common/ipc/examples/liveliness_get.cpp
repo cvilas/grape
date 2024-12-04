@@ -41,7 +41,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     const auto key = args.getOptionOrThrow<std::string>("key");
     std::println("Sending liveliness query for '{}'...", key);
-    static constexpr auto FIFO_LENGTH = 16u;
+    static constexpr auto FIFO_LENGTH = 16U;
     auto replies = session.liveliness_get(key, zenoh::channels::FifoChannel(FIFO_LENGTH));
 
     for (auto res = replies.recv(); std::holds_alternative<zenoh::Reply>(res);

@@ -43,7 +43,7 @@ public:
 
   template <arithmetic T>
   [[nodiscard]] auto pack(const T& value) -> bool {
-    return pack(std::span<const T>{ &value, 1u });
+    return pack(std::span<const T>{ &value, 1U });
   }
 
   template <arithmetic T>
@@ -103,7 +103,7 @@ public:
 
   template <arithmetic T>
   [[nodiscard]] auto unpack(T& value) -> bool {
-    return unpack(std::span<T>{ &value, 1u });
+    return unpack(std::span<T>{ &value, 1U });
   }
 
   template <arithmetic T>
