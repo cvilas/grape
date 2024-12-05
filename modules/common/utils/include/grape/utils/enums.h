@@ -129,6 +129,7 @@ constexpr auto enum_cast(std::string_view str_name) -> std::optional<Enum> {
   auto i = std::underlying_type_t<Enum>{};
   for (const auto& s : enum_names_list<Enum>) {
     if (s == str_name) {
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       return static_cast<Enum>(i + enum_range<Enum>::min);
     }
     ++i;
