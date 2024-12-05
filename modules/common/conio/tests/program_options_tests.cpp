@@ -7,6 +7,8 @@
 
 namespace {
 
+// NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange)
+
 using ProgramOptions = grape::conio::ProgramOptions;
 using ProgramDescription = grape::conio::ProgramDescription;
 
@@ -122,5 +124,7 @@ TEST_CASE("Ensures 'help' is always available", "[program_options]") {
   REQUIRE(args.has_value());
   REQUIRE(args.value().hasOption("help"));
 }
+
+// NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)
 
 }  // namespace

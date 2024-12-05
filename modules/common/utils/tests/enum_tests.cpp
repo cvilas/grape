@@ -5,6 +5,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/utils/enums.h"
 
+// NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange)
+
 // Test-case enumeration with customised range
 enum class Color { Red = -2, Green = 0, Blue = 1, Black = 2, White = 4 };
 
@@ -61,3 +63,5 @@ TEST_CASE("Invalid string name can be cast back to enum", "[enums]") {
 }
 
 }  // namespace
+
+// NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)

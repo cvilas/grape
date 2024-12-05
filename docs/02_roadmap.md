@@ -17,6 +17,8 @@
 
 - Implement grape::app. ([README](../modules/common/app/README.md))
 - Implement [grapecam](https://github.com/cvilas/grapecam)
+- Study [cpptrace](https://github.com/jeremy-rifkin/cpptrace). Simplify and integrate
+- In logger, implement `isatty()` to identify whether color messages can be printed, and print in color. See `cpptrace::isatty`
 
 ### Plotting
 
