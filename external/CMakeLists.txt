@@ -55,8 +55,10 @@ if(zenohcxx IN_LIST EXTERNAL_PROJECTS_LIST)
   else()
     message(STATUS "zenohc: Building ${ZENOHC_VERSION_REQUIRED} from source")
     set(ZENOHC_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+        -DZENOHC_CARGO_CHANNEL=+stable
+        -DZENOHC_CUSTOM_TARGET=${RUSTC_TRIPLE}
         -DZENOHC_BUILD_WITH_UNSTABLE_API=ON
-        -DZENOHC_BUILD_WITH_SHARED_MEMORY=ON # shm requires both
+        -DZENOHC_BUILD_WITH_SHARED_MEMORY=ON # shm requires unstable API for now (Dec 2024)
         -DCMAKE_VERBOSE_MAKEFILE=ON)
     ExternalProject_Add(
       zenohc

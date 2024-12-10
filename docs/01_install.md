@@ -2,9 +2,9 @@
 
 ## Supported platforms
 
-OS               | Architecture  | Compiler
------------------|---------------|----------------
-Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 gcc-14
+OS               |  Architecture   | Compiler
+-----------------|-----------------|----------------
+Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-19 gcc-14
 
 ## Setup build environment
 
@@ -38,7 +38,7 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 gcc-14
     sudo ./llvm.sh $CLANG_VERSION
     sudo apt install clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
     llvm-$CLANG_VERSION-dev libc++-$CLANG_VERSION-dev libomp-$CLANG_VERSION-dev libc++abi-$CLANG_VERSION-dev \
-    libunwind-$CLANG_VERSION-dev
+    libunwind-$CLANG_VERSION-dev lld-$CLANG_VERSION
     sudo update-alternatives --remove-all clang 
     sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$CLANG_VERSION $CLANG_VERSION \
     --slave /usr/bin/clang++ clang++ /usr/bin/clang++-$CLANG_VERSION \
@@ -61,9 +61,9 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 gcc-14
     --slave /usr/bin/g++ g++ /usr/bin/g++-$GCC_VERSION \
     --slave /usr/bin/gcov gcov /usr/bin/gcov-$GCC_VERSION
     
-    # (X86_64 only): install Arm64 cross compilers 
+    # (X86_64 only): install Aarch64 cross compilers 
     sudo apt install g++-$GCC_VERSION-aarch64-linux-gnu gcc-$GCC_VERSION-aarch64-linux-gnu \
-    gfortran-$GCC_VERSION-aarch64-linux-gnu binfmt-support qemu-user-static qemu-system-arm qemu -y
+    gfortran-$GCC_VERSION-aarch64-linux-gnu binfmt-support qemu-user-static qemu-system-arm -y
 
     sudo update-alternatives --remove-all aarch64-linux-gnu-gcc aarch64-linux-gnu-gfortran
     sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gfortran aarch64-linux-gnu-gfortran /usr/bin/aarch64-linux-gnu-gfortran-$GCC_VERSION $GCC_VERSION
@@ -76,7 +76,11 @@ Ubuntu 24.04 LTS | Arm64, X86_64 | clang-19 gcc-14
 
     ```bash
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    sudo apt install libssl-dev
+    
+    # install toolchains for X86_64 and Aarch64
+    rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+    rustup toolchain add stable-x86_64-unknown-linux-gnu stable-aarch64-unknown-linux-gnu
+    sudo apt install libssl-dev # required for sccache
     cargo install sccache --locked
     ```
 

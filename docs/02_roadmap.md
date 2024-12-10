@@ -13,6 +13,9 @@
 
 ## Dec 2024
 
+- Cross compile for Arm64 from X86 
+  - with gcc toolchain
+  - with clang toolchain
 - grapecam
   - Implement grape::app. ([README](../modules/common/app/README.md))
   - Implement [grapecam](https://github.com/cvilas/grapecam)
