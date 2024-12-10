@@ -25,9 +25,9 @@ void Exception::print() noexcept {
                           loc.function_name(),                             //
                           static_cast<int>(loc_fname.length()), loc_fname.data(), loc.line());
     std::ignore = fprintf(stderr, "\nBacktrace:");
-    auto i = 0U;
-    for (const auto& s : ex.trace().trace()) {
-      std::ignore = fprintf(stderr, "\n#%u: %s", i++, s.c_str());
+    auto idx = 0U;
+    for (const auto& trace : ex.trace().trace()) {
+      std::ignore = fprintf(stderr, "\n#%u: %s", idx++, trace.c_str());
     }
   } catch (const std::exception& ex) {
     std::ignore = fprintf(stderr, "\nException: %s", ex.what());

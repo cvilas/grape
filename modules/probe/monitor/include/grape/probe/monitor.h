@@ -45,7 +45,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const Monitor::Error& code) -> std::string_view {
-  return enums::enum_name(code);
+  return enums::name(code);
 }
 
 }  // namespace grape::probe

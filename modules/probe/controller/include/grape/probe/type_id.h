@@ -66,8 +66,8 @@ constexpr auto toTypeId() -> TypeId {
 }
 
 /// @return Length in bytes, for an element of the specified type
-constexpr auto length(TypeId t) -> std::size_t {
-  switch (t) {
+constexpr auto length(TypeId tid) -> std::size_t {
+  switch (tid) {
       // clang-format off
     case TypeId::Int8: return sizeof(std::int8_t); break;
     case TypeId::Uint8:return sizeof(std::uint8_t); break;

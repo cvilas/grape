@@ -12,35 +12,35 @@
 //=================================================================================================
 
 /// An example enumeration
-enum class Color { Red = -2, Green, Blue, Black, White };
+enum class Color : std::int8_t { Red = -2, Green, Blue, Black, White };
 
 /// Specialisation for the enumeration. Necessary if the enumeration values are not in the default
-/// range [enum_range::DEFAULT_MIN, enum_range::DEFAULT_MAX]
+/// range [Range::DEFAULT_MIN, Range::DEFAULT_MAX]
 template <>
-struct grape::enums::enum_range<Color> {
-  static constexpr int min = -2;
-  static constexpr int max = 2;
+struct grape::enums::Range<Color> {
+  static constexpr int MIN = -2;
+  static constexpr int MAX = 2;
 };
 
 //=================================================================================================
 auto main() -> int {
   try {
     /// String representation of a specific enumeration value can be obtained as follows:
-    std::println("{}", grape::enums::enum_name(Color::Red));
+    std::println("{}", grape::enums::name(Color::Red));
 
     /// Here's another way
     auto value = static_cast<std::underlying_type_t<Color>>(Color::Red);
     value += 2;
-    std::println("{}", grape::enums::enum_name(static_cast<Color>(value)));
+    std::println("{}", grape::enums::name(static_cast<Color>(value)));
 
     /// A table of all values in the enumeration as strings
-    std::println("All values: {}", grape::enums::enum_names_list<Color>);
+    std::println("All values: {}", grape::enums::NAMES_LIST<Color>);
 
     /// Get enumeration from string
-    auto enum_str = "Blue";
-    const auto maybe_enum = grape::enums::enum_cast<Color>(enum_str);
+    const auto* enum_str = "Blue";
+    const auto maybe_enum = grape::enums::cast<Color>(enum_str);
     if (maybe_enum.has_value()) {
-      std::println("'{}' -> '{}'", enum_str, grape::enums::enum_name(maybe_enum.value()));
+      std::println("'{}' -> '{}'", enum_str, grape::enums::name(maybe_enum.value()));
     } else {
       std::println("Cannot convert string '{}' to valid enum of type Color", enum_str);
     }

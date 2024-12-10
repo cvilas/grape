@@ -12,10 +12,11 @@
 namespace grape::log {
 
 /// Default log formatter implementation.
-inline auto defaultFormatter(const Record& r) -> std::string {
-  const auto file_name = std::filesystem::path(r.location.file_name()).filename().string();
-  return std::format("[{}] [{}] [{}] [{}:{}] {}", r.timestamp, r.logger_name.cStr(),
-                     toString(r.severity), file_name, r.location.line(), r.message.cStr());
+inline auto defaultFormatter(const Record& record) -> std::string {
+  const auto file_name = std::filesystem::path(record.location.file_name()).filename().string();
+  return std::format("[{}] [{}] [{}] [{}:{}] {}", record.timestamp, record.logger_name.cStr(),
+                     toString(record.severity), file_name, record.location.line(),
+                     record.message.cStr());
 }
 
 }  // namespace grape::log

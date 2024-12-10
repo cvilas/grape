@@ -11,8 +11,8 @@
 namespace grape::ipc {
 
 //-------------------------------------------------------------------------------------------------
-inline auto toString(const zenoh::ZResult& e) -> std::string_view {
-  static const auto ZENOH_ERROR_STRINGS = std::unordered_map<int, std::string_view>{
+inline auto toString(const zenoh::ZResult& code) -> std::string_view {
+  static const auto zenoh_error_strings = std::unordered_map<int, std::string_view>{
     { Z_OK, "OK" },                                       //
     { Z_EINVAL, "Invalid data or argument" },             //
     { Z_EPARSE, "Parsing error" },                        //
@@ -28,6 +28,6 @@ inline auto toString(const zenoh::ZResult& e) -> std::string_view {
     { Z_EAGAIN_MUTEX, "Mutex unavailable (try again)" },  //
     { Z_EPOISON_MUTEX, "Mutex poisoned" }                 //
   };
-  return ZENOH_ERROR_STRINGS.at(e);
+  return zenoh_error_strings.at(code);
 }
 }  // namespace grape::ipc

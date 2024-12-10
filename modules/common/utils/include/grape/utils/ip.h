@@ -13,7 +13,7 @@ namespace grape::utils {
 
 /// Holds an IP Address and associated methods
 struct [[nodiscard]] IPAddress {
-  enum class Version { IPv4, IPv6 };
+  enum class Version : std::uint8_t { IPv4, IPv6 };
   static constexpr auto MAX_SEGMENTS = 16U;
 
   Version version{ Version::IPv4 };

@@ -56,7 +56,6 @@ public:
     std::string name;
   };
 
-public:
   /// Prepare new thread.
   /// @param config configuration parameters
   explicit Thread(Config&& config);

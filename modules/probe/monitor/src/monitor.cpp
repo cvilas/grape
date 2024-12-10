@@ -227,10 +227,10 @@ auto signalDataGetter(int idx, void* buf) -> ImPlotPoint {
   const auto timestamp_type = buffer->timestampDataType();
   // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-  ImPlotPoint p;
-  p.x = convert(timestamp_type, timestamp_data);
-  p.y = convert(signal_info.type, trace_data);
-  return p;
+  ImPlotPoint pt;
+  pt.x = convert(timestamp_type, timestamp_data);
+  pt.y = convert(signal_info.type, trace_data);
+  return pt;
 }
 
 //=================================================================================================
@@ -255,11 +255,11 @@ Controllables::Controllables(const std::vector<grape::probe::Signal>& signals_in
                              std::span<const std::byte> frame) {
   items_.reserve(signals_info.size());
   auto offset = 0UL;
-  for (const auto& s : signals_info) {
-    const auto count = length(s.type) * s.num_elements;
-    if (s.role == grape::probe::Signal::Role::Control) {
+  for (const auto& sig : signals_info) {
+    const auto count = length(sig.type) * sig.num_elements;
+    if (sig.role == grape::probe::Signal::Role::Control) {
       const auto data = frame.subspan(offset, count);
-      items_.emplace_back(Item{ .info = s, .data = { data.begin(), data.end() } });
+      items_.emplace_back(Item{ .info = sig, .data = { data.begin(), data.end() } });
     }
     offset += count;
   }
@@ -422,8 +422,8 @@ void Monitor::drawPlots() {
 
   const ImGuiIO& io = ImGui::GetIO();
 
-  static auto t = 0.;
-  t += static_cast<double>(io.DeltaTime);
+  static auto ts = 0.;
+  ts += static_cast<double>(io.DeltaTime);
 
   const std::shared_lock lock(impl_->signals_lock);
   if (not impl_->signals_buffer) {
@@ -447,7 +447,7 @@ void Monitor::drawPlots() {
         ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, PLOT_FILL_ALPHA);
         ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
         // TODO(vilas): X axis limits must come from time in data history rather than t
-        ImPlot::SetupAxisLimits(ImAxis_X1, t - static_cast<double>(history), t, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, ts - static_cast<double>(history), ts, ImGuiCond_Always);
         for (auto trace_number = 0U; trace_number < signal.num_elements; ++trace_number) {
           auto trace_name = std::string(signal_name);
           if (signal.num_elements > 1) {

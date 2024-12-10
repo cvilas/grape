@@ -53,7 +53,6 @@ public:
     bool is_specified{ false };
   };
 
-public:
   /// Check whether an option was specified on the command line
   /// @param key The command line option (without the '--').
   /// @return true if option is found
@@ -208,7 +207,7 @@ auto ProgramOptions::getOptionOrThrow(const std::string& key) const -> T {
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_view {
-  return enums::enum_name(code);
+  return enums::name(code);
 }
 
 //-------------------------------------------------------------------------------------------------

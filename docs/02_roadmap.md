@@ -11,22 +11,28 @@
 - Realtime services
 - Serialization
 
-## TODO
+## Dec 2024
 
-### grapecam
+- grapecam
+  - Implement grape::app. ([README](../modules/common/app/README.md))
+  - Implement [grapecam](https://github.com/cvilas/grapecam)
+  - Implement `isatty()` to identify terminal and print colored logs (see `cpptrace::istty`)
+- plot
+  - Generic plotting API and `plottable`concept
+  - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
+- Record and replay ([reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder))
+- Define behaviour for `experimental` flag in `declare_module` and implement it
+- Review [ecal](https://github.com/eclipse-ecal/ecal). Is it an alternative to zenoh?
+- delete `/tmp/ctcache-*` and fix linter warnings
+- update `clang-tidy-cache`. Does it fix linter caching problems?
 
-- Implement grape::app. ([README](../modules/common/app/README.md))
-- Implement [grapecam](https://github.com/cvilas/grapecam)
-- Study [cpptrace](https://github.com/jeremy-rifkin/cpptrace). Simplify and integrate
-- In logger, implement `isatty()` to identify whether color messages can be printed, and print in color. See `cpptrace::isatty`
+## Jan 2025
 
-### Plotting
+- Ability to create and destroy publishers and subscribers at will (required for teleop mux)
+- CANOpen support
+- Teleop controller
 
-- Requirements analysis
-- Generic plotting API and `plottable`concept
-- Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
-
-### Generalise IPC API
+## Generalise IPC API
 
 - Implement queryable/query API
 - Avoid copy in createDataCallback() by using SpliceIterator
@@ -49,7 +55,7 @@
 - Fix zenoh examples: pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
   
-### Robotics core
+## Robotics core
 
 - HW IO
   - CANopen
@@ -76,7 +82,7 @@
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
 - replace `grape::realtime::SystemError` with `std::errc`
 
-### 3D visualisation
+## 3D visualisation
 
 - Study
   - [2D Game Engine](https://pikuma.com/courses/cpp-2d-game-engine-development)
@@ -94,7 +100,7 @@
     - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
     - Implement a basic scenegraph example and check performance in MacOS and Linux
 
-### CI and build robustness
+## CI and build robustness
 
 - Fix GCC builds
   - `std::expected` not available with -DENABLE_LINTER=ON
@@ -109,7 +115,7 @@
 - Integrate cpack to generate artifacts
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 
-### Demo applications
+## Demo applications
 
 - Office environment (CO2, temperature, light) dashboard
 - Network camera and viewer for industrial monitoring

@@ -107,14 +107,14 @@ auto main(int argc, const char* argv[]) -> int {
     auto min_rtt = std::chrono::high_resolution_clock::duration::max();
     auto max_rtt = std::chrono::high_resolution_clock::duration::min();
     auto avg_rtt = std::chrono::high_resolution_clock::duration::zero();
-    for (auto& r : results) {
-      if (r < min_rtt) {
-        min_rtt = r;
+    for (auto& res : results) {
+      if (res < min_rtt) {
+        min_rtt = res;
       }
-      if (r > max_rtt) {
-        max_rtt = r;
+      if (res > max_rtt) {
+        max_rtt = res;
       }
-      avg_rtt += r;
+      avg_rtt += res;
     }
     avg_rtt = avg_rtt / static_cast<int>(results.size());
     std::println("Ping Pong rtt stats ({} pings): min={}, avg={}, max={}", num_pings, min_rtt,

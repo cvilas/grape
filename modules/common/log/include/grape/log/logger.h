@@ -83,6 +83,6 @@ struct Log {
 /// CTAD deduction guide for the above template when using defaulted source location
 /// (See https://www.cppstories.com/2021/non-terminal-variadic-args/)
 template <typename... Args>
-Log(Logger& l, Severity s, std::format_string<Args...> fmt, Args&&... args) -> Log<Args...>;
+Log(Logger& logger, Severity sev, std::format_string<Args...> fmt, Args&&... args) -> Log<Args...>;
 
 }  // namespace grape::log

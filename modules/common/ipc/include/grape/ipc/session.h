@@ -23,7 +23,7 @@ namespace grape::ipc {
 class Session {
 public:
   /// Communication modes. See https://zenoh.io/docs/getting-started/deployment/
-  enum class Mode {
+  enum class Mode : std::uint8_t {
     Peer,    //!< Connect to every other session directly
     Client,  //!< Connect to other sessions via a router
     Router   //!< Route data between clients and local subnetworks of peers
@@ -32,10 +32,9 @@ public:
   /// Session configuration parameters
   struct Config {
     Session::Mode mode{ Session::Mode::Peer };  //!< Operating mode
-    std::optional<Locator> router{};            //!< Router to connect to
+    std::optional<Locator> router;              //!< Router to connect to
   };
 
-public:
   explicit Session(const Config& config);
 
   /// @return unique ID of this session
@@ -70,7 +69,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const Session::Mode& mode) -> std::string {
-  auto mode_str = std::string(enums::enum_name(mode));
+  auto mode_str = std::string(enums::name(mode));
   std::ranges::transform(mode_str, mode_str.begin(), ::tolower);
   return mode_str;
 }

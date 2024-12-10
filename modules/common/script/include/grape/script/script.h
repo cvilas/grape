@@ -130,12 +130,12 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 constexpr auto toString(ConfigScript::Error code) -> std::string_view {
-  return enums::enum_name(code);
+  return enums::name(code);
 }
 
 //-------------------------------------------------------------------------------------------------
 constexpr auto toString(ConfigTable::Error code) -> std::string_view {
-  return enums::enum_name(code);
+  return enums::name(code);
 }
 
 //-------------------------------------------------------------------------------------------------

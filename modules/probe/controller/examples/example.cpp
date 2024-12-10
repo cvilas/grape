@@ -28,10 +28,10 @@ template <grape::probe::NumericType T>
 void print(std::string_view name, std::span<const std::byte> data) {
   const auto count = data.size_bytes() / sizeof(T);
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  const auto value = std::span<const T>(reinterpret_cast<const T*>(data.data()), count);
+  const auto values = std::span<const T>(reinterpret_cast<const T*>(data.data()), count);
   std::print("{}=[ ", name);
-  for (const auto& v : value) {
-    std::print("{} ", v);
+  for (const auto& vl : values) {
+    std::print("{} ", vl);
   }
   std::println("]");
 }
@@ -40,21 +40,21 @@ void print(std::string_view name, std::span<const std::byte> data) {
 // deserialises record
 void sink(const std::vector<grape::probe::Signal>& signals, std::span<const std::byte> data) {
   auto offset = 0UL;
-  for (const auto& s : signals) {
-    const auto size_bytes = length(s.type) * s.num_elements;
+  for (const auto& sig : signals) {
+    const auto size_bytes = length(sig.type) * sig.num_elements;
     using TID = grape::probe::TypeId;
-    switch (s.type) {
+    switch (sig.type) {
         // clang-format off
-      case TID::Int8: print<std::int8_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Uint8: print<std::uint8_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Int16: print<std::int16_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Uint16: print<std::uint16_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Int32: print<std::int32_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Uint32: print<std::uint32_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Int64: print<std::int64_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Uint64: print<std::uint64_t>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Float32: print<float>(s.name.str(), data.subspan(offset, size_bytes)); break;
-      case TID::Float64: print<double>(s.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Int8: print<std::int8_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Uint8: print<std::uint8_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Int16: print<std::int16_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Uint16: print<std::uint16_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Int32: print<std::int32_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Uint32: print<std::uint32_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Int64: print<std::int64_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Uint64: print<std::uint64_t>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Float32: print<float>(sig.name.str(), data.subspan(offset, size_bytes)); break;
+      case TID::Float64: print<double>(sig.name.str(), data.subspan(offset, size_bytes)); break;
         // clang-format on
     }
     offset += size_bytes;

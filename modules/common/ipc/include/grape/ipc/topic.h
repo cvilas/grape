@@ -10,7 +10,7 @@ namespace grape::ipc {
 
 //-------------------------------------------------------------------------------------------------
 struct Topic {
-  std::string key{};
+  std::string key;
 };
 
 }  // namespace grape::ipc

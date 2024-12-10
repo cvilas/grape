@@ -18,8 +18,8 @@ TEST_CASE("Basic logging api works", "[log]") {
 
   auto config = grape::log::Config();
   config.threshold = grape::log::Severity::Debug;
-  config.sink = [&stream](const grape::log::Record& r) {
-    stream.append(std::format("{}", r.message.cStr()));
+  config.sink = [&stream](const grape::log::Record& rec) {
+    stream.append(std::format("{}", rec.message.cStr()));
   };
   config.queue_capacity = QUEUE_CAPACITY;
 
@@ -40,8 +40,8 @@ TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
 
   auto config = grape::log::Config();
   config.threshold = grape::log::Severity::Note;
-  config.sink = [&stream](const grape::log::Record& r) {
-    stream.append(std::format("{}", r.message.cStr()));
+  config.sink = [&stream](const grape::log::Record& rec) {
+    stream.append(std::format("{}", rec.message.cStr()));
   };
   config.queue_capacity = QUEUE_CAPACITY;
 

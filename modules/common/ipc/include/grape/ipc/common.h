@@ -20,7 +20,7 @@ namespace grape::ipc {
 //=================================================================================================
 /// Defines attributes of a network connection endpoint
 struct [[nodiscard]] Locator {
-  enum class Protocol { TCP, UDP };
+  enum class Protocol : std::uint8_t { TCP, UDP };
   static constexpr auto DEFAULT_PORT = 7447;
 
   Protocol protocol{ Protocol::TCP };
@@ -47,7 +47,7 @@ struct [[nodiscard]] UUID {
 [[nodiscard]] constexpr auto toString(const Locator& loc) -> std::string {
   // ipv6 format: tcp/[fe80::2145:12c5:9fc3:3c71]:7447
   // ipv4 format: tcp/192.168.0.2:7447
-  auto proto_str = std::string(enums::enum_name(loc.protocol));
+  auto proto_str = std::string(enums::name(loc.protocol));
   std::ranges::transform(proto_str, proto_str.begin(), ::tolower);
   auto addr_str = toString(loc.address);
   if (loc.address.version == utils::IPAddress::Version::IPv6) {
@@ -59,14 +59,14 @@ struct [[nodiscard]] UUID {
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toString(const UUID& id) -> std::string {
-  return std::ranges::fold_left(id.bytes, std::string(), [](const std::string& s, std::uint8_t v) {
-    return std::format("{:02X}", v) + s;
-  });
+  return std::ranges::fold_left(
+      id.bytes, std::string(),
+      [](const std::string& str, std::uint8_t val) { return std::format("{:02X}", val) + str; });
 }
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto isDefined(const UUID& id) -> bool {
-  return std::ranges::any_of(id.bytes, [](const auto& b) { return b != 0; });
+  return std::ranges::any_of(id.bytes, [](const auto& ch) { return ch != 0; });
 }
 
 }  // namespace grape::ipc

@@ -34,22 +34,22 @@ TEST_CASE("Serialize arithmetic types", "[serdes]") {
   std::uint16_t u16{};
   std::int32_t i32{};
   std::uint64_t u64{};
-  float f{};
-  double d{};
+  float flt{};
+  double dbl{};
 
   REQUIRE(des.unpack(i8));
   REQUIRE(des.unpack(u16));
   REQUIRE(des.unpack(i32));
   REQUIRE(des.unpack(u64));
-  REQUIRE(des.unpack(f));
-  REQUIRE(des.unpack(d));
+  REQUIRE(des.unpack(flt));
+  REQUIRE(des.unpack(dbl));
 
   REQUIRE(i8 == 42);
   REQUIRE(u16 == 1000);
   REQUIRE(i32 == -123456);
   REQUIRE(u64 == 9876543210);
-  REQUIRE_THAT(static_cast<double>(f), Catch::Matchers::WithinRel(3.14, 0.0001));
-  REQUIRE_THAT(d, Catch::Matchers::WithinRel(2.71828, 0.0001));
+  REQUIRE_THAT(static_cast<double>(flt), Catch::Matchers::WithinRel(3.14, 0.0001));
+  REQUIRE_THAT(dbl, Catch::Matchers::WithinRel(2.71828, 0.0001));
 }
 
 //-------------------------------------------------------------------------------------------------

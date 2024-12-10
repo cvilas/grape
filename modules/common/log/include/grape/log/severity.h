@@ -22,7 +22,7 @@ enum class [[nodiscard]] Severity : std::uint8_t {
 };
 
 /// @return String representation of Severity
-constexpr auto toString(Severity s) -> std::string_view {
-  return enums::enum_name(s);
+constexpr auto toString(Severity sev) -> std::string_view {
+  return enums::name(sev);
 }
 }  // namespace grape::log
