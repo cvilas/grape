@@ -34,8 +34,9 @@ auto transform(const std::vector<zenoh::Id>& zids) -> std::vector<grape::ipc::UU
   auto uuids = std::vector<grape::ipc::UUID>{};
   uuids.reserve(zids.size());
 
-  std::ranges::transform(zids, std::back_inserter(uuids),
-                         [](const zenoh::Id& z) { return grape::ipc::UUID{ .bytes = z.bytes() }; });
+  std::ranges::transform(zids, std::back_inserter(uuids), [](const zenoh::Id& zid) {
+    return grape::ipc::UUID{ .bytes = zid.bytes() };
+  });
   return uuids;
 }
 

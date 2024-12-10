@@ -33,14 +33,14 @@ struct PoseStamped {
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::WritableStream OutStream>
-[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const Position& p) -> bool {
-  if (not ser.pack(p.x)) {
+[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const Position& pos) -> bool {
+  if (not ser.pack(pos.x)) {
     return false;
   }
-  if (not ser.pack(p.y)) {
+  if (not ser.pack(pos.y)) {
     return false;
   }
-  if (not ser.pack(p.z)) {
+  if (not ser.pack(pos.z)) {
     return false;
   }
   return true;
@@ -48,14 +48,14 @@ template <grape::serdes::WritableStream OutStream>
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::ReadableStream InStream>
-[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, Position& p) -> bool {
-  if (not des.unpack(p.x)) {
+[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, Position& pos) -> bool {
+  if (not des.unpack(pos.x)) {
     return false;
   }
-  if (not des.unpack(p.y)) {
+  if (not des.unpack(pos.y)) {
     return false;
   }
-  if (not des.unpack(p.z)) {
+  if (not des.unpack(pos.z)) {
     return false;
   }
   return true;
@@ -63,17 +63,17 @@ template <grape::serdes::ReadableStream InStream>
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::WritableStream OutStream>
-[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const Quaternion& q) -> bool {
-  if (not ser.pack(q.x)) {
+[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const Quaternion& qt) -> bool {
+  if (not ser.pack(qt.x)) {
     return false;
   }
-  if (not ser.pack(q.y)) {
+  if (not ser.pack(qt.y)) {
     return false;
   }
-  if (not ser.pack(q.z)) {
+  if (not ser.pack(qt.z)) {
     return false;
   }
-  if (not ser.pack(q.w)) {
+  if (not ser.pack(qt.w)) {
     return false;
   }
   return true;
@@ -81,17 +81,17 @@ template <grape::serdes::WritableStream OutStream>
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::ReadableStream InStream>
-[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, Quaternion& q) -> bool {
-  if (not des.unpack(q.x)) {
+[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, Quaternion& qt) -> bool {
+  if (not des.unpack(qt.x)) {
     return false;
   }
-  if (not des.unpack(q.y)) {
+  if (not des.unpack(qt.y)) {
     return false;
   }
-  if (not des.unpack(q.z)) {
+  if (not des.unpack(qt.z)) {
     return false;
   }
-  if (not des.unpack(q.w)) {
+  if (not des.unpack(qt.w)) {
     return false;
   }
   return true;
@@ -99,14 +99,14 @@ template <grape::serdes::ReadableStream InStream>
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::WritableStream OutStream>
-[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const PoseStamped& p) -> bool {
-  if (not ser.pack(p.nanoseconds)) {
+[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const PoseStamped& pos) -> bool {
+  if (not ser.pack(pos.nanoseconds)) {
     return false;
   }
-  if (not pack(ser, p.position)) {
+  if (not pack(ser, pos.position)) {
     return false;
   }
-  if (not pack(ser, p.orientation)) {
+  if (not pack(ser, pos.orientation)) {
     return false;
   }
   return true;
@@ -114,14 +114,14 @@ template <grape::serdes::WritableStream OutStream>
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::ReadableStream InStream>
-[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, PoseStamped& p) -> bool {
-  if (not des.unpack(p.nanoseconds)) {
+[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, PoseStamped& pos) -> bool {
+  if (not des.unpack(pos.nanoseconds)) {
     return false;
   }
-  if (not unpack(des, p.position)) {
+  if (not unpack(des, pos.position)) {
     return false;
   }
-  if (not unpack(des, p.orientation)) {
+  if (not unpack(des, pos.orientation)) {
     return false;
   }
   return true;

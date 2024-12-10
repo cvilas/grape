@@ -27,7 +27,7 @@ struct [[nodiscard]] Record {
 
 // Ensure any future changes maintains triviality for the sake of performance
 // Logger class relies on this being trivially copyable
-static_assert(std::is_trivially_copyable_v<Record> == true);
-static_assert(std::is_trivially_move_constructible_v<Record> == true);
+static_assert(std::is_trivially_copyable_v<Record>);
+static_assert(std::is_trivially_move_constructible_v<Record>);
 
 }  // namespace grape::log

@@ -56,9 +56,9 @@ auto main(int argc, const char* argv[]) -> int {
     RobotCluster robot_cluster;
     robot_cluster.configure(table);
     std::println("Cluster '{}' has following robots:", robot_cluster.name);
-    for (const auto& r : robot_cluster.members) {
-      const auto pose = r.pose;
-      std::println(" '{}' at ({}, {}, {})", r.name, pose.x, pose.y, pose.rz);
+    for (const auto& robot : robot_cluster.members) {
+      const auto pose = robot.pose;
+      std::println(" '{}' at ({}, {}, {})", robot.name, pose.x, pose.y, pose.rz);
     }
     return EXIT_SUCCESS;
   } catch (...) {

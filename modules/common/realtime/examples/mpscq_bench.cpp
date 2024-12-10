@@ -20,8 +20,8 @@ void bmMpscqPush(benchmark::State& state) {
   const auto capacity = static_cast<std::size_t>(state.max_iterations);
   auto queue = grape::realtime::MPSCQueue<Item>(capacity);
 
-  for (auto s : state) {
-    (void)s;
+  for (auto st : state) {
+    (void)st;
     if (not queue.tryPush(Item{})) {
       throw std::runtime_error("tryPush failed");
     }
@@ -41,8 +41,8 @@ void bmMpscqPop(benchmark::State& state) {
     }
   }
 
-  for (auto s : state) {
-    (void)s;
+  for (auto st : state) {
+    (void)st;
     auto item = queue.tryPop();
     benchmark::DoNotOptimize(item);
     if (not item.has_value()) {

@@ -12,8 +12,7 @@ namespace {
 enum class Error : uint8_t { Bad, RealBad };
 
 void functionThatThrows() {
-  grape::panic<grape::Exception>(
-      std::format("Boom!! [{}]", grape::enums::enum_name(Error::RealBad)));
+  grape::panic<grape::Exception>(std::format("Boom!! [{}]", grape::enums::name(Error::RealBad)));
 }
 
 void doWork() {

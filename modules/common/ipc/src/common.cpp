@@ -27,7 +27,7 @@ auto Locator::fromString(const std::string& loc_str) -> std::optional<Locator> {
   // Extract protocol
   auto protocol_str = loc_str.substr(0, protocol_sep_pos);
   std::ranges::transform(protocol_str, protocol_str.begin(), ::toupper);
-  const auto protocol = enums::enum_cast<Locator::Protocol>(protocol_str);
+  const auto protocol = enums::cast<Locator::Protocol>(protocol_str);
   if (not protocol) {
     return std::nullopt;
   }

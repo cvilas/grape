@@ -31,7 +31,7 @@ ConfigScript::ConfigScript(const std::filesystem::path& script_path) : ConfigScr
 
 //-------------------------------------------------------------------------------------------------
 ConfigScript::ConfigScript()
-  : lua_state_(std::shared_ptr<lua_State>(luaL_newstate(), [](lua_State* s) { exitLua(s); })) {
+  : lua_state_(std::shared_ptr<lua_State>(luaL_newstate(), [](lua_State* st) { exitLua(st); })) {
   luaL_openlibs(lua_state_.get());
 }
 
@@ -269,8 +269,9 @@ auto ConfigTable::readString(const std::string& key) const
 //-------------------------------------------------------------------------------------------------
 auto ConfigTable::readTable(const std::string& key) const
     -> std::expected<ConfigTable, ConfigTable::Error> {
-  const auto on_success = [this](const ConfigTableDetail& d) -> std::expected<ConfigTable, Error> {
-    return ConfigTable(this->lua_state_, d.table_reference);
+  const auto on_success =
+      [this](const ConfigTableDetail& det) -> std::expected<ConfigTable, Error> {
+    return ConfigTable(this->lua_state_, det.table_reference);
   };
   const auto on_fail = [](const ConfigTable::Error& error) -> std::expected<ConfigTable, Error> {
     return std::unexpected(error);
@@ -302,8 +303,9 @@ auto ConfigTable::readString(size_t index) const -> std::expected<std::string, C
 
 //-------------------------------------------------------------------------------------------------
 auto ConfigTable::readTable(size_t index) const -> std::expected<ConfigTable, ConfigTable::Error> {
-  const auto on_success = [this](const ConfigTableDetail& d) -> std::expected<ConfigTable, Error> {
-    return ConfigTable(this->lua_state_, d.table_reference);
+  const auto on_success =
+      [this](const ConfigTableDetail& det) -> std::expected<ConfigTable, Error> {
+    return ConfigTable(this->lua_state_, det.table_reference);
   };
   const auto on_fail = [](const auto& error) -> std::expected<ConfigTable, Error> {
     return std::unexpected(error);

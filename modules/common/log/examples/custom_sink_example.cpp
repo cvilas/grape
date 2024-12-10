@@ -15,8 +15,8 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     auto log_file = std::ofstream("logs.txt");
     grape::log::Config config;
-    config.sink = [&log_file](const grape::log::Record& r) {
-      log_file << std::format("[{}] {}\n", r.timestamp, r.message.cStr());
+    config.sink = [&log_file](const grape::log::Record& rec) {
+      log_file << std::format("[{}] {}\n", rec.timestamp, rec.message.cStr());
     };
 
     auto logger = grape::log::Logger(std::move(config));

@@ -31,16 +31,16 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   const auto& signals = pins.signals();
 
   // check pins are sorted by address and role
-  const auto sort_predicate = [](const Signal& a, const Signal& b) {
-    if (a.role == b.role) {
-      return (a.address < b.address);
+  const auto sort_predicate = [](const Signal& sig_a, const Signal& sig_b) {
+    if (sig_a.role == sig_b.role) {
+      return (sig_a.address < sig_b.address);
     }
-    return (a.role < b.role);
+    return (sig_a.role < sig_b.role);
   };
 
   CHECK(std::ranges::is_sorted(signals, sort_predicate));
   CHECK(std::ranges::all_of(controllables,
-                            [r = Role::Control](const auto& s) { return s.role == r; }));
+                            [role = Role::Control](const auto& sig) { return sig.role == role; }));
 
   // configure the capture buffers
   static constexpr auto BUFFER_CONFIG = grape::probe::BufferConfig{

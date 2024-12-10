@@ -83,9 +83,10 @@ auto ProgramDescription::parse(int argc, const char** argv) const
   }
 
   // Check for duplicate declarations
-  std::ranges::sort(tmp_options, [](const auto& a, const auto& b) { return a.key < b.key; });
+  std::ranges::sort(tmp_options,
+                    [](const auto& opt_a, const auto& opt_b) { return opt_a.key < opt_b.key; });
   const auto dup_it = std::ranges::adjacent_find(
-      tmp_options, [](const auto& a, const auto& b) { return a.key == b.key; });
+      tmp_options, [](const auto& opt_a, const auto& opt_b) { return opt_a.key == opt_b.key; });
   if (dup_it != tmp_options.end()) {
     return std::unexpected(Error{ .code = Error::Code::Redeclared, .key = dup_it->key });
   }

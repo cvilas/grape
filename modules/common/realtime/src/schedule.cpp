@@ -55,8 +55,8 @@ auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> SystemErro
 #ifdef __linux__
   cpu_set_t mask;
   CPU_ZERO(&mask);
-  for (const auto i : cpus) {
-    CPU_SET(i, &mask);
+  for (const auto cpu_no : cpus) {
+    CPU_SET(cpu_no, &mask);
   }
   if (0 != sched_setaffinity(pid, sizeof(mask), &mask)) {
     return SystemError{ .code = errno, .function_name = "sched_setaffinity" };

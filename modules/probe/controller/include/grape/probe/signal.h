@@ -32,7 +32,7 @@ struct Signal {
 };
 
 // Ensure any future changes maintains triviality for the sake of performance
-static_assert(std::is_trivially_copyable_v<Signal> == true);
-static_assert(std::is_trivially_move_constructible_v<Signal> == true);
+static_assert(std::is_trivially_copyable_v<Signal>);
+static_assert(std::is_trivially_move_constructible_v<Signal>);
 
 }  // namespace grape::probe

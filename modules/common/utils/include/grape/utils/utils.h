@@ -52,7 +52,7 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 template <typename T>
 constexpr auto getTypeName() -> std::string_view {
   // From https://stackoverflow.com/a/35943472/9929294
-  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic,readability-identifier-length)
   // clang-format off
   char const* p = __PRETTY_FUNCTION__;
   while (*p++ != '='){}
@@ -67,7 +67,7 @@ constexpr auto getTypeName() -> std::string_view {
     }
   }
   // clang-format on
-  // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic,readability-identifier-length)
   return {};
 }
 

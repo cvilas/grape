@@ -39,9 +39,9 @@ auto getHostName() -> std::string {
 //-------------------------------------------------------------------------------------------------
 auto IPAddress::fromString(const std::string& ip_str) -> std::optional<IPAddress> {
   IPAddress addr;
-  const auto af = ((ip_str.find('.') == std::string::npos) ? AF_INET6 : AF_INET);
-  addr.version = ((af == AF_INET) ? IPAddress::Version::IPv4 : IPAddress::Version::IPv6);
-  const auto ret = inet_pton(af, ip_str.c_str(), addr.bytes.data());
+  const auto af_id = ((ip_str.find('.') == std::string::npos) ? AF_INET6 : AF_INET);
+  addr.version = ((af_id == AF_INET) ? IPAddress::Version::IPv4 : IPAddress::Version::IPv6);
+  const auto ret = inet_pton(af_id, ip_str.c_str(), addr.bytes.data());
   if (ret == 1) {
     return addr;
   }
@@ -51,8 +51,8 @@ auto IPAddress::fromString(const std::string& ip_str) -> std::optional<IPAddress
 //-------------------------------------------------------------------------------------------------
 auto toString(const IPAddress& addr) -> std::string {
   auto ip_str = std::array<char, INET6_ADDRSTRLEN>{ 0 };
-  const auto af = ((addr.version == IPAddress::Version::IPv4) ? AF_INET : AF_INET6);
-  if (inet_ntop(af, addr.bytes.data(), ip_str.data(), INET6_ADDRSTRLEN) == ip_str.data()) {
+  const auto af_id = ((addr.version == IPAddress::Version::IPv4) ? AF_INET : AF_INET6);
+  if (inet_ntop(af_id, addr.bytes.data(), ip_str.data(), INET6_ADDRSTRLEN) == ip_str.data()) {
     return { ip_str.data() };
   }
   return {};

@@ -18,8 +18,8 @@ using Signal = grape::probe::Signal;
 /// Calculates memory size required to capture a snapshot frame
 auto calcSnapFrameSize(const std::vector<Signal>& signals) -> std::size_t {
   return std::accumulate(std::begin(signals), std::end(signals), std::size_t{ 0U },
-                         [](const std::uint32_t& a, const Signal& b) {
-                           return a + (length(b.type) * b.num_elements);
+                         [](const std::uint32_t& acc, const Signal& sig) {
+                           return acc + (length(sig.type) * sig.num_elements);
                          });
 }
 
@@ -30,9 +30,9 @@ auto calcSyncFrameSize(const std::vector<Signal>& signals) -> std::size_t {
   // - offset : offset into signals array
   // - N     : size in bytes of the largest control variable
   std::size_t max_data_size = 0;
-  for (const auto& s : signals) {
-    if (s.role == Signal::Role::Control) {
-      max_data_size = std::max(max_data_size, length(s.type) * s.num_elements);
+  for (const auto& sig : signals) {
+    if (sig.role == Signal::Role::Control) {
+      max_data_size = std::max(max_data_size, length(sig.type) * sig.num_elements);
     }
   }
   using SignalVectorOffset =
@@ -64,7 +64,7 @@ auto PinConfig::sort() -> std::ranges::subrange<std::vector<Signal>::const_itera
 
   // return sub-range of Role::Control
   return std::ranges::equal_range(signals_, Signal::Role::Control, {},
-                                  [](const auto& s) { return s.role; });
+                                  [](const auto& sig) { return sig.role; });
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -84,8 +84,8 @@ auto Controller::snap() -> Error {
   const auto writer = [&signals = pins_.signals(), &buffer_check](std::span<std::byte> buffer) {
     auto offset = 0UL;
     const auto buffer_size = buffer.size_bytes();
-    for (const auto& s : signals) {
-      const auto count = length(s.type) * s.num_elements;
+    for (const auto& sig : signals) {
+      const auto count = length(sig.type) * sig.num_elements;
       auto* dest = static_cast<void*>(buffer.data() + offset);
       offset += count;
       if (offset > buffer_size) {
@@ -93,7 +93,7 @@ auto Controller::snap() -> Error {
         return;
       }
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
-      const auto* src = reinterpret_cast<void*>(s.address);
+      const auto* src = reinterpret_cast<void*>(sig.address);
       std::memcpy(dest, src, count);
     }
   };
@@ -143,8 +143,8 @@ void Controller::sync() {
 auto Controller::qset(const std::string& name, std::span<const std::byte> value) -> Error {
   const auto& signals = pins_.signals();
 
-  const auto it = std::ranges::find_if(controllables_,
-                                       [&name](const auto& s) { return (name == s.name.cStr()); });
+  const auto it = std::ranges::find_if(
+      controllables_, [&name](const auto& sig) { return (name == sig.name.cStr()); });
 
   if (it == signals.end()) {
     return Error::SignalNotFound;

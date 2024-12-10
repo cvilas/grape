@@ -50,7 +50,7 @@ TEST_CASE("Parses compressed IPv6 address strings to IPAddress", "[IPAddress]") 
     REQUIRE(ip.has_value());
     REQUIRE(ip->version == grape::utils::IPAddress::Version::IPv6);
     REQUIRE(std::all_of(ip->bytes.begin(), ip->bytes.end() - 1,
-                        [](const auto& v) { return (v == 0); }));
+                        [](const auto& vl) { return (vl == 0); }));
     REQUIRE(ip->bytes[15] == 0x01);
   }
 
@@ -63,7 +63,7 @@ TEST_CASE("Parses compressed IPv6 address strings to IPAddress", "[IPAddress]") 
     REQUIRE(ip->bytes[2] == 0x0d);
     REQUIRE(ip->bytes[3] == 0xb8);
     REQUIRE(std::all_of(ip->bytes.begin() + 4, ip->bytes.end(),
-                        [](const auto& v) { return (v == 0); }));
+                        [](const auto& vl) { return (vl == 0); }));
   }
 
   SECTION("Multiple compressed sections") {

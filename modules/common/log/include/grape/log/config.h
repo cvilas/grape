@@ -14,7 +14,7 @@ namespace grape::log {
 struct Config {
   static constexpr auto DEFAULT_QUEUE_CAPACITY = 1000U;
   static constexpr auto DEFAULT_FLUSH_PERIOD = std::chrono::microseconds(1000);
-  using Sink = std::function<void(const Record& r)>;
+  using Sink = std::function<void(const Record& record)>;
 
   /// Threshold severity at which messages are logged. Eg: if set to 'Warn', only 'Warn', 'Error'
   /// and 'Critical' messages are logged

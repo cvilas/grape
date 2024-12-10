@@ -165,11 +165,11 @@ public:
     data_.reserve(max_size_);
   }
 
-  void addPoint(float x, float y) {
+  void addPoint(float x_val, float y_val) {
     if (data_.size() < max_size_) {
-      data_.push_back(ImVec2(x, y));
+      data_.push_back(ImVec2(x_val, y_val));
     } else {
-      data_[offset_] = ImVec2(x, y);
+      data_[offset_] = ImVec2(x_val, y_val);
       offset_ = (offset_ + 1) % max_size_;
     }
   }
@@ -202,10 +202,10 @@ void ImplotExample::demoRealtimePlot() {
   static ScrollingBuffer mybf(2000);
   const ImVec2 mouse = ImGui::GetMousePos();
   const ImGuiIO& io = ImGui::GetIO();
-  static auto t = 0.F;
-  t += io.DeltaTime;
-  mxbf.addPoint(t, mouse.x * 0.0005F);
-  mybf.addPoint(t, mouse.y * 0.0005F);
+  static auto ts = 0.F;
+  ts += io.DeltaTime;
+  mxbf.addPoint(ts, mouse.x * 0.0005F);
+  mybf.addPoint(ts, mouse.y * 0.0005F);
 
   static float history = 10.0F;
   ImGui::SliderFloat("History", &history, 1, 30, "%.1f s");
@@ -214,7 +214,7 @@ void ImplotExample::demoRealtimePlot() {
 
   if (ImPlot::BeginPlot("##Scrolling", ImVec2(-1, 150))) {
     ImPlot::SetupAxes(nullptr, nullptr, flags, flags);
-    ImPlot::SetupAxisLimits(ImAxis_X1, static_cast<double>(t - history), static_cast<double>(t),
+    ImPlot::SetupAxisLimits(ImAxis_X1, static_cast<double>(ts - history), static_cast<double>(ts),
                             ImGuiCond_Always);
     ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
     ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5F);

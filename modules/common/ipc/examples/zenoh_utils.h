@@ -18,7 +18,7 @@ namespace grape::ipc::ex {
 [[nodiscard]] inline auto toString(const zenoh::Id& id) -> std::string {
   return std::accumulate(
       std::begin(id.bytes()), std::end(id.bytes()), std::string(),
-      [](const std::string& s, std::uint8_t v) { return std::format("{:02X}", v) + s; });
+      [](const std::string& str, std::uint8_t val) { return std::format("{:02X}", val) + str; });
 }
 
 //-------------------------------------------------------------------------------------------------
