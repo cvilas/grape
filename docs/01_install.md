@@ -76,6 +76,8 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-19 gcc-14
 
     ```bash
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+    . "$HOME/.cargo/env"
     
     # install toolchains for X86_64 and Aarch64
     rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu

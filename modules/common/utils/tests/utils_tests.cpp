@@ -5,6 +5,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/utils/utils.h"
 
+namespace my_ns {
+template <typename T>
+struct CustomType {};
+}  // namespace my_ns
+
 namespace {
 
 //-------------------------------------------------------------------------------------------------
@@ -16,4 +21,11 @@ TEST_CASE("string trimming") {
   constexpr auto EXPECTED = "to/some/file";
   CHECK(TRUNCATED == EXPECTED);
 }
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("get type name") {
+  CHECK("int" == grape::utils::getTypeName<int>());
+  CHECK("my_ns::CustomType<int>" == grape::utils::getTypeName<my_ns::CustomType<int>>());
+}
+
 }  // namespace

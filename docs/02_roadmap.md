@@ -30,7 +30,9 @@
 ## Generalise IPC API
 
 - Implement queryable/query API
-- Avoid copy in createDataCallback() by using SpliceIterator
+- Avoid copy in createDataCallback()
+  - Support Bytes::get_contiguous_view for contiguous payload
+  - Support SpliceIterator for non-contiguous payload
 - Implement liveliness API
 - Implement shared memory API
 - Implement caching API
@@ -92,6 +94,7 @@
   - Design scene description format using our scripting engine
     - Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scnegraph
   - Design scenegraph library using existing khronos libs
+    - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
     - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
     - Implement a basic scenegraph example and check performance in MacOS and Linux
 
@@ -107,6 +110,10 @@
 - Integrate cpack to generate artifacts
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Support GCC builds without restrictions
+
+## Other
+
+- Integrate JSON serialisation and reflection using [glaze](https://github.com/stephenberry/glaze)
 
 ## Demo applications
 

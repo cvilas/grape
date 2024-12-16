@@ -62,6 +62,7 @@ constexpr auto getTypeName() -> std::string_view {
   for (;; ++p2) {
     switch (*p2) {
       case '[': ++count; break;
+      case ';': [[fallthrough]];
       case ']': --count; if (!count) { return { p, static_cast<std::size_t>(p2 - p) }; } break;
       default: break;
     }
