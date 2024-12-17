@@ -15,7 +15,7 @@ namespace grape::log {
 /// Default log sink implementation. Just writes to standard error output
 inline void defaultSink(const Record& rec) {
   if (::isatty(STDERR_FILENO) != 0) {  // color format the logs if going to terminal
-    const auto color = [](Severity sev) -> std::string_view {
+    const auto* const color = [](Severity sev) {
       switch (sev) {
           // clang-format off
         case Severity::Critical: return "\033[37;41m";  // white on red
@@ -26,6 +26,7 @@ inline void defaultSink(const Record& rec) {
         case Severity::Debug: return "";
           // clang-format on
       }
+      return "";
     }(rec.severity);
     static constexpr auto RESET_COLOR = "\033[0m";
     std::println(stderr, "{}{}{}", color, defaultFormatter(rec), RESET_COLOR);

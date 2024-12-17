@@ -55,8 +55,8 @@ auto main(int argc, const char* argv[]) -> int {
         const auto attachments =
             zenoh::ext::deserialize<std::unordered_map<std::string, std::string>>(
                 maybe_attachments->get());
-        for (auto&& [k, v] : attachments) {
-          std::println("   attachment: {}: {}", k, v);
+        for (auto&& [kk, vv] : attachments) {
+          std::println("   attachment: {}: {}", kk, vv);
         }
       }
       return true;

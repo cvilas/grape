@@ -76,6 +76,8 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-19 gcc-14
 
     ```bash
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+    . "$HOME/.cargo/env"
     
     # install toolchains for X86_64 and Aarch64
     rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
@@ -100,7 +102,7 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-19 gcc-14
 
 ## Configure and build
 
-Note (Nov 2024): Clang toolchain is recommended to build the project:
+Note (Dec 2024): Clang toolchain is recommended to build the project:
 
 ```bash
 git clone git@github.com:cvilas/grape
@@ -110,12 +112,13 @@ cmake .. -DBUILD_MODULES=all -DCMAKE_TOOLCHAIN_FILE=$PWD/../toolchains/toolchain
 ninja
 ```
 
-With GCC, your mileage may vary. Try building the project as follows
+With gcc, use `Makefile` instead of `ninja` to build libraries and tests. Some examples do not build
+because libstdc++ does not support formatted printing over containers
 
 ```bash
 git clone git@github.com:cvilas/grape
 mkdir -p grape/build_gcc
 cd grape/build_gcc
-cmake .. -DBUILD_MODULES=all -DENABLE_LINTER=OFF -DENABLE_CACHE=OFF -GNinja
-ninja
+cmake .. -DBUILD_MODULES=all
+make -j8
 ```
