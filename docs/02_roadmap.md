@@ -108,6 +108,10 @@
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Support GCC builds without restrictions
 
+## Other
+
+- Integrate JSON serialisation and reflection using [glaze](https://github.com/stephenberry/glaze)
+
 ## Demo applications
 
 - Office environment (CO2, temperature, light) dashboard
