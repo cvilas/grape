@@ -92,6 +92,7 @@
   - Design scene description format using our scripting engine
     - Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scnegraph
   - Design scenegraph library using existing khronos libs
+    - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
     - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
     - Implement a basic scenegraph example and check performance in MacOS and Linux
 
