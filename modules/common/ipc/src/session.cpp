@@ -12,7 +12,9 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 auto transform(const grape::ipc::Session::Config& config) -> zenoh::Config {
   auto zconfig = zenoh::Config::create_default();
-  zconfig.insert_json5(Z_CONFIG_MODE_KEY, std::format(R"("{}")", toString(config.mode)));
+  auto mode_str = std::string(toString(config.mode));
+  std::ranges::transform(mode_str, mode_str.begin(), ::tolower);
+  zconfig.insert_json5(Z_CONFIG_MODE_KEY, std::format(R"("{}")", mode_str));
   const auto is_router_specified = config.router.has_value();
   if (config.mode == grape::ipc::Session::Mode::Client and not is_router_specified) {
     grape::panic<grape::Exception>("'Client' mode requires 'router' to be specified");
