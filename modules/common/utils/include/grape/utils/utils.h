@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <cstdlib>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -51,24 +50,11 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 /// @return user-readable name for specified type
 template <typename T>
 constexpr auto getTypeName() -> std::string_view {
-  // From https://stackoverflow.com/a/35943472/9929294
-  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic,readability-identifier-length)
-  // clang-format off
-  char const* p = __PRETTY_FUNCTION__;
-  while (*p++ != '='){}
-  for (; *p == ' '; ++p){}
-  char const* p2 = p;
-  int count = 1;
-  for (;; ++p2) {
-    switch (*p2) {
-      case '[': ++count; break;
-      case ']': --count; if (!count) { return { p, static_cast<std::size_t>(p2 - p) }; } break;
-      default: break;
-    }
-  }
-  // clang-format on
-  // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic,readability-identifier-length)
-  return {};
+  constexpr std::string_view FUNCTION_NAME = __PRETTY_FUNCTION__;
+  constexpr std::string_view PREFIX = "T = ";
+  constexpr auto START = FUNCTION_NAME.find(PREFIX) + PREFIX.size();
+  constexpr auto END = FUNCTION_NAME.find_first_of("];", START);
+  return FUNCTION_NAME.substr(START, END - START);
 }
 
 }  // namespace grape::utils

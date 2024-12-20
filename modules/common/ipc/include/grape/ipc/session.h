@@ -68,10 +68,8 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-[[nodiscard]] constexpr auto toString(const Session::Mode& mode) -> std::string {
-  auto mode_str = std::string(enums::name(mode));
-  std::ranges::transform(mode_str, mode_str.begin(), ::tolower);
-  return mode_str;
+[[nodiscard]] constexpr auto toString(const Session::Mode& mode) -> std::string_view {
+  return enums::name(mode);
 }
 
 }  // namespace grape::ipc

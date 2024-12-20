@@ -80,8 +80,8 @@ inline auto FIFOBuffer::visitToWrite(const WriterFunc& func) -> bool {
   assert(not readability_flag.test(std::memory_order_acquire));
 
   // write frame
-  const auto frame_offset = static_cast<std::int64_t>(head * config_.frame_length);
-  const auto frame_start = std::next(std::begin(buffer_), frame_offset);
+  const auto frame_offset = head * config_.frame_length;
+  const auto frame_start = std::next(std::begin(buffer_), static_cast<std::int64_t>(frame_offset));
   func(std::span{ frame_start, config_.frame_length });
   readability_flag.test_and_set(std::memory_order_release);
 
@@ -98,8 +98,8 @@ inline auto FIFOBuffer::visitToRead(const ReaderFunc& func) -> bool {
 
   // read frame
   readability_flag.clear(std::memory_order_release);
-  const auto frame_offset = static_cast<std::int64_t>(tail_ * config_.frame_length);
-  const auto frame_start = std::next(std::begin(buffer_), frame_offset);
+  const auto frame_offset = tail_ * config_.frame_length;
+  const auto frame_start = std::next(std::begin(buffer_), static_cast<std::int64_t>(frame_offset));
   func(std::span{ frame_start, config_.frame_length });
 
   if (++tail_ >= config_.num_frames) {
