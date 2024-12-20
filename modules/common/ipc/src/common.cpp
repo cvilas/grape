@@ -4,7 +4,7 @@
 
 #include "grape/ipc/common.h"
 
-#include <limits>
+#include <charconv>
 
 #include "grape/utils/enums.h"
 
@@ -44,14 +44,16 @@ auto Locator::fromString(const std::string& loc_str) -> std::optional<Locator> {
 
   // Extract port
   int port{};
-  try {
-    const auto port_str = loc_str.substr(port_sep_pos + 1);
-    port = std::stoi(port_str);
-    if ((port < std::numeric_limits<std::uint16_t>::min()) or
-        (port > std::numeric_limits<std::uint16_t>::max())) {
-      return std::nullopt;
-    }
-  } catch (...) {
+  const auto port_str = loc_str.substr(port_sep_pos + 1);
+  const auto port_str_len = port_str.length();
+  const auto [ptr, ec] = std::from_chars(
+      port_str.data(),                 //
+      port_str.data() + port_str_len,  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      port);
+  static constexpr auto MIN_PORT = 1U;
+  static constexpr auto MAX_PORT = 0xFFFFU;
+  port = std::stoi(port_str);
+  if (ec != std::errc() or std::cmp_less(port, MIN_PORT) or std::cmp_greater(port, MAX_PORT)) {
     return std::nullopt;
   }
 

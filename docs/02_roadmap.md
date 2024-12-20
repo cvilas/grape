@@ -13,32 +13,26 @@
 
 ## Dec 2024
 
-- Cross compile for Arm64 from X86 
-  - with gcc toolchain
-  - with clang toolchain
 - grapecam
   - Implement grape::app. ([README](../modules/common/app/README.md))
   - Implement [grapecam](https://github.com/cvilas/grapecam)
-  - Implement `isatty()` to identify terminal and print colored logs (see `cpptrace::istty`)
 - plot
   - Generic plotting API and `plottable`concept
   - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
 - Record and replay ([reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder))
 - Define behaviour for `experimental` flag in `declare_module` and implement it
-- Review [ecal](https://github.com/eclipse-ecal/ecal). Is it an alternative to zenoh?
-- delete `/tmp/ctcache-*` and fix linter warnings
-- update `clang-tidy-cache`. Does it fix linter caching problems?
 
 ## Jan 2025
 
-- Ability to create and destroy publishers and subscribers at will (required for teleop mux)
 - CANOpen support
 - Teleop controller
 
 ## Generalise IPC API
 
 - Implement queryable/query API
-- Avoid copy in createDataCallback() by using SpliceIterator
+- Avoid copy in createDataCallback()
+  - Support Bytes::get_contiguous_view for contiguous payload
+  - Support SpliceIterator for non-contiguous payload
 - Implement liveliness API
 - Implement shared memory API
 - Implement caching API
@@ -100,14 +94,12 @@
   - Design scene description format using our scripting engine
     - Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scnegraph
   - Design scenegraph library using existing khronos libs
+    - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
     - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
     - Implement a basic scenegraph example and check performance in MacOS and Linux
 
 ## CI and build robustness
 
-- Fix GCC builds
-  - `std::expected` not available with -DENABLE_LINTER=ON
-  - sccache breaks build with -DENABLE_CACHE=ON
 - Setup configuration presets for developer and CI builds
   - Incorporate lessons from https://youtu.be/UI_QayAb9U0
   - Fail the CI if clang-format changes code
@@ -117,6 +109,11 @@
 - Implement CI build using github workflow  
 - Integrate cpack to generate artifacts
 - Integrate [ninjatracing](https://github.com/nico/ninjatracing)
+- Support GCC builds without restrictions
+
+## Other
+
+- Integrate JSON serialisation and reflection using [glaze](https://github.com/stephenberry/glaze)
 
 ## Demo applications
 
