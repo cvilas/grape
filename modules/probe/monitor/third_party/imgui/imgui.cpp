@@ -1,4 +1,4 @@
-// dear imgui, v1.91.5
+// dear imgui, v1.91.7 WIP
 // (main code and documentation)
 
 // Help:
@@ -429,6 +429,9 @@ CODE
  When you are not sure about an old symbol or function name, try using the Search/Find function of your IDE to look for comments or references in all imgui files.
  You can read releases logs https://github.com/ocornut/imgui/releases for more details.
 
+ - 2024/11/27 (1.91.6) - changed CRC32 table from CRC32-adler to CRC32c polynomial in order to be compatible with the result of SSE 4.2 instructions.
+                         As a result, old .ini data may be partially lost (docking and tables information particularly).
+                         Because some users have crafted and storing .ini data as a way to workaround limitations of the docking API, we are providing a '#define IMGUI_USE_LEGACY_CRC32_ADLER' compile-time option to keep using old CRC32 tables if you cannot afford invalidating old .ini data.
  - 2024/11/06 (1.91.5) - commented/obsoleted out pre-1.87 IO system (equivalent to using IMGUI_DISABLE_OBSOLETE_KEYIO or IMGUI_DISABLE_OBSOLETE_FUNCTIONS before)
                             - io.KeyMap[] and io.KeysDown[] are removed (obsoleted February 2022).
                             - io.NavInputs[] and ImGuiNavInput are removed (obsoleted July 2022).
@@ -1092,7 +1095,7 @@ CODE
 #else
 #include <windows.h>
 #endif
-#if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP || WINAPI_FAMILY == WINAPI_FAMILY_GAMES)
+#if defined(WINAPI_FAMILY) && ((defined(WINAPI_FAMILY_APP) && WINAPI_FAMILY == WINAPI_FAMILY_APP) || (defined(WINAPI_FAMILY_GAMES) && WINAPI_FAMILY == WINAPI_FAMILY_GAMES))
 // The UWP and GDK Win32 API subsets don't support clipboard nor IME functions
 #define IMGUI_DISABLE_WIN32_DEFAULT_CLIPBOARD_FUNCTIONS
 #define IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS
@@ -1141,12 +1144,14 @@ CODE
 #pragma GCC diagnostic ignored "-Wpragmas"                          // warning: unknown option after '#pragma GCC diagnostic' kind
 #pragma GCC diagnostic ignored "-Wunused-function"                  // warning: 'xxxx' defined but not used
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"              // warning: cast to pointer from integer of different size
-#pragma GCC diagnostic ignored "-Wformat"                           // warning: format '%p' expects argument of type 'void*', but argument 6 has type 'ImGuiWindow*'
+#pragma GCC diagnostic ignored "-Wfloat-equal"                      // warning: comparing floating-point with '==' or '!=' is unsafe
+#pragma GCC diagnostic ignored "-Wformat"                           // warning: format '%p' expects argument of type 'int'/'void*', but argument X has type 'unsigned int'/'ImGuiWindow*'
 #pragma GCC diagnostic ignored "-Wdouble-promotion"                 // warning: implicit conversion from 'float' to 'double' when passing argument to function
 #pragma GCC diagnostic ignored "-Wconversion"                       // warning: conversion to 'xxxx' from 'xxxx' may alter its value
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"                // warning: format not a string literal, format string not checked
 #pragma GCC diagnostic ignored "-Wstrict-overflow"                  // warning: assuming signed overflow does not occur when assuming that (X - c) > X is always false
 #pragma GCC diagnostic ignored "-Wclass-memaccess"                  // [__GNUC__ >= 8] warning: 'memset/memcpy' clearing/writing an object of type 'xxxx' with no trivial copy-assignment; use assignment or value-initialization instead
+#pragma GCC diagnostic ignored "-Wcast-qual"                        // warning: cast from type 'const xxxx *' to type 'xxxx *' casts away qualifiers
 #endif
 
 // Debug options
@@ -2149,11 +2154,14 @@ void ImFormatStringToTempBufferV(const char** out_buf, const char** out_buf_end,
     }
 }
 
+#ifndef IMGUI_ENABLE_SSE4_2_CRC
 // CRC32 needs a 1KB lookup table (not cache friendly)
 // Although the code to generate the table is simple and shorter than the table itself, using a const table allows us to easily:
 // - avoid an unnecessary branch/memory tap, - keep the ImHashXXX functions usable by static constructors, - make it thread-safe.
 static const ImU32 GCrc32LookupTable[256] =
 {
+#ifdef IMGUI_USE_LEGACY_CRC32_ADLER
+    // Legacy CRC32-adler table used pre 1.91.6 (before 2024/11/27). Only use if you cannot afford invalidating old .ini data.
     0x00000000,0x77073096,0xEE0E612C,0x990951BA,0x076DC419,0x706AF48F,0xE963A535,0x9E6495A3,0x0EDB8832,0x79DCB8A4,0xE0D5E91E,0x97D2D988,0x09B64C2B,0x7EB17CBD,0xE7B82D07,0x90BF1D91,
     0x1DB71064,0x6AB020F2,0xF3B97148,0x84BE41DE,0x1ADAD47D,0x6DDDE4EB,0xF4D4B551,0x83D385C7,0x136C9856,0x646BA8C0,0xFD62F97A,0x8A65C9EC,0x14015C4F,0x63066CD9,0xFA0F3D63,0x8D080DF5,
     0x3B6E20C8,0x4C69105E,0xD56041E4,0xA2677172,0x3C03E4D1,0x4B04D447,0xD20D85FD,0xA50AB56B,0x35B5A8FA,0x42B2986C,0xDBBBC9D6,0xACBCF940,0x32D86CE3,0x45DF5C75,0xDCD60DCF,0xABD13D59,
@@ -2170,7 +2178,27 @@ static const ImU32 GCrc32LookupTable[256] =
     0x86D3D2D4,0xF1D4E242,0x68DDB3F8,0x1FDA836E,0x81BE16CD,0xF6B9265B,0x6FB077E1,0x18B74777,0x88085AE6,0xFF0F6A70,0x66063BCA,0x11010B5C,0x8F659EFF,0xF862AE69,0x616BFFD3,0x166CCF45,
     0xA00AE278,0xD70DD2EE,0x4E048354,0x3903B3C2,0xA7672661,0xD06016F7,0x4969474D,0x3E6E77DB,0xAED16A4A,0xD9D65ADC,0x40DF0B66,0x37D83BF0,0xA9BCAE53,0xDEBB9EC5,0x47B2CF7F,0x30B5FFE9,
     0xBDBDF21C,0xCABAC28A,0x53B39330,0x24B4A3A6,0xBAD03605,0xCDD70693,0x54DE5729,0x23D967BF,0xB3667A2E,0xC4614AB8,0x5D681B02,0x2A6F2B94,0xB40BBE37,0xC30C8EA1,0x5A05DF1B,0x2D02EF8D,
+#else
+    // CRC32c table compatible with SSE 4.2 instructions
+    0x00000000,0xF26B8303,0xE13B70F7,0x1350F3F4,0xC79A971F,0x35F1141C,0x26A1E7E8,0xD4CA64EB,0x8AD958CF,0x78B2DBCC,0x6BE22838,0x9989AB3B,0x4D43CFD0,0xBF284CD3,0xAC78BF27,0x5E133C24,
+    0x105EC76F,0xE235446C,0xF165B798,0x030E349B,0xD7C45070,0x25AFD373,0x36FF2087,0xC494A384,0x9A879FA0,0x68EC1CA3,0x7BBCEF57,0x89D76C54,0x5D1D08BF,0xAF768BBC,0xBC267848,0x4E4DFB4B,
+    0x20BD8EDE,0xD2D60DDD,0xC186FE29,0x33ED7D2A,0xE72719C1,0x154C9AC2,0x061C6936,0xF477EA35,0xAA64D611,0x580F5512,0x4B5FA6E6,0xB93425E5,0x6DFE410E,0x9F95C20D,0x8CC531F9,0x7EAEB2FA,
+    0x30E349B1,0xC288CAB2,0xD1D83946,0x23B3BA45,0xF779DEAE,0x05125DAD,0x1642AE59,0xE4292D5A,0xBA3A117E,0x4851927D,0x5B016189,0xA96AE28A,0x7DA08661,0x8FCB0562,0x9C9BF696,0x6EF07595,
+    0x417B1DBC,0xB3109EBF,0xA0406D4B,0x522BEE48,0x86E18AA3,0x748A09A0,0x67DAFA54,0x95B17957,0xCBA24573,0x39C9C670,0x2A993584,0xD8F2B687,0x0C38D26C,0xFE53516F,0xED03A29B,0x1F682198,
+    0x5125DAD3,0xA34E59D0,0xB01EAA24,0x42752927,0x96BF4DCC,0x64D4CECF,0x77843D3B,0x85EFBE38,0xDBFC821C,0x2997011F,0x3AC7F2EB,0xC8AC71E8,0x1C661503,0xEE0D9600,0xFD5D65F4,0x0F36E6F7,
+    0x61C69362,0x93AD1061,0x80FDE395,0x72966096,0xA65C047D,0x5437877E,0x4767748A,0xB50CF789,0xEB1FCBAD,0x197448AE,0x0A24BB5A,0xF84F3859,0x2C855CB2,0xDEEEDFB1,0xCDBE2C45,0x3FD5AF46,
+    0x7198540D,0x83F3D70E,0x90A324FA,0x62C8A7F9,0xB602C312,0x44694011,0x5739B3E5,0xA55230E6,0xFB410CC2,0x092A8FC1,0x1A7A7C35,0xE811FF36,0x3CDB9BDD,0xCEB018DE,0xDDE0EB2A,0x2F8B6829,
+    0x82F63B78,0x709DB87B,0x63CD4B8F,0x91A6C88C,0x456CAC67,0xB7072F64,0xA457DC90,0x563C5F93,0x082F63B7,0xFA44E0B4,0xE9141340,0x1B7F9043,0xCFB5F4A8,0x3DDE77AB,0x2E8E845F,0xDCE5075C,
+    0x92A8FC17,0x60C37F14,0x73938CE0,0x81F80FE3,0x55326B08,0xA759E80B,0xB4091BFF,0x466298FC,0x1871A4D8,0xEA1A27DB,0xF94AD42F,0x0B21572C,0xDFEB33C7,0x2D80B0C4,0x3ED04330,0xCCBBC033,
+    0xA24BB5A6,0x502036A5,0x4370C551,0xB11B4652,0x65D122B9,0x97BAA1BA,0x84EA524E,0x7681D14D,0x2892ED69,0xDAF96E6A,0xC9A99D9E,0x3BC21E9D,0xEF087A76,0x1D63F975,0x0E330A81,0xFC588982,
+    0xB21572C9,0x407EF1CA,0x532E023E,0xA145813D,0x758FE5D6,0x87E466D5,0x94B49521,0x66DF1622,0x38CC2A06,0xCAA7A905,0xD9F75AF1,0x2B9CD9F2,0xFF56BD19,0x0D3D3E1A,0x1E6DCDEE,0xEC064EED,
+    0xC38D26C4,0x31E6A5C7,0x22B65633,0xD0DDD530,0x0417B1DB,0xF67C32D8,0xE52CC12C,0x1747422F,0x49547E0B,0xBB3FFD08,0xA86F0EFC,0x5A048DFF,0x8ECEE914,0x7CA56A17,0x6FF599E3,0x9D9E1AE0,
+    0xD3D3E1AB,0x21B862A8,0x32E8915C,0xC083125F,0x144976B4,0xE622F5B7,0xF5720643,0x07198540,0x590AB964,0xAB613A67,0xB831C993,0x4A5A4A90,0x9E902E7B,0x6CFBAD78,0x7FAB5E8C,0x8DC0DD8F,
+    0xE330A81A,0x115B2B19,0x020BD8ED,0xF0605BEE,0x24AA3F05,0xD6C1BC06,0xC5914FF2,0x37FACCF1,0x69E9F0D5,0x9B8273D6,0x88D28022,0x7AB90321,0xAE7367CA,0x5C18E4C9,0x4F48173D,0xBD23943E,
+    0xF36E6F75,0x0105EC76,0x12551F82,0xE03E9C81,0x34F4F86A,0xC69F7B69,0xD5CF889D,0x27A40B9E,0x79B737BA,0x8BDCB4B9,0x988C474D,0x6AE7C44E,0xBE2DA0A5,0x4C4623A6,0x5F16D052,0xAD7D5351
+#endif
 };
+#endif
 
 // Known size hash
 // It is ok to call ImHashData on a string with known length but the ### operator won't be supported.
@@ -2179,10 +2207,22 @@ ImGuiID ImHashData(const void* data_p, size_t data_size, ImGuiID seed)
 {
     ImU32 crc = ~seed;
     const unsigned char* data = (const unsigned char*)data_p;
+    const unsigned char *data_end = (const unsigned char*)data_p + data_size;
+#ifndef IMGUI_ENABLE_SSE4_2_CRC
     const ImU32* crc32_lut = GCrc32LookupTable;
-    while (data_size-- != 0)
+    while (data < data_end)
         crc = (crc >> 8) ^ crc32_lut[(crc & 0xFF) ^ *data++];
     return ~crc;
+#else
+    while (data + 4 <= data_end)
+    {
+        crc = _mm_crc32_u32(crc, *(ImU32*)data);
+        data += 4;
+    }
+    while (data < data_end)
+        crc = _mm_crc32_u8(crc, *data++);
+    return ~crc;
+#endif
 }
 
 // Zero-terminated string hash, with support for ### to reset back to seed value
@@ -2196,7 +2236,9 @@ ImGuiID ImHashStr(const char* data_p, size_t data_size, ImGuiID seed)
     seed = ~seed;
     ImU32 crc = seed;
     const unsigned char* data = (const unsigned char*)data_p;
+#ifndef IMGUI_ENABLE_SSE4_2_CRC
     const ImU32* crc32_lut = GCrc32LookupTable;
+#endif
     if (data_size != 0)
     {
         while (data_size-- != 0)
@@ -2204,7 +2246,11 @@ ImGuiID ImHashStr(const char* data_p, size_t data_size, ImGuiID seed)
             unsigned char c = *data++;
             if (c == '#' && data_size >= 2 && data[0] == '#' && data[1] == '#')
                 crc = seed;
+#ifndef IMGUI_ENABLE_SSE4_2_CRC
             crc = (crc >> 8) ^ crc32_lut[(crc & 0xFF) ^ c];
+#else
+            crc = _mm_crc32_u8(crc, c);
+#endif
         }
     }
     else
@@ -2213,7 +2259,11 @@ ImGuiID ImHashStr(const char* data_p, size_t data_size, ImGuiID seed)
         {
             if (c == '#' && data[0] == '#' && data[1] == '#')
                 crc = seed;
+#ifndef IMGUI_ENABLE_SSE4_2_CRC
             crc = (crc >> 8) ^ crc32_lut[(crc & 0xFF) ^ c];
+#else
+            crc = _mm_crc32_u8(crc, c);
+#endif
         }
     }
     return ~crc;
@@ -3834,7 +3884,8 @@ ImGuiContext::ImGuiContext(ImFontAtlas* shared_font_atlas)
     Time = 0.0f;
     FrameCount = 0;
     FrameCountEnded = FrameCountRendered = -1;
-    WithinFrameScope = WithinFrameScopeWithImplicitWindow = WithinEndChild = false;
+    WithinEndChildID = 0;
+    WithinFrameScope = WithinFrameScopeWithImplicitWindow = false;
     GcCompactAll = false;
     TestEngineHookItems = false;
     TestEngine = NULL;
@@ -3879,6 +3930,7 @@ ImGuiContext::ImGuiContext(ImFontAtlas* shared_font_atlas)
     ActiveIdPreviousFrameIsAlive = false;
     ActiveIdPreviousFrameHasBeenEditedBefore = false;
     ActiveIdPreviousFrameWindow = NULL;
+    memset(&ActiveIdValueOnActivation, 0, sizeof(ActiveIdValueOnActivation));
     LastActiveId = 0;
     LastActiveIdTimer = 0.0f;
 
@@ -4226,8 +4278,8 @@ ImGuiWindow::ImGuiWindow(ImGuiContext* ctx, const char* name) : DrawListInst(NUL
     FontWindowScale = 1.0f;
     SettingsOffset = -1;
     DrawList = &DrawListInst;
-    DrawList->_Data = &Ctx->DrawListSharedData;
     DrawList->_OwnerName = Name;
+    DrawList->_Data = &Ctx->DrawListSharedData;
     NavPreferredScoringPosRel[0] = NavPreferredScoringPosRel[1] = ImVec2(FLT_MAX, FLT_MAX);
 }
 
@@ -4307,7 +4359,7 @@ void ImGui::SetActiveID(ImGuiID id, ImGuiWindow* window)
 
         // This could be written in a more general way (e.g associate a hook to ActiveId),
         // but since this is currently quite an exception we'll leave it as is.
-        // One common scenario leading to this is: pressing Key ->NavMoveRequestApplyResult() -> ClearActiveId()
+        // One common scenario leading to this is: pressing Key ->NavMoveRequestApplyResult() -> ClearActiveID()
         if (g.InputTextState.ID == g.ActiveId)
             InputTextDeactivateHook(g.ActiveId);
     }
@@ -4700,15 +4752,15 @@ void ImGui::DebugAllocHook(ImGuiDebugAllocInfo* info, int frame_count, void* ptr
     }
     if (size != (size_t)-1)
     {
+        //printf("[%05d] MemAlloc(%d) -> 0x%p\n", frame_count, (int)size, ptr);
         entry->AllocCount++;
         info->TotalAllocCount++;
-        //printf("[%05d] MemAlloc(%d) -> 0x%p\n", frame_count, size, ptr);
     }
     else
     {
+        //printf("[%05d] MemFree(0x%p)\n", frame_count, ptr);
         entry->FreeCount++;
         info->TotalFreeCount++;
-        //printf("[%05d] MemFree(0x%p)\n", frame_count, ptr);
     }
 }
 
@@ -5025,7 +5077,7 @@ void ImGui::UpdateHoveredWindowAndCaptureFlags()
     io.WantTextInput = (g.WantTextInputNextFrame != -1) ? (g.WantTextInputNextFrame != 0) : false;
 }
 
-// Calling SetupDrawListSharedData() is followed by SetCurrentFont() which sets up the remaining data.
+// Called once a frame. Followed by SetCurrentFont() which sets up the remaining data.
 static void SetupDrawListSharedData()
 {
     ImGuiContext& g = *GImGui;
@@ -5788,7 +5840,7 @@ bool ImGui::IsItemDeactivatedAfterEdit()
     return IsItemDeactivated() && (g.ActiveIdPreviousFrameHasBeenEditedBefore || (g.ActiveId == 0 && g.ActiveIdHasBeenEditedBefore));
 }
 
-// == GetItemID() == GetFocusID()
+// == (GetItemID() == GetFocusID() && GetFocusID() != 0)
 bool ImGui::IsItemFocused()
 {
     ImGuiContext& g = *GImGui;
@@ -6055,10 +6107,10 @@ void ImGui::EndChild()
     ImGuiContext& g = *GImGui;
     ImGuiWindow* child_window = g.CurrentWindow;
 
-    IM_ASSERT(g.WithinEndChild == false);
+    const ImGuiID backup_within_end_child_id = g.WithinEndChildID;
     IM_ASSERT(child_window->Flags & ImGuiWindowFlags_ChildWindow);   // Mismatched BeginChild()/EndChild() calls
 
-    g.WithinEndChild = true;
+    g.WithinEndChildID = child_window->ID;
     ImVec2 child_size = child_window->Size;
     End();
     if (child_window->BeginCount == 1)
@@ -6090,7 +6142,7 @@ void ImGui::EndChild()
         if (g.HoveredWindow == child_window)
             g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HoveredWindow;
     }
-    g.WithinEndChild = false;
+    g.WithinEndChildID = backup_within_end_child_id;
     g.LogLinePosY = -FLT_MAX; // To enforce a carriage return
 }
 
@@ -6679,9 +6731,10 @@ void ImGui::RenderWindowDecorations(ImGuiWindow* window, const ImRect& title_bar
     ImGuiStyle& style = g.Style;
     ImGuiWindowFlags flags = window->Flags;
 
-    // Ensure that ScrollBar doesn't read last frame's SkipItems
+    // Ensure that Scrollbar() doesn't read last frame's SkipItems
     IM_ASSERT(window->BeginCount == 0);
     window->SkipItems = false;
+    window->DC.NavLayerCurrent = ImGuiNavLayer_Menu;
 
     // Draw window + handle manual resize
     // As we highlight the title bar when want_focus is set, multiple reappearing windows will have their title bar highlighted on their reappearing frame.
@@ -6758,6 +6811,7 @@ void ImGui::RenderWindowDecorations(ImGuiWindow* window, const ImRect& title_bar
         if (handle_borders_and_resize_grips)
             RenderWindowOuterBorders(window);
     }
+    window->DC.NavLayerCurrent = ImGuiNavLayer_Main;
 }
 
 // Render title text, collapse button, close button
@@ -7342,9 +7396,12 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         {
             IM_ASSERT(window->IDStack.Size == 1);
             window->IDStack.Size = 0; // As window->IDStack[0] == window->ID here, make sure TestEngine doesn't erroneously see window as parent of itself.
+            window->DC.NavLayerCurrent = ImGuiNavLayer_Menu;
             IMGUI_TEST_ENGINE_ITEM_ADD(window->ID, window->Rect(), NULL);
             IMGUI_TEST_ENGINE_ITEM_INFO(window->ID, window->Name, (g.HoveredWindow == window) ? ImGuiItemStatusFlags_HoveredRect : 0);
             window->IDStack.Size = 1;
+            window->DC.NavLayerCurrent = ImGuiNavLayer_Main;
+
         }
 #endif
 
@@ -7604,7 +7661,11 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         // [Test Engine] Register title bar / tab with MoveId.
 #ifdef IMGUI_ENABLE_TEST_ENGINE
         if (!(window->Flags & ImGuiWindowFlags_NoTitleBar))
+        {
+            window->DC.NavLayerCurrent = ImGuiNavLayer_Menu;
             IMGUI_TEST_ENGINE_ITEM_ADD(g.LastItemData.ID, g.LastItemData.Rect, &g.LastItemData);
+            window->DC.NavLayerCurrent = ImGuiNavLayer_Main;
+        }
 #endif
     }
     else
@@ -7715,7 +7776,7 @@ void ImGui::End()
 
     // Error checking: verify that user doesn't directly call End() on a child window.
     if (window->Flags & ImGuiWindowFlags_ChildWindow)
-        IM_ASSERT_USER_ERROR(g.WithinEndChild, "Must call EndChild() and not End()!");
+        IM_ASSERT_USER_ERROR(g.WithinEndChildID == window->ID, "Must call EndChild() and not End()!");
 
     // Close anything that is open
     if (window->DC.CurrentColumns)
@@ -10427,8 +10488,16 @@ void ImGui::ErrorRecoveryTryToRecoverState(const ImGuiErrorRecoveryState* state_
         ImGuiWindow* window = g.CurrentWindow;
         if (window->Flags & ImGuiWindowFlags_ChildWindow)
         {
-            IM_ASSERT_USER_ERROR(0, "Missing EndChild()");
-            EndChild();
+            if (g.CurrentTable != NULL && g.CurrentTable->InnerWindow == g.CurrentWindow)
+            {
+                IM_ASSERT_USER_ERROR(0, "Missing EndTable()");
+                EndTable();
+            }
+            else
+            {
+                IM_ASSERT_USER_ERROR(0, "Missing EndChild()");
+                EndChild();
+            }
         }
         else
         {
@@ -10542,7 +10611,7 @@ bool    ImGui::ErrorLog(const char* msg)
     // Output to tooltip
     if (g.IO.ConfigErrorRecoveryEnableTooltip)
     {
-        if (BeginErrorTooltip())
+        if (g.WithinFrameScope && BeginErrorTooltip())
         {
             if (g.ErrorCountCurrentFrame < 20)
             {
@@ -10579,7 +10648,7 @@ void ImGui::ErrorCheckEndFrameFinalizeErrorTooltip()
         BulletText("Code should use PushID()/PopID() in loops, or append \"##xx\" to same-label identifiers!");
         BulletText("Empty label e.g. Button(\"\") == same ID as parent widget/node. Use Button(\"##xx\") instead!");
         //BulletText("Code intending to use duplicate ID may use e.g. PushItemFlag(ImGuiItemFlags_AllowDuplicateId, true); ... PopItemFlag()"); // Not making this too visible for fear of it being abused.
-        BulletText("Set io.ConfigDebugDetectIdConflicts=false to disable this warning in non-programmers builds.");
+        BulletText("Set io.ConfigDebugHighlightIdConflicts=false to disable this warning in non-programmers builds.");
         Separator();
         Text("(Hold CTRL to: use");
         SameLine();
@@ -11863,11 +11932,11 @@ void ImGui::EndPopup()
         NavMoveRequestTryWrapping(window, ImGuiNavMoveFlags_LoopY);
 
     // Child-popups don't need to be laid out
-    IM_ASSERT(g.WithinEndChild == false);
+    const ImGuiID backup_within_end_child_id = g.WithinEndChildID;
     if (window->Flags & ImGuiWindowFlags_ChildWindow)
-        g.WithinEndChild = true;
+        g.WithinEndChildID = window->ID;
     End();
-    g.WithinEndChild = false;
+    g.WithinEndChildID = backup_within_end_child_id;
 }
 
 // Helper to open a popup if mouse button is released over the item
@@ -13576,15 +13645,16 @@ static void ImGui::NavUpdateWindowing()
     // Keyboard: Press and Release ALT to toggle menu layer
     const ImGuiKey windowing_toggle_keys[] = { ImGuiKey_LeftAlt, ImGuiKey_RightAlt };
     bool windowing_toggle_layer_start = false;
-    for (ImGuiKey windowing_toggle_key : windowing_toggle_keys)
-        if (nav_keyboard_active && IsKeyPressed(windowing_toggle_key, 0, ImGuiKeyOwner_NoOwner))
-        {
-            windowing_toggle_layer_start = true;
-            g.NavWindowingToggleLayer = true;
-            g.NavWindowingToggleKey = windowing_toggle_key;
-            g.NavInputSource = ImGuiInputSource_Keyboard;
-            break;
-        }
+    if (g.NavWindow != NULL && !(g.NavWindow->Flags & ImGuiWindowFlags_NoNavInputs))
+        for (ImGuiKey windowing_toggle_key : windowing_toggle_keys)
+            if (nav_keyboard_active && IsKeyPressed(windowing_toggle_key, 0, ImGuiKeyOwner_NoOwner))
+            {
+                windowing_toggle_layer_start = true;
+                g.NavWindowingToggleLayer = true;
+                g.NavWindowingToggleKey = windowing_toggle_key;
+                g.NavInputSource = ImGuiInputSource_Keyboard;
+                break;
+            }
     if (g.NavWindowingToggleLayer && g.NavInputSource == ImGuiInputSource_Keyboard)
     {
         // We cancel toggling nav layer when any text has been typed (generally while holding Alt). (See #370)
@@ -14718,6 +14788,7 @@ void ImGui::LocalizeRegisterEntries(const ImGuiLocEntry* entries, int count)
 //-----------------------------------------------------------------------------
 // - GetMainViewport()
 // - SetWindowViewport() [Internal]
+// - ScaleWindowsInViewport() [Internal]
 // - UpdateViewportsNewFrame() [Internal]
 // (this section is more complete in the 'docking' branch)
 //-----------------------------------------------------------------------------
@@ -14731,6 +14802,24 @@ ImGuiViewport* ImGui::GetMainViewport()
 void ImGui::SetWindowViewport(ImGuiWindow* window, ImGuiViewportP* viewport)
 {
     window->Viewport = viewport;
+}
+
+static void ScaleWindow(ImGuiWindow* window, float scale)
+{
+    ImVec2 origin = window->Viewport->Pos;
+    window->Pos = ImFloor((window->Pos - origin) * scale + origin);
+    window->Size = ImTrunc(window->Size * scale);
+    window->SizeFull = ImTrunc(window->SizeFull * scale);
+    window->ContentSize = ImTrunc(window->ContentSize * scale);
+}
+
+// Scale all windows (position, size). Use when e.g. changing DPI. (This is a lossy operation!)
+void ImGui::ScaleWindowsInViewport(ImGuiViewportP* viewport, float scale)
+{
+    ImGuiContext& g = *GImGui;
+    for (ImGuiWindow* window : g.Windows)
+        if (window->Viewport == viewport)
+            ScaleWindow(window, scale);
 }
 
 // Update viewports and monitor infos
@@ -15178,6 +15267,17 @@ void ImGui::UpdateDebugToolFlashStyleColor()
     g.Style.Colors[g.DebugFlashStyleColorIdx].w = 1.0f;
     if ((g.DebugFlashStyleColorTime -= g.IO.DeltaTime) <= 0.0f)
         DebugFlashStyleColorStop();
+}
+
+static const char* FormatTextureIDForDebugDisplay(char* buf, int buf_size, ImTextureID tex_id)
+{
+    union { void* ptr; int integer; } tex_id_opaque;
+    memcpy(&tex_id_opaque, &tex_id, ImMin(sizeof(void*), sizeof(tex_id)));
+    if (sizeof(tex_id) >= sizeof(void*))
+        ImFormatString(buf, buf_size, "0x%p", tex_id_opaque.ptr);
+    else
+        ImFormatString(buf, buf_size, "0x%04X", tex_id_opaque.integer);
+    return buf;
 }
 
 // Avoid naming collision with imgui_demo.cpp's HelpMarker() for unity builds.
@@ -15868,16 +15968,6 @@ void ImGui::DebugNodeColumns(ImGuiOldColumns* columns)
     TreePop();
 }
 
-static void FormatTextureIDForDebugDisplay(char* buf, int buf_size, ImTextureID tex_id)
-{
-    union { void* ptr; int integer; } tex_id_opaque;
-    memcpy(&tex_id_opaque, &tex_id, ImMin(sizeof(void*), sizeof(tex_id)));
-    if (sizeof(tex_id) >= sizeof(void*))
-        ImFormatString(buf, buf_size, "0x%p", tex_id_opaque.ptr);
-    else
-        ImFormatString(buf, buf_size, "0x%04X", tex_id_opaque.integer);
-}
-
 // [DEBUG] Display contents of ImDrawList
 void ImGui::DebugNodeDrawList(ImGuiWindow* window, ImGuiViewportP* viewport, const ImDrawList* draw_list, const char* label)
 {
@@ -16379,6 +16469,7 @@ void ImGui::ShowDebugLogWindow(bool* p_open)
     ShowDebugLogFlag("Clipper", ImGuiDebugLogFlags_EventClipper);
     ShowDebugLogFlag("Focus", ImGuiDebugLogFlags_EventFocus);
     ShowDebugLogFlag("IO", ImGuiDebugLogFlags_EventIO);
+    //ShowDebugLogFlag("Font", ImGuiDebugLogFlags_EventFont);
     ShowDebugLogFlag("Nav", ImGuiDebugLogFlags_EventNav);
     ShowDebugLogFlag("Popup", ImGuiDebugLogFlags_EventPopup);
     ShowDebugLogFlag("Selection", ImGuiDebugLogFlags_EventSelection);
@@ -16431,7 +16522,7 @@ void ImGui::ShowDebugLogWindow(bool* p_open)
 void ImGui::DebugTextUnformattedWithLocateItem(const char* line_begin, const char* line_end)
 {
     TextUnformatted(line_begin, line_end);
-    if (!IsItemHovered())
+    if (!IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         return;
     ImGuiContext& g = *GImGui;
     ImRect text_rect = g.LastItemData.Rect;
