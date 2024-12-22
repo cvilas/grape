@@ -14,18 +14,18 @@ set(IMGUI_SOURCES
     ${IMGUI_SOURCES_DIR}/imstb_rectpack.h
     ${IMGUI_SOURCES_DIR}/imstb_textedit.h
     ${IMGUI_SOURCES_DIR}/imstb_truetype.h
-    ${IMGUI_SOURCES_DIR}/imgui_stdlib.h
-    ${IMGUI_SOURCES_DIR}/imgui_impl_opengl3.h
-    ${IMGUI_SOURCES_DIR}/imgui_impl_opengl3_loader.h
-    ${IMGUI_SOURCES_DIR}/imgui_impl_glfw.h
     ${IMGUI_SOURCES_DIR}/imgui.cpp
     ${IMGUI_SOURCES_DIR}/imgui_demo.cpp
     ${IMGUI_SOURCES_DIR}/imgui_draw.cpp
     ${IMGUI_SOURCES_DIR}/imgui_tables.cpp
     ${IMGUI_SOURCES_DIR}/imgui_widgets.cpp
-    ${IMGUI_SOURCES_DIR}/imgui_impl_opengl3.cpp
-    ${IMGUI_SOURCES_DIR}/imgui_impl_glfw.cpp
-    ${IMGUI_SOURCES_DIR}/imgui_stdlib.cpp)
+    ${IMGUI_SOURCES_DIR}/backends/imgui_impl_glfw.h
+    ${IMGUI_SOURCES_DIR}/backends/imgui_impl_glfw.cpp
+    ${IMGUI_SOURCES_DIR}/backends/imgui_impl_opengl3.h
+    ${IMGUI_SOURCES_DIR}/backends/imgui_impl_opengl3_loader.h
+    ${IMGUI_SOURCES_DIR}/backends/imgui_impl_opengl3.cpp
+    ${IMGUI_SOURCES_DIR}/misc/cpp/imgui_stdlib.h
+    ${IMGUI_SOURCES_DIR}/misc/cpp/imgui_stdlib.cpp)
 
 add_library(imguilib OBJECT ${IMGUI_SOURCES})
 target_include_directories(imguilib PRIVATE ${IMGUI_SOURCES_DIR})
