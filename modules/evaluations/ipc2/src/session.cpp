@@ -1,0 +1,126 @@
+//=================================================================================================
+// Copyright (C) 2025 GRAPE Contributors
+//=================================================================================================
+
+#include "grape/ipc2/session.h"
+
+#include <ecal/config/configuration.h>
+#include <ecal/core.h>
+#include <ecal/pubsub/types.h>
+
+#include "publisher_impl.h"
+#include "subscriber_impl.h"
+
+namespace {
+//-------------------------------------------------------------------------------------------------
+auto toMatchEvent(const eCAL::SPubEventCallbackData& event_data) -> grape::ipc2::Match {
+  auto match_status = grape::ipc2::Match::Status::Undefined;
+  switch (event_data.event_type) {
+    case eCAL::ePublisherEvent::none:
+      match_status = grape::ipc2::Match::Status::Undefined;
+      break;
+    case eCAL::ePublisherEvent::connected:
+      match_status = grape::ipc2::Match::Status::Matched;
+      break;
+    case eCAL::ePublisherEvent::disconnected:
+      [[fallthrough]];
+    case eCAL::ePublisherEvent::dropped:
+      match_status = grape::ipc2::Match::Status::Unmatched;
+      break;
+  }
+
+  return { .status = match_status };
+}
+
+//-------------------------------------------------------------------------------------------------
+auto toMatchEvent(const eCAL::SSubEventCallbackData& event_data) -> grape::ipc2::Match {
+  auto match_status = grape::ipc2::Match::Status::Undefined;
+  switch (event_data.event_type) {
+    case eCAL::eSubscriberEvent::none:
+      match_status = grape::ipc2::Match::Status::Undefined;
+      break;
+    case eCAL::eSubscriberEvent::connected:
+      match_status = grape::ipc2::Match::Status::Matched;
+      break;
+    case eCAL::eSubscriberEvent::disconnected:
+      [[fallthrough]];
+    case eCAL::eSubscriberEvent::dropped:
+      match_status = grape::ipc2::Match::Status::Unmatched;
+      break;
+  }
+  return { .status = match_status };
+}
+}  // namespace
+
+namespace grape::ipc2 {
+
+//-------------------------------------------------------------------------------------------------
+Session::Session(const Config& config) {
+  // TODO(vilas):
+  // - enforce only one session per process
+  auto ecal_config = eCAL::Init::Configuration();
+  switch (config.scope) {
+    case Config::Scope::Host:
+      ecal_config.registration.network_enabled = false;
+      ecal_config.transport_layer.udp.mode = eCAL::Types::UDPMode::LOCAL;
+      break;
+    case Config::Scope::Network:
+      ecal_config.registration.network_enabled = true;
+      ecal_config.transport_layer.udp.mode = eCAL::Types::UDPMode::NETWORK;
+      break;
+  }
+  eCAL::Initialize(ecal_config, config.name);
+}
+
+//-------------------------------------------------------------------------------------------------
+Session::~Session() {
+  eCAL::Finalize();
+}
+
+//-------------------------------------------------------------------------------------------------
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Session::ok() const -> bool {
+  return eCAL::Ok();
+}
+
+//-------------------------------------------------------------------------------------------------
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Session::createPublisher(const Topic& topic, MatchCallback&& match_cb) const -> Publisher {
+  const auto event_cb = [moved_match_cb = std::move(match_cb)](
+                            const eCAL::STopicId&, const eCAL::SPubEventCallbackData& event_data) {
+    if (moved_match_cb != nullptr) {
+      moved_match_cb(toMatchEvent(event_data));
+    }
+  };
+  return Publisher(std::make_unique<PublisherImpl>(
+      std::make_unique<eCAL::CPublisher>(topic.name, eCAL::SDataTypeInformation(), event_cb)));
+}
+
+//-------------------------------------------------------------------------------------------------
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Session::createSubscriber(const std::string& topic, Subscriber::DataCallback&& data_cb,
+                               MatchCallback&& match_cb) const -> Subscriber {
+  auto subscriber = std::make_unique<SubscriberImpl>(std::make_unique<eCAL::CSubscriber>(
+      topic, eCAL::SDataTypeInformation(),
+      [moved_match_cb = std::move(match_cb)](const eCAL::STopicId&,
+                                             const eCAL::SSubEventCallbackData& event_data) {
+        if (moved_match_cb != nullptr) {
+          moved_match_cb(toMatchEvent(event_data));
+        }
+      }));
+
+  subscriber->sub()->SetReceiveCallback(
+      [moved_data_cb = std::move(data_cb)](const eCAL::STopicId&, const eCAL::SDataTypeInformation&,
+                                           const eCAL::SReceiveCallbackData& data) {
+        const auto tp =
+            std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
+        if (moved_data_cb != nullptr) {
+          moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer),
+                                    static_cast<std::size_t>(data.buffer_size) },
+                          .publish_time = tp });
+        }
+      });
+  return Subscriber(std::move(subscriber));
+}
+
+}  // namespace grape::ipc2

@@ -40,7 +40,7 @@ Checks: '-*,
         performance-*,
         -performance-move-const-arg,     # duplicates hicpp-move-const-arg,
         readability-*,
-        -readability-magic-numbers,      # duplicates cppcoreguidelines-avoid-magic-numbers
+        -readability-magic-numbers,      # duplicates cppcoreguidelines-avoid-magic-numbers,
         '
 
 # Upgrade warnings to errors

@@ -22,27 +22,10 @@
 ## Generalise IPC API
 
 - Implement queryable/query API
-- Avoid copy in createDataCallback()
-  - Support Bytes::get_contiguous_view for contiguous payload
-  - Support SpliceIterator for non-contiguous payload
-- Implement liveliness API
-- Implement shared memory API
-- Implement caching API
-- Define topics for matched example programs in a single place
-- Consider implementing pub-sub match callbacks
-- Implement PutOptions and subscriber Sample fields
-  - Support attachments
-  - Support timestamping
-  - Resolve how we can combine congestion control, priority and reliability settings in a coherent way to offer fewer choices at the user API layer?
-    - See [discord](https://discord.com/channels/914168414178779197/940584045287460885/1311629493445853206)
-  - Consider supporting sample kind (put/delete)
-- Understand the point of on_drop callback in subscriber and support it if necessary
-- Documentation cleanup: examples
-- Understand hybrid logical clocks
-- Support hybrid logical clocks implementation
+- Implement zero-copy read and write
+- Implement Reliable/BestEffort QoS
+- Implement History QoS
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
-- Fix zenoh examples: pull, shm pub/sub
-- New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
   
 ## Robotics core
 
@@ -122,6 +105,25 @@
 - Implement advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client
+
+## Zenoh
+
+- Implement queryable/query API
+- Implement zero-copy read and write
+- Implement Reliable/BestEffort QoS
+- Implement History QoS
+- Define topics for matched example programs in a single place
+- Implement PutOptions and subscriber Sample fields
+  - Support attachments
+  - Resolve how we can combine congestion control, priority and reliability settings in a coherent way to offer fewer choices at the user API layer?
+    - See [discord](https://discord.com/channels/914168414178779197/940584045287460885/1311629493445853206)
+  - Consider supporting sample kind (put/delete)
+- Understand the point of on_drop callback in subscriber and support it if necessary
+- Documentation cleanup: examples
+- Understand hybrid logical clocks
+- Support hybrid logical clocks implementation
+- Fix zenoh examples: pull, shm pub/sub
+- New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
 
 ## References
 
