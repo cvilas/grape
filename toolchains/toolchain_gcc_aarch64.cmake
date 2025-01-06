@@ -22,6 +22,7 @@ set(ENV{RUSTFLAGS} "-Clinker=aarch64-linux-gnu-gcc -Car=aarch64-linux-gnu-ar")
 # Enable static analysis for host build only
 set(ENABLE_LINTER OFF)
 set(ENABLE_FORMATTER OFF)
+set(ENABLE_CACHE OFF)
 
 # Look in specific places for all the libraries, and only look there
 list(APPEND CMAKE_FIND_ROOT_PATH "/usr/aarch64-linux-gnu;${CMAKE_INSTALL_PREFIX}")
