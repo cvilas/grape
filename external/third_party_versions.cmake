@@ -4,7 +4,7 @@
 
 # List of all third-party dependency versions
 
-set(CATCH2_VERSION_REQUIRED       3.7.1)
+set(CATCH2_VERSION_REQUIRED       3.8.0)
 set(BENCHMARK_VERSION_REQUIRED    1.9.1)
 set(ZENOH_VERSION_REQUIRED        1.1.0)
 set(ZENOHC_VERSION_REQUIRED       ${ZENOH_VERSION_REQUIRED})
