@@ -34,11 +34,12 @@ auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr size_t DEFAULT_PACKET_SIZE = 8;
     static constexpr size_t DEFAULT_NUM_PINGS = 100;
+    static constexpr auto WARMUP_PINGS = 100U;
 
     const auto maybe_args =
         grape::conio::ProgramDescription("Measures roundtrip time with pong program")
-            .declareOption<size_t>("pings", "Number of pings to attempt", DEFAULT_NUM_PINGS)
-            .declareOption<size_t>("size", "Payload size in bytes", DEFAULT_PACKET_SIZE)
+            .declareOption<std::size_t>("pings", "Number of pings to attempt", DEFAULT_NUM_PINGS)
+            .declareOption<std::size_t>("size", "Payload size in bytes", DEFAULT_PACKET_SIZE)
             .declareOption<std::string>("router", "Router locator", "none")
             .parse(argc, argv);
 
@@ -46,8 +47,8 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
     const auto& args = maybe_args.value();
-    const auto num_pings = args.getOptionOrThrow<size_t>("pings");
-    const auto size = args.getOptionOrThrow<size_t>("size");
+    const auto num_pings = args.getOptionOrThrow<std::size_t>("pings");
+    const auto size = args.getOptionOrThrow<std::size_t>("size");
 
     std::println("Payload size: {}", size);
     std::println("Number of pings: {}", num_pings);
@@ -84,18 +85,19 @@ auto main(int argc, const char* argv[]) -> int {
 
     // ping-pong
     static constexpr auto PONG_WAIT_TIMEOUT = std::chrono::milliseconds(10000);
-    const auto data = std::vector<char>(size);
-    auto results = std::vector<std::chrono::high_resolution_clock::duration>(num_pings);
-    for (size_t i = 0; i < num_pings; i++) {
+    const auto data = std::vector<std::byte>(size);
+    const auto total_pings = num_pings + WARMUP_PINGS;
+    auto round_trip_durations = std::vector<std::chrono::high_resolution_clock::duration>{};
+    round_trip_durations.reserve(total_pings);
+    for (std::size_t i = 0; i < total_pings; i++) {
       const auto ts_start = std::chrono::high_resolution_clock::now();
       pub.publish(data);
       std::print("Ping ");
       std::unique_lock lk(pong_mut);
       if (pong_cond.wait_for(lk, PONG_WAIT_TIMEOUT, [&pong_received] { return pong_received; })) {
         const auto ts_stop = std::chrono::high_resolution_clock::now();
-        const auto rtt = ts_stop - ts_start;
-        std::println("seq={} rtt={}, lat={}", i, rtt, rtt / 2);
-        results[i] = rtt;
+        const auto& rtt = round_trip_durations.emplace_back(ts_stop - ts_start);
+        std::println("seq={}, rtt={}", i, rtt);
         pong_received = false;
       } else {
         std::println("Timed out waiting for response. Exiting");
@@ -103,22 +105,26 @@ auto main(int argc, const char* argv[]) -> int {
       }
     }
 
+    // remove warmup runs
+    round_trip_durations.erase(round_trip_durations.begin(),
+                               round_trip_durations.begin() + WARMUP_PINGS);
+
     // print statistics
-    auto min_rtt = std::chrono::high_resolution_clock::duration::max();
-    auto max_rtt = std::chrono::high_resolution_clock::duration::min();
-    auto avg_rtt = std::chrono::high_resolution_clock::duration::zero();
-    for (auto& res : results) {
-      if (res < min_rtt) {
-        min_rtt = res;
+    auto rtt_min = std::chrono::high_resolution_clock::duration::max();
+    auto rtt_max = std::chrono::high_resolution_clock::duration::min();
+    auto rtt_avg = std::chrono::high_resolution_clock::duration::zero();
+    for (auto& rtt : round_trip_durations) {
+      if (rtt < rtt_min) {
+        rtt_min = rtt;
       }
-      if (res > max_rtt) {
-        max_rtt = res;
+      if (rtt > rtt_max) {
+        rtt_max = rtt;
       }
-      avg_rtt += res;
+      rtt_avg += rtt;
     }
-    avg_rtt = avg_rtt / static_cast<int>(results.size());
-    std::println("Ping Pong rtt stats ({} pings): min={}, avg={}, max={}", num_pings, min_rtt,
-                 avg_rtt, max_rtt);
+    rtt_avg = rtt_avg / static_cast<int>(round_trip_durations.size());
+    std::println("{} pings ({} bytes): rtt_min={}, rtt_avg={}, rtt_max={}", num_pings, size,
+                 rtt_min, rtt_avg, rtt_max);
     return EXIT_SUCCESS;
   } catch (...) {
     grape::Exception::print();

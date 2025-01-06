@@ -31,8 +31,7 @@ set(EP_CMAKE_EXTRA_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
-    -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
-    -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD})
+    -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
 
 # helper macro useful for dependency handling
 macro(add_dummy_target)
@@ -110,6 +109,33 @@ if(glfw3 IN_LIST EXTERNAL_PROJECTS_LIST)
       GIT_TAG ${GLFW3_VERSION_REQUIRED}
       GIT_SHALLOW true
       CMAKE_ARGS ${GLFW3_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# eCAL
+if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(eCAL ${ECAL_VERSION_REQUIRED} QUIET)
+  if(eCAL_FOUND)
+    message(STATUS "eCAL: Using version ${eCAL_VERSION} from ${eCAL_DIR}")
+    add_dummy_target(eCAL)
+  else()
+    message(STATUS "eCAL: Building ${ECAL_VERSION_REQUIRED} from source")
+    set(ECAL_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+        -DECAL_USE_HDF5=OFF
+        -DECAL_USE_QT=OFF
+        -DECAL_BUILD_APPS=OFF
+        -DECAL_BUILD_SAMPLES=OFF
+        -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON
+        -DECAL_INSTALL_SAMPLE_SOURCES=OFF
+        -DECAL_CPACK_PACK_WITH_INNOSETUP=OFF
+        -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/submodule_dependencies.cmake)
+    ExternalProject_Add(
+      eCAL
+      GIT_REPOSITORY "https://github.com/eclipse-ecal/ecal.git"
+      GIT_TAG v${ECAL_VERSION_REQUIRED}-rc.1 # Remove suffix when stable
+      GIT_SHALLOW true
+      CMAKE_ARGS ${ECAL_CMAKE_ARGS})
   endif()
 endif()
 
