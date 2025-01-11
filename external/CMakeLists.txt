@@ -24,6 +24,7 @@ set_directory_properties(PROPERTIES EP_UPDATE_DISCONNECTED 1) # skip update step
 # Collect common arguments to configure external projects
 set(EP_CMAKE_EXTRA_ARGS
     -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_INSTALL_LIBDIR=lib # override default lib64 on some systems
     -DCMAKE_INSTALL_RPATH=${CMAKE_INSTALL_RPATH}
     -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
     -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
