@@ -347,8 +347,7 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
 
   impl_->implot_ctx = ImPlot::CreateContext();
   if (nullptr == impl_->implot_ctx) {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = std::fprintf(stderr, "Error: ImPlot::CreateContext\n");
+    std::ignore = std::fputs("Error: ImPlot::CreateContext\n", stderr);
   }
 }
 
