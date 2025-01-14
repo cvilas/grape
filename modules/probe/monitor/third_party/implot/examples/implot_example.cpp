@@ -43,12 +43,10 @@ auto main() -> int {
     ImplotExample ex;
     ex.run();
   } catch (const std::exception& ex) {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = std::fprintf(stderr, "%s\n", ex.what());
+    std::ignore = std::fputs(ex.what(), stderr);
     return EXIT_FAILURE;
   } catch (...) {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    std::ignore = std::fprintf(stderr, "Exception\n");
+    std::ignore = std::fputs("Exception\n", stderr);
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
