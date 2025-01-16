@@ -37,7 +37,7 @@
 - Implement shared memory API
 - Implement caching API
 - Define topics for matched example programs in a single place
-- Consider implementing pub-sub match callbacks
+- Implement pub-sub match callbacks
 - Implement PutOptions and subscriber Sample fields
   - Support attachments
   - Support timestamping
@@ -49,7 +49,7 @@
 - Understand hybrid logical clocks
 - Support hybrid logical clocks implementation
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
-- Fix zenoh examples: pull, shm pub/sub
+- Fix zenoh examples: pull, shm pub/sub, pub_cache, query_sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
   
 ## Robotics core
