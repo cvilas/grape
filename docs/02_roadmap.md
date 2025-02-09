@@ -11,21 +11,13 @@
 - Realtime services
 - Serialization
 
-## Dec 2024
+## Ongoing
 
+- Switch to eCALv6 as main IPC
+- Teleop controller
 - grapecam
   - Implement grape::app. ([README](../modules/common/app/README.md))
   - Implement [grapecam](https://github.com/cvilas/grapecam)
-- plot
-  - Generic plotting API and `plottable`concept
-  - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
-- Record and replay ([reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder))
-- Define behaviour for `experimental` flag in `declare_module` and implement it
-
-## Jan 2025
-
-- CANOpen support
-- Teleop controller
 
 ## Generalise IPC API
 
@@ -79,8 +71,12 @@
 - `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
 - replace `grape::realtime::SystemError` with `std::errc`
 
-## 3D visualisation
+## Visualisation
 
+- Record and replay ([reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder))
+- plot
+  - Generic plotting API and `plottable`concept
+  - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
 - Study
   - [2D Game Engine](https://pikuma.com/courses/cpp-2d-game-engine-development)
   - [Vulkan in 30 minutes](https://renderdoc.org/vulkan-in-30-minutes.html)
