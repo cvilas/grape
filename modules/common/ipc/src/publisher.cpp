@@ -1,30 +1,28 @@
 //=================================================================================================
-// Copyright (C) 2024 GRAPE Contributors
+// Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
 #include "grape/ipc/publisher.h"
 
-#include "ipc_zenoh.h"  // should be included before zenoh headers
+#include <chrono>
+
+#include "publisher_impl.h"
 
 namespace grape::ipc {
+
 //-------------------------------------------------------------------------------------------------
 Publisher::~Publisher() = default;
 
 //-------------------------------------------------------------------------------------------------
-void Publisher::publish(std::span<const std::byte> bytes) {
-  const auto bytes_view = std::string_view(
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-      reinterpret_cast<const char*>(bytes.data()),  //
-      bytes.size_bytes());
-  impl_->put(bytes_view);
+Publisher::Publisher(std::unique_ptr<PublisherImpl> impl) : impl_(std::move(impl)) {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Publisher::publish(std::span<const char> bytes) {
-  impl_->put(std::string_view{ bytes.data(), bytes.size() });
+void Publisher::publish(std::span<const std::byte> bytes) const {
+  const auto now = std::chrono::system_clock::now();
+  const auto us =
+      std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+  std::ignore = impl_->pub()->Send(bytes.data(), bytes.size(), us);
 }
 
-//-------------------------------------------------------------------------------------------------
-Publisher::Publisher(std::unique_ptr<zenoh::Publisher> zp) : impl_(std::move(zp)) {
-}
 }  // namespace grape::ipc

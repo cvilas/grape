@@ -1,19 +1,21 @@
 //=================================================================================================
-// Copyright (C) 2024 GRAPE Contributors
+// Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
 #include "grape/ipc/subscriber.h"
 
-#include "ipc_zenoh.h"  // should be included before zenoh headers
-
-namespace {}
+#include "subscriber_impl.h"
 
 namespace grape::ipc {
+//-------------------------------------------------------------------------------------------------
+Subscriber::Subscriber(std::unique_ptr<SubscriberImpl> impl) : impl_(std::move(impl)) {
+}
 
 //-------------------------------------------------------------------------------------------------
 Subscriber::~Subscriber() = default;
 
 //-------------------------------------------------------------------------------------------------
-Subscriber::Subscriber(std::unique_ptr<zenoh::Subscriber<void>> zs) : impl_(std::move(zs)) {
+auto Subscriber::getPublisherCount() const -> std::size_t {
+  return impl_->sub()->GetPublisherCount();
 }
 }  // namespace grape::ipc
