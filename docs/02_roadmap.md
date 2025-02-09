@@ -13,18 +13,15 @@
 
 ## Ongoing
 
-- Switch to eCALv6 as main IPC
 - Teleop controller
 - grapecam
   - Implement grape::app. ([README](../modules/common/app/README.md))
   - Implement [grapecam](https://github.com/cvilas/grapecam)
-
-## Generalise IPC API
-
-- Implement queryable/query API
-- Implement zero-copy read and write
-- Implement Reliable/BestEffort QoS
-- Implement History QoS
+- IPC
+  - Implement queryable/query API
+  - Implement zero-copy read and write
+  - Implement Reliable/BestEffort QoS
+  - Implement History QoS
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
   
 ## Robotics core

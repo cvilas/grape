@@ -1,5 +1,5 @@
 //=================================================================================================
-// Copyright (C) 2024 GRAPE Contributors
+// Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
 #pragma once
@@ -7,20 +7,17 @@
 #include <memory>
 #include <span>
 
-namespace zenoh {
-class Publisher;
-}  // namespace zenoh
-
 namespace grape::ipc {
 
 class Session;
+class PublisherImpl;
 
 //=================================================================================================
 /// Publishers post topic data. Created by Session. See also Topic.
 class Publisher {
 public:
-  void publish(std::span<const std::byte> bytes);
-  void publish(std::span<const char> bytes);
+  /// Publish data on topic specified at creation by Session
+  void publish(std::span<const std::byte> bytes) const;
 
   ~Publisher();
   Publisher(const Publisher&) = delete;
@@ -30,8 +27,8 @@ public:
 
 private:
   friend class Session;
-  explicit Publisher(std::unique_ptr<zenoh::Publisher> zp);
-  std::unique_ptr<zenoh::Publisher> impl_;
+  explicit Publisher(std::unique_ptr<PublisherImpl> impl);
+  std::unique_ptr<PublisherImpl> impl_;
 };
 
 }  // namespace grape::ipc

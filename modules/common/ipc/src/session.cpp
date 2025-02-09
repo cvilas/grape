@@ -1,120 +1,126 @@
 //=================================================================================================
-// Copyright (C) 2024 GRAPE Contributors
+// Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
 #include "grape/ipc/session.h"
 
-#include "grape/exception.h"
-#include "ipc_zenoh.h"  // should be included before zenoh headers
+#include <ecal/config/configuration.h>
+#include <ecal/core.h>
+#include <ecal/pubsub/types.h>
+
+#include "publisher_impl.h"
+#include "subscriber_impl.h"
 
 namespace {
-
 //-------------------------------------------------------------------------------------------------
-auto transform(const grape::ipc::Session::Config& config) -> zenoh::Config {
-  auto zconfig = zenoh::Config::create_default();
-  auto mode_str = std::string(toString(config.mode));
-  std::ranges::transform(mode_str, mode_str.begin(), ::tolower);
-  zconfig.insert_json5(Z_CONFIG_MODE_KEY, std::format(R"("{}")", mode_str));
-  const auto is_router_specified = config.router.has_value();
-  if (config.mode == grape::ipc::Session::Mode::Client and not is_router_specified) {
-    grape::panic<grape::Exception>("'Client' mode requires 'router' to be specified");
+auto toMatchEvent(const eCAL::SPubEventCallbackData& event_data) -> grape::ipc::Match {
+  auto match_status = grape::ipc::Match::Status::Undefined;
+  switch (event_data.event_type) {
+    case eCAL::ePublisherEvent::none:
+      match_status = grape::ipc::Match::Status::Undefined;
+      break;
+    case eCAL::ePublisherEvent::connected:
+      match_status = grape::ipc::Match::Status::Matched;
+      break;
+    case eCAL::ePublisherEvent::disconnected:
+      [[fallthrough]];
+    case eCAL::ePublisherEvent::dropped:
+      match_status = grape::ipc::Match::Status::Unmatched;
+      break;
   }
-  if (is_router_specified) {
-    zconfig.insert_json5(Z_CONFIG_CONNECT_KEY, std::format(R"(["{}"])", toString(*config.router)));
-  }
-  // TODO(vilas):
-  //- enable timestamp (optional)
-  //- enable cache history (optional)
-  //- enable shared memory (optional)
-  // zconfig.insert_json5(Z_CONFIG_LISTEN_KEY, toString(config.listen_on));
-  // todo: insert as ["tcp/[fe80::2145:12c5:9fc3:3c71]:7447", "tcp/192.168.0.2:7447"]
-  return zconfig;
+
+  return { .status = match_status };
 }
 
 //-------------------------------------------------------------------------------------------------
-auto transform(const std::vector<zenoh::Id>& zids) -> std::vector<grape::ipc::UUID> {
-  auto uuids = std::vector<grape::ipc::UUID>{};
-  uuids.reserve(zids.size());
-
-  std::ranges::transform(zids, std::back_inserter(uuids), [](const zenoh::Id& zid) {
-    return grape::ipc::UUID{ .bytes = zid.bytes() };
-  });
-  return uuids;
-}
-
-//-------------------------------------------------------------------------------------------------
-auto createDataCallback(grape::ipc::DataCallback&& user_cb)
-    -> std::function<void(const zenoh::Sample&)> {
-  if (user_cb == nullptr) {
-    return nullptr;
+auto toMatchEvent(const eCAL::SSubEventCallbackData& event_data) -> grape::ipc::Match {
+  auto match_status = grape::ipc::Match::Status::Undefined;
+  switch (event_data.event_type) {
+    case eCAL::eSubscriberEvent::none:
+      match_status = grape::ipc::Match::Status::Undefined;
+      break;
+    case eCAL::eSubscriberEvent::connected:
+      match_status = grape::ipc::Match::Status::Matched;
+      break;
+    case eCAL::eSubscriberEvent::disconnected:
+      [[fallthrough]];
+    case eCAL::eSubscriberEvent::dropped:
+      match_status = grape::ipc::Match::Status::Unmatched;
+      break;
   }
-  return [cb = std::move(user_cb)](const zenoh::Sample& sample) -> void {
-    // TODO(vilas): Avoid copy. use SpliceIterator instead
-    const auto data = sample.get_payload().as_vector();
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    cb({ reinterpret_cast<const std::byte*>(data.data()), data.size() });
-  };
+  return { .status = match_status };
 }
 }  // namespace
 
 namespace grape::ipc {
 
-//=================================================================================================
-Session::Session(const Session::Config& config) {
-  auto zerr = zenoh::ZResult{};
-  impl_ = std::make_unique<zenoh::Session>(transform(config),
-                                           zenoh::Session::SessionOptions::create_default(), &zerr);
-  if (zerr != Z_OK) {
-    grape::panic<Exception>(std::format("Failed to create session. Reason: {}", toString(zerr)));
+//-------------------------------------------------------------------------------------------------
+Session::Session(const Config& config) {
+  // TODO(vilas):
+  // - enforce only one session per process
+  auto ecal_config = eCAL::Init::Configuration();
+  switch (config.scope) {
+    case Config::Scope::Host:
+      ecal_config.registration.network_enabled = false;
+      ecal_config.transport_layer.udp.mode = eCAL::Types::UDPMode::LOCAL;
+      break;
+    case Config::Scope::Network:
+      ecal_config.registration.network_enabled = true;
+      ecal_config.transport_layer.udp.mode = eCAL::Types::UDPMode::NETWORK;
+      break;
   }
+  eCAL::Initialize(ecal_config, config.name);
 }
 
 //-------------------------------------------------------------------------------------------------
-Session::~Session() = default;
-
-//-------------------------------------------------------------------------------------------------
-auto Session::id() const -> UUID {
-  return { .bytes = impl_->get_zid().bytes() };
+Session::~Session() {
+  eCAL::Finalize();
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Session::routers() const -> std::vector<UUID> {
-  return transform(impl_->get_routers_z_id());
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Session::ok() const -> bool {
+  return eCAL::Ok();
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Session::peers() const -> std::vector<UUID> {
-  return transform(impl_->get_peers_z_id());
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Session::createPublisher(const Topic& topic, MatchCallback&& match_cb) const -> Publisher {
+  const auto event_cb = [moved_match_cb = std::move(match_cb)](
+                            const eCAL::STopicId&, const eCAL::SPubEventCallbackData& event_data) {
+    if (moved_match_cb != nullptr) {
+      moved_match_cb(toMatchEvent(event_data));
+    }
+  };
+  return Publisher(std::make_unique<PublisherImpl>(
+      std::make_unique<eCAL::CPublisher>(topic.name, eCAL::SDataTypeInformation(), event_cb)));
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Session::createPublisher(const Topic& topic) -> Publisher {
-  /// @todo(vilas) Review all the following settings. Expose critical ones
-  auto options = zenoh::Session::PublisherOptions::create_default();
-  options.congestion_control = Z_CONGESTION_CONTROL_BLOCK;
-  options.priority = Z_PRIORITY_DATA;
-  options.is_express = false;
-  options.reliability = Z_RELIABILITY_BEST_EFFORT;
-  auto zerr = zenoh::ZResult{};
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+auto Session::createSubscriber(const std::string& topic, Subscriber::DataCallback&& data_cb,
+                               MatchCallback&& match_cb) const -> Subscriber {
+  auto subscriber = std::make_unique<SubscriberImpl>(std::make_unique<eCAL::CSubscriber>(
+      topic, eCAL::SDataTypeInformation(),
+      [moved_match_cb = std::move(match_cb)](const eCAL::STopicId&,
+                                             const eCAL::SSubEventCallbackData& event_data) {
+        if (moved_match_cb != nullptr) {
+          moved_match_cb(toMatchEvent(event_data));
+        }
+      }));
 
-  auto pub = Publisher(std::make_unique<zenoh::Publisher>(
-      impl_->declare_publisher(topic.key, std::move(options), &zerr)));
-  if (zerr != Z_OK) {
-    grape::panic<Exception>(std::format("Failed to create publisher. Reason: {}", toString(zerr)));
-  }
-  return pub;
-}
-
-//-------------------------------------------------------------------------------------------------
-auto Session::createSubscriber(const std::string& topic, DataCallback&& cb) -> Subscriber {
-  auto zerr = zenoh::ZResult{};
-  auto sub = Subscriber(std::make_unique<zenoh::Subscriber<void>>(
-      impl_->declare_subscriber(topic, createDataCallback(std::move(cb)), zenoh::closures::none,
-                                zenoh::Session::SubscriberOptions::create_default(), &zerr)));
-  if (zerr != Z_OK) {
-    grape::panic<Exception>(std::format("Failed to create subscriber. Reason: {}", toString(zerr)));
-  }
-  return sub;
+  subscriber->sub()->SetReceiveCallback(
+      [moved_data_cb = std::move(data_cb)](const eCAL::STopicId&, const eCAL::SDataTypeInformation&,
+                                           const eCAL::SReceiveCallbackData& data) {
+        const auto tp =
+            std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
+        if (moved_data_cb != nullptr) {
+          moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer),
+                                    static_cast<std::size_t>(data.buffer_size) },
+                          .publish_time = tp });
+        }
+      });
+  return Subscriber(std::move(subscriber));
 }
 
 }  // namespace grape::ipc

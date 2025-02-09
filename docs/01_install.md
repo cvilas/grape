@@ -73,27 +73,6 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-20 gcc-14
     --slave /usr/bin/aarch64-linux-gnu-gcov aarch64-linux-gnu-gcov /usr/bin/aarch64-linux-gnu-gcov-$GCC_VERSION
     ```
 
-  - Rust
-
-    ```bash
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-    . "$HOME/.cargo/env"
-    
-    # install toolchains for X86_64 and Aarch64
-    rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
-    rustup toolchain add stable-x86_64-unknown-linux-gnu stable-aarch64-unknown-linux-gnu
-    sudo apt install libssl-dev # required for sccache
-    cargo install sccache --locked
-    ```
-
-  - To cache Rust builds, add following lines to `$HOME/.cargo/config.toml`
-
-    ```toml
-    [build]
-    rustc-wrapper="sccache"
-    ```
-
 - (Desktop only) For graphical applications, install GL and windowing libraries 
 
   ```bash
