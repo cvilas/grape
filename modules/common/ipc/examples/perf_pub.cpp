@@ -2,6 +2,7 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
+#include <chrono>
 #include <print>
 #include <thread>
 #include <vector>
@@ -50,7 +51,8 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Press CTRL-C to quit");
     while (true) {
       pub.publish(payload);
-      std::this_thread::yield();
+      // force a context switch to mimic reality of cache invalidation, etc
+      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
     }
     return EXIT_SUCCESS;
   } catch (...) {
