@@ -129,7 +129,8 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
         -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON
         -DECAL_INSTALL_SAMPLE_SOURCES=OFF
         -DECAL_CPACK_PACK_WITH_INNOSETUP=OFF
-        -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/submodule_dependencies.cmake)
+        -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/submodule_dependencies.cmake
+        -DBUILD_SHARED_LIBS=OFF) # workaround for https://github.com/eclipse-ecal/ecal/issues/2014
     ExternalProject_Add(
       eCAL
       GIT_REPOSITORY "https://github.com/eclipse-ecal/ecal.git"
