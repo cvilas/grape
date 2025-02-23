@@ -14,9 +14,9 @@
 
 ## Ongoing
 
+- Implement queryable/query API
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 - Implement systemd service target
-- Implement queryable/query API
 - Implement zero-copy read and write
 - Implement Teleop controller
 - Implement behaviour tree 
@@ -27,7 +27,9 @@
   - CANopen
   - joystick
   - midi
-- Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). Document it.
+- Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). 
+  - Document how to allocate specified CPU cores to run Linux.
+  - Document how to allocate specified CPU cores to run my processes and threads.
 - Study
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
   - [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) on ROS2 interop

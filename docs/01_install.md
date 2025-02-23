@@ -45,6 +45,7 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
     --slave /usr/bin/clang++ clang++ /usr/bin/clang++-$CLANG_VERSION \
     --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$CLANG_VERSION \
     --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-$CLANG_VERSION 
+    sudo ln -s /usr/lib/llvm-$CLANG_VERSION /usr/lib/llvm-latest
     ```
 
   - GCC (Your mileage may vary!)
