@@ -14,6 +14,7 @@
 
 ## Ongoing
 
+- Eliminate message `[eCAL][Config] Specified yaml configuration path not valid:"ecal.yaml". Using default configuration.`
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 - Implement systemd service target
 - Implement queryable/query API
