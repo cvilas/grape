@@ -29,7 +29,7 @@ struct Statistics {
   static constexpr auto REPORT_DURATION = std::chrono::seconds(1);
   uint64_t msg_count{ 0 };
   uint64_t aggregate_bytes{ 0 };
-  std::chrono::nanoseconds aggregate_latency{ 0 };
+  std::chrono::system_clock::duration aggregate_latency{ 0 };
   std::chrono::system_clock::time_point start;
   void print() const;
   void reset();
@@ -42,7 +42,7 @@ void Statistics::print() const {
   const auto dt = std::chrono::duration<double>(stop - start).count();
   const auto msg_rate = std::floor(static_cast<double>(msg_count) / dt);
   const auto byte_rate = std::floor(static_cast<double>(aggregate_bytes) / dt);
-  const auto avg_latency = aggregate_latency / msg_count;
+  const auto avg_latency = aggregate_latency / static_cast<double>(msg_count);
   std::println("  [{} msg/s] [{} bytes/sec] [{} latency]", msg_rate, byte_rate, avg_latency);
 }
 
