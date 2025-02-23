@@ -15,7 +15,7 @@ set(CMAKE_SYSTEM_PROCESSOR aarch64)
 set(BUILD_SHARED_LIBS OFF) # TODO(vilas): Linker fails if 'ON'
 
 # C++ compiler toolchain paths
-set(LLVM_DIR "/usr/lib/llvm-20")
+set(LLVM_DIR "/usr/lib/llvm-latest") # Note: This path is defined by _our_ llvm install process
 set(LLVM_INCLUDE_DIR "${LLVM_DIR}/include/c++/v1")
 set(LLVM_LIBRARY_DIR "${LLVM_DIR}/lib") # TODO(vilas): should be location of libraries for 'target' arch 
 
