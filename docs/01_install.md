@@ -4,16 +4,16 @@
 
 OS               |  Architecture   | Compiler
 -----------------|-----------------|----------------
-Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-20 gcc-14
+Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
 
 ## Setup build environment
 
-- Install the basic tools
+- Install OS utilities 
 
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
   ccache doxygen graphviz linux-generic python3-dev python-is-python3 pipx \
-  iproute2 iputils-ping net-tools iftop htop nvtop
+  avahi-daemon avahi-utils iproute2 iputils-ping net-tools iftop htop nvtop
   ```
 
 - Install latest cmake and helpers
@@ -34,7 +34,7 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-20 gcc-14
     ```bash
     wget https://apt.llvm.org/llvm.sh
     wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    export CLANG_VERSION=20 # Replace with latest version number
+    export CLANG_VERSION=21 # Replace with latest version number
     chmod +x llvm.sh
     sudo ./llvm.sh $CLANG_VERSION
     sudo apt install clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
@@ -82,7 +82,7 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-20 gcc-14
 
 ## Configure and build
 
-Note (Dec 2024): Clang toolchain is recommended to build the project:
+Note (Feb 2025): Clang toolchain is recommended to build the project:
 
 ```bash
 git clone git@github.com:cvilas/grape

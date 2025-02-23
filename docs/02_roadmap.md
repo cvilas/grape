@@ -10,20 +10,21 @@
 - Message passing
 - Realtime services
 - Serialization
+- Application framework
 
 ## Ongoing
 
+- Write note on how to write grape applications in app/README
 - Teleop controller
-- grapecam
-  - Implement grape::app. ([README](../modules/common/app/README.md))
-  - Implement [grapecam](https://github.com/cvilas/grapecam)
+- Implement [grapecam](https://github.com/cvilas/grapecam)
 - IPC
   - Implement queryable/query API
   - Implement zero-copy read and write
   - Implement Reliable/BestEffort QoS
   - Implement History QoS
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
-  
+  - [reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder)
+
 ## Robotics core
 
 - HW IO
@@ -35,8 +36,10 @@
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
   - [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) on ROS2 interop
 - Shared memory
-- Single producer multiple consumer queue using externally specified memory (heap or shared memory)
-- Consider removing `MPSCQueue`. It's unused. Rename `FIFOBuffer` to `MPSCQueue`
+- Single-producer multi-consumer queue using externally specified memory (heap or shared memory)
+- Refactor multi-producer single-consumer queue
+  - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
+  - Rename it for clarity
 - Math library
   - Delay line
   - Low pass filter
@@ -53,7 +56,6 @@
 
 ## Visualisation
 
-- Record and replay ([reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder))
 - plot
   - Generic plotting API and `plottable`concept
   - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
@@ -84,8 +86,8 @@
   - Document the usage in install instructions
 - Implement CI build using github workflow  
 - Integrate cpack to generate artifacts
-- Integrate [ninjatracing](https://github.com/nico/ninjatracing)
 - Support GCC builds without restrictions
+- Support installing targets as systemd services
 
 ## Other
 
@@ -93,13 +95,13 @@
 
 ## Demo applications
 
-- Office environment (CO2, temperature, light) dashboard
-- Network camera and viewer for industrial monitoring
-- Zenoh interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
+- Environment monitor (CO2, temperature, humidity, light)
+- Network camera and viewer
+- IPC interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
 - Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 - [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
 - [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
-- Implement advanced streaming
+- Advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client
 
@@ -121,6 +123,10 @@
 - Support hybrid logical clocks implementation
 - Fix zenoh examples: pull, shm pub/sub
 - New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
+- PoC IPC experiments
+  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
+  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
 
 ## References
 
