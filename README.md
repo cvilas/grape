@@ -5,9 +5,11 @@
 
 ## What is Grape?
 
-GRAPE provides facilities to develop large distributed and embedded control applications, with hooks for instrumentation and remote monitoring. By large, I mean hundreds of nodes on a network of compute units running Linux (X86_64 and Aarch64).
+- A monorepo that implements building blocks for highly distributed robotic systems. Specifically, GRAPE can be used to build systems consisting of hundreds of process nodes running on hundreds of compute units (Linux X86_64/Aarch64) across a LAN.
+- A playground to evaluate modern C++ techniques in writing simple, expressive, and performant code for industrial applications
+- A hobby project that demonstrates the application of systems engineering [guidelines](https://github.com/cvilas/guidance) that I developed over decades in the industry as a technical and people leader in industrial robotics. ([Author's profile](https://cvilas.github.io/))
 
-It's also a hobby project that demonstrates [principles](https://github.com/cvilas/guidance) that I follow in software development, and serves as a playground to evaluate [modern C++ techniques](./docs/03_modern_cpp.md) in writing simple, expressive, and performant code for industrial applications. Features of this repo that I consider interesting:
+Features of this repo that I consider interesting:
 
 - A [modular build system](./gbs/README.md)
 - A fast [logging library](./modules/common/log/README.md)
@@ -23,3 +25,4 @@ It's also a hobby project that demonstrates [principles](https://github.com/cvil
 
 - [Installation](docs/01_install.md)
 - [Roadmap](docs/02_roadmap.md)
+- [Developer guides](https://github.com/cvilas/guidance)
