@@ -17,9 +17,9 @@ See example programs for reference
 
 ## A note on how to write GRAPE applications
 
-A GRAPE application
-
-- Encapsulates a data processing pipeline as a 'service', with inputs to and outputs from the pipeline implemented as IPC endpoints
-- Exploits the `grape::app` API for initialisation, configuration, logging and IPC
-- Services run as independent processes distributed across CPUs and communicate with each other over IPC
-- Services may be configured to start at system boot (using systemd)  
+The `grape::app` API provides initialisation, configuration, logging and IPC services. This is all 
+that one typically needs to write an application program that encapsulates a data processing 
+pipeline. The inputs to and outputs from the pipeline are implemented as IPC endpoints (i.e. 
+publishers and subscribers). Therefore, applications can run as independent processes within a PC 
+and/or compute units spanning the local network, communicating with each other over IPC. These 
+processes may be configured to start at boot time as systemd services.
