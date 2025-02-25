@@ -542,6 +542,7 @@ function(install_modules)
     # These variables are copied into module-config.cmake.in to set up dependencies
     set(INSTALL_MODULE_NAME ${CMAKE_PROJECT_NAME}_${_module})
     set(INSTALL_MODULE_LIB_TARGETS ${MODULE_${_module}_LIB_TARGETS})
+    set(INSTALL_MODULE_EXE_TARGETS ${MODULE_${_module}_EXE_TARGETS})
     set(INSTALL_MODULE_INTERNAL_DEPENDENCIES ${MODULE_${_module}_DEPENDS_ON})
     set(INSTALL_MODULE_EXTERNAL_DEPENDENCIES ${MODULE_${_module}_EXTERNAL_PROJECT_DEPS})
 
@@ -561,36 +562,37 @@ function(install_modules)
       ${config_create_location}/${INSTALL_MODULE_NAME}-config-version.cmake
       VERSION ${VERSION}
       COMPATIBILITY AnyNewerVersion)
-
-    # install package targets
-    message(VERBOSE "Module \"${_module}\" installable targets:")
-    message(VERBOSE "  Library targets\t : ${MODULE_${_module}_LIB_TARGETS}")
-    message(VERBOSE "  Executable targets\t : ${MODULE_${_module}_EXE_TARGETS}")
-    install(
-      TARGETS ${MODULE_${_module}_LIB_TARGETS} ${MODULE_${_module}_EXE_TARGETS}
-      EXPORT ${INSTALL_MODULE_NAME}-targets
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-      INCLUDES
-      DESTINATION include)
-
-    # install public header files
-    if(EXISTS ${MODULE_${_module}_PATH}/include)
-      install(DIRECTORY ${MODULE_${_module}_PATH}/include/ DESTINATION include)
-    endif()
-
-    # export targets
-    install(
-      EXPORT ${INSTALL_MODULE_NAME}-targets
-      FILE ${INSTALL_MODULE_NAME}-targets.cmake
-      NAMESPACE ${CMAKE_PROJECT_NAME}::
-      DESTINATION ${config_install_location})
-
+    
     # install config files
     install(FILES "${config_create_location}/${INSTALL_MODULE_NAME}-config.cmake"
                   "${config_create_location}/${INSTALL_MODULE_NAME}-config-version.cmake"
             DESTINATION ${config_install_location})
+
+    # install package targets
+    if(DEFINED INSTALL_MODULE_LIB_TARGETS OR DEFINED INSTALL_MODULE_EXE_TARGETS)
+      message(VERBOSE "Module \"${_module}\" installable targets:")
+      message(VERBOSE "  Library targets\t : ${INSTALL_MODULE_LIB_TARGETS}")
+      message(VERBOSE "  Executable targets\t : ${INSTALL_MODULE_EXE_TARGETS}")
+      install(TARGETS 
+        ${INSTALL_MODULE_LIB_TARGETS} ${INSTALL_MODULE_EXE_TARGETS}
+        EXPORT ${INSTALL_MODULE_NAME}-targets
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        INCLUDES DESTINATION include)
+
+      # install public header files
+      if(EXISTS ${MODULE_${_module}_PATH}/include)
+        install(DIRECTORY ${MODULE_${_module}_PATH}/include/ DESTINATION include)
+      endif()
+
+      # export targets
+      install(EXPORT ${INSTALL_MODULE_NAME}-targets
+        FILE ${INSTALL_MODULE_NAME}-targets.cmake
+        NAMESPACE ${CMAKE_PROJECT_NAME}::
+        DESTINATION ${config_install_location})
+    endif()
+    
   endforeach()
 
   # configure the uninstaller script
