@@ -37,9 +37,6 @@ set(CMAKE_INSTALL_LIBDIR lib) # override default lib64 on some systems
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
-# The rpath to use for installed targets.
-set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
-
 # Top level config file
 configure_package_config_file(
   ${GBS_TEMPLATES_DIR}/project-config.cmake.in
