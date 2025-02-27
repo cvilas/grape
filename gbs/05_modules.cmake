@@ -300,6 +300,7 @@ macro(define_module_library)
 
   # sometimes libraries have no cpp files. So this is needed
   set_target_properties(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+  set_target_properties(${LIBRARY_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
 
 endmacro()
 
@@ -429,6 +430,12 @@ macro(define_module_app)
     PUBLIC ${TARGET_ARG_PUBLIC_LINK_LIBS}
     PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS} # link to libraries from the enclosing module
             ${TARGET_ARG_PRIVATE_LINK_LIBS})
+
+  # Set rpath for installed executables, but not for statically linked ones (which will fail)
+  get_target_property(${TARGET_NAME}_link_libs ${TARGET_NAME} LINK_LIBRARIES)
+  if(NOT ${TARGET_NAME}_link_libs MATCHES "-static")
+    set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
+  endif()
 
 endmacro()
 
