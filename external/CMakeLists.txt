@@ -18,8 +18,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/third_party_versions.cmake)
 # -------------------------------------------------------------------------------------------------
 # Setup baseline build configuration
 # -------------------------------------------------------------------------------------------------
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/")
 set_directory_properties(PROPERTIES EP_UPDATE_DISCONNECTED 1) # skip update step
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/")
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
 
 # Collect common arguments to configure external projects
 set(EP_CMAKE_EXTRA_ARGS
@@ -121,21 +122,34 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
     add_dummy_target(eCAL)
   else()
     message(STATUS "eCAL: Building ${ECAL_VERSION_REQUIRED} from source")
+    
+    # Build a dependency first 
+    set(TCP_PUBSUB_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
+	-DBUILD_SHARED_LIBS=OFF) # workaround for https://github.com/eclipse-ecal/ecal/issues/2014
+    ExternalProject_Add(
+      tcp_pubsub
+      GIT_REPOSITORY "https://github.com/eclipse-ecal/tcp_pubsub.git"
+      GIT_TAG v${TCP_PUBSUB_VERSION_REQUIRED}
+      GIT_SHALLOW true
+      CMAKE_ARGS ${TCP_PUBSUB_CMAKE_ARGS})
+    
+    # now build eCAL itself
     set(ECAL_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
         -DECAL_USE_HDF5=OFF
         -DECAL_USE_QT=OFF
         -DECAL_BUILD_APPS=OFF
         -DECAL_BUILD_SAMPLES=OFF
+	-DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=OFF
         -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON
         -DECAL_INSTALL_SAMPLE_SOURCES=OFF
         -DECAL_CPACK_PACK_WITH_INNOSETUP=OFF
-        -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/submodule_dependencies.cmake
-        -DBUILD_SHARED_LIBS=OFF) # workaround for https://github.com/eclipse-ecal/ecal/issues/2014
+        -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/submodule_dependencies.cmake)
     ExternalProject_Add(
       eCAL
       GIT_REPOSITORY "https://github.com/eclipse-ecal/ecal.git"
-      GIT_TAG v${ECAL_VERSION_REQUIRED}-rc.1 # Remove suffix when stable
+      GIT_TAG 6c51d111be2bdfdc83e5a696aa39ff630c196fd3 # TODO(vilas): Replace with v${ECAL_VERSION_REQUIRED} when stable
       GIT_SHALLOW true
+      DEPENDS tcp_pubsub
       CMAKE_ARGS ${ECAL_CMAKE_ARGS})
   endif()
 endif()

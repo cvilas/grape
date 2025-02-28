@@ -4,7 +4,7 @@
 
 declare_module(NAME ipc DEPENDS_ON_MODULES "utils;conio" DEPENDS_ON_EXTERNAL_PROJECTS "eCAL")
 
-find_package(eCAL ${ECAL_VERSION_REQUIRED} REQUIRED)
+find_package(eCAL REQUIRED) # TODO(vilas): ${ECAL_VERSION_REQUIRED} REQUIRED)
 
 # library sources
 set(SOURCES
