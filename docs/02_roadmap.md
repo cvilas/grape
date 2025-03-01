@@ -15,6 +15,12 @@
 ## Ongoing
 
 - Implement queryable/query API
+  - :done: Test the new tcp_pubsub API works
+  - Write eCAL server example
+    - refer to minimal_client.cpp and minimal_server.cpp
+  - Implement our API
+    - make it usable with zenoh queryable
+  - Transform service example to use our API
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 - Implement systemd service target
 - Implement zero-copy read and write
