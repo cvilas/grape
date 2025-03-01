@@ -9,8 +9,8 @@ declare_module(
 
 # library sources
 set(SOURCES 
-  README.md 
-  include/grape/serdes/concepts.h 
+  README.md
+  include/grape/serdes/concepts.h
   include/grape/serdes/serdes.h
   include/grape/serdes/stream.h)
 

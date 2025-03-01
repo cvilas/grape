@@ -33,7 +33,7 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto TOPIC = grape::ipc::Topic{ .name = "hello" };
     auto pub = grape::app::createPublisher(TOPIC);
 
-    const auto to_bytes = [](const std::string& msg) -> std::span<const std::byte> {
+    const auto serialise = [](const std::string& msg) -> std::span<const std::byte> {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
       return { reinterpret_cast<const std::byte*>(msg.data()), msg.size() };
     };
@@ -45,7 +45,7 @@ auto main(int argc, const char* argv[]) -> int {
 
       auto msg = std::format("Hello World {}", ++count);
       grape::app::syslog(grape::log::Severity::Info, "{}", msg);
-      pub.publish(to_bytes(msg));
+      pub.publish(serialise(msg));
     }
 
     // cleanup before exit
