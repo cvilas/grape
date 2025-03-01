@@ -15,6 +15,12 @@
 ## Ongoing
 
 - Implement queryable/query API
+  - :done: Test the new tcp_pubsub API works
+  - Write eCAL server example
+    - refer to minimal_client.cpp and minimal_server.cpp
+  - Implement our API
+    - make it usable with zenoh queryable
+  - Transform service example to use our API
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 - Implement systemd service target
 - Implement zero-copy read and write
@@ -93,14 +99,18 @@
 
 - Integrate JSON serialisation and reflection using [glaze](https://github.com/stephenberry/glaze)
 
-## Demo applications
+## Raspberry Pi Demo Applications
 
-- Environment monitor (CO2, temperature, humidity, light)
-- Network camera and viewer
+- [Sensing hat](https://www.raspberrypi.com/products/sense-hat/)
+  - Environment monitor (CO2, temperature, humidity, light)
+  - AHRS using IMU
+- [HD camera](https://www.raspberrypi.com/products/raspberry-pi-global-shutter-camera/)
+  - Network camera and viewer
 - IPC interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
 - Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
 - [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
-- [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
+- [Rover](https://github.com/nasa-jpl/open-source-rover) 
+  - Demonstrate joystick teleop, FPV and mission control
 - Advanced streaming
   - Choose backend for audio/video device handling and stream processing
   - Implement AV streaming server and client

@@ -61,16 +61,14 @@ Session::Session(const Config& config) {
   auto ecal_config = eCAL::Init::Configuration();
   switch (config.scope) {
     case Config::Scope::Host:
-      ecal_config.registration.network_enabled = false;
-      ecal_config.transport_layer.udp.mode = eCAL::Types::UDPMode::LOCAL;
+      ecal_config.communication_mode = eCAL::eCommunicationMode::local;
       break;
     case Config::Scope::Network:
-      ecal_config.registration.network_enabled = true;
-      ecal_config.transport_layer.udp.mode = eCAL::Types::UDPMode::NETWORK;
-      // ecal_config.publisher.layer.tcp.enable = true;
-      // ecal_config.publisher.layer.udp.enable = false;
-      // ecal_config.subscriber.layer.tcp.enable = true;
-      // ecal_config.subscriber.layer.udp.enable = false;
+      ecal_config.communication_mode = eCAL::eCommunicationMode::network;
+      ecal_config.publisher.layer.tcp.enable = true;
+      ecal_config.publisher.layer.udp.enable = false;
+      ecal_config.subscriber.layer.tcp.enable = true;
+      ecal_config.subscriber.layer.udp.enable = false;
       break;
   }
   eCAL::Initialize(ecal_config, config.name);
@@ -119,8 +117,7 @@ auto Session::createSubscriber(const std::string& topic, Subscriber::DataCallbac
         const auto tp =
             std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
         if (moved_data_cb != nullptr) {
-          moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer),
-                                    static_cast<std::size_t>(data.buffer_size) },
+          moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
                           .publish_time = tp });
         }
       });
