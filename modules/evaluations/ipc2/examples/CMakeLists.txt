@@ -51,9 +51,9 @@ define_module_example(
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
-  NAME query_sub 
+  NAME query_sub
   SOURCES query_sub.cpp zenoh_utils.h
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> 
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
@@ -104,10 +104,8 @@ define_module_example(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PUBLIC_LINK_LIBS grape::conio)
 
-#define_module_example( 
-#  NAME pull SOURCES pull.cpp zenoh_utils.h 
-#  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> 
-#  PUBLIC_LINK_LIBS grape::conio)
+# define_module_example( NAME pull SOURCES pull.cpp zenoh_utils.h PUBLIC_INCLUDE_PATHS
+# $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> PUBLIC_LINK_LIBS grape::conio)
 
 define_module_example(
   NAME client_pub_example

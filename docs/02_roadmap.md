@@ -1,5 +1,7 @@
 # Roadmap
 
+Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi as hardware platforms
+
 ## Completed
 
 - Versioning
@@ -15,6 +17,12 @@
 ## Ongoing
 
 - Implement queryable/query API
+  - :done: Test the new tcp_pubsub API works
+  - Write eCAL server example
+    - refer to minimal_client.cpp and minimal_server.cpp
+  - Implement our API
+    - make it usable with zenoh queryable
+  - Transform service example to use our API
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 - Implement systemd service target
 - Implement zero-copy read and write
@@ -27,12 +35,15 @@
   - CANopen
   - joystick
   - midi
-- Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). 
+- Configure Raspberry Pi5 for realtime applications
+  - Reference: [Low latency](https://ubuntu.com/blog/real-time-kernel-tuning).
   - Document how to allocate specified CPU cores to run Linux.
   - Document how to allocate specified CPU cores to run my processes and threads.
+  - Demo application to show low latency and low jitter loop execution
 - Study
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
   - [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) on ROS2 interop
+  - [glaze](https://github.com/stephenberry/glaze) for JSON serialisation and reflection
 - Shared memory
 - Single-producer multi-consumer queue using externally specified memory (heap or shared memory)
 - Refactor multi-producer single-consumer queue
@@ -50,17 +61,26 @@
 - Differentiator
 - Integrator
 - Matrix operations
+- Quaternion operations
 
 ## Visualisation
 
+Goal: Scenegraph visualisation and plotting tools from first principles
+
+- Choose Windowing API. Options:
+  - SDL3: Better pipeline model that matches how GPUs work. Better support for GPU computing
+  - GLFW: Simple
+  - Qt6: Complete, including graphs
+  - PoC: Implement a HW accelerated shaded triangle in all of them. Choose based on simplicity (verbosity, expressiveness), maintainability 
 - plot
   - Generic plotting API and `plottable`concept
-  - Implement PoC with [Qt6 Graphs](https://doc.qt.io/qt-6/qtgraphs-index.html)
+  - Implement PoC (reference: [Qt6 graphs](https://doc.qt.io/qt-6/qtgraphs-index.html))
 - Study
   - [2D Game Engine](https://pikuma.com/courses/cpp-2d-game-engine-development)
   - [Vulkan in 30 minutes](https://renderdoc.org/vulkan-in-30-minutes.html)
   - [Vulkan Tutorial](https://vulkan-tutorial.com/)
   - [Vulkan guide](https://vkguide.dev/)
+  - [Scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
   - [Flecs and ECS](https://github.com/SanderMertens/flecs)
   - [CLoudPeek](https://github.com/Geekgineer/CloudPeek/tree/main): Could serve as a starting point for custom viewer
   - [USD](https://developer.nvidia.com/usd#nvidia)
@@ -70,7 +90,7 @@
     - Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scnegraph
   - Design scenegraph library using existing khronos libs
     - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
-    - Implement PoC using Qt3D. See [scratch](https://github.com/cvilas/scratch)/3dvis/qt
+    - Implement PoC. (Example: [Qt3d](https://github.com/cvilas/scratch/3dvis/qt))
     - Implement a basic scenegraph example and check performance in MacOS and Linux
 - Disk recording and playback for time-series multi-modal data ([README](../modules/common/recorder/README.md))
   - [reference](https://github.com/basis-robotics/basis/tree/main/cpp/recorder)
@@ -89,21 +109,21 @@
 - Support GCC builds without restrictions
 - Support installing targets as systemd services
 
-## Other
 
-- Integrate JSON serialisation and reflection using [glaze](https://github.com/stephenberry/glaze)
+## Raspberry Pi Demo Applications
 
-## Demo applications
-
-- Environment monitor (CO2, temperature, humidity, light)
-- Network camera and viewer
-- IPC interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
-- [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
-- [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
-- Advanced streaming
-  - Choose backend for audio/video device handling and stream processing
-  - Implement AV streaming server and client
+- AHRS
+  - Use IMU from [Sensing hat](https://www.raspberrypi.com/products/sense-hat/)
+- Environment monitor (CO2, temperature, humidity, pressure, light)
+  - Use [Sensing hat](https://www.raspberrypi.com/products/sense-hat/)
+- PoE camera
+  - Use [HD camera](https://www.raspberrypi.com/products/raspberry-pi-global-shutter-camera/)
+- LQR sim
+  - Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
+  - [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
+- Rover
+  - DiY kit: [Rover](https://github.com/nasa-jpl/open-source-rover)
+  - Demonstrate joystick teleop, FPV and mission control
 
 ## Zenoh
 
