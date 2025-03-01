@@ -8,7 +8,6 @@
 #include "grape/app/app.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
-#include "grape/log/severity.h"
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
@@ -30,12 +29,12 @@ auto main(int argc, const char* argv[]) -> int {
     grape::app::init({ config });
 
     static constexpr auto TOPIC = "hello";
-    const auto from_bytes = [](std::span<const std::byte> bytes) -> std::string {
+    const auto deserialise = [](std::span<const std::byte> bytes) -> std::string {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
       return { reinterpret_cast<const char*>(bytes.data()), bytes.size() };
     };
-    const auto callback = [&from_bytes](const grape::ipc::Sample& sample) {
-      const auto msg = from_bytes(sample.data);
+    const auto callback = [&deserialise](const grape::ipc::Sample& sample) {
+      const auto msg = deserialise(sample.data);
       grape::app::syslog(grape::log::Severity::Info, "{}", msg);
     };
     auto sub = grape::app::createSubscriber(TOPIC, callback);

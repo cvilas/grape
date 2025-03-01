@@ -2,8 +2,8 @@
 # GRAPE
 #=================================================================================================
 
-# These rules encode the ROS style guide. The file comes from https://github.com/davetcoleman/roscpp_code_format
-# Deviations:
+# These rules encode the [ROS style guide](https://github.com/davetcoleman/roscpp_code_format)
+# with the following deviations:
 # - Opening braces on the same line (No line break before opening braces)
 # - 100 characters per line
 

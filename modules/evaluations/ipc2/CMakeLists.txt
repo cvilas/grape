@@ -11,18 +11,18 @@ find_package(zenohc ${ZENOHC_VERSION_REQUIRED} REQUIRED)
 find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} REQUIRED)
 
 # library sources
-set(SOURCES 
-  src/common.cpp
-  src/ipc_zenoh.h
-  src/session.cpp
-  src/publisher.cpp
-  src/subscriber.cpp
-  include/grape/ipc2/common.h
-  include/grape/ipc2/session.h
-  include/grape/ipc2/topic.h
-  include/grape/ipc2/publisher.h
-  include/grape/ipc2/subscriber.h 
-  README.md)
+set(SOURCES
+    src/common.cpp
+    src/ipc_zenoh.h
+    src/session.cpp
+    src/publisher.cpp
+    src/subscriber.cpp
+    include/grape/ipc2/common.h
+    include/grape/ipc2/session.h
+    include/grape/ipc2/topic.h
+    include/grape/ipc2/publisher.h
+    include/grape/ipc2/subscriber.h
+    README.md)
 
 # library target
 define_module_library(
