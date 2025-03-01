@@ -1,5 +1,7 @@
 # Roadmap
 
+Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi as hardware platforms
+
 ## Completed
 
 - Versioning
@@ -15,6 +17,12 @@
 ## Ongoing
 
 - Implement queryable/query API
+  - :done: Test the new tcp_pubsub API works
+  - Write eCAL server example
+    - refer to minimal_client.cpp and minimal_server.cpp
+  - Implement our API
+    - make it usable with zenoh queryable
+  - Transform service example to use our API
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 - Implement systemd service target
 - Implement zero-copy read and write
@@ -27,12 +35,15 @@
   - CANopen
   - joystick
   - midi
-- Configure Raspberry Pi5 for [low latency](https://ubuntu.com/blog/real-time-kernel-tuning). 
+- Configure Raspberry Pi5 for realtime applications
+  - Reference: [Low latency](https://ubuntu.com/blog/real-time-kernel-tuning).
   - Document how to allocate specified CPU cores to run Linux.
   - Document how to allocate specified CPU cores to run my processes and threads.
+  - Demo application to show low latency and low jitter loop execution
 - Study
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
   - [cactus-rt](https://github.com/cactusdynamics/cactus-rt/) on ROS2 interop
+  - [glaze](https://github.com/stephenberry/glaze) for JSON serialisation and reflection
 - Shared memory
 - Single-producer multi-consumer queue using externally specified memory (heap or shared memory)
 - Refactor multi-producer single-consumer queue
@@ -50,6 +61,7 @@
 - Differentiator
 - Integrator
 - Matrix operations
+- Quaternion operations
 
 ## Visualisation
 
@@ -89,21 +101,21 @@
 - Support GCC builds without restrictions
 - Support installing targets as systemd services
 
-## Other
 
-- Integrate JSON serialisation and reflection using [glaze](https://github.com/stephenberry/glaze)
+## Raspberry Pi Demo Applications
 
-## Demo applications
-
-- Environment monitor (CO2, temperature, humidity, light)
-- Network camera and viewer
-- IPC interop with C++ publisher and Python subscriber, demonstrating data serialisation/deserialisation
-- Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
-- [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
-- [Rover](https://github.com/nasa-jpl/open-source-rover) demonstrating joystick teleop, FPV and mission control
-- Advanced streaming
-  - Choose backend for audio/video device handling and stream processing
-  - Implement AV streaming server and client
+- AHRS
+  - Use IMU from [Sensing hat](https://www.raspberrypi.com/products/sense-hat/)
+- Environment monitor (CO2, temperature, humidity, pressure, light)
+  - Use [Sensing hat](https://www.raspberrypi.com/products/sense-hat/)
+- PoE camera
+  - Use [HD camera](https://www.raspberrypi.com/products/raspberry-pi-global-shutter-camera/)
+- LQR sim
+  - Improvements to `probe::Monitor` (See TODO in [README](../modules/probe/monitor/README.md))
+  - [MuJoCoPy Bootcamp](https://pab47.github.io/mujocopy.html) LQR sim from lesson 13, demonstrating integration of MujoCo, plotting and control
+- Rover
+  - DiY kit: [Rover](https://github.com/nasa-jpl/open-source-rover)
+  - Demonstrate joystick teleop, FPV and mission control
 
 ## Zenoh
 
