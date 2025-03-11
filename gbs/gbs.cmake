@@ -50,21 +50,24 @@ else()
   file(MAKE_DIRECTORY ${EP_DEPLOY_DIR}) # make the deploy directory again
 endif()
 
-# Build external projects
+# Configure external projects
 execute_process(
   COMMAND ${CMAKE_COMMAND}
   -G "Ninja" ${CMAKE_SOURCE_DIR}/external # Use 'Ninja' for parallel build
   -DEXTERNAL_PROJECTS_LIST=${formatted_external_projects_list}
   -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+  -DEP_DEPLOY_DIR=${EP_DEPLOY_DIR}
   -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
-  -DCMAKE_INSTALL_PREFIX=${EP_DEPLOY_DIR}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
   -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
   -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
   -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
   -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
   WORKING_DIRECTORY ${EP_BINARY_DIR}
-  RESULT_VARIABLE _result)
+  RESULT_VARIABLE _result
+  ERROR_VARIABLE _error
+)
 
 # if configuration succeeded, then build all external projects
 if (${_result} EQUAL 0)
