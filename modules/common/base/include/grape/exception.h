@@ -20,8 +20,8 @@ namespace grape {
 /// - DO USE exceptions to log and trace terminal errors before exit
 /// - DO define as few exception types as possible
 /// - DO NOT USE exceptions for resource management (eg: to release resources). Use RAII instead
-/// - DO NOT USE exceptions for Loop control. Use return codes, std::optional and std::exceptional
-/// - DO NOT USE exceptions for Memory corruption or exhaustion. Terminate instead.
+/// - DO NOT USE exceptions for loop control. Use return codes, std::optional and std::expected
+/// - DO NOT USE exceptions for memory corruption or exhaustion. Terminate instead.
 ///
 /// @todo Integrate std::stacktrace when compiler support becomes available
 /// @include exception_example.cpp
