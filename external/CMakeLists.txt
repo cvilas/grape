@@ -147,7 +147,7 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       eCAL
       GIT_REPOSITORY "https://github.com/eclipse-ecal/ecal.git"
-      GIT_TAG 6c51d111be2bdfdc83e5a696aa39ff630c196fd3 # TODO(vilas): Replace with v${ECAL_VERSION_REQUIRED} when stable
+      GIT_TAG ${ECAL_VERSION_REQUIRED}-rc.2 # TODO(vilas): Update on release v6
       GIT_SHALLOW true
       DEPENDS tcp_pubsub
       CMAKE_ARGS ${ECAL_CMAKE_ARGS})
