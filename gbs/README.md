@@ -53,6 +53,7 @@ Note that after configuration,
 - `make docs` generates source code documentation using doxygen
 - `make install` builds and installs library and app targets
 - `<install_location>/bin/uninstall.sh` uninstalls everything
+- `cpack` packages up built artifacts for deployment
 
 ## References
 

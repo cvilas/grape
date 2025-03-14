@@ -38,10 +38,10 @@ set_property(GLOBAL PROPERTY EXTERNAL_PROJECTS "")
 # ==================================================================================================
 # Function: enumerate_modules
 #
-# Description: 
+# Description:
 #  Recurses through the source tree and enumerate modules to build.
 #
-# Parameters: 
+# Parameters:
 #  ROOT_PATH: Top level path to begin enumeration from
 #
 function(enumerate_modules)
@@ -61,16 +61,16 @@ function(enumerate_modules)
   endif()
 
   # Run through all module files collecting information about them
-  set(_module_paths)
-  find_module_declarations(_module_paths ROOT_PATH ${_ARG_ROOT_PATH})
+  set(module_paths)
+  find_module_declarations(module_paths ROOT_PATH ${_ARG_ROOT_PATH})
   set(_MODULES_ENUMERATE_FLAG
       ON
       CACHE INTERNAL "Enumeration of modules in progress")
   message(STATUS "Enumerating ${PROJID} modules")
-  foreach(_module IN LISTS _module_paths)
-    if(NOT ${_module} STREQUAL ${CMAKE_CURRENT_LIST_FILE}) # avoid recursion
-      message(VERBOSE "  Parsing ${_module}")
-      include(${_module})
+  foreach(module IN LISTS module_paths)
+    if(NOT ${module} STREQUAL ${CMAKE_CURRENT_LIST_FILE}) # avoid recursion
+      message(VERBOSE "  Parsing ${module}")
+      include(${module})
     endif()
   endforeach()
   set(_MODULES_ENUMERATE_FLAG
@@ -84,42 +84,42 @@ function(enumerate_modules)
   get_property(_declared_modules_list GLOBAL PROPERTY DECLARED_MODULES)
   get_property(_enabled_modules_list GLOBAL PROPERTY ENABLED_MODULES)
   message(STATUS "Modules")
-  foreach(_module IN LISTS _declared_modules_list)
-    set(_reason_to_build "")
-    if(BUILD_MODULE_${_module})
-      set(_reason_to_build "Enabled")
+  foreach(module IN LISTS _declared_modules_list)
+    set(reason_to_build "")
+    if(BUILD_MODULE_${module})
+      set(reason_to_build "Enabled")
     else()
-      if(_module IN_LIST _enabled_modules_list)
-        set(_reason_to_build "Enabled (dependency)")
+      if(module IN_LIST _enabled_modules_list)
+        set(reason_to_build "Enabled (dependency)")
       else()
-        set(_reason_to_build "Disabled")
+        set(reason_to_build "Disabled")
       endif()
     endif()
-    message(STATUS "\t${_module}: ${_reason_to_build}")
+    message(STATUS "\t${module}: ${reason_to_build}")
   endforeach()
 endfunction()
 
 # ==================================================================================================
-# macro: configure_modules
+# Function: configure_modules
 #
-# Description: 
+# Description:
 #  Configures modules that have been marked to be built during enumeration. See enumerate_modules()
 #
-macro(configure_modules)
+function(configure_modules)
   get_property(_enabled_modules_list GLOBAL PROPERTY ENABLED_MODULES)
 
   # Add each marked module into the build
-  foreach(_module IN LISTS _enabled_modules_list)
-    message(VERBOSE "Adding subdirectory ${MODULE_${_module}_PATH} for module ${_module}")
-    add_subdirectory(${MODULE_${_module}_PATH})
+  foreach(module IN LISTS _enabled_modules_list)
+    message(VERBOSE "Adding subdirectory ${MODULE_${module}_PATH} for module ${module}")
+    add_subdirectory(${MODULE_${module}_PATH})
   endforeach()
 
   # Generate input paths for source code documentation DOC_INPUT_PATHS DOC_EXAMPLE_PATHS
   set(DOC_INPUT_PATHS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/docs ${CMAKE_SOURCE_DIR}/README.md)
-  foreach(_module IN LISTS _enabled_modules_list)
-    set(DOC_INPUT_PATHS ${DOC_INPUT_PATHS} ${MODULE_${_module}_PATH}/include
-                        ${MODULE_${_module}_PATH}/docs ${MODULE_${_module}_PATH}/README.md)
-    set(DOC_EXAMPLE_PATHS ${DOC_EXAMPLE_PATHS} ${MODULE_${_module}_PATH}/examples)
+  foreach(module IN LISTS _enabled_modules_list)
+    set(DOC_INPUT_PATHS ${DOC_INPUT_PATHS} ${MODULE_${module}_PATH}/include
+                        ${MODULE_${module}_PATH}/docs ${MODULE_${module}_PATH}/README.md)
+    set(DOC_EXAMPLE_PATHS ${DOC_EXAMPLE_PATHS} ${MODULE_${module}_PATH}/examples)
   endforeach()
   string(REPLACE ";" " " DOC_INPUT_PATHS "${DOC_INPUT_PATHS}")
   string(REPLACE ";" " " DOC_EXAMPLE_PATHS "${DOC_EXAMPLE_PATHS}")
@@ -129,18 +129,18 @@ macro(configure_modules)
 
   # Define installation rules for module targets
   install_modules()
-endmacro()
+endfunction()
 
 # ==================================================================================================
 # macro: declare_module
 #
-# Description: 
+# Description:
 #  Declares a module.
 #
-# Parameters: 
+# Parameters:
 #  NAME (required): A unique name for the module 
-#  ALWAYS_BUILD (optional): If true, the module is always built, disregarding BUILD_MODULES setting 
-#  DEPENDS_ON_MODULES (list): List of other modules that this module depends on 
+#  ALWAYS_BUILD (optional): If true, the module is always built, disregarding BUILD_MODULES setting
+#  DEPENDS_ON_MODULES (list): List of other modules that this module depends on
 #  DEPENDS_ON_EXTERNAL_PROJECTS (list): List of tags to external projects that this module depends on
 #
 macro(declare_module)
@@ -219,11 +219,11 @@ macro(declare_module)
 endmacro()
 
 #==================================================================================================
-# Macro: define_module_library
+# Function: define_module_library
 #
 # Description:
-#   Macro wraps CMake add_library and related functions/macros to generate libraries in a 
-#   standardised manner. Specifically:
+#   Wraps CMake add_library and related functions/macros to generate libraries in a standardised
+#   manner. Specifically:
 #   - Creates library <project_name>_<library_name>
 #   - Creates alias name <project_name>::<library_name>
 #   - Note: A library target belongs to the enclosing module
@@ -240,7 +240,7 @@ endmacro()
 #   [PUBLIC_LINK_LIBS] : (list, optional) Public link dependencies. See 'PUBLIC' keyword in `target_link_libraries`
 #   [PRIVATE_LINK_LIBS]: (list, optional) Private link dependencies. See 'PRIVATE' keyword in `target_link_libraries`
 #
-macro(define_module_library)
+function(define_module_library)
   set(flags NOINSTALL)
   set(single_opts NAME)
   set(multi_opts
@@ -302,22 +302,22 @@ macro(define_module_library)
   set_target_properties(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   set_target_properties(${LIBRARY_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
 
-endmacro()
+endfunction()
 
 # ==================================================================================================
 # Adds a custom target to group all example programs built on call to `make examples`. See
 # `define_module_example`
-add_custom_target(examples COMMENT "Building examples")
+add_custom_target(examples COMMENT "Build examples")
 
 #==================================================================================================
-# macro: define_module_example
+# Function: define_module_example
 #
 # Description:
-#  Macro to define an example program that is built on call to `make examples`. 
+#  Defines an example program that is built on call to `make examples`.
 # Note:
-#  - This is essentially a convenient wrapper over CMake `add_executable`. 
+#  - This is essentially a convenient wrapper over CMake `add_executable`.
 #  - Examples are not installed on call to `make install`
-#  - Examples automatically link to libraries in the enclosing module 
+#  - Examples automatically link to libraries in the enclosing module
 #  - A module can have multiple examples
 #
 # Parameters:
@@ -329,7 +329,7 @@ add_custom_target(examples COMMENT "Building examples")
 #   [PUBLIC_LINK_LIBS] : (list, optional) Public link dependencies. See 'PUBLIC' keyword in `target_link_libraries`
 #   [PRIVATE_LINK_LIBS]: (list, optional) Private link dependencies. See 'PRIVATE' keyword in `target_link_libraries`
 #
-macro(define_module_example)
+function(define_module_example)
   set(flags "")
   set(single_opts NAME)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
@@ -368,13 +368,13 @@ macro(define_module_example)
     PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS} # link to libraries from the enclosing module
             ${TARGET_ARG_PRIVATE_LINK_LIBS})
 
-endmacro()
+endfunction()
 
 #==================================================================================================
-# macro: define_module_app
+# Function: define_module_app
 #
 # Description:
-#   Macro to define exectuable targets
+#   Define exectuable targets
 # Note:
 #   - An executable target belongs to the enclosing module
 #   - A module can have multiple executables
@@ -389,7 +389,7 @@ endmacro()
 #   [PUBLIC_LINK_LIBS] : (list, optional) Public link dependencies. See 'PUBLIC' keyword in `target_link_libraries`
 #   [PRIVATE_LINK_LIBS]: (list, optional) Private link dependencies. See 'PRIVATE' keyword in `target_link_libraries`
 #
-macro(define_module_app)
+function(define_module_app)
   set(flags "")
   set(single_opts NAME)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
@@ -437,7 +437,7 @@ macro(define_module_app)
     set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
   endif()
 
-endmacro()
+endfunction()
 
 # ==================================================================================================
 # Setup tests target
@@ -456,7 +456,7 @@ set_target_properties(Catch2WithMain PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_C
 
 # ==================================================================================================
 # Adds a custom target to group all test programs built on call to `make tests`
-add_custom_target(tests COMMENT "Building tests")
+add_custom_target(tests COMMENT "Build tests")
 
 # ==================================================================================================
 # Adds a custom convenience target to run all tests and generate report on 'make check'
@@ -464,14 +464,14 @@ add_custom_target(
   check
   COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --output-log tests_log.txt --verbose
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  COMMENT "Building and running tests")
+  COMMENT "Build and run tests")
 add_dependencies(check tests) # `check` depends on `tests` target
 
 #==================================================================================================
-# macro: define_module_test
+# Function: define_module_test
 #
 # Description:
-#   Macro to define a 'test' program
+#   Defines a 'test' program
 # Note:
 #   - A test program belongs to the enclosing module
 #   - A module can have multiple tests
@@ -486,7 +486,7 @@ add_dependencies(check tests) # `check` depends on `tests` target
 #   [PUBLIC_LINK_LIBS] : (list, optional) Public link dependencies. See 'PUBLIC' keyword in `target_link_libraries`
 #   [PRIVATE_LINK_LIBS]: (list, optional) Private link dependencies. See 'PRIVATE' keyword in `target_link_libraries`
 #
-macro(define_module_test)
+function(define_module_test)
   set(flags "")
   set(single_opts NAME COMMAND WORKING_DIRECTORY)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
@@ -531,7 +531,7 @@ macro(define_module_test)
     PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS} # link to libraries from the enclosing module
             ${TARGET_ARG_PRIVATE_LINK_LIBS} Catch2::Catch2WithMain)
 
-endmacro()
+endfunction()
 
 #==================================================================================================
 # (for internal use)
@@ -544,14 +544,14 @@ endmacro()
 #  - <project>_<module>-targets.cmake
 function(install_modules)
   get_property(_enabled_modules_list GLOBAL PROPERTY ENABLED_MODULES)
-  foreach(_module IN LISTS _enabled_modules_list)
+  foreach(module IN LISTS _enabled_modules_list)
 
     # These variables are copied into module-config.cmake.in to set up dependencies
-    set(INSTALL_MODULE_NAME ${CMAKE_PROJECT_NAME}_${_module})
-    set(INSTALL_MODULE_LIB_TARGETS ${MODULE_${_module}_LIB_TARGETS})
-    set(INSTALL_MODULE_EXE_TARGETS ${MODULE_${_module}_EXE_TARGETS})
-    set(INSTALL_MODULE_INTERNAL_DEPENDENCIES ${MODULE_${_module}_DEPENDS_ON})
-    set(INSTALL_MODULE_EXTERNAL_DEPENDENCIES ${MODULE_${_module}_EXTERNAL_PROJECT_DEPS})
+    set(INSTALL_MODULE_NAME ${CMAKE_PROJECT_NAME}_${module})
+    set(INSTALL_MODULE_LIB_TARGETS ${MODULE_${module}_LIB_TARGETS})
+    set(INSTALL_MODULE_EXE_TARGETS ${MODULE_${module}_EXE_TARGETS})
+    set(INSTALL_MODULE_INTERNAL_DEPENDENCIES ${MODULE_${module}_DEPENDS_ON})
+    set(INSTALL_MODULE_EXTERNAL_DEPENDENCIES ${MODULE_${module}_EXTERNAL_PROJECT_DEPS})
 
     set(config_create_location ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/${INSTALL_MODULE_NAME})
     set(config_install_location ${CMAKE_INSTALL_LIBDIR}/cmake/${INSTALL_MODULE_NAME})
@@ -577,7 +577,7 @@ function(install_modules)
 
     # install package targets
     if(DEFINED INSTALL_MODULE_LIB_TARGETS OR DEFINED INSTALL_MODULE_EXE_TARGETS)
-      message(VERBOSE "Module \"${_module}\" installable targets:")
+      message(VERBOSE "Module \"${module}\" installable targets:")
       message(VERBOSE "  Library targets\t : ${INSTALL_MODULE_LIB_TARGETS}")
       message(VERBOSE "  Executable targets\t : ${INSTALL_MODULE_EXE_TARGETS}")
       install(TARGETS 
@@ -589,8 +589,8 @@ function(install_modules)
         INCLUDES DESTINATION include)
 
       # install public header files
-      if(EXISTS ${MODULE_${_module}_PATH}/include)
-        install(DIRECTORY ${MODULE_${_module}_PATH}/include/ DESTINATION include)
+      if(EXISTS ${MODULE_${module}_PATH}/include)
+        install(DIRECTORY ${MODULE_${module}_PATH}/include/ DESTINATION include)
       endif()
 
       # export targets
@@ -664,17 +664,17 @@ function(mark_module_and_dependencies_to_build)
   )
 
   # Recursively process all dependencies.
-  foreach(_dep IN LISTS MODULE_${_ARG_MODULE_NAME}_DEPENDS_ON)
-    if(NOT EXISTS ${MODULE_${_dep}_PATH})
-      message(FATAL_ERROR "Module \"${_module}\" internal dependency \"${_dep}\" does not exist")
+  foreach(dep IN LISTS MODULE_${_ARG_MODULE_NAME}_DEPENDS_ON)
+    if(NOT EXISTS ${MODULE_${dep}_PATH})
+      message(FATAL_ERROR "Module \"${module}\" internal dependency \"${dep}\" does not exist")
     endif()
-    mark_module_and_dependencies_to_build(MODULE_NAME ${_dep})
+    mark_module_and_dependencies_to_build(MODULE_NAME ${dep})
 
     # Set a corresponding global property to list of all modules that the module depends on,
     # directly or indirectly.
-    get_property(MODULE_DEP_LIST GLOBAL PROPERTY MODULE_${_dep}_ALL_DEPS)
+    get_property(MODULE_DEP_LIST GLOBAL PROPERTY MODULE_${dep}_ALL_DEPS)
     set_property(GLOBAL APPEND PROPERTY MODULE_${_ARG_MODULE_NAME}_ALL_DEPS ${MODULE_DEP_LIST})
-    set_property(GLOBAL APPEND PROPERTY MODULE_${_ARG_MODULE_NAME}_ALL_DEPS ${_dep})
+    set_property(GLOBAL APPEND PROPERTY MODULE_${_ARG_MODULE_NAME}_ALL_DEPS ${dep})
   endforeach()
 
   # Populate the global list of external dependencies.
@@ -705,9 +705,9 @@ endfunction()
 # building
 function(mark_modules_to_build)
   get_property(_declared_modules GLOBAL PROPERTY DECLARED_MODULES)
-  foreach(_module IN LISTS _declared_modules)
-    if(${BUILD_MODULE_${_module}})
-      mark_module_and_dependencies_to_build(MODULE_NAME ${_module})
+  foreach(module IN LISTS _declared_modules)
+    if(${BUILD_MODULE_${module}})
+      mark_module_and_dependencies_to_build(MODULE_NAME ${module})
     endif()
   endforeach()
 endfunction()
@@ -715,13 +715,13 @@ endfunction()
 # ==================================================================================================
 # (for internal use) Recurse through directory tree and find all CMakeLists.txt files that contains
 # module declaration
-function(find_module_declarations _result)
+function(find_module_declarations result)
   set(flags "")
   set(single_opts ROOT_PATH)
   set(multi_opts "")
 
   # This is the regex string we search for in the files to find a module declaration
-  set(_declaration_search_regex "^declare_module\\(")
+  set(declaration_search_regex "^declare_module\\(")
 
   include(CMakeParseArguments)
   cmake_parse_arguments(_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
@@ -738,15 +738,15 @@ function(find_module_declarations _result)
   # * From these, extract those that contain 'declare_module' string
   file(GLOB_RECURSE _all_cmakelists "${_ARG_ROOT_PATH}/CMakeLists.txt")
 
-  set(_module_files_list)
-  foreach(_file ${_all_cmakelists})
-    file(STRINGS "${_file}" _lines REGEX ${_declaration_search_regex})
+  set(module_files_list)
+  foreach(file ${_all_cmakelists})
+    file(STRINGS "${file}" _lines REGEX ${declaration_search_regex})
     if(_lines)
-      list(APPEND _module_files_list "${_file}")
+      list(APPEND module_files_list "${file}")
     endif()
   endforeach()
-  set(${_result}
-      ${_module_files_list}
+  set(${result}
+      ${module_files_list}
       PARENT_SCOPE)
 
 endfunction()
@@ -770,7 +770,7 @@ if(NOT CMAKE_CROSSCOMPILING)
       COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doxyfile
       WORKING_DIRECTORY ${DOC_OUTPUT_PATH}
       SOURCES ""
-      COMMENT "Generating API documentation"
+      COMMENT "Generate API documentation"
       VERBATIM)
 
     # install(DIRECTORY ${DOC_OUTPUT_PATH} DESTINATION ${CMAKE_INSTALL_DOCDIR})
