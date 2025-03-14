@@ -3,6 +3,9 @@
 # =================================================================================================
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+if(DEFINED PACKAGE_SUFFIX)
+  set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-${PACKAGE_SUFFIX}")
+endif()
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_PACKAGE_VENDOR "Vilas Kumar Chitrakaran")
 set(CPACK_PACKAGE_DIRECTORY ${PROJECT_BINARY_DIR}/package)
