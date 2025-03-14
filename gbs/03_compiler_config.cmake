@@ -12,15 +12,15 @@ add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 set(THIRD_PARTY_COMPILER_WARNINGS -Wall -Wextra -Wpedantic)
 
 # clang warnings
-set(CLANG_WARNINGS -Weverything 
-  -Wno-c++20-compat 
-  -Wno-pre-c++20-compat-pedantic 
-  -Wno-pre-c++17-compat 
-  -Wno-c++98-compat 
-  -Wno-c++98-compat-pedantic 
-  -Wno-unsafe-buffer-usage 
-  -Wno-padded 
-  -Wno-switch-default 
+set(CLANG_WARNINGS -Weverything
+  -Wno-c++20-compat
+  -Wno-pre-c++20-compat-pedantic
+  -Wno-pre-c++17-compat
+  -Wno-c++98-compat
+  -Wno-c++98-compat-pedantic
+  -Wno-unsafe-buffer-usage
+  -Wno-padded
+  -Wno-switch-default
   -Wno-ctad-maybe-unsupported
   -Wno-global-constructors
   -Wno-weak-vtables
@@ -39,15 +39,15 @@ set(GCC_WARNINGS
   -Wnull-dereference # warn if a null dereference is detected
   -Wdouble-promotion # warn if float is implicit promoted to double
   -Wformat=2 # warn on security issues around functions that format output (ie printf)
-  -Wimplicit-fallthrough # warn on statements that fallthrough without an explicit annotation    
+  -Wimplicit-fallthrough # warn on statements that fallthrough without an explicit annotation
   -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
   -Wduplicated-cond # warn if if / else chain has duplicated conditions
   -Wduplicated-branches # warn if if / else branches have duplicated code
   -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
   -Wuseless-cast # warn if you perform a cast to the same type
-  -Wconversion 
-  -Wcast-qual 
-  -Wpointer-arith 
+  -Wconversion
+  -Wcast-qual
+  -Wpointer-arith
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
@@ -88,10 +88,7 @@ endif()
 option(ENABLE_MSAN "Enable memory sanitizer" FALSE)
 if(${ENABLE_MSAN})
   if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-    message(
-      WARNING
-        "Memory sanitizer requires all the code (including libc++) to be MSAN-instrumented otherwise it reports false positives"
-    )
+    message(WARNING "Memory sanitizer requires all code (including libc++) to be MSAN-instrumented to avoid false positives")
   endif()
   if("address" IN_LIST SANITIZERS
      OR "thread" IN_LIST SANITIZERS
@@ -131,8 +128,8 @@ endif()
 option(ENABLE_CACHE "Enable cache if available" ON)
 if(ENABLE_CACHE)
   set(CACHE_PROGRAM_OPTIONS "ccache" "sccache")
-  foreach(CACHE_OPTION IN LISTS CACHE_PROGRAM_OPTIONS)
-    find_program(CACHE_BIN ${CACHE_OPTION})
+  foreach(cache_option IN LISTS CACHE_PROGRAM_OPTIONS)
+    find_program(CACHE_BIN ${cache_option})
     if(CACHE_BIN)
       set(CMAKE_CXX_COMPILER_LAUNCHER ${CACHE_BIN})
       set(CMAKE_C_COMPILER_LAUNCHER ${CACHE_BIN})
@@ -156,14 +153,13 @@ option(ENABLE_LINTER "Enable static analysis" ON)
 if(ENABLE_LINTER)
   find_program(LINTER_BIN NAMES clang-tidy QUIET)
   if(LINTER_BIN)
-    set(LINTER_ARGS 
-      -extra-arg=-Wno-ignored-optimization-argument 
+    set(LINTER_ARGS
+      -extra-arg=-Wno-ignored-optimization-argument
       -extra-arg=-Wno-unknown-warning-option)
     # NOTE: To speed up linting, clang-tidy is invoked via clang-tidy-cache.
     # (https://github.com/matus-chochlik/ctcache) Cache location is set by environment variable
     # CTCACHE_DIR
-    set(LINTER_INVOKE_COMMAND
-        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} -p ${CMAKE_BINARY_DIR} ${LINTER_ARGS})
+    set(LINTER_INVOKE_COMMAND ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} -p ${CMAKE_BINARY_DIR} ${LINTER_ARGS})
     set(CMAKE_C_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
     set(CMAKE_CXX_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")

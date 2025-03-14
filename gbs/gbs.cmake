@@ -23,7 +23,7 @@ enumerate_modules(ROOT_PATH ${CMAKE_SOURCE_DIR}/modules)
 
 # define staging directories for external projects
 set(EP_BINARY_DIR ${CMAKE_BINARY_DIR}/external)  # location of build tree for external projects
-set(EP_DEPLOY_DIR ${EP_BINARY_DIR}/deploy)       # location of installable files from external projects
+set(EP_DEPLOY_DIR ${EP_BINARY_DIR}/deploy)       # location of artifacts from external projects
 file(MAKE_DIRECTORY ${EP_DEPLOY_DIR})
 get_property(_external_projects_list GLOBAL PROPERTY EXTERNAL_PROJECTS)
 
