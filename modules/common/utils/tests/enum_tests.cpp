@@ -57,7 +57,7 @@ TEST_CASE("Valid string names can be cast back to enum", "[enums]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Invalid string name can be cast back to enum", "[enums]") {
+TEST_CASE("Invalid string name cannot be cast back to enum", "[enums]") {
   const auto maybe_color = grape::enums::cast<Color>("Red--");
   REQUIRE(not maybe_color.has_value());
 }

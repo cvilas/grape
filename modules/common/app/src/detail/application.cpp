@@ -19,7 +19,7 @@ namespace {
     return file_name;
   }
   // otherwise search for it...
-  const auto& search_dirs = grape::utils::getSearchDirs();
+  const auto& search_dirs = grape::utils::getSearchPaths();
   for (const auto& dir : search_dirs) {
     auto full_path = dir / "config" / file_name;
     if (std::filesystem::exists(full_path) && std::filesystem::is_regular_file(full_path)) {

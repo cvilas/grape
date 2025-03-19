@@ -22,9 +22,8 @@
 namespace grape::enums {
 namespace detail {
 
-template <auto E>
-
 /// Uses compiler-specific magic to extract a string representing an enumeration at compile-time
+template <auto E>
 consteval auto extractEnumeratorName() -> std::string_view {
   const std::string_view func_name = __PRETTY_FUNCTION__;
 
