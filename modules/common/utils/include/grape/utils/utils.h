@@ -45,7 +45,7 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 /// - User-specific GRAPE configuration: $HOME/.grape/
 /// - Host-specific GRAPE configuration: /etc/opt/grape/
 /// - Default GRAPE configuration: $GRAPE_INSTALL_PATH/share/grape/
-[[nodiscard]] auto getSearchDirs() -> const std::vector<std::filesystem::path>&;
+[[nodiscard]] auto getSearchPaths() -> const std::vector<std::filesystem::path>&;
 
 /// @return user-readable name for specified type
 template <typename T>

@@ -18,7 +18,7 @@ auto main() -> int {
     std::println("Program name: {}", path.filename().string());
     std::println("Program path: {}", path.parent_path().string());
     std::println("Data search directories for this application:");
-    for (const auto& dir : grape::utils::getSearchDirs()) {
+    for (const auto& dir : grape::utils::getSearchPaths()) {
       std::println("\t{}", dir.string());
     }
     return EXIT_SUCCESS;

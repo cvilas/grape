@@ -61,7 +61,7 @@ auto demangle(const char* mangled_name) -> std::string {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto getSearchDirs() -> const std::vector<std::filesystem::path>& {
+auto getSearchPaths() -> const std::vector<std::filesystem::path>& {
   static const auto paths = [] {
     const auto app_path = getProgramPath().parent_path();
     const auto app_name = getProgramPath().filename().string();
