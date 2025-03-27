@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "grape/ipc/match.h"
 #include "grape/ipc/publisher.h"
 #include "grape/ipc/subscriber.h"
@@ -56,5 +58,8 @@ public:
   auto operator=(const Session&) = delete;
   Session(Session&&) noexcept = delete;
   auto operator=(Session&&) noexcept = delete;
+
+private:
+  static std::atomic_flag s_instance_exists;
 };
 }  // namespace grape::ipc

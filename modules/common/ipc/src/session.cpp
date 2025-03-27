@@ -54,10 +54,14 @@ auto toMatchEvent(const eCAL::SSubEventCallbackData& event_data) -> grape::ipc::
 
 namespace grape::ipc {
 
+std::atomic_flag Session::s_instance_exists{ false };
+
 //-------------------------------------------------------------------------------------------------
 Session::Session(const Config& config) {
-  // TODO(vilas):
-  // - enforce only one session per process
+  if (s_instance_exists.test_and_set()) {
+    throw std::runtime_error("Only one IPC session is allowed per process");
+  }
+
   auto ecal_config = eCAL::Init::Configuration();
   switch (config.scope) {
     case Config::Scope::Host:
@@ -77,6 +81,7 @@ Session::Session(const Config& config) {
 //-------------------------------------------------------------------------------------------------
 Session::~Session() {
   eCAL::Finalize();
+  s_instance_exists.clear();
 }
 
 //-------------------------------------------------------------------------------------------------

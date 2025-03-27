@@ -17,6 +17,12 @@ namespace {
 // NOLINTBEGIN(cert-err58-cpp)
 
 //=================================================================================================
+TEST_CASE("A process can have only one session", "[ipc]") {
+  auto session = grape::ipc::Session(grape::ipc::Session::Config{});
+  REQUIRE_THROWS(std::make_unique<grape::ipc::Session>(grape::ipc::Session::Config{}));
+}
+
+//=================================================================================================
 TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   auto session = grape::ipc::Session(grape::ipc::Session::Config{});
   const auto topic = grape::ipc::Topic{ .name = "pub_sub_test" };
