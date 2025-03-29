@@ -14,17 +14,12 @@ Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi a
 - Serialization
 - Application framework
 
-## IPC
+## Current tasks
 
-- Notes on writing applications
-- Implement means to restrict IPC to a set of hosts on LAN
-- Implement IPC to a host behind a router on its LAN
-- Implement queryable/query API
-  - Write eCAL server example: refer to minimal_client.cpp and minimal_server.cpp
-  - Implement our API
-  - Transform service_example.cpp to use our API
-- Implement Python API for IPC
-- Implement IPC zero-copy read and write
+- IPC: Implement means to isolate IPC to a set of hosts [#129]
+- IPC: Implement Query API [#130]
+- IPC: Impmenent Python bindings [#131]
+- IPC: Implement zero-copy read and write [#132]
 
 ## Camera
 

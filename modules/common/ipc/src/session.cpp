@@ -60,7 +60,7 @@ void init(Config&& config) {
 //-------------------------------------------------------------------------------------------------
 auto ok() -> bool {
   if (not s_manager) {
-    return false;
+    panic<Exception>("Not initialised. Call init() first.");
   }
   return eCAL::Ok();
 }

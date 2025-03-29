@@ -198,11 +198,12 @@ auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T,
 //-------------------------------------------------------------------------------------------------
 template <conio::StringStreamable T>
 auto ProgramOptions::getOptionOrThrow(const std::string& key) const -> T {
-  const auto maybe_opt = getOption<T>(key);
-  if (not maybe_opt) {
-    grape::panic<grape::Exception>(toString(maybe_opt.error()));
-  }
-  return maybe_opt.value();
+  return getOption<T>(key)
+      .transform_error([](const auto& err) {
+        panic<Exception>(toString(err));
+        return Error{};  // unreachable
+      })
+      .value();
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# Reduce latency over WiFi
+# How to reduce latency over WiFi
 
 Intel and Qualcomm Atheros WiFi modules included in most laptops support Dynamic Power Saving (DPS). When enabled (which is the default) the kernel puts the WiFi module to sleep if there is no network traffic for few milliseconds. This leads to data transport latency as high as 300ms over WiFi. To reduce average latency, turn off DPS. 
 

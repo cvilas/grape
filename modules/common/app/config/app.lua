@@ -2,7 +2,7 @@
  Copyright (C) 2024 GRAPE Contributors
 =================================================================================================]]
 
---[[Template top-level GRAPE application configuration script in Lua programming language syntax ]]
+--[[Top level application configuration script in Lua programming language syntax ]]
 
 -- Logger configuration
 logger = {
@@ -11,5 +11,5 @@ logger = {
 
 -- IPC (inter-process communication) configuration
 ipc = {
-  scope = "Host",                   -- See grape::ipc::Session::Config::Scope 
+  scope = "Host",                   -- See grape::ipc::Config::Scope 
 }
