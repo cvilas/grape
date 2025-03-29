@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <algorithm>  // std::copy_n
 #include <array>
 #include <span>
-#include <algorithm> // std::copy_n
 
 namespace grape::serdes {
 

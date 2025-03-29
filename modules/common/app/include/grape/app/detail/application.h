@@ -26,15 +26,10 @@ public:
   [[nodiscard]] auto isInit() const -> bool;
   [[nodiscard]] auto ok() const -> bool;
   void cleanup();
-  auto createPublisher(const ipc::Topic& topic, ipc::MatchCallback&& mcb) -> ipc::Publisher;
-  auto createSubscriber(const std::string& topic, ipc::Subscriber::DataCallback&& dcb,
-                        ipc::MatchCallback&& mcb) -> ipc::Subscriber;
-
   static auto instance() -> Application&;
 
 private:
   bool is_init_{ false };
-  std::unique_ptr<ipc::Session> ipc_session_{ nullptr };
 };
 
 }  // namespace grape::app::detail

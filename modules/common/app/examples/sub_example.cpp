@@ -8,6 +8,7 @@
 #include "grape/app/app.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/ipc/subscriber.h"
 #include "grape/log/syslog.h"
 
 //=================================================================================================
@@ -24,10 +25,10 @@ auto main(int argc, const char* argv[]) -> int {
     const auto& args = maybe_args.value();
 
     // Read configuration file path
-    const auto config = args.getOptionOrThrow<std::string>("config");
+    const auto config_path = args.getOptionOrThrow<std::string>("config");
 
     // Initialise application
-    grape::app::init({ config });
+    grape::app::init({ config_path });
 
     static constexpr auto TOPIC = "hello";
     const auto deserialise = [](std::span<const std::byte> bytes) -> std::string {
@@ -38,13 +39,10 @@ auto main(int argc, const char* argv[]) -> int {
       const auto msg = deserialise(sample.data);
       grape::syslog::Log(grape::log::Severity::Info, "{}", msg);
     };
-    auto sub = grape::app::createSubscriber(TOPIC, callback);
+    auto sub = grape::ipc::Subscriber(TOPIC, callback);
 
     std::println("Press ctrl-c to exit");
     grape::app::waitForExit();
-
-    // cleanup before exit
-    grape::app::cleanup();
 
     return EXIT_SUCCESS;
   } catch (...) {

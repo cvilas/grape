@@ -10,7 +10,7 @@
 
 namespace {
 
-// NOLINTBEGIN(cert-er r58-cpp)
+// NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange)
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Resolves file path in the right order", "[file_system]") {
@@ -55,6 +55,6 @@ TEST_CASE("Resolves file path in the right order", "[file_system]") {
   REQUIRE_FALSE(found_file3.has_value());
 }
 
-// NOLINTEND(cert-er r58-cpp)
+// NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)
 
 }  // namespace

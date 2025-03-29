@@ -11,5 +11,5 @@ logger = {
 
 -- IPC (inter-process communication) configuration
 ipc = {
-  scope = "Host",                   -- See grape::ipc::Session::Config::Scope 
+  scope = "Host",                   -- See grape::ipc::Config::Scope 
 }

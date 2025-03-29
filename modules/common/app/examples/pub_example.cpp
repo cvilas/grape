@@ -10,6 +10,7 @@
 #include "grape/app/app.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/ipc/publisher.h"
 #include "grape/log/syslog.h"
 
 //=================================================================================================
@@ -26,13 +27,11 @@ auto main(int argc, const char* argv[]) -> int {
     const auto& args = maybe_args.value();
 
     // Read configuration file path
-    const auto config = args.getOptionOrThrow<std::string>("config");
-
-    // Initialise application
-    grape::app::init({ config });
+    const auto config_path = args.getOptionOrThrow<std::string>("config");
+    grape::app::init({ config_path });
 
     static constexpr auto TOPIC = grape::ipc::Topic{ .name = "hello" };
-    auto pub = grape::app::createPublisher(TOPIC);
+    auto pub = grape::ipc::Publisher(TOPIC);
 
     const auto serialise = [](const std::string& msg) -> std::span<const std::byte> {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -48,9 +47,6 @@ auto main(int argc, const char* argv[]) -> int {
       grape::syslog::Log(grape::log::Severity::Info, "{}", msg);
       pub.publish(serialise(msg));
     }
-
-    // cleanup before exit
-    grape::app::cleanup();
 
     return EXIT_SUCCESS;
   } catch (...) {

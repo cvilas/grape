@@ -7,6 +7,7 @@
 #include <atomic>
 #include <csignal>
 #include <cstring>
+#include <exception>
 #include <print>
 
 #include "grape/app/detail/application.h"
@@ -20,6 +21,20 @@ void handleSignal(int signal) {
   s_exit_flag.test_and_set();
   s_exit_flag.notify_all();
 }
+
+[[noreturn]] void handleTermination() {
+  grape::Exception::print();
+  (void)fputs("\nTerminate called\n", stderr);
+  (void)fputs("\nBacktrace:\n", stderr);
+  auto idx = 0U;
+  const auto strace = grape::utils::StackTrace::current();
+  for (const auto& trace : strace.trace()) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    (void)fprintf(stderr, "#%u: %s\n", idx++, trace.c_str());
+  }
+  std::exit(EXIT_FAILURE);  // NOLINT(concurrency-mt-unsafe)
+}
+
 }  // namespace
 
 namespace grape::app {
@@ -30,39 +45,21 @@ void init(const std::filesystem::path& config) {
   std::ignore = signal(SIGINT, handleSignal);
   std::ignore = signal(SIGTERM, handleSignal);
 
+  // setup terminate handler
+  std::set_terminate(handleTermination);
+
   // initialise application
   detail::Application::instance().init(config);
 }
 
 //-------------------------------------------------------------------------------------------------
-void cleanup() {
-  detail::Application::instance().cleanup();
-}
-
-//-------------------------------------------------------------------------------------------------
-auto isInit() -> bool {
-  return detail::Application::instance().isInit();
-}
-
-//-------------------------------------------------------------------------------------------------
 auto ok() -> bool {
-  return detail::Application::instance().ok() and not s_exit_flag.test();
+  return grape::ipc::ok() and not s_exit_flag.test();
 }
 
 //-------------------------------------------------------------------------------------------------
 void waitForExit() {
   s_exit_flag.wait(false);
-}
-
-//-------------------------------------------------------------------------------------------------
-auto createPublisher(const ipc::Topic& topic, ipc::MatchCallback&& mcb) -> ipc::Publisher {
-  return detail::Application::instance().createPublisher(topic, std::move(mcb));
-}
-
-//-------------------------------------------------------------------------------------------------
-auto createSubscriber(const std::string& topic, ipc::Subscriber::DataCallback&& dcb,
-                      ipc::MatchCallback&& mcb) -> ipc::Subscriber {
-  return detail::Application::instance().createSubscriber(topic, std::move(dcb), std::move(mcb));
 }
 
 }  // namespace grape::app
