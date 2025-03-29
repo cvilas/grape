@@ -44,6 +44,11 @@ auto getProgramPath() -> std::filesystem::path {
 }
 
 //-------------------------------------------------------------------------------------------------
+auto getProgramName() -> std::string {
+  return getProgramPath().filename().string();
+}
+
+//-------------------------------------------------------------------------------------------------
 auto getUserHomePath() -> std::filesystem::path {
   // NOLINTNEXTLINE(concurrency-mt-unsafe)
   static const auto home_dir = std::filesystem::path(getpwuid(getuid())->pw_dir);
@@ -64,7 +69,7 @@ auto demangle(const char* mangled_name) -> std::string {
 auto getSearchPaths() -> const std::vector<std::filesystem::path>& {
   static const auto paths = [] {
     const auto app_path = getProgramPath().parent_path();
-    const auto app_name = getProgramPath().filename().string();
+    const auto app_name = getProgramName();
     const auto home_path = getUserHomePath();
     return std::vector<std::filesystem::path>{
       home_path / ("." + app_name),         //

@@ -34,6 +34,9 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 /// @return Full path of the program being executed
 [[nodiscard]] auto getProgramPath() -> std::filesystem::path;
 
+/// @return Name of the program being executed
+[[nodiscard]] auto getProgramName() -> std::string;
+
 /// @return Full path to current user's home directory
 [[nodiscard]] auto getUserHomePath() -> std::filesystem::path;
 

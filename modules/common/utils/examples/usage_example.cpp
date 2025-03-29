@@ -15,7 +15,7 @@ auto main() -> int {
     const auto home_dir = grape::utils::getUserHomePath();
     std::println("Host name: {}", host_name);
     std::println("User's home: {}", home_dir.string());
-    std::println("Program name: {}", path.filename().string());
+    std::println("Program name: {}", grape::utils::getProgramName());
     std::println("Program path: {}", path.parent_path().string());
     std::println("Data search directories for this application:");
     for (const auto& dir : grape::utils::getSearchPaths()) {

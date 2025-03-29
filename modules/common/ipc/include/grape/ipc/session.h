@@ -29,7 +29,7 @@ public:
       Host,    //!< Messages confined to host
       Network  //!< Messages can be exchanged across LAN
     };
-    std::string name = utils::getProgramPath().filename();  //!< user-defined identifier
+    std::string name = utils::getProgramName();  //!< user-defined identifier
     Scope scope = Scope::Host;
   };
 
