@@ -11,8 +11,7 @@ namespace grape::syslog {
 
 /// @return Creates the system logger
 static auto systemLogger() -> log::Logger& {
-  static log::Logger logger(
-      log::Config{ .logger_name = utils::getProgramPath().filename().string() });
+  static log::Logger logger(log::Config{ .logger_name = utils::getProgramName() });
   return logger;
 }
 
