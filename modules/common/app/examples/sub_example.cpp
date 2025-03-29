@@ -8,6 +8,7 @@
 #include "grape/app/app.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/log/syslog.h"
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
@@ -35,7 +36,7 @@ auto main(int argc, const char* argv[]) -> int {
     };
     const auto callback = [&deserialise](const grape::ipc::Sample& sample) {
       const auto msg = deserialise(sample.data);
-      grape::app::syslog(grape::log::Severity::Info, "{}", msg);
+      grape::syslog::Log(grape::log::Severity::Info, "{}", msg);
     };
     auto sub = grape::app::createSubscriber(TOPIC, callback);
 

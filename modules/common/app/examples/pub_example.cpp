@@ -10,6 +10,7 @@
 #include "grape/app/app.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/log/syslog.h"
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
@@ -44,7 +45,7 @@ auto main(int argc, const char* argv[]) -> int {
       std::this_thread::sleep_for(LOOP_SLEEP);
 
       auto msg = std::format("Hello World {}", ++count);
-      grape::app::syslog(grape::log::Severity::Info, "{}", msg);
+      grape::syslog::Log(grape::log::Severity::Info, "{}", msg);
       pub.publish(serialise(msg));
     }
 

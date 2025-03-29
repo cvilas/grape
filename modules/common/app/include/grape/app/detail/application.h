@@ -8,9 +8,8 @@
 
 #include "grape/exception.h"
 #include "grape/ipc/session.h"
-#include "grape/log/logger.h"
 
-namespace grape::app {
+namespace grape::app::detail {
 
 ///------------------------------------------------------------------------------------------------
 /// *NOT USER API*
@@ -18,8 +17,6 @@ namespace grape::app {
 /// This header defines intrinsics required to support grape applications. These are not intended
 /// to be user-facing APIs. Instead user applications should use the API from the public header
 ///------------------------------------------------------------------------------------------------
-
-namespace detail {
 
 //-------------------------------------------------------------------------------------------------
 /// Encapsulates common services for GRAPE applications.
@@ -35,26 +32,9 @@ public:
 
   static auto instance() -> Application&;
 
-  template <typename... Args>
-  void log(log::Severity sev, const std::source_location& loc, std::format_string<Args...> fmt,
-           Args&&... args);
-
 private:
   bool is_init_{ false };
-  std::unique_ptr<log::Logger> logger_{ nullptr };
   std::unique_ptr<ipc::Session> ipc_session_{ nullptr };
 };
 
-//-------------------------------------------------------------------------------------------------
-template <typename... Args>
-void Application::log(log::Severity sev, const std::source_location& loc,
-                      std::format_string<Args...> fmt, Args&&... args) {
-  if (not is_init_) {
-    panic<Exception>("Not initialised. Call init() first");
-  }
-  logger_->log(sev, loc, fmt, std::forward<Args>(args)...);
-}
-}  // namespace detail
-
-
-}  // namespace grape::app
+}  // namespace grape::app::detail

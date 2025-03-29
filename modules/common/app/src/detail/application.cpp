@@ -6,8 +6,8 @@
 
 #include <utility>
 
+#include "grape/log/syslog.h"
 #include "grape/script/script.h"
-#include "grape/utils/utils.h"
 
 namespace {
 
@@ -30,9 +30,7 @@ namespace {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto configureLogger(const grape::script::ConfigTable& table) -> grape::log::Config {
-  const auto app_name = grape::utils::getProgramPath().filename().string();
-  auto config = grape::log::Config{ .logger_name = app_name };
+void configureLogger(const grape::script::ConfigTable& table) {
   const auto maybe_severity_str = table.read<std::string>("severity_threshold");
   if (not maybe_severity_str) {
     grape::panic<grape::Exception>(
@@ -44,9 +42,7 @@ auto configureLogger(const grape::script::ConfigTable& table) -> grape::log::Con
     grape::panic<grape::Exception>(msg);
   }
 
-  config.threshold = *maybe_severity;  // NOLINT(bugprone-unchecked-optional-access)
-
-  return config;
+  grape::syslog::setThreshold(*maybe_severity);  // NOLINT(bugprone-unchecked-optional-access)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -109,9 +105,9 @@ void Application::init(const std::filesystem::path& config_file) {
   if (not log_config) {
     panic<Exception>("Logger configuration not found");
   }
-  logger_ = std::make_unique<log::Logger>(configureLogger(*log_config));
-  grape::log::Log(*logger_, grape::log::Severity::Info, "Using configuration file '{}'",
-                  maybe_config_path->string());  // NOLINT(bugprone-unchecked-optional-access)
+  configureLogger(log_config.value());
+  syslog::Log(grape::log::Severity::Info, "Using configuration file '{}'",
+              maybe_config_path->string());  // NOLINT(bugprone-unchecked-optional-access)
 
   // configure IPC
   const auto ipc_config = config_root.read<grape::script::ConfigTable>("ipc");

@@ -10,7 +10,7 @@ namespace {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Must initialise once", "[app]") {
-  REQUIRE_THROWS(grape::app::syslog(grape::log::Severity::Error, "Test log"));
+  REQUIRE_THROWS(grape::app::ok());
 }
 
 //-------------------------------------------------------------------------------------------------
