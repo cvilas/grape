@@ -14,6 +14,12 @@ Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi a
 - Serialization
 - Application framework
 
+## static initialisation
+
+- Start project on github to track tasks
+- Initialise static system logger. Throw if used before initialisation 
+- Initialise static system ipc::Session. Throw if used before initialisation
+
 ## IPC
 
 - Notes on writing applications
