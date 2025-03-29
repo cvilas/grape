@@ -7,6 +7,7 @@
 #include <atomic>
 #include <csignal>
 #include <cstring>
+#include <print>
 
 #include "grape/app/detail/application.h"
 
