@@ -54,16 +54,17 @@ void Logger::sinkLoop() noexcept {
 //-------------------------------------------------------------------------------------------------
 void Logger::flush() noexcept {
   try {
-    auto record = Record();
-    const auto reader = [&record](std::span<const std::byte> frame) {
-      assert(sizeof(record) == frame.size_bytes());
-      std::memcpy(&record, frame.data(), frame.size_bytes());
-    };
-    // flush all log records
-    while (queue_.visitToRead(reader)) {
+    auto record_reader = [this](std::span<const std::byte> frame) {
+      assert(sizeof(Record) == frame.size_bytes());
       if (config_.sink != nullptr) {
-        config_.sink(record);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        const auto* const record = reinterpret_cast<const Record*>(frame.data());
+        config_.sink(*record);
       }
+    };
+
+    // flush all log records
+    while (queue_.visitToRead(record_reader)) {
     }
 
     // make a note of number of logs missed
