@@ -17,13 +17,13 @@ TEST_CASE("Basic logging api works", "[log]") {
   static constexpr auto QUEUE_CAPACITY = 10U;
 
   auto config = grape::log::Config();
-  config.threshold = grape::log::Severity::Debug;
   config.sink = [&stream](const grape::log::Record& rec) {
     stream.append(std::format("{}", rec.message.cStr()));
   };
   config.queue_capacity = QUEUE_CAPACITY;
 
   auto logger = grape::log::Logger(std::move(config));
+  logger.setThreshold(grape::log::Severity::Debug);
 
   /// Explicitly specify variadic template arguments types list
   grape::log::Log<int, float>(logger, grape::log::Severity::Info, "{} {}", 5, 3.14F,
@@ -39,13 +39,13 @@ TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
   static constexpr auto QUEUE_CAPACITY = 10U;
 
   auto config = grape::log::Config();
-  config.threshold = grape::log::Severity::Note;
   config.sink = [&stream](const grape::log::Record& rec) {
     stream.append(std::format("{}", rec.message.cStr()));
   };
   config.queue_capacity = QUEUE_CAPACITY;
 
   auto logger = std::make_unique<grape::log::Logger>(std::move(config));
+  logger->setThreshold(grape::log::Severity::Note);
 
   const auto* const log_str = "This should appear in logs";
   grape::log::Log(*logger, grape::log::Severity::Error, "{}", log_str);  //!< above threshold
@@ -63,12 +63,12 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   static constexpr auto QUEUE_CAPACITY = 5U;
   std::atomic_size_t num_logs{ 0 };
   auto config = grape::log::Config();
-  config.threshold = grape::log::Severity::Debug;
   config.sink = [&num_logs](const grape::log::Record&) { num_logs++; };
   config.queue_capacity = QUEUE_CAPACITY;
   config.flush_period = FLUSH_PERIOD;
 
   auto logger = grape::log::Logger(std::move(config));
+  logger.setThreshold(grape::log::Severity::Debug);
 
   // push messages beyond queue capacity before the logs get flushed
   static constexpr auto NUM_MESSAGES = QUEUE_CAPACITY * 3;
