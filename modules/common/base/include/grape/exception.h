@@ -41,7 +41,7 @@ public:
   }
 
   /// @return Backtrace leading up to exception
-  [[nodiscard]] virtual auto trace() const noexcept -> const utils::StackTrace& {
+  [[nodiscard]] auto trace() const noexcept -> const utils::StackTrace& {
     return trace_;
   }
 

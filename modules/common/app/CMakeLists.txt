@@ -9,11 +9,9 @@ declare_module(
 
 # library sources
 set(SOURCES 
-  src/detail/application.cpp
   src/app.cpp
   README.md
-  include/grape/app/app.h
-  include/grape/app/detail/application.h)
+  include/grape/app/app.h)
 
 # library target
 define_module_library(

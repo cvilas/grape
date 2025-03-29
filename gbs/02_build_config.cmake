@@ -2,8 +2,6 @@
 # Copyright (C) 2018 GRAPE Contributors
 # =================================================================================================
 
-find_package(Git REQUIRED)
-
 # Global configuration for FetchContent used to integrate third-party content directly into codebase
 include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)

@@ -2,6 +2,8 @@
 # Copyright (C) 2018 GRAPE Contributors
 # =================================================================================================
 
+find_package(Git REQUIRED)
+
 # Extract current branch name
 execute_process(
   COMMAND git rev-parse --abbrev-ref HEAD
