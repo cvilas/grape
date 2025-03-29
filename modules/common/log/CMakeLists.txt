@@ -16,6 +16,7 @@ set(SOURCES
     include/grape/log/logger.h
     include/grape/log/record.h
     include/grape/log/severity.h
+    include/grape/log/syslog.h
     src/logger.cpp)
 
 # library target

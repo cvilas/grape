@@ -56,15 +56,5 @@ void Application::log(log::Severity sev, const std::source_location& loc,
 }
 }  // namespace detail
 
-//-------------------------------------------------------------------------------------------------
-/// Logging interface declaration. To understand how this works, look up CTAD and user defined
-/// template args deduction guide: https://www.cppstories.com/2021/non-terminal-variadic-args/
-template <typename... Args>
-struct syslog {  // NOLINT(readability-identifier-naming)
-  syslog(log::Severity sev, std::format_string<Args...> fmt, Args&&... args,
-         const std::source_location& loc = std::source_location::current()) {
-    detail::Application::instance().log(sev, loc, fmt, std::forward<Args>(args)...);
-  }
-};
 
 }  // namespace grape::app

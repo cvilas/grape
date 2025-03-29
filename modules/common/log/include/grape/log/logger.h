@@ -13,16 +13,23 @@
 namespace grape::log {
 
 //=================================================================================================
-/// @brief A buffered lock-free logger suitable for realtime applications
+/// A buffered lock-free logger suitable for realtime applications
 class Logger {
 public:
   /// Create logger
   /// @param config Configuration parameters
   explicit Logger(Config&& config);
 
+  /// Threshold severity at which messages are logged. Eg: if set to 'Warn', only 'Warn', 'Error'
+  /// and 'Critical' messages are logged
+  /// @param severity Minimum severity level to log
+  void setThreshold(Severity severity) noexcept {
+    threshold_.store(severity, std::memory_order_relaxed);
+  }
+
   /// @return true if messages at specified severity are logged
-  [[nodiscard]] constexpr auto canLog(Severity severity) const noexcept -> bool {
-    return (severity <= config_.threshold);
+  [[nodiscard]] auto canLog(Severity severity) const noexcept -> bool {
+    return (severity <= threshold_.load(std::memory_order_relaxed));
   }
 
   /// Log a message
@@ -56,8 +63,10 @@ private:
   void sinkLoop() noexcept;
   void flush() noexcept;
 
-  static_assert(std::atomic_uint32_t::is_always_lock_free);
   Config config_{};
+  static_assert(std::atomic<Severity>::is_always_lock_free);
+  std::atomic<Severity> threshold_{ Severity::Debug };
+  static_assert(std::atomic_uint32_t::is_always_lock_free);
   std::atomic_uint32_t missed_logs_{ 0 };
   realtime::FIFOBuffer queue_;
   struct Backend;
@@ -65,7 +74,7 @@ private:
 };
 
 //=================================================================================================
-// Generic logging interface (recommended user interface for logging)
+// Recommended user interface for logging
 template <typename... Args>
 struct Log {
   /// Log a message to any logger

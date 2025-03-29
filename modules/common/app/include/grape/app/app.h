@@ -36,11 +36,4 @@ auto createPublisher(const ipc::Topic& topic, ipc::MatchCallback&& mcb = nullptr
 auto createSubscriber(const std::string& topic, ipc::Subscriber::DataCallback&& dcb,
                       ipc::MatchCallback&& mcb = nullptr) -> ipc::Subscriber;
 
-/// Application-wide logging interface.
-/// @param sev Severity level
-/// @param fmt message format string
-/// @param args Message args to be formatted
-template <typename... Args>
-syslog(log::Severity sev, std::format_string<Args...> fmt, Args&&... args) -> syslog<Args...>;
-
 }  // namespace grape::app
