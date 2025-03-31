@@ -5,6 +5,7 @@
 #pragma once
 
 #include <source_location>
+#include <stop_token>
 
 #include "grape/log/config.h"
 #include "grape/log/severity.h"
@@ -60,7 +61,7 @@ public:
 
 private:
   void log(const Record& record);
-  void sinkLoop() noexcept;
+  void sinkLoop(const std::stop_token& st) noexcept;
   void flush() noexcept;
 
   Config config_{};
