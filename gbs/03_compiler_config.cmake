@@ -51,7 +51,7 @@ set(GCC_WARNINGS
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  add_compile_options(-fcolor-diagnostics ${CLANG_WARNINGS})
+  add_compile_options(-fcolor-diagnostics -fexperimental-library ${CLANG_WARNINGS})
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_compile_options(-fdiagnostics-color=always ${GCC_WARNINGS})
 else()

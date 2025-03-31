@@ -11,8 +11,7 @@ namespace grape::log {
 
 struct Logger::Backend {
   std::uint32_t missed_logs{ 0 };
-  std::atomic_flag exit_flag{ false };
-  std::thread sink_thread;
+  std::jthread sink_thread;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -20,31 +19,32 @@ Logger::Logger(Config&& config)                                                 
   : config_(std::move(config))                                                        //
   , queue_({ .frame_length = sizeof(Record), .num_frames = config_.queue_capacity })  //
   , backend_(std::make_unique<Backend>()) {
-  backend_->sink_thread = std::thread([this]() { sinkLoop(); });
+  backend_->sink_thread = std::jthread([this](const std::stop_token& st) { sinkLoop(st); });
 }
 
 //-------------------------------------------------------------------------------------------------
 Logger::~Logger() {
-  backend_->exit_flag.test_and_set();
+  backend_->sink_thread.request_stop();
   backend_->sink_thread.join();
 }
 
 //-------------------------------------------------------------------------------------------------
 void Logger::log(const Record& record) {
-  if (canLog(record.severity)) {
-    const auto writer = [&record](std::span<std::byte> frame) {
-      assert(sizeof(record) == frame.size_bytes());
-      std::memcpy(frame.data(), &record, sizeof(Record));
-    };
-    if (not queue_.visitToWrite(writer)) {
-      missed_logs_.fetch_add(1, std::memory_order_acquire);
-    }
+  if (not canLog(record.severity)) {
+    return;
+  }
+  const auto writer = [&record](std::span<std::byte> frame) {
+    assert(sizeof(record) == frame.size_bytes());
+    std::memcpy(frame.data(), &record, sizeof(Record));
+  };
+  if (not queue_.visitToWrite(writer)) {
+    missed_logs_.fetch_add(1, std::memory_order_acquire);
   }
 }
 
 //-------------------------------------------------------------------------------------------------
-void Logger::sinkLoop() noexcept {
-  while (not backend_->exit_flag.test()) {
+void Logger::sinkLoop(const std::stop_token& st) noexcept {
+  while (not st.stop_requested()) {
     std::this_thread::sleep_for(config_.flush_period);
     flush();
   }
