@@ -8,7 +8,9 @@
 //=================================================================================================
 auto main(int /*argc*/, const char** /*argv[]*/) -> int {
   try {
-    grape::syslog::setThreshold(grape::log::Severity::Debug);
+    auto config = grape::log::Config{};
+    config.threshold = grape::log::Severity::Debug;
+    grape::syslog::init(std::move(config));
     grape::syslog::Log(grape::log::Severity::Critical, "A critical error message");
     grape::syslog::Log(grape::log::Severity::Error, "An error message");
     grape::syslog::Log(grape::log::Severity::Warn, "A warning message");

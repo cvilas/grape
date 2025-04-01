@@ -21,16 +21,9 @@ public:
   /// @param config Configuration parameters
   explicit Logger(Config&& config);
 
-  /// Threshold severity at which messages are logged. Eg: if set to 'Warn', only 'Warn', 'Error'
-  /// and 'Critical' messages are logged
-  /// @param severity Minimum severity level to log
-  void setThreshold(Severity severity) noexcept {
-    threshold_.store(severity, std::memory_order_relaxed);
-  }
-
   /// @return true if messages at specified severity are logged
   [[nodiscard]] auto canLog(Severity severity) const noexcept -> bool {
-    return (severity <= threshold_.load(std::memory_order_relaxed));
+    return (severity <= config_.threshold);
   }
 
   /// Log a message
@@ -65,8 +58,6 @@ private:
   void flush() noexcept;
 
   Config config_{};
-  static_assert(std::atomic<Severity>::is_always_lock_free);
-  std::atomic<Severity> threshold_{ Severity::Debug };
   static_assert(std::atomic_uint32_t::is_always_lock_free);
   std::atomic_uint32_t missed_logs_{ 0 };
   realtime::FIFOBuffer queue_;

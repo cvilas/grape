@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <functional>
-
-#include "grape/log/default_sink.h"
+#include "grape/log/formatters/default_formatter.h"
+#include "grape/log/sinks/console_sink.h"
+#include "grape/utils/file_system.h"
 
 namespace grape::log {
 
@@ -14,10 +14,13 @@ namespace grape::log {
 struct Config {
   static constexpr auto DEFAULT_QUEUE_CAPACITY = 1000U;
   static constexpr auto DEFAULT_FLUSH_PERIOD = std::chrono::microseconds(1000);
-  using Sink = std::function<void(const Record& record)>;
+
+  /// Threshold severity at which messages are logged. Eg: if set to 'Warn', only 'Warn', 'Error'
+  /// and 'Critical' messages are logged
+  Severity threshold{ Severity::Debug };
 
   /// The log receiver function
-  Sink sink{ defaultSink };
+  std::shared_ptr<Sink> sink{ std::make_shared<ConsoleSink<DefaultFormatter>>() };
 
   /// The maximum number of records the internal buffer can hold without flushing the queue.
   /// @note To avoid overflow resulting in missed logs, set this to (>= max_logs_per_second *
@@ -29,7 +32,7 @@ struct Config {
   std::chrono::microseconds flush_period{ DEFAULT_FLUSH_PERIOD };
 
   /// Identifying name for the logger
-  std::string logger_name;
+  std::string logger_name = utils::getProgramName();
 };
 
 }  // namespace grape::log
