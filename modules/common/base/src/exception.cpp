@@ -21,18 +21,17 @@ void Exception::print() noexcept {
   } catch (const grape::Exception& ex) {
     const auto& loc = ex.location();
     const auto loc_fname = utils::truncate(loc.file_name(), "modules");
-    std::ignore = fprintf(stderr, "\n%s\nin\n%s\nat\n%.*s:%u", ex.what(),  //
-                          loc.function_name(),                             //
-                          static_cast<int>(loc_fname.length()), loc_fname.data(), loc.line());
-    std::ignore = fprintf(stderr, "\nBacktrace:");
+    (void)fprintf(stderr, "\nException: %s\nin\n%s\nat\n%.*s:%u", ex.what(), loc.function_name(),
+                  static_cast<int>(loc_fname.length()), loc_fname.data(), loc.line());
+    (void)fprintf(stderr, "\nBacktrace:");
     auto idx = 0U;
     for (const auto& trace : ex.trace().trace()) {
-      std::ignore = fprintf(stderr, "\n#%u: %s", idx++, trace.c_str());
+      (void)fprintf(stderr, "\n#%u: %s", idx++, trace.c_str());
     }
   } catch (const std::exception& ex) {
-    std::ignore = fprintf(stderr, "\nException: %s", ex.what());
+    (void)fprintf(stderr, "\nException: %s\n", ex.what());
   } catch (...) {
-    std::ignore = fputs("\nUnknown exception", stderr);
+    (void)fputs("\nUnknown exception\n", stderr);
   }
   // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 }
