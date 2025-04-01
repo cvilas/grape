@@ -4,8 +4,10 @@
 
 #include "grape/log/logger.h"
 
-#include <cstring>
+#include <cstring>  // for memcpy
 #include <thread>
+
+#include "grape/exception.h"
 
 namespace grape::log {
 
@@ -59,7 +61,7 @@ void Logger::flush() noexcept {
       if (config_.sink != nullptr) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         const auto* const record = reinterpret_cast<const Record*>(frame.data());
-        config_.sink(*record);
+        config_.sink->write(*record);
       }
     };
 
@@ -73,15 +75,16 @@ void Logger::flush() noexcept {
       const auto delta_missed_logs = missed_logs - backend_->missed_logs;
       backend_->missed_logs = missed_logs;
       if (config_.sink != nullptr) {
-        config_.sink({ .timestamp{ std::chrono::system_clock::now() },      //
-                       .location{ std::source_location::current() },        //
-                       .logger_name{ config_.logger_name.c_str() },         //
-                       .message{ "{} records missed", delta_missed_logs },  //
-                       .severity = Severity::Warn });
+        config_.sink->write({ .timestamp{ std::chrono::system_clock::now() },      //
+                              .location{ std::source_location::current() },        //
+                              .logger_name{ config_.logger_name.c_str() },         //
+                              .message{ "{} records missed", delta_missed_logs },  //
+                              .severity = Severity::Warn });
       }
     }
   } catch (...) {
-    std::ignore = std::fputs("Ignored exception in Logger::flush()\n", stderr);
+    (void)std::fputs("Ignored exception in Logger::flush()", stderr);
+    grape::Exception::print();
   }
 }
 }  // namespace grape::log
