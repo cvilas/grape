@@ -10,6 +10,8 @@
 
 #include <execinfo.h>
 
+#include "grape/utils/utils.h"
+
 namespace grape::utils {
 
 //-------------------------------------------------------------------------------------------------
@@ -21,8 +23,23 @@ auto StackTrace::current() -> StackTrace {
   const auto symbols = std::unique_ptr<char*, void (*)(void*)>(
       backtrace_symbols(stack_frames.data(), frame_count), std::free);
   trace.symbol_list_.resize(static_cast<std::size_t>(frame_count));
+
   for (auto i = 1U; std::cmp_less(i, frame_count); ++i) {
-    trace.symbol_list_.at(i - 1) = symbols.get()[i];
+    auto symbol_str = std::string(symbols.get()[i]);
+    const auto name_begin = symbol_str.find('(');
+    const auto name_end = symbol_str.find('+', name_begin);
+
+    if (name_begin != std::string::npos && name_end != std::string::npos) {
+      const auto mangled_name = symbol_str.substr(name_begin + 1, name_end - name_begin - 1);
+      const auto demangled = utils::demangle(mangled_name.c_str());
+      const auto prefix = symbol_str.substr(0, name_begin + 1);
+      const auto suffix = symbol_str.substr(name_end);
+      symbol_str = prefix;
+      symbol_str += demangled;
+      symbol_str += suffix;
+    }
+
+    trace.symbol_list_.at(i - 1) = symbol_str;
   }
 
   return trace;
