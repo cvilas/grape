@@ -10,21 +10,17 @@
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
+#include "grape/ipc/publisher.h"
 #include "grape/ipc/session.h"
+#include "grape/ipc/subscriber.h"
 
 namespace {
 
 // NOLINTBEGIN(cert-err58-cpp)
 
 //=================================================================================================
-TEST_CASE("A process can have only one session", "[ipc]") {
-  auto session = grape::ipc::Session(grape::ipc::Session::Config{});
-  REQUIRE_THROWS(std::make_unique<grape::ipc::Session>(grape::ipc::Session::Config{}));
-}
-
-//=================================================================================================
 TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
-  auto session = grape::ipc::Session(grape::ipc::Session::Config{});
+  grape::ipc::init(grape::ipc::Config{});
   const auto topic = grape::ipc::Topic{ .name = "pub_sub_test" };
 
   // Create a large payload (eg: 1080p RGB image)
@@ -49,8 +45,8 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   };
 
   // create pub/sub
-  auto publisher = session.createPublisher(topic);
-  auto subscriber = session.createSubscriber(topic.name, recv_callback);
+  auto publisher = grape::ipc::Publisher(topic);
+  auto subscriber = grape::ipc::Subscriber(topic.name, recv_callback);
 
   // Wait for pub/sub registration
   constexpr auto RETRY_COUNT = 10U;

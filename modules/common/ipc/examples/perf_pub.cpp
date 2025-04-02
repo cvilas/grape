@@ -8,6 +8,8 @@
 #include <vector>
 
 #include "grape/conio/program_options.h"
+#include "grape/exception.h"
+#include "grape/ipc/publisher.h"
 #include "grape/ipc/session.h"
 #include "perf_constants.h"
 
@@ -43,13 +45,13 @@ auto main(int argc, const char* argv[]) -> int {
     const auto payload = std::vector<std::byte>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 
-    auto config = grape::ipc::Session::Config{};
-    config.scope = grape::ipc::Session::Config::Scope::Network;
-    auto session = grape::ipc::Session(config);
+    auto config = grape::ipc::Config{};
+    config.scope = grape::ipc::Config::Scope::Network;
+    grape::ipc::init(std::move(config));
 
-    auto pub = session.createPublisher({ .name = grape::ipc::ex::perf::TOPIC });
+    auto pub = grape::ipc::Publisher({ .name = grape::ipc::ex::perf::TOPIC });
     std::println("Press CTRL-C to quit");
-    while (true) {
+    while (grape::ipc::ok()) {
       pub.publish(payload);
       // force a context switch to mimic reality of cache invalidation, etc
       std::this_thread::sleep_for(std::chrono::nanoseconds(1));

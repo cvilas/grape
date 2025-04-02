@@ -25,11 +25,11 @@ After evaluating [various options](./docs/ipc_options.md), current implementatio
 
 ### 'Network' mode
 
-By default, an IPC `Session` restricts all its messages to within the localhost. Since the eCAL 
+By default, an IPC session restricts all its messages to within the localhost. Since the eCAL 
 backend uses multicast for inter-host communications, additional configuration is required on the 
 participating hosts and the network infrastructure to enable message passing across a LAN.
 
-- In your IPC application `Session::Config`, set `scope` to `Session::Config::Scope::Network`
+- In your IPC application set `scope` to `ipc::Config:Scope::Network`
 - On your host
   - [Configure multicast routes](https://eclipse-ecal.github.io/ecal/latest/getting_started/cloud.html#fa-ubuntu-multicast-configuration-on-ubuntu)  
   - For TCP pub/sub, ensure hostnames are [resolvable](https://eclipse-ecal.github.io/ecal/latest/getting_started/services.html#hostname-resolution)
