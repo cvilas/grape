@@ -9,7 +9,9 @@
 #include <thread>
 
 #include "grape/conio/program_options.h"
+#include "grape/exception.h"
 #include "grape/ipc/session.h"
+#include "grape/ipc/subscriber.h"
 #include "perf_constants.h"
 
 //=================================================================================================
@@ -75,9 +77,9 @@ auto main(int argc, const char* argv[]) -> int {
       grape::panic<grape::Exception>(toString(maybe_args.error()));
     }
     [[maybe_unused]] const auto& args = maybe_args.value();
-    auto config = grape::ipc::Session::Config{};
-    config.scope = grape::ipc::Session::Config::Scope::Network;
-    auto session = grape::ipc::Session(config);
+    auto config = grape::ipc::Config{};
+    config.scope = grape::ipc::Config::Scope::Network;
+    grape::ipc::init(std::move(config));
 
     Statistics stats;
 
@@ -93,11 +95,11 @@ auto main(int argc, const char* argv[]) -> int {
       }
     };
 
-    auto sub = session.createSubscriber(grape::ipc::ex::perf::TOPIC, data_cb);
+    auto sub = grape::ipc::Subscriber(grape::ipc::ex::perf::TOPIC, data_cb);
 
     std::println("Press CTRL+C to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);
-    while (session.ok()) {
+    while (grape::ipc::ok()) {
       std::this_thread::sleep_for(LOOP_WAIT);
     }
 

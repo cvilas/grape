@@ -9,10 +9,10 @@
 #include <memory>
 #include <span>
 
-namespace grape::ipc {
+#include "grape/ipc/match.h"
+#include "grape/ipc/topic.h"
 
-class Session;
-class SubscriberImpl;
+namespace grape::ipc {
 
 //=================================================================================================
 /// Defines data sample received by the subscriber, with related meta-information
@@ -28,6 +28,13 @@ public:
   /// Function signature for callback on received data
   using DataCallback = std::function<void(const Sample&)>;
 
+  /// creates a subscriber
+  /// @param topic Topic on which to listen to for data from matched publishers
+  /// @param data_cb Data processing callback, triggered on every newly received data sample
+  /// @param match_cb Match callback, triggered when matched/unmatched with a remote publisher
+  Subscriber(const std::string& topic, Subscriber::DataCallback&& data_cb,
+             MatchCallback&& match_cb = nullptr);
+
   /// @return The number of publishers currently matched to this subscriber
   [[nodiscard]] auto getPublisherCount() const -> std::size_t;
 
@@ -38,9 +45,8 @@ public:
   auto operator=(Subscriber&&) noexcept = delete;
 
 private:
-  friend class Session;
-  explicit Subscriber(std::unique_ptr<SubscriberImpl> impl);
-  std::unique_ptr<SubscriberImpl> impl_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 }  // namespace grape::ipc

@@ -6,23 +6,66 @@
 
 #include <chrono>
 
-#include "publisher_impl.h"
+#include <ecal/pubsub/publisher.h>
+#include <ecal/pubsub/types.h>
+
+#include "grape/exception.h"
+#include "grape/ipc/session.h"
+
+namespace {
+
+//-------------------------------------------------------------------------------------------------
+auto toMatchEvent(const eCAL::SPubEventCallbackData& event_data) -> grape::ipc::Match {
+  auto match_status = grape::ipc::Match::Status::Undefined;
+  switch (event_data.event_type) {
+    case eCAL::ePublisherEvent::none:
+      match_status = grape::ipc::Match::Status::Undefined;
+      break;
+    case eCAL::ePublisherEvent::connected:
+      match_status = grape::ipc::Match::Status::Matched;
+      break;
+    case eCAL::ePublisherEvent::disconnected:
+      [[fallthrough]];
+    case eCAL::ePublisherEvent::dropped:
+      match_status = grape::ipc::Match::Status::Unmatched;
+      break;
+  }
+
+  return { .status = match_status };
+}
+}  // namespace
 
 namespace grape::ipc {
 
-//-------------------------------------------------------------------------------------------------
-Publisher::~Publisher() = default;
+struct Publisher::Impl : public eCAL::CPublisher {
+  Impl(const std::string& topic_name, const eCAL::PubEventCallbackT& event_cb)
+    : eCAL::CPublisher(topic_name, eCAL::SDataTypeInformation(), event_cb) {
+  }
+};
 
 //-------------------------------------------------------------------------------------------------
-Publisher::Publisher(std::unique_ptr<PublisherImpl> impl) : impl_(std::move(impl)) {
+Publisher::Publisher(const Topic& topic, MatchCallback&& match_cb) {
+  if (not ok()) {
+    panic<Exception>("Not initialised");
+  }
+  const auto event_cb = [moved_match_cb = std::move(match_cb)](
+                            const eCAL::STopicId&, const eCAL::SPubEventCallbackData& event_data) {
+    if (moved_match_cb != nullptr) {
+      moved_match_cb(toMatchEvent(event_data));
+    }
+  };
+  impl_ = std::make_unique<Publisher::Impl>(topic.name, event_cb);
 }
+
+//-------------------------------------------------------------------------------------------------
+Publisher::~Publisher() = default;
 
 //-------------------------------------------------------------------------------------------------
 void Publisher::publish(std::span<const std::byte> bytes) const {
   const auto now = std::chrono::system_clock::now();
   const auto us =
       std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
-  std::ignore = impl_->pub()->Send(bytes.data(), bytes.size(), us);
+  std::ignore = impl_->Send(bytes.data(), bytes.size(), us);
 }
 
 }  // namespace grape::ipc
