@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include <filesystem>
 #include <string>
-#include <vector>
 
 namespace grape::utils {
 
@@ -30,25 +28,6 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
 
 /// Transforms C++ ABI identifiers (eg: RTTI symbols) to names used in the source code
 [[nodiscard]] auto demangle(const char* mangled_name) -> std::string;
-
-/// @return Full path of the program being executed
-[[nodiscard]] auto getProgramPath() -> std::filesystem::path;
-
-/// @return Name of the program being executed
-[[nodiscard]] auto getProgramName() -> std::string;
-
-/// @return Full path to current user's home directory
-[[nodiscard]] auto getUserHomePath() -> std::filesystem::path;
-
-/// @return Ordered list of search paths for supporting files (config, data) of an application.
-/// @note Config/data file search order:
-/// - User-specific application configuration: $HOME/.$APP_NAME/
-/// - Host-specific application configuration: /etc/opt/$APP_NAME/
-/// - Default application configuration: $APP_PATH/../share/$APP_NAME/
-/// - User-specific GRAPE configuration: $HOME/.grape/
-/// - Host-specific GRAPE configuration: /etc/opt/grape/
-/// - Default GRAPE configuration: $GRAPE_INSTALL_PATH/share/grape/
-[[nodiscard]] auto getSearchPaths() -> const std::vector<std::filesystem::path>&;
 
 /// @return user-readable name for specified type
 template <typename T>
