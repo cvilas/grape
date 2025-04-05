@@ -19,6 +19,7 @@ set(SOURCES
     src/utils.cpp
     src/version.cpp
     README.md
+    include/grape/utils/detail/enums_detail.h
     include/grape/utils/enums.h
     include/grape/utils/file_system.h
     include/grape/utils/ip.h
