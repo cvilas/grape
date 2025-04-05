@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <print>
 
-#include <unistd.h>  // _exit()
-
 namespace grape::conio {
 
 //-------------------------------------------------------------------------------------------------
@@ -46,8 +44,8 @@ void ProgramOptions::insertHelp(std::vector<Option>& options) {
 //-------------------------------------------------------------------------------------------------
 auto ProgramDescription::parse(int argc, const char** argv) const
     -> std::expected<ProgramOptions, ProgramOptions::Error> {
-  auto tmp_options = options_;
-  ProgramOptions::insertHelp(tmp_options);
+  auto declared_options = options_;
+  ProgramOptions::insertHelp(declared_options);
 
   using Error = ProgramOptions::Error;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -55,43 +53,46 @@ auto ProgramDescription::parse(int argc, const char** argv) const
   for (const auto& arg : args_list) {
     if (arg.starts_with("--")) {
       const std::string kv = arg.substr(2);
-      const size_t pos = kv.find('=');
-      const auto key = kv.substr(0, pos);
-      const auto it =
-          std::ranges::find_if(tmp_options, [&key](const auto& opt) { return key == opt.key; });
+      const size_t sep = kv.find('=');
+      const auto key = kv.substr(0, sep);
+      const auto it = std::ranges::find_if(declared_options,
+                                           [&key](const auto& opt) { return key == opt.key; });
 
-      if (it == tmp_options.end()) {
-        return std::unexpected(Error{ .code = Error::Code::Undeclared, .key = key });
+      // skip option that is not declared as supported
+      if (it == declared_options.end()) {
+        continue;
       }
       it->is_specified = true;
 
       if (key == ProgramOptions::HELP_KEY) {
         // print help and exit if it was specified
         std::println(stderr, "{}", it->value);
-        _exit(EXIT_SUCCESS);
+        std::exit(EXIT_SUCCESS);  // NOLINT(concurrency-mt-unsafe)
       } else {
-        it->value = ((pos == std::string::npos) ? "" : kv.substr(pos + 1));
+        it->value = ((sep == std::string::npos) ? "" : kv.substr(sep + 1));
       }
     }
   }
 
   // check all required arguments are specified
-  for (const auto& entry : tmp_options) {
+  for (const auto& entry : declared_options) {
     if (entry.is_required and not entry.is_specified) {
       return std::unexpected(Error{ .code = Error::Code::Undefined, .key = entry.key });
     }
   }
 
   // Check for duplicate declarations
-  std::ranges::sort(tmp_options,
+  std::ranges::sort(declared_options,
                     [](const auto& opt_a, const auto& opt_b) { return opt_a.key < opt_b.key; });
-  const auto dup_it = std::ranges::adjacent_find(
-      tmp_options, [](const auto& opt_a, const auto& opt_b) { return opt_a.key == opt_b.key; });
-  if (dup_it != tmp_options.end()) {
+  const auto dup_it =
+      std::ranges::adjacent_find(declared_options, [](const auto& opt_a, const auto& opt_b) {
+        return opt_a.key == opt_b.key;
+      });
+  if (dup_it != declared_options.end()) {
     return std::unexpected(Error{ .code = Error::Code::Redeclared, .key = dup_it->key });
   }
 
-  return ProgramOptions(std::move(tmp_options));
+  return ProgramOptions(std::move(declared_options));
 }
 
 }  // namespace grape::conio
