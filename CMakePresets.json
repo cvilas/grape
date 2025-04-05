@@ -1,22 +1,25 @@
 {
  "version": 7,
+ "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
  "configurePresets": [
   {
-   "name": "preferred",
-   "description": "Configuration setting for all modules with  preferred toolchain",
+   "name": "default",
+   "displayName": "Default configuration",
+   "description": "Default Configuration, all modules, clang toolchain",
    "generator": "Ninja",
    "binaryDir": "${sourceDir}/build",
    "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake",
    "cacheVariables": {
-    "BUILD_MODULES": "all"
+    "BUILD_MODULES": "all",
+    "CMAKE_BUILD_TYPE": "RelWithDebInfo"
    }
   }
  ],
  "buildPresets": [
   {
-   "name": "preferred",
-   "description": "Preferred build settings",
-   "configurePreset": "preferred"
+   "name": "default",
+   "description": "Default build",
+   "configurePreset": "default"
   }
  ]
 }
