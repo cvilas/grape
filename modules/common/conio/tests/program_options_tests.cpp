@@ -7,8 +7,6 @@
 
 namespace {
 
-// NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange)
-
 using ProgramOptions = grape::conio::ProgramOptions;
 using ProgramDescription = grape::conio::ProgramDescription;
 
@@ -31,8 +29,9 @@ TEST_CASE("Returns error on undeclared options specified on the command line",
   const auto argc = 1;
   const auto args = ProgramDescription("undeclared option test").parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  REQUIRE(not args.has_value());
-  REQUIRE(args.error().code == ProgramOptions::Error::Code::Undeclared);
+  const auto undeclared_option = args.value().getOption<std::string>("undeclared_key");
+  REQUIRE(not undeclared_option.has_value());
+  REQUIRE(undeclared_option.error().code == ProgramOptions::Error::Code::Undeclared);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -124,7 +123,5 @@ TEST_CASE("Ensures 'help' is always available", "[program_options]") {
   REQUIRE(args.has_value());
   REQUIRE(args.value().hasOption("help"));
 }
-
-// NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)
 
 }  // namespace
