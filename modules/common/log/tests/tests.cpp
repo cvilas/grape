@@ -11,21 +11,6 @@ namespace {
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
-//-------------------------------------------------------------------------------------------------
-TEST_CASE("Basic logging api works", "[log]") {
-  auto config = grape::log::Config();
-  config.threshold = grape::log::Severity::Debug;
-
-  auto logger = grape::log::Logger(std::move(config));
-
-  /// Explicitly specify variadic template arguments types list
-  grape::log::Log<int, float>(logger, grape::log::Severity::Info, "{} {}", 5, 3.14F,
-                              std::source_location::current());
-
-  /// Use the deduction guide for arguments with defaulted source location
-  grape::log::Log(logger, grape::log::Severity::Info, "{} {}", 5, 3.14);
-}
-
 // A log sink for testing
 class TestLogSink : public grape::log::Sink {
 public:
@@ -45,6 +30,22 @@ private:
   std::atomic_size_t num_logs_{ 0 };
   std::string stream_;
 };
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Basic logging api works", "[log]") {
+  auto config = grape::log::Config();
+  config.threshold = grape::log::Severity::Debug;
+  config.sink = std::make_shared<TestLogSink>();
+
+  auto logger = grape::log::Logger(std::move(config));
+
+  /// Explicitly specify variadic template arguments types list
+  grape::log::Log<int, float>(logger, grape::log::Severity::Info, "{} {}", 5, 3.14F,
+                              std::source_location::current());
+
+  /// Use the deduction guide for arguments with defaulted source location
+  grape::log::Log(logger, grape::log::Severity::Info, "{} {}", 5, 3.14);
+}
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
