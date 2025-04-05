@@ -1,22 +1,42 @@
 {
  "version": 7,
+ "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
  "configurePresets": [
   {
-   "name": "preferred",
-   "description": "Configuration setting for all modules with  preferred toolchain",
+   "name": "clang-all",
+   "displayName": "Clang configuration",
+   "description": "Configure all modules, clang toolchain, Ninja generator",
    "generator": "Ninja",
-   "binaryDir": "${sourceDir}/build",
+   "binaryDir": "${sourceDir}/build/clang",
    "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake",
    "cacheVariables": {
-    "BUILD_MODULES": "all"
+    "BUILD_MODULES": "all",
+    "CMAKE_BUILD_TYPE": "RelWithDebInfo"
    }
+  },
+  {
+    "name": "native-all",
+    "displayName": "GCC configuration",
+    "description": "Configure all modules, native toolchain, makefile generator",
+    "generator": "Unix Makefiles",
+    "binaryDir": "${sourceDir}/build/native",
+    "toolchainFile": "",
+    "cacheVariables": {
+     "BUILD_MODULES": "all",
+     "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+    }    
   }
  ],
  "buildPresets": [
   {
-   "name": "preferred",
-   "description": "Preferred build settings",
-   "configurePreset": "preferred"
+   "name": "clang-all",
+   "description": "Build all modules with clang toolchain",
+   "configurePreset": "clang-all"
+  },
+  {
+    "name": "native-all",
+    "description": "Build all modules with native toolchain",
+    "configurePreset": "native-all"    
   }
  ]
 }
