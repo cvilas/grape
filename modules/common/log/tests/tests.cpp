@@ -11,10 +11,32 @@ namespace {
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
+// A log sink for testing
+class TestLogSink : public grape::log::Sink {
+public:
+  void write(const grape::log::Record& record) override {
+    num_logs_.fetch_add(1, std::memory_order_relaxed);
+    stream_.append(std::format("{}", record.message.cStr()));
+  }
+
+  [[nodiscard]] auto stream() const -> const std::string& {
+    return stream_;
+  }
+
+  [[nodiscard]] auto numLogs() const -> std::size_t {
+    return num_logs_.load();
+  }
+
+private:
+  std::atomic_size_t num_logs_{ 0 };
+  std::string stream_;
+};
+
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Basic logging api works", "[log]") {
   auto config = grape::log::Config();
   config.threshold = grape::log::Severity::Debug;
+  config.sink = std::make_shared<TestLogSink>();
 
   auto logger = grape::log::Logger(std::move(config));
 
@@ -25,26 +47,6 @@ TEST_CASE("Basic logging api works", "[log]") {
   /// Use the deduction guide for arguments with defaulted source location
   grape::log::Log(logger, grape::log::Severity::Info, "{} {}", 5, 3.14);
 }
-
-// A log sink for testing
-class TestLogSink : public grape::log::Sink {
-public:
-  void write(const grape::log::Record& record) override {
-    num_logs_.fetch_add(1, std::memory_order_relaxed);
-    stream_.append(std::format("{}", record.message.cStr()));
-  }
-
-  auto stream() const -> const std::string& {
-    return stream_;
-  }
-  auto numLogs() const -> std::size_t {
-    return num_logs_.load();
-  }
-
-private:
-  std::atomic_size_t num_logs_{ 0 };
-  std::string stream_;
-};
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
