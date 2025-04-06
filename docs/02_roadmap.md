@@ -133,29 +133,6 @@ Goal: Robot model description file as the single source of truth to generate for
   - DiY kit: [Rover](https://github.com/nasa-jpl/open-source-rover)
   - Demonstrate joystick teleop, FPV and mission control
 
-## Zenoh
-
-- Implement queryable/query API
-- Implement zero-copy read and write
-- Implement Reliable/BestEffort QoS
-- Implement History QoS
-- Define topics for matched example programs in a single place
-- Implement PutOptions and subscriber Sample fields
-  - Support attachments
-  - Resolve how we can combine congestion control, priority and reliability settings in a coherent way to offer fewer choices at the user API layer?
-    - See [discord](https://discord.com/channels/914168414178779197/940584045287460885/1311629493445853206)
-  - Consider supporting sample kind (put/delete)
-- Understand the point of on_drop callback in subscriber and support it if necessary
-- Documentation cleanup: examples
-- Understand hybrid logical clocks
-- Support hybrid logical clocks implementation
-- Fix zenoh examples: pull, shm pub/sub
-- New zenoh examples: Router interceptors (downsampling), authentication, access control, serdes (ZBytes)
-- PoC IPC experiments
-  - Case 1: pub-peer on PC1, sub-peer on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 2: pub-peer + router on PC1, sub-peer + router on PC2, router on PC3, multicast scouting off. Confirm data transfer from PC1 to PC2, no data transfer through PC3.
-  - Case 3: Extend case2 by adding a PC4 with router and sub-client. Confirm sub-client on PC4 receives data from pub-peer on PC1.
-
 ## References
 
 - [cactus-rt](https://github.com/cactusdynamics/cactus-rt/)
