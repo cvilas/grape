@@ -115,7 +115,7 @@ function(configure_modules)
   endforeach()
 
   # Generate input paths for source code documentation DOC_INPUT_PATHS DOC_EXAMPLE_PATHS
-  set(DOC_INPUT_PATHS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/docs ${CMAKE_SOURCE_DIR}/README.md)
+  set(DOC_INPUT_PATHS ${CMAKE_SOURCE_DIR}/docs ${CMAKE_SOURCE_DIR}/README.md)
   foreach(module IN LISTS _enabled_modules_list)
     set(DOC_INPUT_PATHS ${DOC_INPUT_PATHS} ${MODULE_${module}_PATH}/include
                         ${MODULE_${module}_PATH}/docs ${MODULE_${module}_PATH}/README.md)
