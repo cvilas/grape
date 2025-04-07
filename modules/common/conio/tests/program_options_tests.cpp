@@ -81,7 +81,7 @@ TEST_CASE("Reads required option if specified on the command line", "[program_op
                         .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   REQUIRE(args.has_value());
-  REQUIRE(args.value().getOption<int>("required_key") == 16);
+  REQUIRE(args.value().getOption<int>("required_key").value() == 16);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ TEST_CASE("Default value is used for optional argument if unspecified", "[progra
           .declareOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE)
           .parse(0, nullptr);
   REQUIRE(args.has_value());
-  REQUIRE(args.value().getOption<int>("int_key") == INT_KEY_DEFAULT_VALUE);
+  REQUIRE(args.value().getOption<int>("int_key").value() == INT_KEY_DEFAULT_VALUE);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ TEST_CASE("Default value is overridden when optional argument is specified", "[p
           .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   REQUIRE(args.has_value());
-  REQUIRE(args.value().getOption<int>("int_key") == 10);
+  REQUIRE(args.value().getOption<int>("int_key").value() == 10);
 }
 
 //-------------------------------------------------------------------------------------------------

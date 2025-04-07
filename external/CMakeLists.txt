@@ -78,10 +78,12 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
     add_dummy_target(eCAL)
   else()
     message(STATUS "eCAL: Building ${ECAL_VERSION_REQUIRED} from source")
-    
-    # Build a dependency first 
-    set(TCP_PUBSUB_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
-	-DBUILD_SHARED_LIBS=OFF) # workaround for https://github.com/eclipse-ecal/ecal/issues/2014
+
+    # Build tcp-pubsub separately with bug fixes we need
+    set(TCP_PUBSUB_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+        -DTCP_PUBSUB_BUILD_SAMPLES=OFF
+        -DTCP_PUBSUB_BUILD_ECAL_SAMPLES=OFF
+        -DBUILD_SHARED_LIBS=OFF) # workaround for https://github.com/eclipse-ecal/ecal/issues/2014
     ExternalProject_Add(
       tcp_pubsub
       GIT_REPOSITORY "https://github.com/eclipse-ecal/tcp_pubsub.git"
@@ -95,7 +97,7 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
         -DECAL_USE_QT=OFF
         -DECAL_BUILD_APPS=OFF
         -DECAL_BUILD_SAMPLES=OFF
-	-DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=OFF
+        -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=OFF
         -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON
         -DECAL_INSTALL_SAMPLE_SOURCES=OFF
         -DECAL_CPACK_PACK_WITH_INNOSETUP=OFF

@@ -4,6 +4,8 @@
 
 #define SPDLOG_USE_STD_FORMAT
 
+#include <format>
+
 #include <benchmark/benchmark.h>
 
 #include "grape/log/sinks/file_sink.h"

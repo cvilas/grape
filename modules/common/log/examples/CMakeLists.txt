@@ -2,17 +2,9 @@
 # Copyright (C) 2023 GRAPE Contributors
 # =================================================================================================
 
-define_module_example(
-  NAME example
-  SOURCES example.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS "")
+define_module_example(NAME example SOURCES example.cpp)
 
-define_module_example(
-  NAME custom_sink_example
-  SOURCES custom_sink_example.cpp
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  PUBLIC_LINK_LIBS "")
+define_module_example(NAME custom_sink_example SOURCES custom_sink_example.cpp)
 
 define_module_example(
   NAME spdlog_bench
