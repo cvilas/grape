@@ -72,6 +72,9 @@ Subscriber::Subscriber(const std::string& topic, Subscriber::DataCallback&& data
 Subscriber::~Subscriber() = default;
 
 //-------------------------------------------------------------------------------------------------
+Subscriber::Subscriber(Subscriber&&) noexcept = default;
+
+//-------------------------------------------------------------------------------------------------
 auto Subscriber::getPublisherCount() const -> std::size_t {
   return impl_->GetPublisherCount();
 }

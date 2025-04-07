@@ -61,6 +61,9 @@ Publisher::Publisher(const Topic& topic, MatchCallback&& match_cb) {
 Publisher::~Publisher() = default;
 
 //-------------------------------------------------------------------------------------------------
+Publisher::Publisher(Publisher&&) noexcept = default;
+
+//-------------------------------------------------------------------------------------------------
 void Publisher::publish(std::span<const std::byte> bytes) const {
   const auto now = std::chrono::system_clock::now();
   const auto us =

@@ -16,9 +16,9 @@ Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi a
 
 ## Current tasks
 
+- IPC: Impmenent Python bindings [#131]
 - IPC: Implement means to isolate IPC to a set of hosts [#129]
 - IPC: Implement Query API [#130]
-- IPC: Impmenent Python bindings [#131]
 - IPC: Implement zero-copy read and write [#132]
 
 ## Camera

@@ -25,9 +25,9 @@ public:
   void publish(std::span<const std::byte> bytes) const;
 
   ~Publisher();
+  Publisher(Publisher&&) noexcept;
   Publisher(const Publisher&) = delete;
   auto operator=(const Publisher&) = delete;
-  Publisher(Publisher&&) noexcept = default;
   auto operator=(Publisher&&) noexcept = delete;
 
 private:

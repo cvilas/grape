@@ -6,9 +6,9 @@
 
 #include <concepts>
 
-#include "grape/log/record.h"
-
 namespace grape::log {
+
+struct Record;
 
 //=================================================================================================
 /// Interface for log record text formatters, for use with log sinks

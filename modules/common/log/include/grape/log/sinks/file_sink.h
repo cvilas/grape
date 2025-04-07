@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "grape/exception.h"
-#include "grape/log/sink.h"
+#include "grape/log/sinks/sink.h"
 
 namespace grape::log {
 

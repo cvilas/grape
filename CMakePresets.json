@@ -1,42 +1,45 @@
 {
- "version": 7,
- "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
- "configurePresets": [
-  {
-   "name": "clang-all",
-   "displayName": "Clang configuration",
-   "description": "Configure all modules, clang toolchain, Ninja generator",
-   "generator": "Ninja",
-   "binaryDir": "${sourceDir}/build/clang",
-   "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake",
-   "cacheVariables": {
-    "BUILD_MODULES": "all",
-    "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-   }
-  },
-  {
-    "name": "native-all",
-    "displayName": "GCC configuration",
-    "description": "Configure all modules, native toolchain, makefile generator",
-    "generator": "Unix Makefiles",
-    "binaryDir": "${sourceDir}/build/native",
-    "toolchainFile": "",
-    "cacheVariables": {
-     "BUILD_MODULES": "all",
-     "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-    }    
-  }
- ],
- "buildPresets": [
-  {
-   "name": "clang-all",
-   "description": "Build all modules with clang toolchain",
-   "configurePreset": "clang-all"
-  },
-  {
-    "name": "native-all",
-    "description": "Build all modules with native toolchain",
-    "configurePreset": "native-all"    
-  }
- ]
+  "version": 7,
+  "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "BUILD_MODULES": "all",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_INSTALL_PREFIX": "/opt/${sourceDirName}"
+      }
+    },
+    {
+      "name": "clang-all",
+      "inherits": "base",
+      "description": "Configure all modules with clang toolchain",
+      "binaryDir": "${sourceDir}/build/clang",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake"
+    },
+    {
+      "name": "native-all",
+      "inherits": "base",
+      "description": "Configure all modules with native toolchain",
+      "binaryDir": "${sourceDir}/build/native",
+      "toolchainFile": "",
+      "cacheVariables": {
+        "ENABLE_LINTER": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "clang-all",
+      "description": "Build all modules with clang toolchain",
+      "configurePreset": "clang-all"
+    },
+    {
+      "name": "native-all",
+      "description": "Build all modules with native toolchain",
+      "configurePreset": "native-all"
+    }
+  ]
 }

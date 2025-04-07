@@ -32,16 +32,15 @@ public:
   /// @param topic Topic on which to listen to for data from matched publishers
   /// @param data_cb Data processing callback, triggered on every newly received data sample
   /// @param match_cb Match callback, triggered when matched/unmatched with a remote publisher
-  Subscriber(const std::string& topic, Subscriber::DataCallback&& data_cb,
-             MatchCallback&& match_cb = nullptr);
+  Subscriber(const std::string& topic, DataCallback&& data_cb, MatchCallback&& match_cb = nullptr);
 
   /// @return The number of publishers currently matched to this subscriber
   [[nodiscard]] auto getPublisherCount() const -> std::size_t;
 
   ~Subscriber();
+  Subscriber(Subscriber&&) noexcept;
   Subscriber(const Subscriber&) = delete;
   auto operator=(const Subscriber&) = delete;
-  Subscriber(Subscriber&&) noexcept = default;
   auto operator=(Subscriber&&) noexcept = delete;
 
 private:
