@@ -34,5 +34,6 @@ define_module_library(
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 
 # Subprojects
+add_subdirectory(py)
 add_subdirectory(tests)
 add_subdirectory(examples)

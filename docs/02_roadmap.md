@@ -16,9 +16,10 @@ Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi a
 
 ## Current tasks
 
-- IPC: Impmenent Python bindings [#131]
+- IPC: Implement Service/Query API [#130]
+- Implement joystick interface
+- Implement canopen interface
 - IPC: Implement means to isolate IPC to a set of hosts [#129]
-- IPC: Implement Query API [#130]
 - IPC: Implement zero-copy read and write [#132]
 
 ## Camera
@@ -26,14 +27,9 @@ Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi a
 - Implement a PoC gstreamer capture and HW accelerated glfw display
 - Implement [grapecam](https://github.com/cvilas/grapecam)
 
-## CAN
-
-- Implement canopen interface
-
 ## Teleop
 
 - Implement Teleop controller
-- Implement joystick interface
 
 ## Low latency applications on raspberry pi
 
@@ -58,6 +54,7 @@ Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi a
 
 ## Math library for realtime control
 
+- Study: Interfaces with C++20 concept: <https://concepts.godbolt.org/z/PjGb466cr>
 - Delay line
 - Low pass filter
 - Differentiator
@@ -136,5 +133,4 @@ Goal: Robot model description file as the single source of truth to generate for
 - C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)
 - C++20 features: <https://youtu.be/N1gOSgZy7h4>
 - Practical [C++26 Reflection](https://youtu.be/cqQ7v6xdZRw)
-- Interfaces with C++20 concept: <https://concepts.godbolt.org/z/PjGb466cr>
 - Clean code: <https://youtu.be/9ch7tZN4jeI>

@@ -1,0 +1,25 @@
+#=================================================================================================
+# Copyright (C) 2025 GRAPE Contributors
+#=================================================================================================
+
+from setuptools import setup, find_packages
+from setuptools.dist import Distribution
+
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package"""
+    def has_ext_modules(self):
+        return True
+
+setup(
+    name="@PY_MODULE_NAME@",
+    version="@VERSION@",
+    description="Python bindings for grape::ipc",
+    packages=find_packages(),
+    package_data={
+        "@PY_MODULE_NAME@": ["*.so", "*.pyd", "*.dll"],  # Include the binary extension
+    },
+    include_package_data=True,  # Ensure package_data is included
+    distclass=BinaryDistribution,  # Mark as binary distribution
+    python_requires=">=3.6",
+    zip_safe=False,  # Required for extensions
+)
