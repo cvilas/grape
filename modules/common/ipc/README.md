@@ -34,3 +34,12 @@ participating hosts and the network infrastructure to enable message passing acr
   - [Configure multicast routes](https://eclipse-ecal.github.io/ecal/latest/getting_started/cloud.html#fa-ubuntu-multicast-configuration-on-ubuntu)  
   - For TCP pub/sub, ensure hostnames are [resolvable](https://eclipse-ecal.github.io/ecal/latest/getting_started/services.html#hostname-resolution)
 - You may need to configure network Switches in your LAN for ['IGMP snooping'](https://en.wikipedia.org/wiki/IGMP_snooping). Refer to your device's user manual.
+
+### Python bindings
+
+* To use IPC in Python applications, install the IPC [wheel](https://pythonwheels.com/) as follows
+```bash
+pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
+``` 
+* Test by running `examples/pub_example.py` and `examples/sub_example.py`
+

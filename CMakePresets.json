@@ -13,33 +13,45 @@
       }
     },
     {
-      "name": "clang-all",
+      "name": "clang",
       "inherits": "base",
       "description": "Configure all modules with clang toolchain",
       "binaryDir": "${sourceDir}/build/clang",
       "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake"
     },
     {
-      "name": "native-all",
+      "name": "native",
       "inherits": "base",
       "description": "Configure all modules with native toolchain",
       "binaryDir": "${sourceDir}/build/native",
       "toolchainFile": "",
-      "cacheVariables": {
-        "ENABLE_LINTER": "OFF"
+      "cacheVariables": { 
+        "ENABLE_LINTER": "OFF" 
       }
+    },
+    {
+      "name": "cross",
+      "inherits": "base",
+      "description": "Configure all modules for Aarch64 cross-build with native toolchain",
+      "binaryDir": "${sourceDir}/build/cross",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_gcc_aarch64.cmake"
     }
   ],
   "buildPresets": [
     {
-      "name": "clang-all",
+      "name": "clang",
       "description": "Build all modules with clang toolchain",
-      "configurePreset": "clang-all"
+      "configurePreset": "clang"
     },
     {
-      "name": "native-all",
+      "name": "native",
       "description": "Build all modules with native toolchain",
-      "configurePreset": "native-all"
+      "configurePreset": "native"
+    },
+    {
+      "name": "cross",
+      "description": "Build all modules with Aarch64 cross-build toolchain",
+      "configurePreset": "cross"
     }
   ]
 }

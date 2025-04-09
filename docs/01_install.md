@@ -12,8 +12,9 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
 
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
-  ccache doxygen graphviz linux-generic python3-dev python-is-python3 pipx \
+  ccache doxygen graphviz linux-generic python3-dev python-is-python3 pybind11-dev pipx \
   avahi-daemon avahi-utils iproute2 iputils-ping net-tools iftop htop nvtop
+  pip install build setuptools wheel
   ```
 
 - Install latest cmake and helpers
@@ -83,23 +84,18 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
 
 ## Configure and build
 
-Note (Feb 2025): Clang toolchain is recommended to build the project:
+Note (May 2025): Clang toolchain is recommended to build the project:
 
 ```bash
 git clone git@github.com:cvilas/grape
-mkdir -p grape/build
-cd grape/build
-cmake .. -DBUILD_MODULES=all -DCMAKE_TOOLCHAIN_FILE=$PWD/../toolchains/toolchain_clang.cmake -GNinja
-ninja
+cmake --preset clang
+cmake --build --preset clang --target all examples check
 ```
 
-With gcc, use `Makefile` instead of `ninja` to build libraries and tests. Some examples do not build
-because libstdc++ does not support formatted printing over containers
+With gcc, some examples do not build, as libstdc++ doesn't support formatted printing over ranges
 
 ```bash
 git clone git@github.com:cvilas/grape
-mkdir -p grape/build_gcc
-cd grape/build_gcc
-cmake .. -DBUILD_MODULES=all
-make -j8
+cmake --preset native
+cmake --build --preset native --target all check
 ```
