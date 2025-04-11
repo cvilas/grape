@@ -17,6 +17,13 @@ Goal: A catalog of useful tools and applications using X86-64 and Raspberry Pi a
 ## Current tasks
 
 - IPC: Impmenent Python bindings [#131]
+  - Create a barebones python package (wheel). 
+  - Install the wheel and demonstrate it can be imported and used with a python script
+  - Extend the idea to implement bindings for all of IPC as it stands currently
+  - Write an example application with python pub -> python sub and python pub -> C++ sub
+  - Write an example application with C++ pub -> python pub
+  - Clean up packaging
+  - Raise MR
 - IPC: Implement means to isolate IPC to a set of hosts [#129]
 - IPC: Implement Query API [#130]
 - IPC: Implement zero-copy read and write [#132]
