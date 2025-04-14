@@ -5,6 +5,7 @@
 #pragma once
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 
 #include "grape/exception.h"
