@@ -8,6 +8,7 @@
 
 #include <unistd.h>
 
+#include "grape/log/record.h"
 #include "grape/log/sinks/sink.h"
 
 namespace grape::log {

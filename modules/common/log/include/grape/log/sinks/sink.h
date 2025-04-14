@@ -5,6 +5,7 @@
 #pragma once
 
 #include <concepts>
+#include <string>
 
 namespace grape::log {
 
