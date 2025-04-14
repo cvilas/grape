@@ -32,10 +32,10 @@ void handleSignal(int signal) {
 
 //-------------------------------------------------------------------------------------------------
 [[noreturn]] void handleTermination() {
+  (void)fputs("\nTerminated\n", stderr);
   if (std::current_exception() != nullptr) {
     grape::Exception::print();
   } else {
-    (void)fputs("\nTerminated\n", stderr);
     (void)fputs("\nBacktrace:\n", stderr);
     auto idx = 0U;
     const auto strace = grape::utils::StackTrace::current();
@@ -177,7 +177,7 @@ auto ok() -> bool {
   if (not s_init_flag.test()) {
     panic<Exception>("Not initialised. Call init() first");
   }
-  return (not s_exit_flag.test()) and grape::ipc::ok();
+  return grape::ipc::ok();
 }
 
 //-------------------------------------------------------------------------------------------------
