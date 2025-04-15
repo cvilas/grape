@@ -37,18 +37,18 @@ string(REPLACE ";" "\\;" formatted_external_projects_list "${_external_projects_
 message(STATUS "========= External dependencies: Configuring =========")
 
 # Delete local deployment directories of external projects
-execute_process(
-  COMMAND bash -c "find ${EP_BINARY_DIR} -type d \\( -name \"deploy\" -o -name \"tmp\" \\) | xargs rm -r"
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  RESULT_VARIABLE _result
-  ERROR_VARIABLE _error
-)
-if(NOT _result EQUAL 0)
-  message(WARNING "Clean up command failed: ${_error}")
-else()
-  message(STATUS "Cleaned up external build directories")
-  file(MAKE_DIRECTORY ${EP_DEPLOY_DIR}) # make the deploy directory again
-endif()
+#execute_process(
+#  COMMAND bash -c "find ${EP_BINARY_DIR} -type d \\( -name \"deploy\" -o -name \"tmp\" \\) | xargs rm -r"
+#  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#  RESULT_VARIABLE _result
+#  ERROR_VARIABLE _error
+#)
+#if(NOT _result EQUAL 0)
+#  message(WARNING "Clean up command failed: ${_error}")
+#else()
+#  message(STATUS "Cleaned up external build directories")
+#  file(MAKE_DIRECTORY ${EP_DEPLOY_DIR}) # make the deploy directory again
+#endif()
 
 # Configure external projects
 execute_process(
@@ -56,9 +56,8 @@ execute_process(
   -G "Ninja" ${CMAKE_SOURCE_DIR}/external # Use 'Ninja' for parallel build
   -DEXTERNAL_PROJECTS_LIST=${formatted_external_projects_list}
   -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-  -DEP_DEPLOY_DIR=${EP_DEPLOY_DIR}
   -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
-  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+  -DCMAKE_INSTALL_PREFIX=${EP_DEPLOY_DIR}
   -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
   -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}

@@ -39,7 +39,7 @@ set(WHEEL_DIR ${CMAKE_BINARY_DIR}/share/${CMAKE_PROJECT_NAME}/py/wheels)
 add_custom_target(
     ${PY_MODULE_NAME}_wheel ALL
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PY_MODULE_NAME}> ${PY_BINDINGS_DIR}/
-    COMMAND ${CMAKE_COMMAND} -E env python -m build --wheel --outdir ${WHEEL_DIR}
+    COMMAND pyproject-build --wheel --outdir ${WHEEL_DIR}
     DEPENDS ${PY_MODULE_NAME}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
    COMMENT "Building Python package (wheel) for ${MODULE_NAME}"

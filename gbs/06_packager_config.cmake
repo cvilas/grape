@@ -2,6 +2,7 @@
 # Copyright (C) 2018 GRAPE Contributors
 # =================================================================================================
 
+# Define packaging rules
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 if(DEFINED PACKAGE_SUFFIX)
   set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-${PACKAGE_SUFFIX}")
@@ -20,3 +21,12 @@ set(CPACK_GENERATOR "TBZ2")
 #set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
 include(CPack)
+
+# ==================================================================================================
+# Adds a custom target to package up all artifacts for deployment on `make pack`
+add_custom_target(
+  pack 
+  COMMENT "Package all artifacts for deployment"
+  COMMAND ${CMAKE_COMMAND} -E env cpack
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)

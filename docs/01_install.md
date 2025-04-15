@@ -12,9 +12,9 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
 
   ```bash
   sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
-  ccache doxygen graphviz linux-generic python3-dev python-is-python3 pybind11-dev pipx \
-  avahi-daemon avahi-utils iproute2 iputils-ping net-tools iftop htop nvtop
-  pip install build setuptools wheel
+  ccache doxygen graphviz linux-generic python3-dev python-is-python3 pybind11-dev python3-wheel \
+  python3-setuptools python3-build pipx avahi-daemon avahi-utils iproute2 iputils-ping net-tools \
+  iftop htop nvtop patch
   ```
 
 - Install latest cmake and helpers
@@ -89,7 +89,7 @@ Note (May 2025): Clang toolchain is recommended to build the project:
 ```bash
 git clone git@github.com:cvilas/grape
 cmake --preset clang
-cmake --build --preset clang --target all examples check
+cmake --build build/clang --target all examples check
 ```
 
 With gcc, some examples do not build, as libstdc++ doesn't support formatted printing over ranges
@@ -97,5 +97,5 @@ With gcc, some examples do not build, as libstdc++ doesn't support formatted pri
 ```bash
 git clone git@github.com:cvilas/grape
 cmake --preset native
-cmake --build --preset native --target all check
+cmake --build build/native --target all check
 ```
