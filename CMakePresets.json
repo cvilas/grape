@@ -16,42 +16,32 @@
       "name": "clang",
       "inherits": "base",
       "description": "Configure all modules with clang toolchain",
-      "binaryDir": "${sourceDir}/build/clang",
-      "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake"
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake",
+      "cacheVariables": { 
+        "PACKAGE_SUFFIX": "${presetName}"
+      }    
     },
     {
       "name": "native",
       "inherits": "base",
       "description": "Configure all modules with native toolchain",
-      "binaryDir": "${sourceDir}/build/native",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "toolchainFile": "",
       "cacheVariables": { 
-        "ENABLE_LINTER": "OFF" 
+        "ENABLE_LINTER": "OFF",
+        "PACKAGE_SUFFIX": "${presetName}"
       }
     },
     {
       "name": "cross",
       "inherits": "base",
       "description": "Configure all modules for Aarch64 cross-build with native toolchain",
-      "binaryDir": "${sourceDir}/build/cross",
-      "toolchainFile": "${sourceDir}/toolchains/toolchain_gcc_aarch64.cmake"
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "clang",
-      "description": "Build all modules with clang toolchain",
-      "configurePreset": "clang"
-    },
-    {
-      "name": "native",
-      "description": "Build all modules with native toolchain",
-      "configurePreset": "native"
-    },
-    {
-      "name": "cross",
-      "description": "Build all modules with Aarch64 cross-build toolchain",
-      "configurePreset": "cross"
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_gcc_aarch64.cmake",
+      "cacheVariables": { 
+        "PACKAGE_SUFFIX": "${presetName}"
+      }  
     }
   ]
 }

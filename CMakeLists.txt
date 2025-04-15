@@ -2,7 +2,7 @@
 # Copyright (C) 2023 GRAPE Contributors
 # =================================================================================================
 
-cmake_minimum_required(VERSION 3.28.0)
+cmake_minimum_required(VERSION 3.31.6)
 project(grape LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 23)
