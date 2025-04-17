@@ -49,9 +49,10 @@ Note that after configuration,
 - `make` builds libraries and apps
 - `make examples` builds all example programs
 - `make tests` builds all unit tests
-- `make check` builds and run tests, and generates a test report.
+- `make check` builds and runs tests, and generates a test report.
 - `make docs` generates source code documentation using doxygen
-- `make install` builds and installs library and app targets
+- `make install` builds and installs library and apps on host
+- `make pack` builds and packages up artifacts for deployment
 - `<install_location>/bin/uninstall.sh` uninstalls everything
 - `cpack` packages up built artifacts for deployment
 
