@@ -23,28 +23,43 @@ std::atomic_flag s_exit_flag = ATOMIC_FLAG_INIT;
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 //-------------------------------------------------------------------------------------------------
+void throwIfUninitialised() {
+  if (not s_init_flag.test()) {
+    grape::panic<grape::Exception>("Not initialised. Call init() first");
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
+void throwIfInitialised() {
+  if (s_init_flag.test()) {
+    grape::panic<grape::Exception>("Already initialised");
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
 void handleSignal(int signal) {
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,concurrency-mt-unsafe)
-  (void)fprintf(stderr, "\nReceived signal: %s\n", strsignal(signal));
+  constexpr auto* MSG_PREFIX = "\nReceived signal: ";
+  const auto* const signal_name = strsignal(signal);  // NOLINT(concurrency-mt-unsafe)
+  std::ignore = write(STDERR_FILENO, MSG_PREFIX, std::strlen(MSG_PREFIX));
+  std::ignore = write(STDERR_FILENO, signal_name, std::strlen(signal_name));
+  std::ignore = write(STDERR_FILENO, "\n", 1);
   s_exit_flag.test_and_set();
   s_exit_flag.notify_all();
 }
 
 //-------------------------------------------------------------------------------------------------
 [[noreturn]] void handleTermination() {
-  (void)fputs("\nTerminated\n", stderr);
   if (std::current_exception() != nullptr) {
     grape::Exception::print();
   } else {
-    (void)fputs("\nBacktrace:\n", stderr);
-    auto idx = 0U;
+    constexpr auto* MSG_PREFIX = "\nBacktrace\n";
+    std::ignore = write(STDERR_FILENO, MSG_PREFIX, strlen(MSG_PREFIX));
     const auto strace = grape::utils::StackTrace::current();
     for (const auto& trace : strace.trace()) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-      (void)fprintf(stderr, "#%u: %s\n", idx++, trace.c_str());
+      std::ignore = write(STDERR_FILENO, trace.c_str(), trace.size());
     }
   }
-  std::exit(EXIT_FAILURE);  // NOLINT(concurrency-mt-unsafe)
+  _exit(EXIT_FAILURE);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -116,10 +131,7 @@ namespace grape::app {
 
 //-------------------------------------------------------------------------------------------------
 void init(int argc, const char** argv, const std::string& description) {
-  if (s_init_flag.test()) {
-    panic<Exception>("Already initialised");
-  }
-
+  throwIfInitialised();
   setExitHandlers();
 
   const auto args =
@@ -137,10 +149,7 @@ void init(int argc, const char** argv, const std::string& description) {
 
 //-------------------------------------------------------------------------------------------------
 void init(const std::filesystem::path& config_file) {
-  if (s_init_flag.test()) {
-    panic<Exception>("Already initialised");
-  }
-
+  throwIfInitialised();
   setExitHandlers();
 
   // parse config file
@@ -174,17 +183,13 @@ void init(const std::filesystem::path& config_file) {
 
 //-------------------------------------------------------------------------------------------------
 auto ok() -> bool {
-  if (not s_init_flag.test()) {
-    panic<Exception>("Not initialised. Call init() first");
-  }
-  return grape::ipc::ok();
+  throwIfUninitialised();
+  return grape::ipc::ok() and not s_exit_flag.test();
 }
 
 //-------------------------------------------------------------------------------------------------
 void waitForExit() {
-  if (not s_init_flag.test()) {
-    panic<Exception>("Not initialised. Call init() first");
-  }
+  throwIfUninitialised();
   s_exit_flag.wait(false);
 }
 
