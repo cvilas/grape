@@ -69,9 +69,12 @@ add_library(lualib OBJECT ${LUA_SOURCES})
 set_target_properties(lualib PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(lualib PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
 set_target_properties(lualib PROPERTIES POSITION_INDEPENDENT_CODE ON) # always need this
+set_target_properties(lualib PROPERTIES C_CLANG_TIDY "")
 
 add_executable(grape_lua ${LUA_SOURCES_DIR}/lua.c)
 target_link_libraries(grape_lua lualib m)
 set_target_properties(grape_lua PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(grape_lua PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
+set_target_properties(grape_lua PROPERTIES C_CLANG_TIDY "")
 install(TARGETS grape_lua)
+
