@@ -271,7 +271,7 @@ function(define_module_library)
   add_library(${LIBRARY_NAME_ALIAS} ALIAS ${LIBRARY_NAME})
   add_clang_format(${LIBRARY_NAME})
 
-  if(NOT NOINSTALL)
+  if(NOT TARGET_ARG_NOINSTALL)
     set(MODULE_${MODULE_NAME}_LIB_TARGETS
         ${MODULE_${MODULE_NAME}_LIB_TARGETS} ${LIBRARY_NAME}
         CACHE INTERNAL "Library targets in module ${MODULE_NAME}")
