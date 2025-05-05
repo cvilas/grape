@@ -10,7 +10,7 @@
 #include "grape/log/syslog.h"
 
 //=================================================================================================
-auto main(int argc, const char* argv[]) -> int {
+auto main(int argc, const char* argv[]) -> int {  // NOLINT(bugprone-exception-escape)
   // initialise application
   grape::app::init(argc, argv, "GRAPE publisher application example");
 
