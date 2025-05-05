@@ -13,7 +13,7 @@ class BinaryDistribution(Distribution):
 setup(
     name="@PY_MODULE_NAME@",
     version="@VERSION@",
-    description="Python bindings for grape::ipc",
+    description="Python bindings for @MODULE_NAME@",
     packages=find_packages(),
     package_data={
         "@PY_MODULE_NAME@": ["*.so", "*.pyd", "*.dll"],  # Include the binary extension
