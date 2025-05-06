@@ -13,10 +13,7 @@ def to_bytes(msg: str) -> bytes:
 
 def match_callback(match):
     """Callback for match/unmatch events."""
-    if match.status == "Matched":
-        print("\nMatched")
-    elif match.status == "Unmatched":
-        print("\nUnmatched")
+    print(f"Match status: {match.status}")
 
 
 def main():
