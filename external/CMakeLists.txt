@@ -75,6 +75,54 @@ if(glfw3 IN_LIST EXTERNAL_PROJECTS_LIST)
 endif()
 
 # -------------------------------------------------------------------------------------------------
+# SDL3
+if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(SDL3 ${SDL3_VERSION_REQUIRED} QUIET)
+  if(SDL3_FOUND)
+    message(STATUS "SDL3: Using version ${SDL3_VERSION} from ${SDL3_DIR}")
+    add_dummy_target(SDL3)
+  else()
+    message(STATUS "SDL3: Building ${SDL3_VERSION_REQUIRED} from source")
+    set(SDL3_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+      -DSDL_AUDIO=ON
+      -DSDL_VIDEO=ON
+      -DSDL_GPU=ON
+      -DSDL_RENDER=ON
+      -DSDL_CAMERA=ON
+      -DSDL_WAYLAND=ON
+      -DSDL_TEST_LIBRARY=OFF
+      -DSDL_TESTS=OFF
+      -DSDL_EXAMPLES=OFF)
+    ExternalProject_Add(
+      SDL3
+      GIT_REPOSITORY "https://github.com/libsdl-org/SDL"
+      GIT_TAG "release-${SDL3_VERSION_REQUIRED}"
+      GIT_SHALLOW true
+      CMAKE_ARGS ${SDL3_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# lz4
+if(lz4 IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(lz4 ${LZ4_VERSION_REQUIRED} QUIET)
+  if(lz4_FOUND)
+    message(STATUS "lz4: Using version ${lz4_VERSION} from ${lz4_DIR}")
+    add_dummy_target(lz4)
+  else()
+    message(STATUS "lz4: Building ${lz4_VERSION_REQUIRED} from source")
+    set(LZ4_CMAKE_ARGS -DLZ4_BUILD_CLI=OFF ${EP_CMAKE_EXTRA_ARGS})
+    ExternalProject_Add(
+      lz4
+      GIT_REPOSITORY "https://github.com/lz4/lz4.git"
+      GIT_TAG "v${LZ4_VERSION_REQUIRED}"
+      GIT_SHALLOW true
+      SOURCE_SUBDIR build/cmake
+      CMAKE_ARGS ${LZ4_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
 # yaml-cpp (eCAL dependency)
 if(yaml-cpp IN_LIST EXTERNAL_PROJECTS_LIST)
   find_package(yaml-cpp ${YAML_CPP_VERSION_REQUIRED} QUIET)
