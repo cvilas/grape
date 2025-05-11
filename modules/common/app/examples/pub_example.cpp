@@ -31,7 +31,7 @@ auto main(int argc, const char* argv[]) -> int {  // NOLINT(bugprone-exception-e
     std::this_thread::sleep_for(LOOP_SLEEP);
 
     auto msg = std::format("Hello World {}", ++count);
-    grape::syslog::Log(grape::log::Severity::Info, "{}", msg);
+    grape::syslog::Info("{}", msg);
     pub.publish(serialise(msg));
   }
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <chrono>
+#include <format>
 #include <source_location>
 #include <stop_token>
 

@@ -168,7 +168,7 @@ void init(const std::filesystem::path& config_file) {
   }
   initSyslog(log_config.value());
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-  syslog::Log(log::Severity::Info, "Using configuration file '{}'", maybe_config_path->string());
+  syslog::Info("Using configuration file '{}'", maybe_config_path->string());
 
   // configure IPC
   const auto ipc_config = config_root.read<grape::script::ConfigTable>("ipc");

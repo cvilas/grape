@@ -53,7 +53,7 @@ auto bmGrapeSystemLog(benchmark::State& state) {
   grape::syslog::init(std::move(config));
   auto i = 0uz;
   for (auto _ : state) {
-    grape::syslog::Log(grape::log::Severity::Info, "Log number {:d}", i++);
+    grape::syslog::Info("Log number {:d}", i++);
   }
 }
 
