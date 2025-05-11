@@ -19,55 +19,22 @@ auto instance() -> log::Logger&;
 // Specialised system logging interfaces.
 // @param fmt message format string
 // @param args Message args to be formatted
-//-------------------------------------------------------------------------------------------------
-
-template <typename... Args>
-struct Critical {
-  explicit Critical(std::format_string<Args...> fmt, Args&&... args,
-                    const std::source_location& loc = std::source_location::current()) {
-    instance().log(log::Severity::Critical, loc, fmt, std::forward<Args>(args)...);
-  }
-};
-
-template <typename... Args>
-struct Error {
-  explicit Error(std::format_string<Args...> fmt, Args&&... args,
-                 const std::source_location& loc = std::source_location::current()) {
-    instance().log(log::Severity::Error, loc, fmt, std::forward<Args>(args)...);
-  }
-};
-
-template <typename... Args>
-struct Warn {
-  explicit Warn(std::format_string<Args...> fmt, Args&&... args,
-                const std::source_location& loc = std::source_location::current()) {
-    instance().log(log::Severity::Warn, loc, fmt, std::forward<Args>(args)...);
-  }
-};
-
-template <typename... Args>
-struct Note {
-  explicit Note(std::format_string<Args...> fmt, Args&&... args,
-                const std::source_location& loc = std::source_location::current()) {
-    instance().log(log::Severity::Note, loc, fmt, std::forward<Args>(args)...);
-  }
-};
-
-template <typename... Args>
-struct Info {
-  explicit Info(std::format_string<Args...> fmt, Args&&... args,
-                const std::source_location& loc = std::source_location::current()) {
-    instance().log(log::Severity::Info, loc, fmt, std::forward<Args>(args)...);
-  }
-};
-
-template <typename... Args>
-struct Debug {
-  explicit Debug(std::format_string<Args...> fmt, Args&&... args,
-                 const std::source_location& loc = std::source_location::current()) {
-    instance().log(log::Severity::Info, loc, fmt, std::forward<Args>(args)...);
-  }
-};
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFINE_LOG_STRUCT(NAME, SEVERITY)                                                          \
+  template <typename... Args>                                                                      \
+  struct NAME {                                                                                    \
+    explicit NAME(std::format_string<Args...> fmt, Args&&... args,                                 \
+                  const std::source_location& loc = std::source_location::current()) {             \
+      instance().log(SEVERITY, loc, fmt, std::forward<Args>(args)...);                             \
+    }                                                                                              \
+  };
+DEFINE_LOG_STRUCT(Critical, log::Severity::Critical)
+DEFINE_LOG_STRUCT(Error, log::Severity::Error)
+DEFINE_LOG_STRUCT(Warn, log::Severity::Warn)
+DEFINE_LOG_STRUCT(Note, log::Severity::Note)
+DEFINE_LOG_STRUCT(Info, log::Severity::Info)
+DEFINE_LOG_STRUCT(Debug, log::Severity::Debug)
+#undef DEFINE_LOG_STRUCT
 
 //-------------------------------------------------------------------------------------------------
 // Recommended user API for system logging
