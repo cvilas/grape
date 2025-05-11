@@ -11,12 +11,12 @@ auto main(int /*argc*/, const char** /*argv[]*/) -> int {
     auto config = grape::log::Config{};
     config.threshold = grape::log::Severity::Debug;
     grape::syslog::init(std::move(config));
-    grape::syslog::Log(grape::log::Severity::Critical, "A critical error message");
-    grape::syslog::Log(grape::log::Severity::Error, "An error message");
-    grape::syslog::Log(grape::log::Severity::Warn, "A warning message");
-    grape::syslog::Log(grape::log::Severity::Note, "message='{}'", "A note message");
-    grape::syslog::Log(grape::log::Severity::Info, "An informational message");
-    grape::syslog::Log(grape::log::Severity::Debug, "A debug message");
+    grape::syslog::Critical("A critical error message");
+    grape::syslog::Error("An error message");
+    grape::syslog::Warn("A warning message");
+    grape::syslog::Note("message='{}'", "A note message");
+    grape::syslog::Info("An informational message");
+    grape::syslog::Debug("A debug message");
     return EXIT_SUCCESS;
   } catch (...) {
     grape::Exception::print();
