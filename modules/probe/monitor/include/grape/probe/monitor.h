@@ -36,7 +36,6 @@ public:
   auto operator=(Monitor&&) = delete;
 
 private:
-  static void glfwEerrorCb(int error, const char* description);
   void drawPlots();
   void drawControls();
   struct Impl;

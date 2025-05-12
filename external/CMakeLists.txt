@@ -51,26 +51,30 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
 endif()
 
 # -------------------------------------------------------------------------------------------------
-# GLFW3
-if(glfw3 IN_LIST EXTERNAL_PROJECTS_LIST)
-  find_package(glfw3 ${GLFW3_VERSION_REQUIRED} QUIET)
-  if(glfw3_FOUND)
-    message(STATUS "GLFW3: Using version ${glfw3_VERSION} from ${glfw3_DIR}")
-    add_dummy_target(glfw3)
+# SDL3
+if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(SDL3 ${SDL3_VERSION_REQUIRED} QUIET)
+  if(SDL3_FOUND)
+    message(STATUS "SDL3: Using version ${SDL3_VERSION} from ${SDL3_DIR}")
+    add_dummy_target(SDL3)
   else()
-    message(STATUS "GLFW3: Building ${GLFW3_VERSION_REQUIRED} from source")
-    set(GLFW3_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
-        -DGLFW_BUILD_DOCS=OFF 
-        -DGLFW_BUILD_EXAMPLES=OFF
-        -DGLFW_BUILD_TESTS=OFF 
-        -DGLFW_BUILD_X11=ON 
-        -DGLFW_BUILD_WAYLAND=ON)
+    message(STATUS "SDL3: Building ${SDL3_VERSION_REQUIRED} from source")
+    set(SDL3_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
+      -DSDL_AUDIO=ON
+      -DSDL_VIDEO=ON
+      -DSDL_GPU=ON
+      -DSDL_RENDER=ON
+      -DSDL_CAMERA=ON
+      -DSDL_WAYLAND=ON
+      -DSDL_TEST_LIBRARY=OFF
+      -DSDL_TESTS=OFF
+      -DSDL_EXAMPLES=OFF)
     ExternalProject_Add(
-      glfw3
-      GIT_REPOSITORY "https://github.com/glfw/glfw.git"
-      GIT_TAG ${GLFW3_VERSION_REQUIRED}
+      SDL3
+      GIT_REPOSITORY "https://github.com/libsdl-org/SDL"
+      GIT_TAG "release-${SDL3_VERSION_REQUIRED}"
       GIT_SHALLOW true
-      CMAKE_ARGS ${GLFW3_CMAKE_ARGS})
+      CMAKE_ARGS ${SDL3_CMAKE_ARGS})
   endif()
 endif()
 

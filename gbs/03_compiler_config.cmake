@@ -24,13 +24,15 @@ set(CLANG_WARNINGS -Weverything
   -Wno-ctad-maybe-unsupported
   -Wno-global-constructors
   -Wno-weak-vtables
-  -Wno-exit-time-destructors)
+  -Wno-exit-time-destructors
+  -Wno-documentation-unknown-command
+  -Wno-reserved-macro-identifier
+  -Wno-old-style-cast)
 
 # GCC warnings
 set(GCC_WARNINGS
   -Wshadow # warn the user if a variable declaration shadows one from a parent context
   -Wnon-virtual-dtor # warn if a class with virtual functions has a non-virtual destructor.
-  -Wold-style-cast # warn for c-style casts
   -Wcast-align # warn for potential performance problem casts
   -Wunused # warn on anything being unused
   -Woverloaded-virtual # warn if you overload (not override) a virtual function
@@ -44,7 +46,6 @@ set(GCC_WARNINGS
   -Wduplicated-cond # warn if if / else chain has duplicated conditions
   -Wduplicated-branches # warn if if / else branches have duplicated code
   -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
-  -Wuseless-cast # warn if you perform a cast to the same type
   -Wconversion
   -Wcast-qual
   -Wpointer-arith

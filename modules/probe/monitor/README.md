@@ -10,9 +10,7 @@ Provide more details on the functionality, API usage, etc
 
 ### Third party libs
 
-- [GLFW3](https://www.glfw.org/): Hardware accelerated graphics
-  - To get OpenGL3 working on qemu VM in MacOS, turn off hardware acceleration by using one of the non-gl display hardware options.
-  - `glxinfo -B` on the terminal lists OpenGL versions available on the host
+- [SDL3](https://libsdl.org/): Hardware accelerated graphics
 - [imgui](https://github.com/ocornut/imgui): Immediate mode 2D graphics
 - [implot](https://github.com/epezent/implot): Pretty plotting for imgui
 

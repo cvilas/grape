@@ -10,16 +10,11 @@
 #include <print>
 #include <shared_mutex>
 
+#include <SDL3/SDL.h>
+
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "grape/exception.h"
-
-#if defined(__APPLE__)
-#define GL_SILENCE_DEPRECATION
-#endif
-
-#include <GLFW/glfw3.h>
-
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
 #include "imgui.h"
 #include "implot.h"
 
@@ -275,7 +270,8 @@ auto Controllables::items() -> std::vector<Item>& {
 namespace grape::probe {
 
 struct Monitor::Impl {
-  GLFWwindow* window{ nullptr };
+  SDL_Window* window{ nullptr };
+  SDL_Renderer* renderer{ nullptr };
   ImGuiContext* imgui_ctx{ nullptr };
   ImPlotContext* implot_ctx{ nullptr };
   Monitor::Sender sender{ nullptr };
@@ -286,45 +282,25 @@ struct Monitor::Impl {
 };
 
 //-------------------------------------------------------------------------------------------------
-void Monitor::glfwEerrorCb(int error, const char* description) {
-  std::println(stderr, "GLFW Error {}: {}", error, description);
-}
-
-//-------------------------------------------------------------------------------------------------
 Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
-  glfwSetErrorCallback(Monitor::glfwEerrorCb);
-
-  if (GLFW_FALSE == glfwInit()) {
-    panic<Exception>(std::format("glfwInit: {}", toString(Error::Renderer)));
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
+    panic<Exception>(std::format("SDL_Init: {}", SDL_GetError()));
   }
-
-  // Decide GL+GLSL versions
-#if defined(__APPLE__)
-  // GL 3.2 + GLSL 150
-  const char* glsl_version = "#version 150";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#else
-  // GL 3.0 + GLSL 130
-  const char* glsl_version = "#version 130";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-  // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
 
   // Create window with graphics context
-  static constexpr auto WINDOW_WIDTH = 1280;
-  static constexpr auto WINDOW_HEIGHT = 720;
-  impl_->window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Monitor", nullptr, nullptr);
+  static constexpr auto WIN_W = 1280;
+  static constexpr auto WIN_H = 720;
+  const auto win_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+  impl_->window = SDL_CreateWindow("Implot Example", WIN_W, WIN_H, win_flags);
   if (impl_->window == nullptr) {
-    glfwTerminate();
-    panic<Exception>(std::format("glfwCreateWindow: {}", toString(Error::Renderer)));
+    panic<Exception>(std::format("SDL_CreateWindow: {}", SDL_GetError()));
   }
-  glfwMakeContextCurrent(impl_->window);
-  glfwSwapInterval(1);  // Enable vsync
+  impl_->renderer = SDL_CreateRenderer(impl_->window, nullptr);
+  SDL_SetRenderVSync(impl_->renderer, 1);
+  if (impl_->renderer == nullptr) {
+    panic<Exception>(std::format("Error: SDL_CreateRenderer(): {}", SDL_GetError()));
+  }
+  SDL_ShowWindow(impl_->window);
 
   // Initialize ImGui
   IMGUI_CHECKVERSION();
@@ -337,12 +313,12 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
 
   ImGui::StyleColorsDark();
 
-  if (not ImGui_ImplGlfw_InitForOpenGL(impl_->window, true)) {
-    std::println("Error: ImGui_ImplGlfw_InitForOpenGL");
+  if (not ImGui_ImplSDL3_InitForSDLRenderer(impl_->window, impl_->renderer)) {
+    panic<Exception>(std::format("Error: ImGui_ImplSDL3_InitForSDLRenderer: {}", SDL_GetError()));
   }
 
-  if (not ImGui_ImplOpenGL3_Init(glsl_version)) {
-    std::println("Error: ImGui_ImplOpenGL3_Init");
+  if (not ImGui_ImplSDLRenderer3_Init(impl_->renderer)) {
+    panic<Exception>(std::format("Error: ImGui_ImplSDLRenderer3_Init: {}", SDL_GetError()));
   }
 
   impl_->implot_ctx = ImPlot::CreateContext();
@@ -356,13 +332,14 @@ Monitor::~Monitor() {
   if (impl_->implot_ctx != nullptr) {
     ImPlot::DestroyContext(impl_->implot_ctx);
   }
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
+  ImGui_ImplSDLRenderer3_Shutdown();
+  ImGui_ImplSDL3_Shutdown();
   if (impl_->imgui_ctx != nullptr) {
     ImGui::DestroyContext(impl_->imgui_ctx);
   }
-  glfwDestroyWindow(impl_->window);
-  glfwTerminate();
+  SDL_DestroyRenderer(impl_->renderer);
+  SDL_DestroyWindow(impl_->window);
+  SDL_Quit();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -375,25 +352,33 @@ void Monitor::setSender(Sender&& sender) {
 void Monitor::run() {
   static constexpr auto BK_COLOR = ImVec4(0.45F, 0.55F, 0.60F, 1.00F);
 
-  while (glfwWindowShouldClose(impl_->window) == 0) {
-    glfwPollEvents();
+  bool done = false;
+  while (!done) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      ImGui_ImplSDL3_ProcessEvent(&event);
+      if (event.type == SDL_EVENT_QUIT) {
+        done = true;
+      }
+      if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
+          event.window.windowID == SDL_GetWindowID(impl_->window)) {
+        done = true;
+      }
+    }
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
+    ImGui_ImplSDLRenderer3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     drawPlots();
     drawControls();
     ImGui::Render();
 
-    int display_w = 0;
-    int display_h = 0;
-    glfwGetFramebufferSize(impl_->window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(BK_COLOR.x * BK_COLOR.w, BK_COLOR.y * BK_COLOR.w, BK_COLOR.z * BK_COLOR.w,
-                 BK_COLOR.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(impl_->window);
+    const auto& io = ImGui::GetIO();
+    SDL_SetRenderScale(impl_->renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+    SDL_SetRenderDrawColorFloat(impl_->renderer, BK_COLOR.x, BK_COLOR.y, BK_COLOR.z, BK_COLOR.w);
+    SDL_RenderClear(impl_->renderer);
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), impl_->renderer);
+    SDL_RenderPresent(impl_->renderer);
   }
 }
 
