@@ -4,10 +4,10 @@
 
 declare_module(
   NAME probe_monitor
-  DEPENDS_ON_MODULES probe_controller
-  DEPENDS_ON_EXTERNAL_PROJECTS "glfw3")
+  DEPENDS_ON_MODULES "probe_controller"
+  DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
 
-find_package(glfw3 ${GLFW3_VERSION_REQUIRED} REQUIRED)
+find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 
 # library sources
 set(SOURCES src/monitor.cpp README.md include/grape/probe/monitor.h)

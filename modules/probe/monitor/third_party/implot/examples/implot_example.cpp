@@ -7,14 +7,10 @@
 #include <stdexcept>
 #include <string>
 
-#if defined(__APPLE__)
-#define GL_SILENCE_DEPRECATION
-#endif
+#include <SDL3/SDL.h>
 
-#include <GLFW/glfw3.h>
-
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "imgui.h"
 #include "implot.h"
 
@@ -32,9 +28,9 @@ public:
   auto operator=(ImplotExample&&) = delete;
 
 private:
-  static void glfwEerrorCb(int error, const char* description);
   void demoRealtimePlot();
-  GLFWwindow* window_;
+  SDL_Window* window_;
+  SDL_Renderer* renderer_;
 };
 
 //=================================================================================================
@@ -53,44 +49,26 @@ auto main() -> int {
 }
 
 //-------------------------------------------------------------------------------------------------
-void ImplotExample::glfwEerrorCb(int error, const char* description) {
-  std::println(stderr, "GLFW Error {}: {}", error, description);
-}
-
-//-------------------------------------------------------------------------------------------------
 ImplotExample::ImplotExample() {
-  glfwSetErrorCallback(ImplotExample::glfwEerrorCb);
-  if (GLFW_FALSE == glfwInit()) {
-    throw std::runtime_error("Error: glfwInit");
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
+    throw std::runtime_error(std::format("Error: SDL_Init(): {}", SDL_GetError()));
   }
-
-  // Decide GL+GLSL versions
-#if defined(__APPLE__)
-  // GL 3.2 + GLSL 150
-  const char* glsl_version = "#version 150";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#else
-  // GL 3.0 + GLSL 130
-  const char* glsl_version = "#version 130";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-  // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
 
   // Create window with graphics context
+
   static constexpr auto WIN_W = 1280;
   static constexpr auto WIN_H = 720;
-  window_ = glfwCreateWindow(WIN_W, WIN_H, "Implot example", nullptr, nullptr);
+  const auto win_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+  window_ = SDL_CreateWindow("Implot Example", WIN_W, WIN_H, win_flags);
   if (window_ == nullptr) {
-    glfwTerminate();
-    throw std::runtime_error("Error: glfwCreateWindow");
+    throw std::runtime_error(std::format("Error: SDL_CreateWindow(): {}", SDL_GetError()));
   }
-  glfwMakeContextCurrent(window_);
-  glfwSwapInterval(1);  // Enable vsync
+  renderer_ = SDL_CreateRenderer(window_, nullptr);
+  SDL_SetRenderVSync(renderer_, 1);
+  if (renderer_ == nullptr) {
+    throw std::runtime_error(std::format("Error: SDL_CreateRenderer(): {}", SDL_GetError()));
+  }
+  SDL_ShowWindow(window_);
 
   // Initialize ImGui
   IMGUI_CHECKVERSION();
@@ -102,12 +80,12 @@ ImplotExample::ImplotExample() {
 
   ImGui::StyleColorsDark();
 
-  if (not ImGui_ImplGlfw_InitForOpenGL(window_, true)) {
-    std::println("Error: ImGui_ImplGlfw_InitForOpenGL");
+  if (not ImGui_ImplSDL3_InitForSDLRenderer(window_, renderer_)) {
+    std::println("Error: ImGui_ImplSDL3_InitForSDLRenderer");
   }
 
-  if (not ImGui_ImplOpenGL3_Init(glsl_version)) {
-    std::println("Error: ImGui_ImplOpenGL3_Init");
+  if (not ImGui_ImplSDLRenderer3_Init(renderer_)) {
+    std::println("Error: ImGui_ImplSDLRenderer3_Init");
   }
 
   if (ImPlot::CreateContext() == nullptr) {
@@ -118,35 +96,43 @@ ImplotExample::ImplotExample() {
 //-------------------------------------------------------------------------------------------------
 ImplotExample::~ImplotExample() {
   ImPlot::DestroyContext();
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
+  ImGui_ImplSDLRenderer3_Shutdown();
+  ImGui_ImplSDL3_Shutdown();
   ImGui::DestroyContext();
-  glfwDestroyWindow(window_);
-  glfwTerminate();
+  SDL_DestroyRenderer(renderer_);
+  SDL_DestroyWindow(window_);
+  SDL_Quit();
 }
 
 //-------------------------------------------------------------------------------------------------
 void ImplotExample::run() {
   static constexpr auto BK_COLOR = ImVec4(0.45F, 0.55F, 0.60F, 1.00F);
 
-  while (glfwWindowShouldClose(window_) == 0) {
-    glfwPollEvents();
+  bool done = false;
+  while (!done) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      ImGui_ImplSDL3_ProcessEvent(&event);
+      if (event.type == SDL_EVENT_QUIT) {
+        done = true;
+      }
+      if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
+          event.window.windowID == SDL_GetWindowID(window_)) {
+        done = true;
+      }
+    }
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
+    ImGui_ImplSDLRenderer3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     demoRealtimePlot();
     ImGui::Render();
-
-    int display_w = 0;
-    int display_h = 0;
-    glfwGetFramebufferSize(window_, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(BK_COLOR.x * BK_COLOR.w, BK_COLOR.y * BK_COLOR.w, BK_COLOR.z * BK_COLOR.w,
-                 BK_COLOR.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(window_);
+    const auto& io = ImGui::GetIO();
+    SDL_SetRenderScale(renderer_, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+    SDL_SetRenderDrawColorFloat(renderer_, BK_COLOR.x, BK_COLOR.y, BK_COLOR.z, BK_COLOR.w);
+    SDL_RenderClear(renderer_);
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer_);
+    SDL_RenderPresent(renderer_);
   }
 }
 
