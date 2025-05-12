@@ -7,6 +7,7 @@
 
 #include "grape/exception.h"
 #include "grape/realtime/schedule.h"
+#include "grape/utils/format_ranges.h"
 
 //=================================================================================================
 auto main() -> int {

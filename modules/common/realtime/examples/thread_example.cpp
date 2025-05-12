@@ -9,6 +9,7 @@
 
 #include "grape/realtime/schedule.h"
 #include "grape/realtime/thread.h"
+#include "grape/utils/format_ranges.h"
 
 namespace {
 
