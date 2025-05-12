@@ -49,7 +49,7 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
     sudo ln -s /usr/lib/llvm-$CLANG_VERSION /usr/lib/llvm-latest
     ```
 
-  - GCC (Your mileage may vary!)
+  - GCC
 
     ```bash
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -84,7 +84,7 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
 
 ## Configure and build
 
-Note (May 2025): Clang toolchain is recommended to build the project:
+Using Clang toolchain:
 
 ```bash
 git clone git@github.com:cvilas/grape
@@ -92,10 +92,10 @@ cmake --preset clang
 cmake --build build/clang --target all examples check
 ```
 
-With gcc, some examples do not build, as libstdc++ doesn't support formatted printing over ranges
+Using GCC:
 
 ```bash
 git clone git@github.com:cvilas/grape
 cmake --preset native
-cmake --build build/native --target all check
+cmake --build build/native --target all examples check
 ```
