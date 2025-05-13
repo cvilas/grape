@@ -75,10 +75,10 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
     --slave /usr/bin/aarch64-linux-gnu-gcov aarch64-linux-gnu-gcov /usr/bin/aarch64-linux-gnu-gcov-$GCC_VERSION
     ```
 
-- (Desktop only) For graphical applications, install GL and windowing libraries 
+- (Desktop only) For graphical applications, install graphics and windowing libraries 
 
   ```bash
-  sudo apt install libgl-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+  sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
   libxkbcommon-dev libwayland-dev wayland-protocols
   ```
 

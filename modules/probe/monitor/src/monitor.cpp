@@ -19,6 +19,58 @@
 #include "implot.h"
 
 namespace {
+//-------------------------------------------------------------------------------------------------
+auto convert(grape::probe::TypeId tid, const std::byte* bytes) -> double {
+  // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+  using TID = grape::probe::TypeId;
+  switch (tid) {
+    case TID::Int8:
+      return static_cast<double>(*reinterpret_cast<const std::int8_t*>(bytes));
+    case TID::Uint8:
+      return static_cast<double>(*reinterpret_cast<const std::uint8_t*>(bytes));
+    case TID::Int16:
+      return static_cast<double>(*reinterpret_cast<const std::int16_t*>(bytes));
+    case TID::Uint16:
+      return static_cast<double>(*reinterpret_cast<const std::uint16_t*>(bytes));
+    case TID::Int32:
+      return static_cast<double>(*reinterpret_cast<const std::int32_t*>(bytes));
+    case TID::Uint32:
+      return static_cast<double>(*reinterpret_cast<const std::uint32_t*>(bytes));
+    case TID::Int64:
+      return static_cast<double>(*reinterpret_cast<const std::int64_t*>(bytes));
+    case TID::Uint64:
+      return static_cast<double>(*reinterpret_cast<const std::uint64_t*>(bytes));
+    case TID::Float32:
+      return static_cast<double>(*reinterpret_cast<const float*>(bytes));
+    case TID::Float64:
+      return static_cast<double>(*reinterpret_cast<const double*>(bytes));
+  }
+  // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
+  std::unreachable();
+}
+
+//-------------------------------------------------------------------------------------------------
+auto toImGuiDataType(grape::probe::TypeId id) -> ImGuiDataType {
+  switch (id) {
+      // clang-format off
+    case grape::probe::TypeId::Int8: return ImGuiDataType_S8;
+    case grape::probe::TypeId::Uint8: return ImGuiDataType_U8;
+    case grape::probe::TypeId::Int16: return ImGuiDataType_S16;
+    case grape::probe::TypeId::Uint16: return ImGuiDataType_U16;
+    case grape::probe::TypeId::Int32: return ImGuiDataType_S32;
+    case grape::probe::TypeId::Uint32: return ImGuiDataType_U32;
+    case grape::probe::TypeId::Int64: return ImGuiDataType_S64;
+    case grape::probe::TypeId::Uint64: return ImGuiDataType_U64;
+    case grape::probe::TypeId::Float32: return ImGuiDataType_Float;
+    case grape::probe::TypeId::Float64: return ImGuiDataType_Double;
+      // clang-format on
+  }
+  std::unreachable();
+}
+
+}  // namespace
+
+namespace grape::probe::detail {
 
 //=================================================================================================
 // Buffers signal data frames
@@ -152,82 +204,6 @@ auto ScrollingBuffer::timestampDataType() const -> grape::probe::TypeId {
   return timestamp_type_;
 }
 
-//-------------------------------------------------------------------------------------------------
-auto convert(grape::probe::TypeId tid, const std::byte* bytes) -> double {
-  // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-  using TID = grape::probe::TypeId;
-  switch (tid) {
-    case TID::Int8:
-      return static_cast<double>(*reinterpret_cast<const std::int8_t*>(bytes));
-    case TID::Uint8:
-      return static_cast<double>(*reinterpret_cast<const std::uint8_t*>(bytes));
-    case TID::Int16:
-      return static_cast<double>(*reinterpret_cast<const std::int16_t*>(bytes));
-    case TID::Uint16:
-      return static_cast<double>(*reinterpret_cast<const std::uint16_t*>(bytes));
-    case TID::Int32:
-      return static_cast<double>(*reinterpret_cast<const std::int32_t*>(bytes));
-    case TID::Uint32:
-      return static_cast<double>(*reinterpret_cast<const std::uint32_t*>(bytes));
-    case TID::Int64:
-      return static_cast<double>(*reinterpret_cast<const std::int64_t*>(bytes));
-    case TID::Uint64:
-      return static_cast<double>(*reinterpret_cast<const std::uint64_t*>(bytes));
-    case TID::Float32:
-      return static_cast<double>(*reinterpret_cast<const float*>(bytes));
-    case TID::Float64:
-      return static_cast<double>(*reinterpret_cast<const double*>(bytes));
-  }
-  // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-  std::unreachable();
-}
-
-//-------------------------------------------------------------------------------------------------
-auto toImGuiDataType(grape::probe::TypeId id) -> ImGuiDataType {
-  switch (id) {
-      // clang-format off
-    case grape::probe::TypeId::Int8: return ImGuiDataType_S8;
-    case grape::probe::TypeId::Uint8: return ImGuiDataType_U8;
-    case grape::probe::TypeId::Int16: return ImGuiDataType_S16;
-    case grape::probe::TypeId::Uint16: return ImGuiDataType_U16;
-    case grape::probe::TypeId::Int32: return ImGuiDataType_S32;
-    case grape::probe::TypeId::Uint32: return ImGuiDataType_U32;
-    case grape::probe::TypeId::Int64: return ImGuiDataType_S64;
-    case grape::probe::TypeId::Uint64: return ImGuiDataType_U64;
-    case grape::probe::TypeId::Float32: return ImGuiDataType_Float;
-    case grape::probe::TypeId::Float64: return ImGuiDataType_Double;
-      // clang-format on
-  }
-  std::unreachable();
-}
-
-//-------------------------------------------------------------------------------------------------
-auto signalDataGetter(int idx, void* buf) -> ImPlotPoint {
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  auto* const buffer = reinterpret_cast<ScrollingBuffer*>(buf);
-  if (buffer == nullptr) {
-    return {};
-  }
-
-  // TODO(vilas): pass frame_data, trace, signal_info from outside to optimise number of times they
-  // are calculated
-
-  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-  const auto* frame_data = buffer->frameData(static_cast<std::size_t>(idx));
-  const auto trace = buffer->markedTrace();
-  const auto& signal_info = buffer->signalsInfo().at(trace.index);
-  const auto* signal_data = frame_data + buffer->signalDataOffsetsWithinFrame().at(trace.index);
-  const auto* trace_data = signal_data + (trace.sub_index * grape::probe::length(signal_info.type));
-  const auto* timestamp_data = frame_data + buffer->timestampDataOffsetWithinFrame();
-  const auto timestamp_type = buffer->timestampDataType();
-  // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-  ImPlotPoint pt;
-  pt.x = convert(timestamp_type, timestamp_data);
-  pt.y = convert(signal_info.type, trace_data);
-  return pt;
-}
-
 //=================================================================================================
 // Storage for control variable updates
 class Controllables {
@@ -265,6 +241,36 @@ auto Controllables::items() -> std::vector<Item>& {
   return items_;
 }
 
+}  // namespace grape::probe::detail
+
+namespace {
+//-------------------------------------------------------------------------------------------------
+auto signalDataGetter(int idx, void* buf) -> ImPlotPoint {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* const buffer = reinterpret_cast<grape::probe::detail::ScrollingBuffer*>(buf);
+  if (buffer == nullptr) {
+    return {};
+  }
+
+  // TODO(vilas): pass frame_data, trace, signal_info from outside to optimise number of times they
+  // are calculated
+
+  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  const auto* frame_data = buffer->frameData(static_cast<std::size_t>(idx));
+  const auto trace = buffer->markedTrace();
+  const auto& signal_info = buffer->signalsInfo().at(trace.index);
+  const auto* signal_data = frame_data + buffer->signalDataOffsetsWithinFrame().at(trace.index);
+  const auto* trace_data = signal_data + (trace.sub_index * grape::probe::length(signal_info.type));
+  const auto* timestamp_data = frame_data + buffer->timestampDataOffsetWithinFrame();
+  const auto timestamp_type = buffer->timestampDataType();
+  // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+  ImPlotPoint pt;
+  pt.x = convert(timestamp_type, timestamp_data);
+  pt.y = convert(signal_info.type, trace_data);
+  return pt;
+}
+
 }  // namespace
 
 namespace grape::probe {
@@ -276,9 +282,9 @@ struct Monitor::Impl {
   ImPlotContext* implot_ctx{ nullptr };
   Monitor::Sender sender{ nullptr };
   std::shared_mutex signals_lock;
-  std::unique_ptr<ScrollingBuffer> signals_buffer;
+  std::unique_ptr<detail::ScrollingBuffer> signals_buffer;
   std::shared_mutex controllables_lock;
-  std::unique_ptr<Controllables> controllables;
+  std::unique_ptr<detail::Controllables> controllables;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -388,9 +394,9 @@ void Monitor::recv(const std::vector<grape::probe::Signal>& signals,
   const std::unique_lock signals_lock(impl_->signals_lock);
   if (impl_->signals_buffer == nullptr) {
     static constexpr auto BUFFER_MAX_SIZE = 2000U;
-    impl_->signals_buffer = std::make_unique<ScrollingBuffer>(BUFFER_MAX_SIZE, signals);
+    impl_->signals_buffer = std::make_unique<detail::ScrollingBuffer>(BUFFER_MAX_SIZE, signals);
     const std::unique_lock ctrl_lock(impl_->controllables_lock);
-    impl_->controllables = std::make_unique<Controllables>(signals, frame);
+    impl_->controllables = std::make_unique<detail::Controllables>(signals, frame);
   }
   impl_->signals_buffer->addFrame(frame);
 }
