@@ -25,7 +25,7 @@ concept ContainerLike = requires(T& obj) {
 //=================================================================================================
 // Specialised formatter template for container-like types
 template <ContainerLike Container>
-struct std::formatter<Container> {
+struct std::formatter<Container> {  // NOLINT(cert-dcl58-cpp)
   static constexpr auto DELIM_OPEN = '[';
   static constexpr auto DELIM_CLOSE = ']';
   static constexpr auto SEPARATOR = ',';

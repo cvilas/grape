@@ -24,10 +24,8 @@
     {
       "name": "native",
       "inherits": "base",
-      "description": "Configure all modules with native toolchain",
-      "cacheVariables": { 
-        "ENABLE_LINTER": "OFF"
-      }
+      "description": "Configure all modules with native toolchain",      
+      "generator": "Unix Makefiles"
     },
     {
       "name": "cross",
