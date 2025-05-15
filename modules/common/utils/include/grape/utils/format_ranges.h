@@ -12,7 +12,6 @@
 
 #include <concepts>
 #include <format>
-#include <version>  // For feature test macros
 
 //=================================================================================================
 // Concept to check if a type is a container with begin() and end() methods
