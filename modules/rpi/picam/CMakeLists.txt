@@ -14,6 +14,16 @@ declare_module(
 #  return()
 #endif()
 
+# Output the results
+detect_cxx_stdlib()
+if(USING_LIBSTDCXX)
+    message(STATUS "Detected C++ Standard Library: libstdc++")
+elseif(USING_LIBCPP)
+    message(STATUS "Detected C++ Standard Library: libc++")
+else()
+    message(STATUS "C++ Standard Library: unknown")
+endif()
+
 set(LIBCAMERA_VERSION_REQUIRED "0.5")
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBCAMERA QUIET IMPORTED_TARGET libcamera>=${LIBCAMERA_VERSION_REQUIRED})

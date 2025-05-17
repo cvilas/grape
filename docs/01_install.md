@@ -4,7 +4,7 @@
 
 OS               |  Architecture   | Compiler
 -----------------|-----------------|----------------
-Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
+Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21/libc++ gcc-14/libstdc++
 
 ## Setup build environment
 
