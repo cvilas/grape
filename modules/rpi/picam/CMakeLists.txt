@@ -7,11 +7,12 @@ declare_module(
   DEPENDS_ON_MODULES "log"
   DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
 
-# Note: As of May 2025, libcamera requires gcc/libstdc++ (fails with clang/libc++)
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  message(WARNING "${MODULE_NAME}: Requires GCC/libstdc++. Bypassing module")
-  return()
-endif()
+# TODO: Detect whether libcamera was built with gcc/libstdc++ or clang/libc++. Don't allow
+# build if toolchain doesn't match.
+#if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+#  message(WARNING "${MODULE_NAME}: Requires GCC/libstdc++. Bypassing module")
+#  return()
+#endif()
 
 set(LIBCAMERA_VERSION_REQUIRED "0.5")
 find_package(PkgConfig REQUIRED)
