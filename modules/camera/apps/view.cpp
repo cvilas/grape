@@ -18,7 +18,7 @@
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 camera API to acquire and show camera frames.
-// Set SDL_CAMERA_DRIVER environement variable to specify a driver backend.
+// Set SDL_CAMERA_DRIVER environment variable to specify a driver backend.
 // Eg: SDL_CAMERA_DRIVER=v4l2 grape_camera_view
 //-------------------------------------------------------------------------------------------------
 
