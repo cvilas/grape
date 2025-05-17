@@ -9,7 +9,7 @@ declare_module(
 
 # Note: As of May 2025, libcamera requires gcc/libstdc++ (fails with clang/libc++)
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  message(WARNING "${MODULE_NAME}: Requires GCC. Bypassing module")
+  message(WARNING "${MODULE_NAME}: Requires GCC/libstdc++. Bypassing module")
   return()
 endif()
 
