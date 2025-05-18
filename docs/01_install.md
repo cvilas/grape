@@ -11,10 +11,10 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
 - Install OS utilities 
 
   ```bash
-  sudo apt install build-essential pkg-config gpg wget ca-certificates git-lfs curl ninja-build \
-  ccache doxygen graphviz linux-generic python3-full python3-dev python-is-python3 pybind11-dev \
-  python3-wheel python3-setuptools python3-build pipx avahi-daemon avahi-utils iproute2 \
-  iputils-ping net-tools iftop htop nvtop patch
+  sudo apt install software-properties-common build-essential pkg-config gpg wget ca-certificates \
+  git-lfs curl ninja-build ccache doxygen graphviz linux-generic python3-full python3-dev \
+  python-is-python3 pybind11-dev python3-wheel python3-setuptools python3-build pipx avahi-daemon \
+  avahi-utils iproute2 iputils-ping net-tools iftop htop nvtop patch
   ```
 
 - Install latest cmake and helpers
