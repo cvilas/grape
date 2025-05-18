@@ -39,7 +39,8 @@ struct std::formatter<Container> {  // NOLINT(cert-dcl58-cpp)
   }
 
   template <typename FormatContext>
-  auto format(const Container& container, FormatContext& ctx) const {
+  auto format(const Container& container, FormatContext& ctx) const ->
+      typename FormatContext::iterator {
     auto out = ctx.out();
     *out++ = DELIM_OPEN;
     auto it = std::begin(container);
