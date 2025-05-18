@@ -41,8 +41,10 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
     sudo apt install clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
     llvm-$CLANG_VERSION-dev libc++-$CLANG_VERSION-dev libomp-$CLANG_VERSION-dev libc++abi-$CLANG_VERSION-dev \
     libunwind-$CLANG_VERSION-dev lld-$CLANG_VERSION
+
+    PRIORITY=${CLANG_VERSION%%.*}
     sudo update-alternatives --remove-all clang 
-    sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$CLANG_VERSION $CLANG_VERSION \
+    sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$CLANG_VERSION $PRIORITY \
     --slave /usr/bin/clang++ clang++ /usr/bin/clang++-$CLANG_VERSION \
     --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$CLANG_VERSION \
     --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-$CLANG_VERSION 
@@ -57,10 +59,11 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
     sudo apt update
     sudo apt install g++-$GCC_VERSION gcc-$GCC_VERSION gfortran-$GCC_VERSION
     
+    PRIORITY=${GCC_VERSION%%.*}
     sudo update-alternatives --remove-all gcc 
     sudo update-alternatives --remove-all gfortran
-    sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-$GCC_VERSION $GCC_VERSION
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$GCC_VERSION $GCC_VERSION \
+    sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-$GCC_VERSION $PRIORITY
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-$GCC_VERSION $PRIORITY \
     --slave /usr/bin/g++ g++ /usr/bin/g++-$GCC_VERSION \
     --slave /usr/bin/gcov gcov /usr/bin/gcov-$GCC_VERSION
     
@@ -69,8 +72,8 @@ Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21 gcc-14
     gfortran-$GCC_VERSION-aarch64-linux-gnu binfmt-support qemu-user-static qemu-system-arm -y
 
     sudo update-alternatives --remove-all aarch64-linux-gnu-gcc aarch64-linux-gnu-gfortran
-    sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gfortran aarch64-linux-gnu-gfortran /usr/bin/aarch64-linux-gnu-gfortran-$GCC_VERSION $GCC_VERSION
-    sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-$GCC_VERSION $GCC_VERSION \
+    sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gfortran aarch64-linux-gnu-gfortran /usr/bin/aarch64-linux-gnu-gfortran-$GCC_VERSION $PRIORITY
+    sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-$GCC_VERSION $PRIORITY \
     --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-$GCC_VERSION \
     --slave /usr/bin/aarch64-linux-gnu-gcov aarch64-linux-gnu-gcov /usr/bin/aarch64-linux-gnu-gcov-$GCC_VERSION
     ```
