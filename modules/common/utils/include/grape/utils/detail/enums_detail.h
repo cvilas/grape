@@ -49,7 +49,7 @@ template <auto E>
 struct NameStorage {
   static constexpr auto NAME = extractEnumeratorName<E>();
 
-  static constexpr auto makeArray() {
+  static constexpr auto makeArray() -> std::array<char, NAME.size()> {
     std::array<char, NAME.size()> result{};
     for (std::size_t i = 0; i < NAME.size(); ++i) {
       result.at(i) = NAME.at(i);
