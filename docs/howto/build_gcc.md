@@ -25,6 +25,7 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/local/bin/gcc $PRIORITY
 --slave /usr/bin/g++ g++ /usr/local/bin/g++ \
 --slave /usr/bin/gcov gcov /usr/local/bin/gcov
 
-# You might have to add the following to ~/.bashrc
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/aarch64-linux-gnu/:/usr/local/lib64
+# You might have to add the following to your shell configuration (~/.bashrc or ~/.zshrc)
+export PATH=/usr/local/bin:${PATH}
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:${LD_LIBRARY_PATH}
 ```
