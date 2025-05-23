@@ -107,28 +107,6 @@ if(yaml-cpp IN_LIST EXTERNAL_PROJECTS_LIST)
 endif()
 
 # -------------------------------------------------------------------------------------------------
-# tcp-pubsub (eCAL dependency)
-if(tcp_pubsub IN_LIST EXTERNAL_PROJECTS_LIST)
-  find_package(tcp_pubsub ${TCP_PUBSUB_VERSION_REQUIRED} QUIET)
-  if(tcp_pubsub_FOUND)
-    message(STATUS "tcp_pubsub: Using version ${tcp_pubsub_VERSION} from ${tcp_pubsub_DIR}")
-    add_dummy_target(tcp_pubsub)
-  else()
-    message(STATUS "tcp_pubsub: Building ${TCP_PUBSUB_VERSION_REQUIRED} from source")
-    set(TCP_PUBSUB_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
-        -DTCP_PUBSUB_BUILD_SAMPLES=OFF
-        -DTCP_PUBSUB_BUILD_ECAL_SAMPLES=OFF
-        -DBUILD_SHARED_LIBS=OFF) # workaround for https://github.com/eclipse-ecal/ecal/issues/2014
-    ExternalProject_Add(
-      tcp_pubsub
-      GIT_REPOSITORY "https://github.com/eclipse-ecal/tcp_pubsub.git"
-      GIT_TAG v${TCP_PUBSUB_VERSION_REQUIRED}
-      GIT_SHALLOW true
-      CMAKE_ARGS ${TCP_PUBSUB_CMAKE_ARGS})
-  endif()
-endif()
-
-# -------------------------------------------------------------------------------------------------
 # eCAL
 if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
   find_package(eCAL ${ECAL_VERSION_REQUIRED} QUIET)
@@ -142,8 +120,8 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
         -DECAL_USE_QT=OFF
         -DECAL_BUILD_APPS=OFF
         -DECAL_BUILD_SAMPLES=OFF
-        -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=OFF
-        -DECAL_THIRDPARTY_BUILD_YAML-CPP=OFF
+	    -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=ON
+	    -DECAL_THIRDPARTY_BUILD_YAML-CPP=OFF
         -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON
         -DECAL_INSTALL_SAMPLE_SOURCES=OFF
         -DECAL_CPACK_PACK_WITH_INNOSETUP=OFF
@@ -152,9 +130,9 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       eCAL
       GIT_REPOSITORY "https://github.com/eclipse-ecal/ecal.git"
-      GIT_TAG v${ECAL_VERSION_REQUIRED}-rc.2 # TODO(vilas): Update on release v6
+      GIT_TAG v${ECAL_VERSION_REQUIRED}-rc.3 # TODO(vilas): Update on release v6
       GIT_SHALLOW true
-      DEPENDS yaml-cpp tcp_pubsub
+      DEPENDS yaml-cpp
       CMAKE_ARGS ${ECAL_CMAKE_ARGS})
   endif()
 endif()
