@@ -1,4 +1,4 @@
-name: GRAPE Build and Test Pipeline
+name: Build and Test
 
 on:
   push:
@@ -11,18 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
+      - name: Install system dependencies and utilities 
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             software-properties-common build-essential pkg-config gpg wget ca-certificates \
             git-lfs curl ninja-build ccache doxygen graphviz linux-generic python3-full \
             python3-dev python-is-python3 pybind11-dev python3-wheel python3-setuptools \
-            python3-build pipx avahi-daemon avahi-utils iproute2 iputils-ping net-tools \
-            iftop htop nvtop patch libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            python3-build pipx patch libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
             libxkbcommon-dev libwayland-dev wayland-protocols
           pipx install cmakelang
 
@@ -60,7 +56,7 @@ jobs:
           echo "CCACHE_DIR=$HOME/.cache/ccache" >> $GITHUB_ENV
           echo "CTCACHE_DIR=$HOME/.cache/ctcache" >> $GITHUB_ENV
 
-      - name: Save cache for reuse
+      - name: Cache build artifacts
         uses: actions/cache@v4
         with:
           path: |
@@ -69,6 +65,13 @@ jobs:
           key: ${{ runner.os }}-ccache-ctcache-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/toolchain.cmake') }}          
           restore-keys: |
             ${{ runner.os }}-ccache-ctcache-
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Fetch history for versioning
+        run: |
+          git fetch --unshallow --tags || git fetch --depth=100 --tags
 
       - name: Configure
         run: cmake --preset clang
@@ -85,8 +88,9 @@ jobs:
 # TODO
 # - Setup a self-hosted runner (https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners)
 # - Add separate pipelines for X86 and Arm64
-# - Fix versioning (libs have wrong version extensions)
+# - Refactor and simplify caching strategy. Maintan cache per arch-vendor-os triplet maybe
+# - Build for both clang and gcc
 # - Fail on linting or formatting errors
 # - Setup configuration presets for applications, developer and CI builds
-# - Generate deployment artifacts (tarball) for each target
+# - After PR is merged and newly tagged, build and generate deployment artifacts (tarball)
 # - Introduce sanitizer builds including [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
