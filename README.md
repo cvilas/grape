@@ -9,20 +9,20 @@
 - A playground to evaluate modern C++ techniques in writing simple, expressive, and performant code for industrial applications
 - A hobby project that demonstrates the application of systems engineering [guidelines](https://github.com/cvilas/guidance) that I developed over decades in the industry as a technical and people leader in industrial robotics. ([Author's profile](https://cvilas.github.io/))
 
-Features of this repo that I consider interesting:
+Selected features:
 
 - A [modular build system](./gbs/README.md)
 - A fast [logging library](./modules/common/log/README.md)
 - A fast [serialisation library](./modules/common/serdes/README.md)
 - A powerful [configuration and scripting system](./modules/common/script/README.md)
 - Facilities for low latency [realtime systems](./modules/common/realtime/README.md)
-- A stubbornly strict [command line parser](./modules/common/conio/include/grape/conio/program_options.h)
+- A stubbornly strict [command line parser](./modules/common/conio/README.md)
 - A high performance [inter-process communication library](./modules/common/ipc/README.md)
-- Minimal external dependencies
-- Supports the latest release of C++ standard (and compilers)
+- An [application development framework](./docs/howto/write_applications.md)
+- Support for the latest C++ standard, compilers and tooling
+- Focus on [Raspberry Pi](https://www.raspberrypi.com/) as the target embedded hardware platform
 
 ## Getting Started
 
 - [Installation](docs/01_install.md)
 - [Roadmap](docs/02_roadmap.md)
-- [Developer guides](https://github.com/cvilas/guidance)

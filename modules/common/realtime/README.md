@@ -4,6 +4,20 @@
 
 Facilities to support deterministic real-time execution of tasks
 
+## TODO
+
+- [ ] Document how to configure Raspberry Pi5 for realtime applications
+- [ ] Document how to allocate specified CPU cores to run Linux.
+- [ ] Document how to allocate specified CPU cores to run my processes and threads.
+- [ ] Implement shared memory interface
+- [ ] Implement single producer multi-consumer queue using heap and shared memory
+- [ ] Refactor multi-producer single-consumer queue
+  - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
+  - Rename it for clarity
+- [ ] Refactor thread class out of realtime and put it in 'grape'
+  - Insert logging to capture timer overruns in the loop
+- [ ] replace `grape::realtime::SystemError` with `std::errc`
+
 ## Real-time tasks
 
 ### Background
