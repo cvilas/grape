@@ -16,8 +16,8 @@ Provide more details on the functionality, API usage, etc
 
 ## TODO
 
-- Implement data transport server (Controller) and client (Monitor)
-  - Implement PlotJuggler realtime streaming plugin using zenoh multicast for transport
+- Refactor imgui and implot out as a separate static-only library. Make it usable in other modules
+- Implement pub (Controller) and sub (Monitor)
 - Incorporate changes to PoC.
   - :done: Make it easy to identify timestamp field with `Signal::Role::Timestamp`  
   - :done: Throw error if exactly one instance of `Signal::Role::Timestamp` is not defined
@@ -44,3 +44,4 @@ Provide more details on the functionality, API usage, etc
   - Save session configuration to file
   - Restore session configuration from file
 - Update this README
+- `reinterpret_cast<uintptr_t>` from `const T*` and then modifying it later is undefined behaviour. Fix `probe::PinConfig::pin`. Consider `std::start_lifetime_as` instead.
