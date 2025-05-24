@@ -33,7 +33,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
   - [ ] Integrate joystick teleop, FPV and mission control
   - [ ] Record and playback time-series multi-modal data
-  - Reference: [Low latency Ubuntu](https://ubuntu.com/blog/real-time-kernel-tuning)
+- [ ] CI updates (See TODO in <../.gitlab/workflows/ci.yml>)
 
 ## Study
 
@@ -63,12 +63,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
   - Implement PoC. (Example: [Qt3d](https://github.com/cvilas/scratch/3dvis/qt))
   - Implement a basic scenegraph example and check performance in MacOS and Linux
-
-### CI and build robustness
-
-- Introduce [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
-- Setup configuration presets for applications, developer and CI builds
-- Implement CI build using github workflow    
 
 ## References
 

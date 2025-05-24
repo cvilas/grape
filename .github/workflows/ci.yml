@@ -1,0 +1,92 @@
+name: GRAPE Build and Test Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            software-properties-common build-essential pkg-config gpg wget ca-certificates \
+            git-lfs curl ninja-build ccache doxygen graphviz linux-generic python3-full \
+            python3-dev python-is-python3 pybind11-dev python3-wheel python3-setuptools \
+            python3-build pipx avahi-daemon avahi-utils iproute2 iputils-ping net-tools \
+            iftop htop nvtop patch libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            libxkbcommon-dev libwayland-dev wayland-protocols
+          pipx install cmakelang
+
+      - name: Install CMake
+        run: |
+          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+          sudo apt-get update
+          sudo rm /usr/share/keyrings/kitware-archive-keyring.gpg
+          sudo apt-get install -y kitware-archive-keyring
+          sudo apt-get install -y cmake
+
+      - name: Install LLVM/Clang toolchain
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          CLANG_VERSION=21
+          chmod +x llvm.sh
+          sudo ./llvm.sh $CLANG_VERSION
+          sudo apt-get install -y clang-$CLANG_VERSION clang-tidy-$CLANG_VERSION clang-format-$CLANG_VERSION \
+          llvm-$CLANG_VERSION-dev libc++-$CLANG_VERSION-dev libomp-$CLANG_VERSION-dev libc++abi-$CLANG_VERSION-dev \
+          libunwind-$CLANG_VERSION-dev lld-$CLANG_VERSION
+          PRIORITY=${CLANG_VERSION%%.*}
+          sudo update-alternatives --remove-all clang || true
+          sudo update-alternatives --remove-all clang++ || true
+          sudo update-alternatives --remove-all clang-tidy || true
+          sudo update-alternatives --remove-all clang-format || true
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$CLANG_VERSION $PRIORITY
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$CLANG_VERSION $PRIORITY
+          sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$CLANG_VERSION $PRIORITY
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-$CLANG_VERSION $PRIORITY
+
+      - name: Set cache directories
+        run: |
+          echo "CCACHE_DIR=$HOME/.cache/ccache" >> $GITHUB_ENV
+          echo "CTCACHE_DIR=$HOME/.cache/ctcache" >> $GITHUB_ENV
+
+      - name: Save cache for reuse
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.CCACHE_DIR }}
+            ${{ env.CTCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-ctcache-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/toolchain.cmake') }}          
+          restore-keys: |
+            ${{ runner.os }}-ccache-ctcache-
+
+      - name: Configure
+        run: cmake --preset clang
+
+      - name: Build
+        run: cmake --build build/clang --target all examples tests
+
+      - name: Report ccache stats
+        run: ccache -s        
+
+      - name: Run unit tests
+        run: cmake --build build/clang --target check
+
+# TODO
+# - Setup a self-hosted runner (https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners)
+# - Add separate pipelines for X86 and Arm64
+# - Fix versioning (libs have wrong version extensions)
+# - Fail on linting or formatting errors
+# - Setup configuration presets for applications, developer and CI builds
+# - Generate deployment artifacts (tarball) for each target
+# - Introduce sanitizer builds including [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
