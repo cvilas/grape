@@ -1,4 +1,3 @@
-<!-- .github/PULL_REQUEST_TEMPLATE.md -->
 ## Description
 
 Please include a summary of the change and which issue is fixed.
@@ -10,6 +9,5 @@ Please include a summary of the change and which issue is fixed.
 - [ ] I have added unit tests, where appropriate, to test newly added functionality
 - [ ] My commits are rebased over `main` branch and commit messages are [formatted correctly](https://github.com/cvilas/guidance/blob/main/process/commit_messages.md)
 
-## Related Issues
-
-Fixes #
+## References
+(Related issue #s)
