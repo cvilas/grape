@@ -1,7 +1,7 @@
 # GRAPE- Graphical Real-time Application Prototyping Environment
 
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](./docs/CODE_OF_CONDUCT.md)
 
 ## What is Grape?
 
@@ -26,3 +26,4 @@ Selected features:
 
 - [Installation](docs/01_install.md)
 - [Roadmap](docs/02_roadmap.md)
+- [Developer's Guide](https://github.com/cvilas/guidance/blob/main/process/developer_guide.md)
