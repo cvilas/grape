@@ -1,7 +1,7 @@
 # How to build GCC from source
 
 ```bash
-GCC_VERSION=15.1.0 
+GCC_VERSION=15.1.1 
 
 # Download sources
 wget https://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz
