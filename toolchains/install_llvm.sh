@@ -25,10 +25,10 @@ sudo apt install -y \
 
 # Set this version as the default
 PRIORITY=$((${LLVM_VERSION%%.*} * 10))
-sudo update-alternatives --remove-all clang 
-sudo update-alternatives --remove-all clang++  
-sudo update-alternatives --remove-all clang-tidy
-sudo update-alternatives --remove-all clang-format
+sudo update-alternatives --remove-all clang || true
+sudo update-alternatives --remove-all clang++ || true
+sudo update-alternatives --remove-all clang-tidy || true
+sudo update-alternatives --remove-all clang-format || true
 sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$LLVM_VERSION $PRIORITY
 sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$LLVM_VERSION $PRIORITY
 sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-$LLVM_VERSION $PRIORITY
