@@ -2,30 +2,42 @@
 
 ## Supported platforms
 
-OS               |  Architecture   | Compiler
+OS               |  Architecture   | Toolchain
 -----------------|-----------------|----------------
-Ubuntu 24.04 LTS | Aarch64, X86_64 | clang-21/libc++, gcc-15/libstdc++
+Ubuntu 24.04 LTS | Aarch64, X86_64 | CMake-4, clang-21/libc++, gcc-15/libstdc++
 
-## Setup development tools
+## Setup development environment
 
-- Install system utilities 
+- Install base system utilities and development tools
   ```bash
-  sudo apt install software-properties-common build-essential pkg-config gpg wget ca-certificates \
-  git-lfs curl ninja-build ccache doxygen graphviz linux-generic python3-full python3-dev \
-  python-is-python3 pybind11-dev python3-wheel python3-setuptools python3-build pipx avahi-daemon \
-  avahi-utils iproute2 iputils-ping net-tools iftop htop nvtop patch
+  chmod +x ./toolchains/install_base.sh
+  ./toolchains/install_base.sh
   ```
 
-- Install build tools
-  - [CMake](./howto/install_cmake.md) and helpers
-  - [LLVM toolchain](./howto/install_llvm.md)
-  - [GCC toolchain](./howto/install_gcc.md)
-
-- Install support libraries for 3D graphics and GUIs 
+- Install CMake
+  
+  If the required version is available from repositories:
   ```bash
-  sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
-  libxkbcommon-dev libwayland-dev wayland-protocols
+  chmod +x ./toolchains/install_cmake.sh
+  ./toolchains/install_cmake.sh
   ```
+  Otherwise, [build from source](./howto/build_cmake.md)
+
+- Install LLVM toolchain
+
+  ```bash
+  chmod +x ./toolchains/install_llvm.sh
+  ./toolchains/install_llvm.sh
+  ```
+
+- Install GCC toolchain
+
+  If the required version is available from repositories:
+  ```bash
+  chmod +x ./toolchains/install_gcc.sh
+  ./toolchains/install_gcc.sh
+  ```
+  Otherwise, [build from source](./howto/build_gcc.md)
 
 ## Configure and build
 
