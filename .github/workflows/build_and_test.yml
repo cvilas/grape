@@ -44,9 +44,9 @@ jobs:
           path: |
             ${{ env.CCACHE_DIR }}
             ${{ env.CTCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-ctcache-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/toolchain.cmake') }}          
+          key: grape-${{ runner.arch }}-${{ runner.os }}-cache
           restore-keys: |
-            ${{ runner.os }}-ccache-ctcache-
+            grape-${{ runner.arch }}-${{ runner.os }}-cache
 
       - name: Configure
         run: cmake --preset clang
@@ -63,7 +63,6 @@ jobs:
 # TODO
 # - Setup a self-hosted runner (https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners)
 # - Add separate pipelines for X86 and Arm64
-# - Refactor and simplify caching strategy. Maintan cache per arch-vendor-os triplet maybe
 # - Build for both clang and gcc
 # - Fail on linting or formatting errors
 # - Setup configuration presets for applications, developer and CI builds
