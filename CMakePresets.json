@@ -26,12 +26,6 @@
       "inherits": "base",
       "description": "Configure all modules with native toolchain",      
       "generator": "Unix Makefiles"
-    },
-    {
-      "name": "cross",
-      "inherits": "base",
-      "description": "Configure all modules for Aarch64 cross-build with native toolchain",
-      "toolchainFile": "${sourceDir}/toolchains/toolchain_gcc_aarch64.cmake"
     }
   ]
 }
