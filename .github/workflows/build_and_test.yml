@@ -8,8 +8,17 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, [self-hosted, ARM64]]
+        include:
+          - runner: ubuntu-latest
+            name: x86_64
+          - runner: [self-hosted, ARM64]
+            name: aarch64
 
+    name: Build and Test (${{ matrix.name }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,8 +70,7 @@ jobs:
         run: cmake --build build/clang --target check
 
 # TODO
-# - Setup a self-hosted runner (https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners)
-# - Add separate pipelines for X86 and Arm64
+# - Setup a self-hosted X86 runner
 # - Build for both clang and gcc
 # - Fail on linting or formatting errors
 # - Setup configuration presets for applications, developer and CI builds
