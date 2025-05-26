@@ -5,6 +5,19 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 ## Towards a Rover
 
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
+- [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
+- [ ] 3D scenegraph using SDL
+- [ ] Real-time time-series plotting using implot
+- [ ] Math library: constexpr matrix and quaternions operations to support AHRS implementation
+- [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
+- [ ] DSP functions
+  - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
+  - [ ] Delay line
+  - [ ] Low pass filter
+  - [ ] Differentiator
+  - [ ] Integrator
+  - [ ] Velocity observer
+- [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] Host monitoring micro-service
   - [ ] Implement library to read CPU, memory, disk usage, network utilisation, temperatures
   - [ ] Add systemd services support in GBS
@@ -13,19 +26,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] IPC: Implement Service/Query API [#130]
   - [ ] IPC: Implement zero-copy read and write [#132]
   - [ ] IPC: Fix 'local' mode communication in MacOS
-- [ ] [Configure Pi as platform for realtime control](../modules/common/realtime/README.md) 
-- [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
-- [ ] Math library
-  - [ ] Matrix operations
-  - [ ] Quaternion operations
-- [ ] DSP functions
-  - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
-  - [ ] Delay line
-  - [ ] Low pass filter
-  - [ ] Differentiator
-  - [ ] Integrator
-  - [ ] Velocity observer
-- [ ] [Stand-alone AHRS](../modules/rpi/ahrs/README.md) using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
 - [ ] Rover
   - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
   - [ ] Implement joystick interface for Linux
