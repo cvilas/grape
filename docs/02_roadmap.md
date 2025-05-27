@@ -6,6 +6,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
 - [ ] Implement joystick interface for Linux
+- [ ] Implement IPC service/query API [#130]
 - [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] 3D scenegraph using SDL
@@ -25,7 +26,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Add systemd services support in GBS
   - [ ] Implement the ability to install monitoring micro-service using cpack
   - [ ] IPC: Implement means to isolate IPC to a set of hosts [#129]
-  - [ ] IPC: Implement Service/Query API [#130]
   - [ ] IPC: Implement zero-copy read and write [#132]
   - [ ] IPC: Fix 'local' mode communication in MacOS
 - [ ] Rover
