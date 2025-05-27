@@ -5,6 +5,8 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 ## Towards a Rover
 
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
+- [ ] Implement joystick interface for Linux
+- [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] 3D scenegraph using SDL
 - [ ] Real-time time-series plotting using implot
@@ -28,12 +30,10 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] IPC: Fix 'local' mode communication in MacOS
 - [ ] Rover
   - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
-  - [ ] Implement joystick interface for Linux
   - [ ] Implement CANOpen interface for Linux
-  - [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
-  - [ ] Integrate joystick teleop, FPV and mission control
+  - [ ] Steam Deck as operator controller: joystick teleop, FPV and mission control
   - [ ] Record and playback time-series multi-modal data
-- [ ] CI updates (See TODO in <../.gitlab/workflows/ci.yml>)
+- [ ] CI updates (See TODO in <../.gitlab/workflows/build_and_test.yml>)
 
 ## Study
 
@@ -63,6 +63,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
   - Implement PoC. (Example: [Qt3d](https://github.com/cvilas/scratch/3dvis/qt))
   - Implement a basic scenegraph example and check performance in MacOS and Linux
+- Define geometric primitives (plane, ellipsoid, cone, cuboid)
 
 ## References
 
