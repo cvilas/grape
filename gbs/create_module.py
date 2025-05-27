@@ -32,7 +32,7 @@ def create_module(module_name, project_name="GRAPE"):
     )
     os.rename(
         os.path.join(module_name, "include", "grape"),
-        os.path.join(module_name, "include", project_name)
+        os.path.join(module_name, "include", project_name.lower())
     )
     os.rename(
         os.path.join(module_name, "src", "@module@.cpp"),
@@ -46,7 +46,10 @@ def create_module(module_name, project_name="GRAPE"):
             file_path = os.path.join(subdir, f)
             with fileinput.FileInput(file_path, inplace=True) as file:
                  for line in file:
-                    line = line.replace('@project@', project_name)
+                    if "Copyright" in line:
+                        line = line.replace('@project@', project_name)
+                    else:
+                        line = line.replace('@project@', project_name.lower())
                     line = line.replace('@module@', module_name)
                     line = line.replace('@year@', year)
                     print(line, end='')
