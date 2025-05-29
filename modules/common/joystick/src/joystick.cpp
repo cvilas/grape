@@ -19,6 +19,7 @@
 
 namespace {
 
+//-------------------------------------------------------------------------------------------------
 template <std::invocable Fn>
 class [[nodiscard]] ScopeGuard {
 public:
@@ -38,7 +39,8 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-[[nodiscard,maybe_unused]] constexpr auto toControlType(unsigned int ev_type) -> grape::joystick::ControlType {
+[[nodiscard, maybe_unused]] constexpr auto toControlType(unsigned int ev_type)
+    -> grape::joystick::ControlType {
   using ControlType = grape::joystick::ControlType;
   switch (ev_type) {
       // clang-format off
@@ -50,7 +52,8 @@ private:
 }
 
 //-------------------------------------------------------------------------------------------------
-[[nodiscard,maybe_unused]] constexpr auto toControlId(unsigned int code) -> grape::joystick::ControlId {
+[[nodiscard, maybe_unused]] constexpr auto toControlId(unsigned int code)
+    -> grape::joystick::ControlId {
   using ControlId = grape::joystick::ControlId;
   switch (code) {
       // clang-format off
@@ -149,7 +152,8 @@ auto readDeviceInfo(const std::filesystem::path& path) -> grape::joystick::Devic
   const auto fd = ::open(path.c_str(), O_RDONLY);
   if (fd < 0) {
     const auto err = std::error_code(errno, std::system_category());
-    grape::panic<grape::Exception>(std::format("Cannot open device '{}': {}", path.string(), err.message()));
+    grape::panic<grape::Exception>(
+        std::format("Cannot open device '{}': {}", path.string(), err.message()));
   }
   auto guard = ScopeGuard([fd]() { ::close(fd); });
 
@@ -282,10 +286,10 @@ void Joystick::Impl::eventLoop(const std::stop_token& st) noexcept {
       if (attempt_reconnection) {
         std::this_thread::sleep_for(RECONNECTION_DELAY);
         if (open()) {
-          attempt_reconnection = (pollForEvents() ? false: true);
+          attempt_reconnection = (not pollForEvents());
         }
       } else {
-        attempt_reconnection = (waitForEvents() ? false : true);
+        attempt_reconnection = (not waitForEvents());
       }
     }
     close();
