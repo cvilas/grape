@@ -19,7 +19,7 @@
 
 namespace {
 
-//-------------------------------------------------------------------------------------------------
+//=================================================================================================
 template <std::invocable Fn>
 class [[nodiscard]] ScopeGuard {
 public:
@@ -206,32 +206,42 @@ auto enumerate() -> std::vector<DeviceInfo> {
   return devices;
 }
 
-//-------------------------------------------------------------------------------------------------
-struct Joystick::Impl {
+//=================================================================================================
+class Joystick::Impl {
+public:
+  Impl(std::filesystem::path path, EventCallback&& cb);
   auto open() -> bool;
   void close();
+
+private:
   auto pollForEvents() noexcept -> bool;
   auto waitForEvents() noexcept -> bool;
   void eventLoop(const std::stop_token& st) noexcept;
 
-  std::filesystem::path device_path;
-  std::atomic_int fd{ -1 };
-  std::atomic_bool attempt_reconnection{ true };
-  EventCallback event_cb{ nullptr };
-  std::jthread event_thread;
+  std::filesystem::path device_path_;
+  std::atomic_int fd_{ -1 };
+  std::atomic_bool attempt_reconnection_{ true };
+  EventCallback event_cb_{ nullptr };
+  std::jthread event_thread_;
 };
 
 //-------------------------------------------------------------------------------------------------
+Joystick::Impl::Impl(std::filesystem::path path, EventCallback&& cb)
+  : device_path_(std::move(path)), event_cb_(std::move(cb)) {
+  event_thread_ = std::jthread([this](const std::stop_token& st) { eventLoop(st); });
+}
+
+//-------------------------------------------------------------------------------------------------
 void Joystick::Impl::close() {
-  if (fd < 0) {
+  if (fd_ < 0) {
     return;
   }
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-  std::ignore = ::ioctl(fd, EVIOCGRAB, 0);
-  ::close(fd);
-  fd = -1;
-  if (event_cb) {
-    event_cb(ConnectionEvent{ .timestamp = Clock::now(), .is_connected = false });
+  std::ignore = ::ioctl(fd_, EVIOCGRAB, 0);
+  ::close(fd_);
+  fd_ = -1;
+  if (event_cb_) {
+    event_cb_(ConnectionEvent{ .timestamp = Clock::now(), .is_connected = false });
   }
 }
 
@@ -240,8 +250,8 @@ auto Joystick::Impl::open() -> bool {
   close();
 
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-  fd = ::open(device_path.c_str(), O_RDONLY | O_NONBLOCK);
-  if (fd < 0) {
+  fd_ = ::open(device_path_.c_str(), O_RDONLY | O_NONBLOCK);
+  if (fd_ < 0) {
     const auto err_num = errno;
     if (err_num == ENOENT) {
       return false;
@@ -252,13 +262,13 @@ auto Joystick::Impl::open() -> bool {
 
   // Get exclusive access to device to avoid missing and duplicate events
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-  if (::ioctl(fd, EVIOCGRAB, 1) != 0) {
+  if (::ioctl(fd_, EVIOCGRAB, 1) != 0) {
     const auto err = std::error_code(errno, std::system_category());
     grape::panic<grape::Exception>(std::format("Cannot get exclusive access: {}", err.message()));
   }
 
-  if (event_cb != nullptr) {
-    event_cb(ConnectionEvent{ .timestamp = Clock::now(), .is_connected = true });
+  if (event_cb_ != nullptr) {
+    event_cb_(ConnectionEvent{ .timestamp = Clock::now(), .is_connected = true });
   }
   return true;
 }
@@ -283,34 +293,30 @@ void Joystick::Impl::eventLoop(const std::stop_token& st) noexcept {
   try {
     constexpr auto RECONNECTION_DELAY = std::chrono::seconds(1);
     while (not st.stop_requested()) {
-      if (attempt_reconnection) {
+      if (attempt_reconnection_) {
         std::this_thread::sleep_for(RECONNECTION_DELAY);
         if (open()) {
-          attempt_reconnection = (not pollForEvents());
+          attempt_reconnection_ = (not pollForEvents());
         }
       } else {
-        attempt_reconnection = (not waitForEvents());
+        attempt_reconnection_ = (not waitForEvents());
       }
     }
     close();
   } catch (...) {
-    if (event_cb != nullptr) {
-      event_cb(ErrorEvent{ .timestamp = Clock::now(), .exception = std::current_exception() });
-      event_cb(ConnectionEvent{ .timestamp = Clock::now(), .is_connected = false });
+    if (event_cb_ != nullptr) {
+      event_cb_(ErrorEvent{ .timestamp = Clock::now(), .exception = std::current_exception() });
+      event_cb_(ConnectionEvent{ .timestamp = Clock::now(), .is_connected = false });
     }
   }
 }
 
 //-------------------------------------------------------------------------------------------------
 Joystick::Joystick(const std::filesystem::path& device_path, EventCallback&& cb)
-  : impl_(std::make_unique<Impl>()) {
-  impl_->device_path = device_path;
-  impl_->event_cb = std::move(cb);
-  impl_->event_thread = std::jthread([this](const std::stop_token& st) { impl_->eventLoop(st); });
+  : impl_(std::make_unique<Impl>(device_path, std::move(cb))) {
 }
 
 //-------------------------------------------------------------------------------------------------
-Joystick::~Joystick() {
-}
+Joystick::~Joystick() = default;
 
 }  // namespace grape::joystick
