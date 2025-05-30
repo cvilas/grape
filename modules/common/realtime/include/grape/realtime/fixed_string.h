@@ -120,4 +120,12 @@ constexpr void swap(const BasicFixedString<CharT, N>& lhs,
 template <std::size_t max_length>
 using FixedString = BasicFixedString<char, max_length>;
 
+// Checks to ensure suitability in realtime context
+static_assert(std::is_trivially_copyable_v<FixedString<1>>);
+static_assert(std::is_nothrow_copy_constructible_v<FixedString<1>>);
+static_assert(std::is_nothrow_move_constructible_v<FixedString<1>>);
+static_assert(std::is_nothrow_copy_assignable_v<FixedString<1>>);
+static_assert(std::is_nothrow_move_assignable_v<FixedString<1>>);
+static_assert(std::is_nothrow_destructible_v<FixedString<1>>);
+
 }  // namespace grape::realtime

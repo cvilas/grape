@@ -8,19 +8,22 @@
 #ifdef __linux__
 #include <malloc.h>
 #endif
+#include <system_error>
+
 #include <sched.h>
 #include <sys/mman.h>
 
 namespace grape::realtime {
 
 //-------------------------------------------------------------------------------------------------
-auto lockMemory() -> SystemError {
+auto lockMemory() -> std::expected<void, Error> {
   // The implementation here follows from John Ogness' talk, 'A Checklist for Writing Linux
   // Real-Time Applications' at Embedded Liux Conference Europe 2020. See docs.
 #ifdef __linux__
   // Lock all current and future process address space into RAM, preventing paging into swap area
   if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
-    return SystemError{ .code = errno, .function_name = "mlockall" };
+    const auto err = std::error_code(errno, std::system_category());
+    return std::unexpected(Error{ "(mclockall) ", err.message() });
   }
 
   // Heap trimming: when the amount of contiguous free memory at the top of the  heap  grows
@@ -31,7 +34,8 @@ auto lockMemory() -> SystemError {
     const auto disable = -1;
     const auto code = mallopt(M_TRIM_THRESHOLD, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
-      return SystemError{ .code = code, .function_name = "mallopt(M_TRIM_THRESHOLD)" };
+      const auto err = std::error_code(code, std::system_category());
+      return std::unexpected(Error{ "(mallopt(M_TRIM_THRESHOLD)) ", err.message() });
     }
   }
 
@@ -41,17 +45,19 @@ auto lockMemory() -> SystemError {
     const auto disable = 0;
     const auto code = mallopt(M_MMAP_MAX, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
-      return SystemError{ .code = code, .function_name = "mallopt(M_MMAP_MAX)" };
+      const auto err = std::error_code(code, std::system_category());
+      return std::unexpected(Error{ "(mallopt(M_MMAP_MAX)) ", err.message() });
     }
   }
   return {};
 #else
-  return SystemError{ .code = ENOSYS, .function_name = "lockMemory" };
+  const auto err = std::make_error_code(std::errc::function_not_supported);
+  return std::unexpected(Error{ "(lockMemory) ", err.code.message() });
 #endif
 }
 
 //-------------------------------------------------------------------------------------------------
-auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> SystemError {
+auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> std::expected<void, Error> {
 #ifdef __linux__
   cpu_set_t mask;
   CPU_ZERO(&mask);
@@ -59,30 +65,34 @@ auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> SystemErro
     CPU_SET(cpu_no, &mask);
   }
   if (0 != sched_setaffinity(pid, sizeof(mask), &mask)) {
-    return SystemError{ .code = errno, .function_name = "sched_setaffinity" };
+    const auto err = std::error_code(errno, std::system_category());
+    return std::unexpected(Error{ "(sched_setaffinity) ", err.message() });
   }
   return {};
 #else
   (void)cpus;
   (void)pid;
-  return SystemError{ .code = ENOSYS, .function_name = "setCpuAffinity" };
+  const auto err = std::make_error_code(std::errc::function_not_supported);
+  return std::unexpected(Error{ "(setCpuAffinity) ", err.code.message() });
 #endif
 }
 
 //-------------------------------------------------------------------------------------------------
-auto setSchedule(Schedule schedule, pid_t pid) -> SystemError {
+auto setSchedule(Schedule schedule, pid_t pid) -> std::expected<void, Error> {
 #ifdef __linux__
   sched_param param{};
   param.sched_priority = schedule.priority;
   const auto prio = (schedule.policy == Schedule::Policy::Realtime ? SCHED_FIFO : SCHED_OTHER);
   if (0 != sched_setscheduler(pid, prio, &param)) {
-    return SystemError{ .code = errno, .function_name = "sched_setscheduler" };
+    const auto err = std::error_code(errno, std::system_category());
+    return std::unexpected(Error{ "(sched_setscheduler) ", err.message() });
   }
   return {};
 #else
   (void)schedule;
   (void)pid;
-  return SystemError{ .code = ENOSYS, .function_name = "setSchedule" };
+  const auto err = std::make_error_code(std::errc::function_not_supported);
+  return std::unexpected(Error{ "(setScrhedule) ", err.code.message() });
 #endif
 }
 

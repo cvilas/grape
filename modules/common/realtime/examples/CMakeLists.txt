@@ -23,3 +23,5 @@ define_module_example(NAME string_example SOURCES string_example.cpp)
 define_module_example(NAME schedule_example SOURCES schedule_example.cpp)
 
 define_module_example(NAME thread_example SOURCES thread_example.cpp)
+
+define_module_example(NAME error_example SOURCES error_example.cpp)
