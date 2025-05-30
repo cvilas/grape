@@ -52,10 +52,8 @@ auto main() -> int {
   try {
     // disable swap
     const auto is_mem_locked = grape::realtime::lockMemory();
-    if (is_mem_locked.code != 0) {
-      std::println("Main thread: {}: {}. Continuing ..",  //
-                   is_mem_locked.function_name,           //
-                   strerror(is_mem_locked.code));         // NOLINT(concurrency-mt-unsafe)
+    if (not is_mem_locked) {
+      std::println("Main thread: {}. Continuing ..", is_mem_locked.error().message());
     }
 
     // create task configurator
@@ -75,10 +73,8 @@ auto main() -> int {
 
     // Set main thread CPU affinity here. Will assign rt thread CPU affinity in task setup().
     const auto is_main_cpu_set = grape::realtime::setCpuAffinity(CPUS_NON_RT);
-    if (is_main_cpu_set.code != 0) {
-      std::println("Main thread: {}: {}. Continuing ..",  //
-                   is_main_cpu_set.function_name,         //
-                   strerror(is_main_cpu_set.code));       // NOLINT(concurrency-mt-unsafe)
+    if (not is_main_cpu_set) {
+      std::println("Main thread: {}. Continuing ..", is_main_cpu_set.error().message());
     } else {
       std::println("Main thread: Set to run on CPUs {}", CPUS_NON_RT);
     }
@@ -87,22 +83,17 @@ auto main() -> int {
     task_config.setup = []() -> bool {
       std::println("Setup started");
       const auto is_task_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
-      if (is_task_cpu_set.code != 0) {
-        std::println("Task thread: {}: {}. Continuing ..",  //
-                     is_task_cpu_set.function_name,         //
-                     strerror(is_task_cpu_set.code));       // NOLINT(concurrency-mt-unsafe)
+      if (not is_task_cpu_set) {
+        std::println("Task thread: {}. Continuing ..", is_task_cpu_set.error().message());
       } else {
         std::println("Task thread: Set to run on CPUs {}", CPUS_RT);
       }
 
       static constexpr auto RT_PRIORITY = 20;
-      const auto is_scheduled =
-          grape::realtime::setSchedule({ .policy = grape::realtime::Schedule::Policy::Realtime,  //
-                                         .priority = RT_PRIORITY });
-      if (is_scheduled.code != 0) {
-        std::println("Task thread: {}: {}. Continuing ..",  //
-                     is_scheduled.function_name,            //
-                     strerror(is_scheduled.code));          // NOLINT(concurrency-mt-unsafe)
+      const auto is_scheduled = grape::realtime::setSchedule(
+          { .policy = grape::realtime::Schedule::Policy::Realtime, .priority = RT_PRIORITY });
+      if (not is_scheduled) {
+        std::println("Task thread: {}. Continuing ..", is_scheduled.error().message());
       } else {
         std::println("Task thread: Scheduled to run at RT priority {}", RT_PRIORITY);
       }

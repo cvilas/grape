@@ -14,11 +14,9 @@ auto main() -> int {
     static constexpr auto CPUS = { 1U, 2U, 3U };
 
     // Set CPU affinity
-    const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS);
-    if (is_cpu_set.code != 0) {
-      std::println("Could not set CPU affinity. {}: {}",  //
-                   is_cpu_set.function_name,              //
-                   strerror(is_cpu_set.code));            // NOLINT(concurrency-mt-unsafe)
+    const auto cpu_set_err = grape::realtime::setCpuAffinity(CPUS);
+    if (not cpu_set_err) {
+      std::println("Could not set CPU affinity: {}", cpu_set_err.error().message());
       return EXIT_FAILURE;
     }
     std::println("Set to run on CPUs {}", CPUS);
@@ -27,10 +25,8 @@ auto main() -> int {
     static constexpr auto RT_PRIORITY = 20;
     const auto is_scheduled = grape::realtime::setSchedule(
         { .policy = grape::realtime::Schedule::Policy::Realtime, .priority = RT_PRIORITY });
-    if (is_scheduled.code != 0) {
-      std::println("Could not set RT schedule. {}: {}",  //
-                   is_scheduled.function_name,           //
-                   strerror(is_scheduled.code));         // NOLINT(concurrency-mt-unsafe)
+    if (not is_scheduled) {
+      std::println("Could not set RT schedule: {}", is_scheduled.error().message());
       return EXIT_FAILURE;
     }
     std::println("Scheduled to run at RT priority {}", RT_PRIORITY);
