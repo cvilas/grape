@@ -1,6 +1,5 @@
 //=================================================================================================
 // Copyright (C) 2023 GRAPE Contributors
-// MIT License
 //=================================================================================================
 
 #include <format>
@@ -9,10 +8,11 @@
 #include "grape/utils/enums.h"
 
 namespace {
-enum class Error : uint8_t { Bad, RealBad };
+enum class MyException : std::uint8_t { Bad, RealBad };
 
 void functionThatThrows() {
-  grape::panic<grape::Exception>(std::format("Boom!! [{}]", grape::enums::name(Error::RealBad)));
+  grape::panic<grape::Exception>(
+      std::format("Boom!! [{}]", grape::enums::name(MyException::RealBad)));
 }
 
 void doWork() {

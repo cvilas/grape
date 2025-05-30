@@ -9,7 +9,7 @@
 
 #include <sys/types.h>
 
-#include "grape/realtime/system_error.h"
+#include "grape/error.h"
 
 namespace grape::realtime {
 
@@ -17,14 +17,14 @@ namespace grape::realtime {
 /// memory access latency. Usually called on application startup and before creation of any threads.
 /// @note This function is a no-op on any OS except Linux
 /// @return 0 error code, else information on failure
-[[nodiscard]] auto lockMemory() -> SystemError;
+[[nodiscard]] auto lockMemory() -> Error;
 
 /// Set CPU affinity for a thread in Linux.
 /// @note This function is a no-op on any OS except Linux
 /// @param cpus List of CPU indices, starting at 0
 /// @param pid Linux specific thread ID, typically returned by gettid() (0=calling thread)
 /// @return 0 error code, else information on failure
-[[nodiscard]] auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid = 0) -> SystemError;
+[[nodiscard]] auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid = 0) -> Error;
 
 /// Thread scheduling parameters
 struct Schedule {
@@ -55,6 +55,6 @@ struct Schedule {
 /// @param schedule Scheduling parameters.
 /// @param pid Linux specific thread ID, typically returned by gettid() (0=calling thread)
 /// @return 0 error code, else information on failure
-[[nodiscard]] auto setSchedule(Schedule schedule, pid_t pid = 0) -> SystemError;
+[[nodiscard]] auto setSchedule(Schedule schedule, pid_t pid = 0) -> Error;
 
 }  // namespace grape::realtime

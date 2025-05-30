@@ -16,7 +16,6 @@ set(SOURCES
     include/grape/realtime/mpsc_queue.h
     include/grape/realtime/mutex.h
     include/grape/realtime/schedule.h
-    include/grape/realtime/system_error.h
     include/grape/realtime/thread.h)
 
 # library target
