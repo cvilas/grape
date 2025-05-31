@@ -37,7 +37,7 @@ public:
   }
 
 private:
-  static constexpr auto MAX_MESSAGE_LENGTH = 128U;
+  static constexpr auto MAX_MESSAGE_LENGTH = 64U;
   std::size_t message_length_{};
   std::array<char, MAX_MESSAGE_LENGTH> message_{};
   std::source_location location_;
