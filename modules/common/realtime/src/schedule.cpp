@@ -52,7 +52,7 @@ auto lockMemory() -> std::expected<void, Error> {
   return {};
 #else
   const auto err = std::make_error_code(std::errc::function_not_supported);
-  return std::unexpected(Error{ "(lockMemory) ", err.code.message() });
+  return std::unexpected(Error{ "(lockMemory) ", err.message() });
 #endif
 }
 
@@ -73,7 +73,7 @@ auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> std::expec
   (void)cpus;
   (void)pid;
   const auto err = std::make_error_code(std::errc::function_not_supported);
-  return std::unexpected(Error{ "(setCpuAffinity) ", err.code.message() });
+  return std::unexpected(Error{ "(setCpuAffinity) ", err.message() });
 #endif
 }
 
@@ -92,7 +92,7 @@ auto setSchedule(Schedule schedule, pid_t pid) -> std::expected<void, Error> {
   (void)schedule;
   (void)pid;
   const auto err = std::make_error_code(std::errc::function_not_supported);
-  return std::unexpected(Error{ "(setScrhedule) ", err.code.message() });
+  return std::unexpected(Error{ "(setScrhedule) ", err.message() });
 #endif
 }
 
