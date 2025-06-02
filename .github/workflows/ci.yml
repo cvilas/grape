@@ -1,4 +1,4 @@
-name: Build and Test
+name: CI pipeline
 
 on:
   push:
@@ -10,11 +10,11 @@ jobs:
   build-and-test:
     runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false # Allow other builds to continue even if one fails
       matrix:
-        runner: [ubuntu-latest, [self-hosted, ARM64]]
         include:
-          - runner: ubuntu-latest
-            name: x86_64
+          - runner: [self-hosted, X64]
+            name: x86_64            
           - runner: [self-hosted, ARM64]
             name: aarch64
 
@@ -70,7 +70,6 @@ jobs:
         run: cmake --build build/clang --target check
 
 # TODO
-# - Setup a self-hosted X86 runner
 # - Build for both clang and gcc
 # - Fail on linting or formatting errors
 # - Setup configuration presets for applications, developer and CI builds
