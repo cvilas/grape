@@ -4,6 +4,9 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 
 ## Towards a Rover
 
+- [ ] Implement joystick interface for Linux
+- [ ] Implement IPC service/query API [#130]
+- [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] 3D scenegraph using SDL
@@ -23,17 +26,14 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Add systemd services support in GBS
   - [ ] Implement the ability to install monitoring micro-service using cpack
   - [ ] IPC: Implement means to isolate IPC to a set of hosts [#129]
-  - [ ] IPC: Implement Service/Query API [#130]
   - [ ] IPC: Implement zero-copy read and write [#132]
   - [ ] IPC: Fix 'local' mode communication in MacOS
 - [ ] Rover
   - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
-  - [ ] Implement joystick interface for Linux
   - [ ] Implement CANOpen interface for Linux
-  - [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
-  - [ ] Integrate joystick teleop, FPV and mission control
+  - [ ] Steam Deck as operator controller: joystick teleop, FPV and mission control
   - [ ] Record and playback time-series multi-modal data
-- [ ] CI updates (See TODO in <../.gitlab/workflows/ci.yml>)
+- [ ] CI updates (See TODO in <../.gitlab/workflows/build_and_test.yml>)
 
 ## Study
 
@@ -63,6 +63,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
   - Implement PoC. (Example: [Qt3d](https://github.com/cvilas/scratch/3dvis/qt))
   - Implement a basic scenegraph example and check performance in MacOS and Linux
+- Define geometric primitives (plane, ellipsoid, cone, cuboid)
 
 ## References
 
