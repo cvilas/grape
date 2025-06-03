@@ -7,6 +7,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] Implement joystick interface for Linux
 - [ ] Implement IPC service/query API [#130]
 - [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
+- [ ] Implement distributed software estop (i.e. trigger a specific action on loss of signal from any of the remotes)
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] 3D scenegraph using SDL
