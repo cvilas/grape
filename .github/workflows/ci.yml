@@ -82,4 +82,4 @@ jobs:
 # - Build for both clang and gcc
 # - Setup configuration presets for applications, developer and CI builds
 # - After PR is merged and newly tagged, build and generate deployment artifacts (tarball)
-# - Introduce sanitizer builds including [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
+# - Separate [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html) build on realtime module 
