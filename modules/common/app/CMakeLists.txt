@@ -8,10 +8,7 @@ declare_module(
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
-set(SOURCES 
-  src/app.cpp
-  README.md
-  include/grape/app/app.h)
+set(SOURCES src/app.cpp README.md include/grape/app/app.h)
 
 # library target
 define_module_library(

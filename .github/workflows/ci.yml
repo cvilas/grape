@@ -58,7 +58,16 @@ jobs:
             grape-${{ runner.arch }}-${{ runner.os }}-cache
 
       - name: Configure
-        run: cmake --preset clang
+        run: cmake --preset clang -DLINTER_WARNING_IS_ERROR=ON
+      
+      - name: Check formatting
+        run: |
+          cmake --build build/clang --target format
+          if ! git diff --exit-code --quiet; then
+            echo "::error::Following files are incorrectly formatted"
+            git status
+            exit 1
+          fi
 
       - name: Build
         run: cmake --build build/clang --target all examples tests
@@ -71,7 +80,6 @@ jobs:
 
 # TODO
 # - Build for both clang and gcc
-# - Fail on linting or formatting errors
 # - Setup configuration presets for applications, developer and CI builds
 # - After PR is merged and newly tagged, build and generate deployment artifacts (tarball)
 # - Introduce sanitizer builds including [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html)
