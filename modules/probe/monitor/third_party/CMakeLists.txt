@@ -20,7 +20,7 @@ set(IMGUI_SOURCES
     ${IMGUI_SOURCES_DIR}/backends/imgui_impl_sdlrenderer3.h
     ${IMGUI_SOURCES_DIR}/backends/imgui_impl_sdlrenderer3.cpp
     ${IMGUI_SOURCES_DIR}/backends/imgui_impl_sdl3.h
-    ${IMGUI_SOURCES_DIR}/backends/imgui_impl_sdl3.cpp    
+    ${IMGUI_SOURCES_DIR}/backends/imgui_impl_sdl3.cpp
     ${IMGUI_SOURCES_DIR}/misc/cpp/imgui_stdlib.h
     ${IMGUI_SOURCES_DIR}/misc/cpp/imgui_stdlib.cpp)
 

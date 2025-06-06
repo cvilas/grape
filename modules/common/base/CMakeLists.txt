@@ -7,9 +7,7 @@ declare_module(
   DEPENDS_ON_MODULES "utils"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
-set(SOURCES 
-include/grape/exception.h 
-src/exception.cpp)
+set(SOURCES include/grape/exception.h src/exception.cpp)
 
 define_module_library(
   NAME base

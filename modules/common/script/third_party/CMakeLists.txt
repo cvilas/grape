@@ -77,4 +77,3 @@ set_target_properties(grape_lua PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(grape_lua PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
 set_target_properties(grape_lua PROPERTIES C_CLANG_TIDY "")
 install(TARGETS grape_lua)
-

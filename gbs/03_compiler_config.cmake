@@ -151,12 +151,16 @@ endif()
 
 # Linter (clang-tidy)
 option(ENABLE_LINTER "Enable static analysis" ON)
+option(LINTER_WARNING_IS_ERROR "Treat linter warnings as errors" OFF)
 if(ENABLE_LINTER)
   find_program(LINTER_BIN NAMES clang-tidy QUIET)
   if(LINTER_BIN)
     set(LINTER_ARGS
       -extra-arg=-Wno-ignored-optimization-argument
       -extra-arg=-Wno-unknown-warning-option)
+    if(LINTER_WARNING_IS_ERROR)
+      list(APPEND LINTER_ARGS -warnings-as-errors=*)
+    endif()  
     # NOTE: To speed up linting, clang-tidy is invoked via clang-tidy-cache.
     # (https://github.com/matus-chochlik/ctcache) Cache location is set by environment variable
     # CTCACHE_DIR
@@ -180,4 +184,5 @@ message(STATUS "\tENABLE_MSAN       : ${ENABLE_MSAN}")
 message(STATUS "\tENABLE_TSAN       : ${ENABLE_TSAN}")
 message(STATUS "\tENABLE_UBSAN      : ${ENABLE_UBSAN}")
 message(STATUS "\tENABLE_COVERAGE   : ${ENABLE_COVERAGE}")
-message(STATUS "\tENABLE_LINTER     : ${ENABLE_LINTER} (${LINTER_BIN})")
+message(STATUS "\tENABLE_LINTER           : ${ENABLE_LINTER} (${LINTER_BIN})")
+message(STATUS "\tLINTER_WARNING_IS_ERROR : ${LINTER_WARNINGS_AS_ERRORS}")
