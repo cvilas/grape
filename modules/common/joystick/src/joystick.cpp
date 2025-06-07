@@ -5,7 +5,6 @@
 #include "grape/joystick/joystick.h"
 
 #include <atomic>
-#include <bit>       // std::bit_ceil
 #include <concepts>  //std::invocable
 #include <cstring>
 #include <expected>
