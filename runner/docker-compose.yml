@@ -1,0 +1,13 @@
+version: '3'
+services:
+  gha-runner:
+    build: .
+    container_name: gha-runner
+    volumes:
+      - gha-runner-config:/home/runner
+      - gha-runner-work:/home/runner/_work
+    restart: unless-stopped
+
+volumes:
+  gha-runner-config:
+  gha-runner-work:
