@@ -7,7 +7,6 @@ services:
       - gha-runner-config:/home/runner
       - gha-runner-work:/home/runner/_work
     restart: unless-stopped
-    command: ./run.sh
 
 volumes:
   gha-runner-config:

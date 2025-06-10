@@ -7,7 +7,7 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
 - Install [Docker](https://docs.docker.com/get-docker/) 
   ```sh
   sudo apt update
-  sudo apt install -y ca-certificates curl gnupg libicu74
+  sudo apt install -y ca-certificates curl gnupg
   sudo install -m 0755 -d /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   echo \
@@ -48,6 +48,7 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
     ```
   - Inside the container, register the runner (replace with your actual values):
     ```sh
+    chown -R runner:runner /home/runner/_work
     ./config.sh --url https://github.com/cvilas/grape --token YOUR_TOKEN
     ```
     Follow the prompts to finish registration, then exit the container shell.
