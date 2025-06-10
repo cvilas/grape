@@ -40,8 +40,8 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
   ```
 
 - Register the Runner
-  - Go to your GitHub repository: **Settings → Actions → Runners → New self-hosted runner**  
-   Select Linux, x64, and copy the registration command (with your repo URL and token).
+  - Go to this project's GitHub repository: **Settings → Actions → Runners → New self-hosted runner**  
+   Select Linux, x64, and copy the registration command (with repo URL and token).
   - Run the following to open a shell in the container:
     ```sh
     docker compose run --rm gha-runner /bin/bash
@@ -60,7 +60,7 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
 
 - Enable Auto-Start on Boot: The `restart: unless-stopped` policy in `docker-compose.yml` ensures the runner container will automatically start on system boot. If you ever reboot your machine, Docker will restart the runner container automatically.
 
-- Stopping and Removing the Runner
+- To stop and remove the Runner
   ```sh
   docker compose down
   ```
