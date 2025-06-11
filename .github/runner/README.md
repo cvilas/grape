@@ -36,7 +36,11 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
 
 - Build the Docker Image. From this `runner/` directory, run:
   ```sh
-  docker compose build
+  # For X86_64 Linux
+  docker compose build --build-arg ARCH=x64
+
+  # For Arm64 Linux
+  docker compose build --build-arg ARCH=arm64
   ```
 
 - Register the Runner
@@ -48,7 +52,6 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
     ```
   - Inside the container, register the runner (replace with your actual values):
     ```sh
-    chown -R runner:runner /home/runner/_work
     ./config.sh --url https://github.com/cvilas/grape --token YOUR_TOKEN
     ```
     Follow the prompts to finish registration, then exit the container shell.
@@ -73,11 +76,17 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
 
 ## Troubleshooting
 
-- Check logs:  
+- Follow logs:  
   ```sh
   docker compose logs -f
   ```
 - If you change the repository or token, re-run the registration step.
+- To remove all docker images, containers, volumes and configs by brute force
+  ```sh
+  sudo systemctl stop docker
+  sudo rm -rf /var/lib/docker
+  sudo systemctl start docker
+  ```
 
 ## References
 

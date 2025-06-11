@@ -15,4 +15,4 @@ echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://ap
 sudo apt update
 sudo rm /usr/share/keyrings/kitware-archive-keyring.gpg
 sudo apt install -y kitware-archive-keyring
-sudo apt install -y cmake
+sudo apt install -y cmake cmake-format

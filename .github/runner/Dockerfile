@@ -2,23 +2,28 @@
 
 FROM ubuntu:24.04
 
+ARG ARCH=x64 # CPU architecture (x64, arm64)
+
 RUN apt-get update && \
-    apt-get install -y curl sudo git libicu74 && \
+    apt-get install -y curl sudo gosu git libicu74 && \
     useradd -m runner && \
     echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-USER root
 WORKDIR /home/runner
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-USER runner
-
 # Install GitHub Actions runner (update version as needed)
-RUN curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-x64-2.325.0.tar.gz && \
-    tar xzf ./actions-runner-linux-x64-2.325.0.tar.gz && \
-    rm actions-runner-linux-x64-2.325.0.tar.gz
+ENV RUNNER_VERSION=2.325.0
+ENV RUNNER_ARCH=${ARCH}
+ENV RUNNER_TARBALL=actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz
+
+RUN curl -o ${RUNNER_TARBALL} -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/${RUNNER_TARBALL} && \
+    tar xzf ./${RUNNER_TARBALL} && \
+    rm ${RUNNER_TARBALL}
 
 ENTRYPOINT ["/entrypoint.sh"]
+
+# run the github runner script
 CMD ["./run.sh"]
