@@ -9,7 +9,7 @@ define_module_example(NAME custom_sink_example SOURCES custom_sink_example.cpp)
 define_module_example(
   NAME spdlog_bench
   SOURCES spdlog_bench.cpp
-  PRIVATE_INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/spdlog-1.15.2/include
+  PRIVATE_INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/spdlog-1.15.3/include
                         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   PRIVATE_LINK_LIBS benchmark::benchmark
   PUBLIC_LINK_LIBS "")
