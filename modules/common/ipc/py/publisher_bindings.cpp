@@ -17,7 +17,7 @@ void bindPublisher(pybind11::module_& module) {
            "Create a Publisher with the specified topic and optional match callback.")
       .def(
           "publish",
-          [](const Publisher& self, const pybind11::bytes& data) {
+          [](const Publisher& self, const pybind11::bytes& data) -> void {
             const std::string& data_str = data.cast<std::string>();
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
             const auto* raw_data = reinterpret_cast<const std::byte*>(data_str.data());

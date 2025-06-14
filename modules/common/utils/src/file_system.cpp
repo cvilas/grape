@@ -54,7 +54,7 @@ auto getUserHomePath() -> std::filesystem::path {
 
 //-------------------------------------------------------------------------------------------------
 auto getSearchPaths() -> const std::vector<std::filesystem::path>& {
-  static const auto paths = [] {
+  static const auto paths = [] -> std::vector<std::filesystem::path> {
     const auto app_path = getProgramPath().parent_path();
     const auto app_name = getProgramName();
     const auto home_path = getUserHomePath();

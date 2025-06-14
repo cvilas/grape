@@ -31,11 +31,11 @@ auto main() -> int {
     const auto cfg = Fifo::Config{ .frame_length = 8U, .num_frames = 10U };
     Fifo buffer(cfg);
 
-    const auto producer = [&buffer](const std::string& name) {
+    const auto producer = [&buffer](const std::string& name) -> void {
       static constexpr auto UPDATE_PERIOD = std::chrono::milliseconds(100);
       std::uint64_t value = 0;
       while (!s_exit) {
-        const auto pushed = buffer.visitToWrite([&value](std::span<std::byte> frame) {
+        const auto pushed = buffer.visitToWrite([&value](std::span<std::byte> frame) -> void {
           assert(sizeof(value) == frame.size_bytes());
           std::memcpy(frame.data(), &value, sizeof(value));
         });
@@ -49,15 +49,16 @@ auto main() -> int {
       }
     };
 
-    const auto consumer = [&buffer]() {
+    const auto consumer = [&buffer]() -> void {
       static constexpr auto REST_PERIOD = std::chrono::seconds(1);
       while (!s_exit) {
         std::uint64_t value{};
         if (buffer.count() > 0) {
-          const auto pulled = buffer.visitToRead([&value](std::span<const std::byte> frame) {
-            assert(sizeof(value) == frame.size_bytes());
-            std::memcpy(&value, frame.data(), frame.size_bytes());
-          });
+          const auto pulled =
+              buffer.visitToRead([&value](std::span<const std::byte> frame) -> void {
+                assert(sizeof(value) == frame.size_bytes());
+                std::memcpy(&value, frame.data(), frame.size_bytes());
+              });
           if (pulled) {
             std::println("consume - {:d}", value);
           } else {

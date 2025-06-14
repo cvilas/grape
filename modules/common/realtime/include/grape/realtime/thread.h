@@ -36,16 +36,16 @@ public:
     /// configuration of the thread.
     /// @return 'true' to indicate success and continue with the thread; 'false' to indicate
     /// failure, in which case the thread exits immediately without calling teardown()
-    std::function<bool()> setup{ [] { return false; } };
+    std::function<bool()> setup{ [] -> bool { return false; } };
 
     /// @brief Function called periodically (see interval) from within the thread
     /// @return 'true' to indicate success and to continue calling the function in the next
     /// time-step; 'false' to indicate failure or exit condition (will call teardown())
-    std::function<bool()> process{ []() { return false; } };
+    std::function<bool()> process{ [] -> bool { return false; } };
 
     /// @brief Function called once just before exit from thread. Use this for any cleaning up
     /// before exiting thread
-    std::function<void()> teardown{ []() {} };
+    std::function<void()> teardown{ [] -> void {} };
 
     static constexpr auto DEFAULT_PROCESS_INTERVAL = std::chrono::microseconds(1000'000);
 
@@ -93,7 +93,7 @@ inline Thread::~Thread() {
 inline void Thread::start() {
   stop();
   exit_flag_.clear();
-  thread_ = std::thread([this]() { threadFunction(); });
+  thread_ = std::thread([this]() -> void { threadFunction(); });
 }
 
 //-------------------------------------------------------------------------------------------------

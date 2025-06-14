@@ -40,9 +40,11 @@ auto main() -> int {
     // create the probe controller
     auto monitor = grape::probe::Monitor();
     auto data_sink = [&monitor](const std::vector<grape::probe::Signal>& signals,
-                                std::span<const std::byte> data) { monitor.recv(signals, data); };
+                                std::span<const std::byte> data) -> void {
+      monitor.recv(signals, data);
+    };
     auto probe = grape::probe::Controller(std::move(pin_config), BUFFER_CONFIG, data_sink);
-    monitor.setSender([&probe](const std::string& name, std::span<const std::byte> data) {
+    monitor.setSender([&probe](const std::string& name, std::span<const std::byte> data) -> void {
       const auto ret = probe.qset(name, data);
       if (ret != grape::probe::Controller::Error::None) {
         grape::panic<grape::Exception>(std::format("{}: {}", name, toString(ret)));
@@ -52,7 +54,7 @@ auto main() -> int {
     // Process function: In real use-cases, this could be executing in a privileged
     // time sensitive context in a separate thread. Here, we just periodically update variables
     const auto process_loop = [&exit_flag, &probe, &timestamp, &amplitude, &frequency,
-                               &waveforms]() {
+                               &waveforms]() -> void {
       try {
         static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(10);
         const auto ts_start = std::chrono::high_resolution_clock::now();
@@ -84,7 +86,7 @@ auto main() -> int {
 
     // Monitor function: In real use-cases, this would be executing in non realtime context. Here,
     // we periodically receive batched updates and show how to queue a control variable update
-    const auto monitor_loop = [&exit_flag, &probe]() {
+    const auto monitor_loop = [&exit_flag, &probe]() -> void {
       try {
         static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(100);
         while (not exit_flag) {

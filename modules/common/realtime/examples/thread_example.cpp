@@ -119,7 +119,7 @@ auto main() -> int {
     };
 
     // set the clean up function for the task thread
-    task_config.teardown = []() { std::println("\nTeardown"); };
+    task_config.teardown = []() -> void { std::println("\nTeardown"); };
 
     // off we go. start the task
     auto task = grape::realtime::Thread(std::move(task_config));

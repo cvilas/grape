@@ -24,15 +24,16 @@ TEST_CASE("Writes and reads are in FIFO order", "[FIFOBuffer]") {
   // write
   for (std::size_t i = 0; i < CONFIG.num_frames; ++i) {
     const auto test_data = std::vector<std::byte>(CONFIG.frame_length, static_cast<std::byte>(i));
-    REQUIRE(buffer.visitToWrite(
-        [&test_data](std::span<std::byte> frame) { std::ranges::copy(test_data, frame.begin()); }));
+    REQUIRE(buffer.visitToWrite([&test_data](std::span<std::byte> frame) -> void {
+      std::ranges::copy(test_data, frame.begin());
+    }));
     REQUIRE(buffer.count() == i + 1);
   }
 
   // read
   for (std::size_t i = 0; i < CONFIG.num_frames; ++i) {
     std::vector<std::byte> read_data(CONFIG.frame_length, static_cast<std::byte>(0xff));
-    REQUIRE(buffer.visitToRead([&read_data](std::span<const std::byte> frame) {
+    REQUIRE(buffer.visitToRead([&read_data](std::span<const std::byte> frame) -> void {
       std::ranges::copy(frame, read_data.begin());
     }));
     REQUIRE(buffer.count() == CONFIG.num_frames - i - 1);
@@ -45,12 +46,12 @@ TEST_CASE("Attempt to write to a full buffer should fail", "[FIFOBuffer]") {
   constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
   grape::realtime::FIFOBuffer buffer(CONFIG);
   for (std::size_t i = 0; i < CONFIG.num_frames; ++i) {
-    REQUIRE(buffer.visitToWrite([&](std::span<std::byte>) {
+    REQUIRE(buffer.visitToWrite([&](std::span<std::byte>) -> void {
       // Writing to fill up the buffer
     }));
   }
   REQUIRE(buffer.count() == CONFIG.num_frames);
-  REQUIRE_FALSE(buffer.visitToWrite([&](std::span<std::byte>) {
+  REQUIRE_FALSE(buffer.visitToWrite([&](std::span<std::byte>) -> void {
     // Attempting to write to a full buffer
   }));
   REQUIRE(buffer.count() == CONFIG.num_frames);
@@ -60,7 +61,7 @@ TEST_CASE("Attempt to write to a full buffer should fail", "[FIFOBuffer]") {
 TEST_CASE("Attempt to read from an empty buffer should fail", "[FIFOBuffer]") {
   constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
   grape::realtime::FIFOBuffer buffer(CONFIG);
-  REQUIRE_FALSE(buffer.visitToRead([&](std::span<const std::byte>) {
+  REQUIRE_FALSE(buffer.visitToRead([&](std::span<const std::byte>) -> void {
     // Attempting to read from an empty buffer
   }));
   REQUIRE(buffer.count() == 0);

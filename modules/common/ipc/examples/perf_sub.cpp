@@ -83,7 +83,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     Statistics stats;
 
-    const auto data_cb = [&stats](const grape::ipc::Sample& sample) {
+    const auto data_cb = [&stats](const grape::ipc::Sample& sample) -> void {
       const auto ts = std::chrono::system_clock::now();
       stats.add(ts, sample);
       static constexpr std::array<char, 4> PROGRESS{ '|', '/', '-', '\\' };

@@ -18,7 +18,7 @@ auto main(int argc, const char* argv[]) -> int {  // NOLINT(bugprone-exception-e
   };
 
   // subsription callback
-  const auto callback = [&deserialise](const grape::ipc::Sample& sample) {
+  const auto callback = [&deserialise](const grape::ipc::Sample& sample) -> void {
     const auto msg = deserialise(sample.data);
     grape::syslog::Info("{}", msg);
   };

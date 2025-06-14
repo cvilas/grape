@@ -12,7 +12,7 @@ namespace grape::ipc::py {
 
 void bindSession(pybind11::module_& module) {
   module.def(
-      "init", [](Config config) { init(std::move(config)); },
+      "init", [](Config config) -> void { init(std::move(config)); },
       "Initialize IPC session for the process", pybind11::arg("config"));
 
   module.def("ok", &ok, "Check if session state is nominal and error-free");

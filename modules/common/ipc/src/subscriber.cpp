@@ -48,7 +48,8 @@ Subscriber::Subscriber(const std::string& topic, Subscriber::DataCallback&& data
   }
 
   const auto event_cb = [moved_match_cb = std::move(match_cb)](
-                            const eCAL::STopicId&, const eCAL::SSubEventCallbackData& event_data) {
+                            const eCAL::STopicId&,
+                            const eCAL::SSubEventCallbackData& event_data) -> void {
     if (moved_match_cb != nullptr) {
       moved_match_cb(toMatchEvent(event_data));
     }
@@ -58,7 +59,7 @@ Subscriber::Subscriber(const std::string& topic, Subscriber::DataCallback&& data
 
   impl_->SetReceiveCallback(
       [moved_data_cb = std::move(data_cb)](const eCAL::STopicId&, const eCAL::SDataTypeInformation&,
-                                           const eCAL::SReceiveCallbackData& data) {
+                                           const eCAL::SReceiveCallbackData& data) -> void {
         const auto tp =
             std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
         if (moved_data_cb != nullptr) {

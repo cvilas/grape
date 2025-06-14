@@ -33,7 +33,7 @@ auto main() -> int {
     static constexpr std::size_t Q_LEN = 10;
     grape::realtime::MPSCQueue<ExampleObject> mpscq(Q_LEN);
 
-    const auto producer = [&mpscq](const std::string& name) {
+    const auto producer = [&mpscq](const std::string& name) -> void {
       static constexpr auto UPDATE_PERIOD = std::chrono::milliseconds(100);
       std::uint64_t value = 0;
       while (!s_exit) {
@@ -49,7 +49,7 @@ auto main() -> int {
       }
     };
 
-    const auto consumer = [&mpscq]() {
+    const auto consumer = [&mpscq]() -> void {
       static constexpr auto REST_PERIOD = std::chrono::seconds(1);
       while (!s_exit) {
         if (mpscq.count() > 0) {

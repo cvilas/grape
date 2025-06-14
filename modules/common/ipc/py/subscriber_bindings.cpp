@@ -16,10 +16,9 @@ void bindSubscriber(pybind11::module_& module) {
   pybind11::class_<Sample>(module, "Sample")
       .def_property_readonly(
           "data",
-          [](const Sample& sample) {
+          [](const Sample& sample) -> pybind11::bytes {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-            return pybind11::bytes(reinterpret_cast<const char*>(sample.data.data()),
-                                   sample.data.size());
+            return { reinterpret_cast<const char*>(sample.data.data()), sample.data.size() };
           },
           "The data received by the subscriber")
       .def_readonly("publish_time", &Sample::publish_time, "The time the data was published");

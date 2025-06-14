@@ -31,7 +31,8 @@ ConfigScript::ConfigScript(const std::filesystem::path& script_path) : ConfigScr
 
 //-------------------------------------------------------------------------------------------------
 ConfigScript::ConfigScript()
-  : lua_state_(std::shared_ptr<lua_State>(luaL_newstate(), [](lua_State* st) { exitLua(st); })) {
+  : lua_state_(
+        std::shared_ptr<lua_State>(luaL_newstate(), [](lua_State* st) -> void { exitLua(st); })) {
   luaL_openlibs(lua_state_.get());
 }
 

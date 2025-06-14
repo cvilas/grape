@@ -97,7 +97,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     // Process function: In real use-cases, this could be executing in a privileged
     // time sensitive context in a separate thread. Here, we just periodically update variables
-    const auto process = [&probe, &timestamp, &amplitude, &frequency, &waveforms]() {
+    const auto process = [&probe, &timestamp, &amplitude, &frequency, &waveforms]() -> void {
       static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(100);
       const auto ts_start = std::chrono::high_resolution_clock::now();
       while (not s_exit) {
@@ -125,7 +125,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     // Monitor function: In real use-cases, this would be executing in non realtime context. Here,
     // we periodically receive batched updates and show how to queue a control variable update
-    const auto monitor = [&probe]() {
+    const auto monitor = [&probe]() -> void {
       static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(1000);
       double desired_amplitude = {};
       while (not s_exit) {
