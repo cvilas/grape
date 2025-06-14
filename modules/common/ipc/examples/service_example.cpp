@@ -24,7 +24,7 @@ auto main() -> int {
     static constexpr auto METHOD_PARAM = "get";
 
     auto server_event_cb = [](const eCAL::SServiceId& service_id,
-                              const eCAL::SServerEventCallbackData& event) {
+                              const eCAL::SServerEventCallbackData& event) -> void {
       std::println("[Server] {}: {} {}", service_id.service_name, service_id.service_id.host_name,
                    to_string(event.type));
     };
@@ -50,7 +50,7 @@ auto main() -> int {
     // Create client
     auto service_method_info_set = std::set<eCAL::SServiceMethodInformation>{ method };
     auto client_event_cb = [](const eCAL::SServiceId& service_id,
-                              const eCAL::SClientEventCallbackData& event) {
+                              const eCAL::SClientEventCallbackData& event) -> void {
       std::println("[Client] '{}' from '{}' {}", service_id.service_name,
                    service_id.service_id.host_name, to_string(event.type));
     };

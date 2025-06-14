@@ -20,11 +20,11 @@ auto main() -> int {
       return { reinterpret_cast<const char*>(bytes.data()), bytes.size() };
     };
 
-    const auto data_cb = [&from_bytes](const grape::ipc::Sample& sample) {
+    const auto data_cb = [&from_bytes](const grape::ipc::Sample& sample) -> void {
       std::println("Received message: '{}'", from_bytes(sample.data));
     };
 
-    const auto match_cb = [](const grape::ipc::Match& match) {
+    const auto match_cb = [](const grape::ipc::Match& match) -> void {
       if (match.status == grape::ipc::Match::Status::Matched) {
         std::println("\nMatched");
       } else if (match.status == grape::ipc::Match::Status::Unmatched) {

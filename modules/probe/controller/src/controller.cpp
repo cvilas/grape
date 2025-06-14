@@ -18,7 +18,7 @@ using Signal = grape::probe::Signal;
 /// Calculates memory size required to capture a snapshot frame
 auto calcSnapFrameSize(const std::vector<Signal>& signals) -> std::size_t {
   return std::accumulate(std::begin(signals), std::end(signals), std::size_t{ 0U },
-                         [](const std::uint32_t& acc, const Signal& sig) {
+                         [](const std::uint32_t& acc, const Signal& sig) -> std::size_t {
                            return acc + (length(sig.type) * sig.num_elements);
                          });
 }
@@ -64,7 +64,7 @@ auto PinConfig::sort() -> std::ranges::subrange<std::vector<Signal>::const_itera
 
   // return sub-range of Role::Control
   return std::ranges::equal_range(signals_, Signal::Role::Control, {},
-                                  [](const auto& sig) { return sig.role; });
+                                  [](const auto& sig) -> auto { return sig.role; });
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -81,7 +81,8 @@ Controller::Controller(PinConfig&& pins, const BufferConfig& buffer_config, Rece
 //-------------------------------------------------------------------------------------------------
 auto Controller::snap() -> Error {
   auto buffer_check = Error::None;
-  const auto writer = [&signals = pins_.signals(), &buffer_check](std::span<std::byte> buffer) {
+  const auto writer = [&signals = pins_.signals(),
+                       &buffer_check](std::span<std::byte> buffer) -> void {
     auto offset = 0UL;
     const auto buffer_size = buffer.size_bytes();
     for (const auto& sig : signals) {
@@ -106,7 +107,7 @@ auto Controller::snap() -> Error {
 
 //-------------------------------------------------------------------------------------------------
 void Controller::flush() {
-  const auto reader = [this](std::span<const std::byte> data) {
+  const auto reader = [this](std::span<const std::byte> data) -> void {
     if (this->receiver_ != nullptr) {
       this->receiver_(this->pins_.signals(), data);
     }
@@ -121,7 +122,7 @@ void Controller::sync() {
   using SignalVectorOffset =
       std::iterator_traits<std::vector<Signal>::const_iterator>::difference_type;
 
-  const auto updater = [&signals = pins_.signals()](std::span<const std::byte> buffer) {
+  const auto updater = [&signals = pins_.signals()](std::span<const std::byte> buffer) -> void {
     const auto offset_size = sizeof(SignalVectorOffset);
     SignalVectorOffset offset{};
     std::memcpy(&offset, buffer.data(), offset_size);
@@ -144,7 +145,7 @@ auto Controller::qset(const std::string& name, std::span<const std::byte> value)
   const auto& signals = pins_.signals();
 
   const auto it = std::ranges::find_if(
-      controllables_, [&name](const auto& sig) { return (name == sig.name.cStr()); });
+      controllables_, [&name](const auto& sig) -> auto { return (name == sig.name.cStr()); });
 
   if (it == signals.end()) {
     return Error::SignalNotFound;
@@ -161,7 +162,7 @@ auto Controller::qset(const std::string& name, std::span<const std::byte> value)
       std::iterator_traits<std::vector<Signal>::const_iterator>::difference_type;
   const SignalVectorOffset offset = std::distance(signals.begin(), it);
   auto buffer_check = Error::None;
-  const auto writer = [&offset, &value, &buffer_check](std::span<std::byte> buffer) {
+  const auto writer = [&offset, &value, &buffer_check](std::span<std::byte> buffer) -> void {
     const auto offset_size = sizeof(SignalVectorOffset);
     const auto value_size = value.size_bytes();
     if (offset_size + value_size > buffer.size_bytes()) {

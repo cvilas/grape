@@ -21,7 +21,7 @@ Logger::Logger(Config&& config)                                                 
   : config_(std::move(config))                                                        //
   , queue_({ .frame_length = sizeof(Record), .num_frames = config_.queue_capacity })  //
   , backend_(std::make_unique<Backend>()) {
-  backend_->sink_thread = std::jthread([this](const std::stop_token& st) { sinkLoop(st); });
+  backend_->sink_thread = std::jthread([this](const std::stop_token& st) -> auto { sinkLoop(st); });
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ void Logger::log(const Record& record) {
   if (not canLog(record.severity)) {
     return;
   }
-  const auto writer = [&record](std::span<std::byte> frame) {
+  const auto writer = [&record](std::span<std::byte> frame) -> void {
     assert(sizeof(record) == frame.size_bytes());
     std::memcpy(frame.data(), &record, sizeof(Record));
   };
@@ -56,7 +56,7 @@ void Logger::sinkLoop(const std::stop_token& st) noexcept {
 //-------------------------------------------------------------------------------------------------
 void Logger::flush() noexcept {
   try {
-    auto record_reader = [this](std::span<const std::byte> frame) {
+    auto record_reader = [this](std::span<const std::byte> frame) -> void {
       assert(sizeof(Record) == frame.size_bytes());
       if (config_.sink != nullptr) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)

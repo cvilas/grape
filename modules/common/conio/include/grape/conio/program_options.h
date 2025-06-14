@@ -171,7 +171,7 @@ auto ProgramDescription::declareOption(const std::string& key, const std::string
 template <StringStreamable T>
 auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T, Error> {
   const auto it = std::find_if(options_.begin(), options_.end(),
-                               [&key](const auto& opt) { return key == opt.key; });
+                               [&key](const auto& opt) -> bool { return key == opt.key; });
   if (it == options_.end()) {
     return std::unexpected(Error{ .code = Error::Code::Undeclared, .key = key });
   }
@@ -199,7 +199,7 @@ auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T,
 template <conio::StringStreamable T>
 auto ProgramOptions::getOptionOrThrow(const std::string& key) const -> T {
   return getOption<T>(key)
-      .transform_error([](const auto& err) {
+      .transform_error([](const auto& err) -> auto {
         panic<Exception>(toString(err));
         return Error{};  // unreachable
       })

@@ -16,8 +16,9 @@ ProgramOptions::ProgramOptions(std::vector<ProgramOptions::Option>&& options)
 
 //-------------------------------------------------------------------------------------------------
 auto ProgramOptions::hasOption(const std::string& key) const -> bool {
-  return (options_.end() !=
-          std::ranges::find_if(options_, [&key](const auto& opt) { return key == opt.key; }));
+  return (options_.end() != std::ranges::find_if(options_, [&key](const auto& opt) -> bool {
+            return key == opt.key;
+          }));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -55,8 +56,8 @@ auto ProgramDescription::parse(int argc, const char** argv) const
       const std::string kv = arg.substr(2);
       const size_t sep = kv.find('=');
       const auto key = kv.substr(0, sep);
-      const auto it = std::ranges::find_if(declared_options,
-                                           [&key](const auto& opt) { return key == opt.key; });
+      const auto it = std::ranges::find_if(
+          declared_options, [&key](const auto& opt) -> bool { return key == opt.key; });
 
       // skip option that is not declared as supported
       if (it == declared_options.end()) {
@@ -82,12 +83,12 @@ auto ProgramDescription::parse(int argc, const char** argv) const
   }
 
   // Check for duplicate declarations
-  std::ranges::sort(declared_options,
-                    [](const auto& opt_a, const auto& opt_b) { return opt_a.key < opt_b.key; });
-  const auto dup_it =
-      std::ranges::adjacent_find(declared_options, [](const auto& opt_a, const auto& opt_b) {
-        return opt_a.key == opt_b.key;
-      });
+  std::ranges::sort(declared_options, [](const auto& opt_a, const auto& opt_b) -> auto {
+    return opt_a.key < opt_b.key;
+  });
+  const auto dup_it = std::ranges::adjacent_find(
+      declared_options,
+      [](const auto& opt_a, const auto& opt_b) -> auto { return opt_a.key == opt_b.key; });
   if (dup_it != declared_options.end()) {
     return std::unexpected(Error{ .code = Error::Code::Redeclared, .key = dup_it->key });
   }

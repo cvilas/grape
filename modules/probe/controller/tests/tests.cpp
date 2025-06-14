@@ -31,7 +31,7 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   const auto& signals = pins.signals();
 
   // check pins are sorted by address and role
-  const auto sort_predicate = [](const Signal& sig_a, const Signal& sig_b) {
+  const auto sort_predicate = [](const Signal& sig_a, const Signal& sig_b) -> bool {
     if (sig_a.role == sig_b.role) {
       return (sig_a.address < sig_b.address);
     }
@@ -39,8 +39,8 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   };
 
   CHECK(std::ranges::is_sorted(signals, sort_predicate));
-  CHECK(std::ranges::all_of(controllables,
-                            [role = Role::Control](const auto& sig) { return sig.role == role; }));
+  CHECK(std::ranges::all_of(
+      controllables, [role = Role::Control](const auto& sig) -> auto { return sig.role == role; }));
 
   // configure the capture buffers
   static constexpr auto BUFFER_CONFIG = grape::probe::BufferConfig{
@@ -50,7 +50,7 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
 
   // create the probe controller
   auto num_records = 0UZ;
-  const auto sink = [&num_records](const std::vector<Signal>&, std::span<const std::byte>) {
+  const auto sink = [&num_records](const std::vector<Signal>&, std::span<const std::byte>) -> void {
     num_records++;
   };
 

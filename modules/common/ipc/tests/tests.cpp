@@ -31,14 +31,15 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(CHAR_MIN, CHAR_MAX);
-  std::ranges::generate(payload, [&gen, &dis]() { return static_cast<std::byte>(dis(gen)); });
+  std::ranges::generate(payload,
+                        [&gen, &dis]() -> std::byte { return static_cast<std::byte>(dis(gen)); });
 
   // define subscriber callback
   std::condition_variable recv_cond;
   std::mutex recv_mut;
   auto received_msg = std::vector<std::byte>{};
   const auto recv_callback = [&recv_mut, &recv_cond,
-                              &received_msg](const grape::ipc::Sample& sample) {
+                              &received_msg](const grape::ipc::Sample& sample) -> void {
     const std::lock_guard<std::mutex> lk(recv_mut);
     received_msg = std::vector<std::byte>(sample.data.begin(), sample.data.end());
     recv_cond.notify_all();
@@ -64,7 +65,8 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   // wait a reasonable time for subscriber to receive message
   constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(3000);
   std::unique_lock lk(recv_mut);
-  recv_cond.wait_for(lk, RECV_WAIT_TIME, [&received_msg] { return not received_msg.empty(); });
+  recv_cond.wait_for(lk, RECV_WAIT_TIME,
+                     [&received_msg] -> bool { return not received_msg.empty(); });
 
   // verify message
   REQUIRE(received_msg.size() == PAYLOAD_SIZE);

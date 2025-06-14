@@ -49,7 +49,8 @@ Publisher::Publisher(const Topic& topic, MatchCallback&& match_cb) {
     panic<Exception>("Not initialised");
   }
   const auto event_cb = [moved_match_cb = std::move(match_cb)](
-                            const eCAL::STopicId&, const eCAL::SPubEventCallbackData& event_data) {
+                            const eCAL::STopicId&,
+                            const eCAL::SPubEventCallbackData& event_data) -> void {
     if (moved_match_cb != nullptr) {
       moved_match_cb(toMatchEvent(event_data));
     }

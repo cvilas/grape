@@ -72,7 +72,7 @@ void setExitHandlers() {
 //-------------------------------------------------------------------------------------------------
 void initSyslog(const grape::script::ConfigTable& table) {
   const auto severity_str = table.read<std::string>("severity_threshold")
-                                .transform_error([](const auto& err) {
+                                .transform_error([](const auto& err) -> auto {
                                   const auto msg =
                                       std::format("severity_threshold {}", toString(err));
                                   grape::panic<grape::Exception>(msg);
@@ -83,7 +83,7 @@ void initSyslog(const grape::script::ConfigTable& table) {
   // NOLINTBEGIN(bugprone-unchecked-optional-access)
   const auto severity =
       grape::enums::cast<grape::log::Severity>(severity_str)
-          .or_else([&severity_str]() {
+          .or_else([&severity_str]() -> auto {
             const auto msg = std::format("Invalid severity_threshold={}", severity_str);
             grape::panic<grape::Exception>(msg);
             return std::optional<grape::log::Severity>{ std::nullopt };  // unreachable
@@ -100,7 +100,7 @@ void initSyslog(const grape::script::ConfigTable& table) {
 //-------------------------------------------------------------------------------------------------
 auto initIpc(const grape::script::ConfigTable& table) {
   const auto scope_str = table.read<std::string>("scope")
-                             .transform_error([](const auto& err) {
+                             .transform_error([](const auto& err) -> auto {
                                const auto msg = std::format("IPC scope {}", toString(err));
                                grape::panic<grape::Exception>(msg);
                                return grape::script::ConfigTable::Error{};  // unreachable
@@ -110,7 +110,7 @@ auto initIpc(const grape::script::ConfigTable& table) {
   // NOLINTBEGIN(bugprone-unchecked-optional-access)
   const auto scope =
       grape::enums::cast<grape::ipc::Config::Scope>(scope_str)
-          .or_else([&scope_str]() {
+          .or_else([&scope_str]() -> std::optional<grape::ipc::Config::Scope> {
             const auto msg = std::format("Invalid IPC scope={}", scope_str);
             grape::panic<grape::Exception>(msg);
             return std::optional<grape::ipc::Config::Scope>{ std::nullopt };  // unreachable
@@ -138,7 +138,7 @@ void init(int argc, const char** argv, const std::string& description) {
       grape::conio::ProgramDescription(description)
           .declareOption<std::string>("config", "Application config file path", "config/app.lua")
           .parse(argc, argv)
-          .transform_error([](const auto& err) {
+          .transform_error([](const auto& err) -> auto {
             grape::panic<grape::Exception>(toString(err));
             return conio::ProgramOptions::Error{};  // unreachable
           })

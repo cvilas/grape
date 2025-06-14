@@ -45,7 +45,7 @@ struct Range {
 /// Generates a list containing string representations for values in an enum type
 template <typename Enum>
   requires std::is_enum_v<Enum>
-static constexpr auto NAMES_LIST = ([]<auto... Es>(std::integer_sequence<int, Es...>) {
+static constexpr auto NAMES_LIST = ([]<auto... Es>(std::integer_sequence<int, Es...>) -> auto {
   return std::array{ detail::extractAndAllocateEnumeratorName<static_cast<Enum>(Es)>()... };
 })(detail::make_integer_range<Range<Enum>::MIN, Range<Enum>::MAX + 1>{});
 

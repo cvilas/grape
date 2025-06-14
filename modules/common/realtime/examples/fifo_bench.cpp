@@ -20,7 +20,7 @@ void bmFifoWrite(benchmark::State& state) {
   auto fifo = grape::realtime::FIFOBuffer(config);
 
   std::vector<std::byte> data(data_size);
-  const auto writer = [&data](std::span<std::byte> buffer) {
+  const auto writer = [&data](std::span<std::byte> buffer) -> void {
     std::memcpy(buffer.data(), data.data(), data.size());
   };
   bool succeeded = false;
@@ -43,7 +43,7 @@ void bmFifoRead(benchmark::State& state) {
   auto fifo = grape::realtime::FIFOBuffer(config);
 
   std::vector<std::byte> data(data_size);
-  const auto writer = [&data](std::span<std::byte> buffer) {
+  const auto writer = [&data](std::span<std::byte> buffer) -> void {
     std::memcpy(buffer.data(), data.data(), data.size());
   };
 
@@ -54,7 +54,7 @@ void bmFifoRead(benchmark::State& state) {
     }
   }
 
-  const auto reader = [&data](std::span<const std::byte> buffer) {
+  const auto reader = [&data](std::span<const std::byte> buffer) -> void {
     std::memcpy(data.data(), buffer.data(), buffer.size_bytes());
   };
 

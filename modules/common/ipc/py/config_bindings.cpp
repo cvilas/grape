@@ -19,7 +19,7 @@ void bindConfig(pybind11::module_& module) {
       .def(pybind11::init<>())
       .def_readwrite("name", &Config::name)
       .def_readwrite("scope", &Config::scope)
-      .def("__repr__", [](const Config& config) {
+      .def("__repr__", [](const Config& config) -> std::string {
         return "Config(name='" + config.name +
                "', scope=" + (config.scope == Config::Scope::Host ? "Host" : "Network") + ")";
       });

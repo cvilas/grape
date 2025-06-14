@@ -17,7 +17,7 @@ auto main() -> int {
     grape::ipc::init(grape::ipc::Config{});
     const auto topic = grape::ipc::Topic{ .name = "hello_world" };
 
-    const auto match_cb = [](const grape::ipc::Match& match) {
+    const auto match_cb = [](const grape::ipc::Match& match) -> void {
       if (match.status == grape::ipc::Match::Status::Matched) {
         std::println("\nMatched");
       } else if (match.status == grape::ipc::Match::Status::Unmatched) {

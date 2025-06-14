@@ -18,7 +18,7 @@ template <Formatter F>
 struct ConsoleSink : public Sink {
   void write(const Record& record) override {
     if (::isatty(STDERR_FILENO) != 0) {  // color format the logs if going to terminal
-      const auto* const color = [](Severity sev) {
+      const auto* const color = [](Severity sev) -> auto {
         switch (sev) {
             // clang-format off
           case Severity::Critical: return "\033[37;41m";  // white on red
