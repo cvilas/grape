@@ -1,4 +1,4 @@
-name: CI pipeline
+name: Build using LLVM toolchain
 
 on:
   push:

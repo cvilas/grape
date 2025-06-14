@@ -5,7 +5,7 @@ FROM ubuntu:24.04
 ARG ARCH=x64 # CPU architecture (x64, arm64)
 
 RUN apt-get update && \
-    apt-get install -y curl sudo gosu git libicu74 && \
+    apt-get install -y curl sudo gosu git git-lfs libicu74 && \
     useradd -m runner && \
     echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
@@ -21,7 +21,8 @@ ENV RUNNER_TARBALL=actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz
 
 RUN curl -o ${RUNNER_TARBALL} -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/${RUNNER_TARBALL} && \
     tar xzf ./${RUNNER_TARBALL} && \
-    rm ${RUNNER_TARBALL}
+    rm ${RUNNER_TARBALL} && \
+    ./bin/installdependencies.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
