@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build-and-test:
+  setup:
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false # Allow other builds to continue even if one fails
@@ -17,8 +17,8 @@ jobs:
             name: x86_64            
           - runner: [self-hosted, ARM64]
             name: aarch64
-
-    name: Build and Test (${{ matrix.name }})
+  
+    name: Setup (${{ matrix.name }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,21 +26,6 @@ jobs:
       - name: Fetch history for versioning
         run: |
           git fetch --unshallow --tags || git fetch --depth=100 --tags
-
-      - name: Install system dependencies and utilities 
-        run: |
-          chmod +x ./toolchains/install_base.sh
-          ./toolchains/install_base.sh
-
-      - name: Install CMake
-        run: |
-          chmod +x ./toolchains/install_cmake.sh
-          ./toolchains/install_cmake.sh
-
-      - name: Install LLVM/Clang toolchain
-        run: |
-          chmod +x ./toolchains/install_llvm.sh
-          ./toolchains/install_llvm.sh
 
       - name: Set cache directories
         run: |
@@ -57,6 +42,39 @@ jobs:
           restore-keys: |
             grape-${{ runner.arch }}-${{ runner.os }}-cache
 
+      - name: Install system dependencies and utilities 
+        run: |
+          chmod +x ./toolchains/install_base.sh
+          ./toolchains/install_base.sh
+
+      - name: Install CMake
+        run: |
+          chmod +x ./toolchains/install_cmake.sh
+          ./toolchains/install_cmake.sh
+
+      - name: Install LLVM/Clang toolchain
+        run: |
+          chmod +x ./toolchains/install_llvm.sh
+          ./toolchains/install_llvm.sh
+
+      - name: Install GCC toolchain
+        run: |
+          chmod +x ./toolchains/install_gcc.sh
+          ./toolchains/install_gcc.sh
+
+  build-and-test-clang:
+    needs: setup
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false # Allow other builds to continue even if one fails
+      matrix:
+        include:
+          - runner: [self-hosted, X64]
+            name: x86_64            
+          - runner: [self-hosted, ARM64]
+            name: aarch64
+    name: Build and Test (Clang, ${{ matrix.name }})
+    steps:
       - name: Configure
         run: cmake --preset clang -DLINTER_WARNING_IS_ERROR=ON
       
@@ -70,11 +88,46 @@ jobs:
           fi
 
       - name: Build
-        run: cmake --build build/clang --target all examples tests
-
-      - name: Report ccache stats
-        run: ccache -s        
+        run: cmake --build build/clang --target all examples tests      
 
       - name: Run unit tests
         run: cmake --build build/clang --target check
+  
+  build-and-test-gcc:
+    needs: setup
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false # Allow other builds to continue even if one fails
+      matrix:
+        include:
+          - runner: [self-hosted, X64]
+            name: x86_64            
+          - runner: [self-hosted, ARM64]
+            name: aarch64
+    name: Build and Test (GCC, ${{ matrix.name }})
+    steps:
+      - name: Configure
+        run: cmake --preset native -DLINTER_WARNING_IS_ERROR=ON
+
+      - name: Build
+        run: cmake --build build/native --target all examples tests    
+
+      - name: Run unit tests
+        run: cmake --build build/native --target check
+
+  report-cache:
+    needs: [build-and-test-clang, build-and-test-gcc]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false # Allow other builds to continue even if one fails
+      matrix:
+        include:
+          - runner: [self-hosted, X64]
+            name: x86_64            
+          - runner: [self-hosted, ARM64]
+            name: aarch64
+    name: Report Cache Stats (${{ matrix.name }})
+    steps:
+      - name: Report ccache stats
+        run: ccache -s
         
