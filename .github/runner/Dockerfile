@@ -1,11 +1,13 @@
 # Dockerfile for GitHub Actions self-hosted runner
 
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 ARG ARCH=x64 # CPU architecture (x64, arm64)
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
-    apt-get install -y curl sudo gosu git git-lfs libicu74 && \
+    apt-get install -y curl sudo gosu git git-lfs libicu70 tzdata && \
     useradd -m runner && \
     echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
