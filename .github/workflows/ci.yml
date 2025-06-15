@@ -1,4 +1,4 @@
-name: Build using LLVM toolchain
+name: Build and test
 
 on:
   push:
@@ -41,6 +41,11 @@ jobs:
         run: |
           chmod +x ./toolchains/install_llvm.sh
           ./toolchains/install_llvm.sh
+      
+      - name: Install GCC toolchain
+        run: |
+          chmod +x ./toolchains/install_gcc.sh
+          ./toolchains/install_gcc.sh
 
       - name: Set cache directories
         run: |
@@ -57,7 +62,7 @@ jobs:
           restore-keys: |
             grape-${{ runner.arch }}-${{ runner.os }}-cache
 
-      - name: Configure
+      - name: Configure (clang)
         run: cmake --preset clang -DLINTER_WARNING_IS_ERROR=ON
       
       - name: Check formatting
@@ -69,12 +74,21 @@ jobs:
             exit 1
           fi
 
-      - name: Build
+      - name: Build (clang)
         run: cmake --build build/clang --target all examples tests
+      
+      - name: Run unit tests (clang)
+        run: cmake --build build/clang --target check
+
+      - name: Configure (gcc)
+        run: cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF
+      
+      - name: Build (gcc)
+        run: cmake --build build/native --target all examples tests -j $(nproc)
+      
+      - name: Run unit tests (gcc)
+        run: cmake --build build/native --target check
 
       - name: Report ccache stats
         run: ccache -s        
-
-      - name: Run unit tests
-        run: cmake --build build/clang --target check
         
