@@ -1,4 +1,4 @@
-# Self-hosted GitHub Actions Runner (Docker, Ubuntu 24.04)
+# Self-hosted GitHub Actions Runner (Docker, Ubuntu)
 
 Instructions to run a persistent, self-hosted GitHub Actions runner using Docker and Docker Compose.
 
