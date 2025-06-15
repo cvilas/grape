@@ -11,9 +11,6 @@ RUN apt-get update && \
 
 WORKDIR /home/runner
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Install GitHub Actions runner (update version as needed)
 ENV RUNNER_VERSION=2.325.0
 ENV RUNNER_ARCH=${ARCH}
@@ -23,6 +20,9 @@ RUN curl -o ${RUNNER_TARBALL} -L https://github.com/actions/runner/releases/down
     tar xzf ./${RUNNER_TARBALL} && \
     rm ${RUNNER_TARBALL} && \
     ./bin/installdependencies.sh
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 

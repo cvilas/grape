@@ -18,7 +18,7 @@ wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
 chmod +x llvm.sh
 sudo ./llvm.sh $LLVM_VERSION
 
-sudo apt install -y \
+sudo apt-get install -y \
   clang-$LLVM_VERSION clang-tidy-$LLVM_VERSION clang-format-$LLVM_VERSION \
   llvm-$LLVM_VERSION-dev libc++-$LLVM_VERSION-dev libc++abi-$LLVM_VERSION-dev \
   libomp-$LLVM_VERSION-dev libunwind-$LLVM_VERSION-dev lld-$LLVM_VERSION
