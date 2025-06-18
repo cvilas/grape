@@ -20,3 +20,9 @@
 - Find the option: "Require approval for all outside collaborators" (or similar wording).
 - Check the box to enable it.
 - Click Save if prompted.
+
+## TODO
+- Build for both clang and gcc
+- Setup configuration presets for applications, developer and CI builds
+- After PR is merged and newly tagged, build and generate deployment artifacts (tarball)
+- Separate [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html) build on realtime module 

@@ -6,8 +6,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 
 - [x] Implement joystick interface for Linux
 - [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
-- [ ] Implement IPC service/query API [#130]
-- [ ] Implement distributed software estop (i.e. trigger a specific action on loss of signal from any of the remotes)
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] 3D scenegraph using SDL
@@ -34,7 +32,9 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Implement CANOpen interface for Linux
   - [ ] Steam Deck as operator controller: joystick teleop, FPV and mission control
   - [ ] Record and playback time-series multi-modal data
-- [ ] CI updates (See TODO in <../.gitlab/workflows/build_and_test.yml>)
+- [ ] CI updates (See TODO in [README](../.github/workflows/README.md))
+- [ ] Support C++26
+  - [ ] Auto serdes using [variadic structured bindings](https://youtu.be/qIDFyhtUMnQ)
 
 ## Study
 
