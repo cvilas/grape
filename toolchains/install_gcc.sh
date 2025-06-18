@@ -5,7 +5,7 @@
 
 set -e
 
-GCC_VERSION=15
+GCC_VERSION=14
 
 sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 sudo apt-get update

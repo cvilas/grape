@@ -4,7 +4,7 @@
 
 OS               |  Architecture   | Toolchain
 -----------------|-----------------|----------------
-Ubuntu 24.04 LTS | Aarch64, X86_64 | CMake-4, clang-21/libc++, gcc-15/libstdc++
+Ubuntu 24.04 LTS | Aarch64, X86_64 | CMake-4, clang-20/libc++, gcc-14/libstdc++
 
 ## Setup development environment
 
