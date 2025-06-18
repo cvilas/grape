@@ -62,7 +62,8 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toControlType(unsigned int ev_type) -> grape::joystick::ControlType {
+[[maybe_unused]] constexpr auto toControlType(unsigned int ev_type)
+    -> grape::joystick::ControlType {
   using ControlType = grape::joystick::ControlType;
   switch (ev_type) {
       // clang-format off
@@ -74,9 +75,9 @@ constexpr auto toControlType(unsigned int ev_type) -> grape::joystick::ControlTy
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toControlId(unsigned int code) -> grape::joystick::ControlId {
+constexpr auto toControlId(unsigned int ev_code) -> grape::joystick::ControlId {
   using ControlId = grape::joystick::ControlId;
-  switch (code) {
+  switch (ev_code) {
       // clang-format off
     case ABS_X: return ControlId::AxisX ;
     case ABS_Y: return ControlId::AxisY ;
