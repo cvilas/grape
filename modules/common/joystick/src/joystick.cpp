@@ -16,8 +16,6 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-#include "grape/joystick/range.h"
-
 namespace {
 
 //=================================================================================================
@@ -238,12 +236,27 @@ auto readDeviceInfo(const std::filesystem::path& path)
 
 //=================================================================================================
 struct Joystick::Impl {
+  [[nodiscard]] auto normalise(ControlId axis, std::int32_t value) const -> float;
+  struct AxisRange {
+    float center{};
+    float scale{};
+  };
   static constexpr auto INVALID_FD = -1;
   int device_fd{ INVALID_FD };
   int epoll_fd{ INVALID_FD };
-  std::unordered_map<ControlId, Range<std::int32_t>> range;
+  std::unordered_map<ControlId, AxisRange> range;
   EventCallback callback{ nullptr };
 };
+
+//-------------------------------------------------------------------------------------------------
+auto Joystick::Impl::normalise(ControlId axis, std::int32_t value) const -> float {
+  auto it = range.find(axis);
+  if (it == range.end()) {
+    return 0.F;
+  }
+  const auto& axis_range = it->second;
+  return (static_cast<float>(value) - axis_range.center) * axis_range.scale;
+}
 
 //-------------------------------------------------------------------------------------------------
 Joystick::Joystick(EventCallback&& cb) : impl_(std::make_unique<Impl>()) {
@@ -260,14 +273,12 @@ auto Joystick::open(const std::filesystem::path& device_path) -> bool {
   close();
 
   const auto tp = Clock::now();
-  const auto* const device_path_str = device_path.c_str();
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-  impl_->device_fd = ::open(device_path_str, O_RDONLY | O_NONBLOCK);
+  impl_->device_fd = ::open(device_path.c_str(), O_RDONLY | O_NONBLOCK);
   if (impl_->device_fd < 0) {
     const auto err = std::error_code(errno, std::system_category());
-    impl_->callback(ErrorEvent{
-        .timestamp = Clock::now(),
-        .message = std::format("Cannot open device '{}': {}", device_path_str, err.message()) });
+    impl_->callback(ErrorEvent{ .timestamp = Clock::now(),
+                                .message = std::format("Cannot open device: {}", err.message()) });
     return false;
   }
 
@@ -381,7 +392,7 @@ auto Joystick::wait(std::chrono::milliseconds timeout) -> bool {
       const auto control_id = toControlId(iev.code);
       impl_->callback(AxisEvent{ .timestamp = toTimePoint(iev.time),
                                  .id = control_id,
-                                 .value = normalise(control_id, iev.value) });
+                                 .value = impl_->normalise(control_id, iev.value) });
     }
     if (iev.type == EV_KEY) {
       impl_->callback(ButtonEvent{ .timestamp = toTimePoint(iev.time),
@@ -451,26 +462,17 @@ auto Joystick::readState() -> bool {
                                                          toString(control_id), err.message()) });
       return false;
     }
-    impl_->range[toControlId(code)] = { .minimum = absinfo.minimum,
-                                        .maximum = absinfo.maximum,
-                                        .fuzz = absinfo.fuzz,
-                                        .flat = absinfo.flat };
+    const auto range = absinfo.maximum - absinfo.minimum;
+    impl_->range[toControlId(code)] = {
+      // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+      .center = static_cast<float>(absinfo.maximum + absinfo.minimum) / 2.F,
+      .scale = (range != 0) ? (2.F / static_cast<float>(range)) : 0.F
+      // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
+    };
     impl_->callback(AxisEvent{
-        .timestamp = tp, .id = control_id, .value = normalise(control_id, absinfo.value) });
+        .timestamp = tp, .id = control_id, .value = impl_->normalise(control_id, absinfo.value) });
   }
   return true;
-}
-
-//-------------------------------------------------------------------------------------------------
-auto Joystick::normalise(ControlId axis, std::int32_t value) const -> float {
-  auto it = impl_->range.find(axis);
-  if (it != impl_->range.end()) {
-    const auto& range = it->second;
-    const auto center = 0.5F * static_cast<float>(range.maximum + range.minimum);
-    const auto half_range = 0.5F * static_cast<float>(range.maximum - range.minimum);
-    return (half_range > 0.F) ? ((static_cast<float>(value) - center) / half_range) : 0.F;
-  }
-  return 0.F;
 }
 
 }  // namespace grape::joystick
