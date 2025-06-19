@@ -73,7 +73,7 @@ private:
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toControlId(unsigned int ev_code) -> grape::joystick::ControlId {
+[[nodiscard]] constexpr auto toControlId(unsigned int ev_code) -> grape::joystick::ControlId {
   using ControlId = grape::joystick::ControlId;
   switch (ev_code) {
       // clang-format off
@@ -143,6 +143,9 @@ constexpr auto toControlId(unsigned int ev_code) -> grape::joystick::ControlId {
     case BTN_BASE4: return ControlId::ButtonBase4 ;
     case BTN_BASE5: return ControlId::ButtonBase5 ;
     case BTN_BASE6: return ControlId::ButtonBase6 ;
+    case (BTN_BASE6+1): return ControlId::ButtonBase7 ; //unofficial extensions
+    case (BTN_BASE6+2): return ControlId::ButtonBase8 ; // ..
+    case (BTN_BASE6+3): return ControlId::ButtonBase9 ; // ..
     case BTN_DEAD: return ControlId::ButtonDead ;
     case BTN_A: return ControlId::ButtonA ;
     case BTN_B: return ControlId::ButtonB ;
