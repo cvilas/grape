@@ -58,7 +58,6 @@ public:
 
 private:
   [[nodiscard]] auto readState() -> bool;
-  [[nodiscard]] auto normalise(ControlId axis, std::int32_t value) const -> float;
   struct Impl;
   std::unique_ptr<Impl> impl_{ nullptr };
 };

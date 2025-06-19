@@ -12,14 +12,8 @@ if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   return()
 endif()
 
-set(SOURCES
-    src/joystick.cpp
-    README.md
-    include/grape/joystick/controls.h
-    include/grape/joystick/device_info.h
-    include/grape/joystick/range.h
-    include/grape/joystick/events.h
-    include/grape/joystick/joystick.h)
+set(SOURCES README.md include/grape/joystick/controls.h include/grape/joystick/device_info.h
+            include/grape/joystick/events.h include/grape/joystick/joystick.h src/joystick.cpp)
 
 define_module_library(
   NAME joystick
