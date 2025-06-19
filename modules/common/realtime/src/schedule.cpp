@@ -92,7 +92,7 @@ auto setSchedule(Schedule schedule, pid_t pid) -> std::expected<void, Error> {
   (void)schedule;
   (void)pid;
   const auto err = std::make_error_code(std::errc::function_not_supported);
-  return std::unexpected(Error{ "(setScrhedule) ", err.message() });
+  return std::unexpected(Error{ "(setSchedule) ", err.message() });
 #endif
 }
 
