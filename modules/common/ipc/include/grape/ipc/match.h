@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <format>
 #include <functional>
 #include <string>
 
@@ -20,7 +21,7 @@ struct EntityId {
 };
 
 [[nodiscard]] constexpr auto toString(const EntityId& entity) -> std::string {
-  return entity.host.empty() ? "(unknown host)" : entity.host + ":" + std::to_string(entity.id);
+  return std::format("{}:{:#x}", entity.host.empty() ? "(unknown host)" : entity.host, entity.id);
 }
 
 //=================================================================================================
