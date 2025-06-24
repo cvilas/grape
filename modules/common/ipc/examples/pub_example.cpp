@@ -18,11 +18,7 @@ auto main() -> int {
     const auto topic = grape::ipc::Topic{ .name = "hello_world" };
 
     const auto match_cb = [](const grape::ipc::Match& match) -> void {
-      if (match.status == grape::ipc::Match::Status::Matched) {
-        std::println("\nMatched");
-      } else if (match.status == grape::ipc::Match::Status::Unmatched) {
-        std::println("\nUnmatched");
-      }
+      std::println("\n{} (host:'{}', id:{:#x})", toString(match.status), match.host, match.id);
     };
 
     auto publisher = grape::ipc::Publisher(topic, match_cb);

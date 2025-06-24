@@ -15,7 +15,8 @@
 namespace {
 
 //-------------------------------------------------------------------------------------------------
-auto toMatchEvent(const eCAL::SPubEventCallbackData& event_data) -> grape::ipc::Match {
+auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallbackData& event_data)
+    -> grape::ipc::Match {
   auto match_status = grape::ipc::Match::Status::Undefined;
   switch (event_data.event_type) {
     case eCAL::ePublisherEvent::none:
@@ -31,7 +32,9 @@ auto toMatchEvent(const eCAL::SPubEventCallbackData& event_data) -> grape::ipc::
       break;
   }
 
-  return { .status = match_status };
+  return { .id = topic_id.topic_id.entity_id,
+           .host = topic_id.topic_id.host_name,
+           .status = match_status };
 }
 }  // namespace
 
@@ -49,10 +52,10 @@ Publisher::Publisher(const Topic& topic, MatchCallback&& match_cb) {
     panic<Exception>("Not initialised");
   }
   const auto event_cb = [moved_match_cb = std::move(match_cb)](
-                            const eCAL::STopicId&,
+                            const eCAL::STopicId& topic_id,
                             const eCAL::SPubEventCallbackData& event_data) -> void {
     if (moved_match_cb != nullptr) {
-      moved_match_cb(toMatchEvent(event_data));
+      moved_match_cb(toMatchEvent(topic_id, event_data));
     }
   };
   impl_ = std::make_unique<Publisher::Impl>(topic.name, event_cb);
