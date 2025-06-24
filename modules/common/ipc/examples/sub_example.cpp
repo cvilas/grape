@@ -25,11 +25,7 @@ auto main() -> int {
     };
 
     const auto match_cb = [](const grape::ipc::Match& match) -> void {
-      if (match.status == grape::ipc::Match::Status::Matched) {
-        std::println("\nMatched");
-      } else if (match.status == grape::ipc::Match::Status::Unmatched) {
-        std::println("\nUnmatched");
-      }
+      std::println("\n{} (host:'{}', id:{:#x})", toString(match.status), match.host, match.id);
     };
 
     auto subscriber = grape::ipc::Subscriber(topic.name, data_cb, match_cb);
