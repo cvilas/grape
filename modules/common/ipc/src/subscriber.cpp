@@ -13,7 +13,8 @@
 namespace {
 
 //-------------------------------------------------------------------------------------------------
-auto toMatchEvent(const eCAL::SSubEventCallbackData& event_data) -> grape::ipc::Match {
+auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallbackData& event_data)
+    -> grape::ipc::Match {
   auto match_status = grape::ipc::Match::Status::Undefined;
   switch (event_data.event_type) {
     case eCAL::eSubscriberEvent::none:
@@ -28,7 +29,9 @@ auto toMatchEvent(const eCAL::SSubEventCallbackData& event_data) -> grape::ipc::
       match_status = grape::ipc::Match::Status::Unmatched;
       break;
   }
-  return { .status = match_status };
+  return { .id = topic_id.topic_id.entity_id,
+           .host = topic_id.topic_id.host_name,
+           .status = match_status };
 }
 }  // namespace
 
@@ -48,10 +51,10 @@ Subscriber::Subscriber(const std::string& topic, Subscriber::DataCallback&& data
   }
 
   const auto event_cb = [moved_match_cb = std::move(match_cb)](
-                            const eCAL::STopicId&,
+                            const eCAL::STopicId& topic_id,
                             const eCAL::SSubEventCallbackData& event_data) -> void {
     if (moved_match_cb != nullptr) {
-      moved_match_cb(toMatchEvent(event_data));
+      moved_match_cb(toMatchEvent(topic_id, event_data));
     }
   };
 
