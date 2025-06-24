@@ -35,6 +35,8 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] CI updates (See TODO in [README](../.github/workflows/README.md))
 - [ ] Support C++26
   - [ ] Auto serdes using [variadic structured bindings](https://youtu.be/qIDFyhtUMnQ)
+  - [ ] Message dispatch using [pattern matching](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf)
+  - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
 
 ## Study
 
