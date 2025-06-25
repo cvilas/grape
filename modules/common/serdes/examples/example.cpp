@@ -63,30 +63,12 @@ using Deserialiser = grape::serdes::Deserialiser<InStream>;
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] auto serialize(Serialiser& ser, const State& st) -> bool {
-  if (not ser.pack(st.name)) {
-    return false;
-  }
-  if (not ser.pack(st.timestamp)) {
-    return false;
-  }
-  if (not ser.pack(st.position)) {
-    return false;
-  }
-  return true;
+  return ser.pack(st.name) and ser.pack(st.timestamp) and ser.pack(st.position);
 }
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] auto deserialize(Deserialiser& des, State& st) -> bool {
-  if (not des.unpack(st.name)) {
-    return false;
-  }
-  if (not des.unpack(st.timestamp)) {
-    return false;
-  }
-  if (not des.unpack(st.position)) {
-    return false;
-  }
-  return true;
+  return des.unpack(st.name) and des.unpack(st.timestamp) and des.unpack(st.position);
 }
 
 }  // namespace

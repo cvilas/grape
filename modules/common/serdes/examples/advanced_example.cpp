@@ -47,7 +47,7 @@ auto main(int argc, const char* argv[]) -> int {
     // serialise
     auto ostream = OutStream();
     auto serialiser = Serialiser(ostream);
-    if (not pack(serialiser, pose)) {
+    if (not serialiser.pack(pose)) {
       std::println("Serialisation error. Exiting");
       return EXIT_FAILURE;
     }
@@ -57,7 +57,7 @@ auto main(int argc, const char* argv[]) -> int {
     auto istream = InStream({ ostream.data(), ostream.size() });
     auto pose2 = PoseStamped{};
     auto deserialiser = Deserialiser(istream);
-    if (not unpack(deserialiser, pose2)) {
+    if (not deserialiser.unpack(pose2)) {
       std::println("Deserialisation error. Exiting");
       return EXIT_FAILURE;
     }

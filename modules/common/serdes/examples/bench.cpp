@@ -21,7 +21,7 @@ void bmSerialize(benchmark::State& state) {
   for (auto st : state) {
     (void)st;
     auto serializer = grape::serdes::Serialiser(buf);
-    if (not pack(serializer, pos)) {
+    if (not serializer.pack(pos)) {
       throw std::runtime_error("Serialisation error");
     }
 
@@ -35,7 +35,7 @@ void bmDeserialize(benchmark::State& state) {
   const auto pos = PoseStamped();
   auto obuf = grape::serdes::OutStream<BUFFER_INIT_SIZE>();
   auto serializer = grape::serdes::Serialiser(obuf);
-  if (not pack(serializer, pos)) {
+  if (not serializer.pack(pos)) {
     throw std::runtime_error("Serialisation error");
   }
 
@@ -44,7 +44,7 @@ void bmDeserialize(benchmark::State& state) {
     auto ibuf = grape::serdes::InStream({ obuf.data(), obuf.size() });
     auto deserializer = grape::serdes::Deserialiser(ibuf);
     PoseStamped deserialized_pose;
-    if (not unpack(deserializer, deserialized_pose)) {
+    if (not deserializer.unpack(deserialized_pose)) {
       throw std::runtime_error("Deserialisation error");
     }
 

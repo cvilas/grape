@@ -33,96 +33,40 @@ struct PoseStamped {
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::WritableStream OutStream>
-[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const Position& pos) -> bool {
-  if (not ser.pack(pos.x)) {
-    return false;
-  }
-  if (not ser.pack(pos.y)) {
-    return false;
-  }
-  if (not ser.pack(pos.z)) {
-    return false;
-  }
-  return true;
+[[nodiscard]] auto serialise(grape::serdes::Serialiser<OutStream>& ser, const Position& pos)
+    -> bool {
+  return ser.pack(pos.x) and ser.pack(pos.y) and ser.pack(pos.z);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::ReadableStream InStream>
-[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, Position& pos) -> bool {
-  if (not des.unpack(pos.x)) {
-    return false;
-  }
-  if (not des.unpack(pos.y)) {
-    return false;
-  }
-  if (not des.unpack(pos.z)) {
-    return false;
-  }
-  return true;
+[[nodiscard]] auto deserialise(grape::serdes::Deserialiser<InStream>& des, Position& pos) -> bool {
+  return des.unpack(pos.x) and des.unpack(pos.y) and des.unpack(pos.z);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::WritableStream OutStream>
-[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const Quaternion& qt) -> bool {
-  if (not ser.pack(qt.x)) {
-    return false;
-  }
-  if (not ser.pack(qt.y)) {
-    return false;
-  }
-  if (not ser.pack(qt.z)) {
-    return false;
-  }
-  if (not ser.pack(qt.w)) {
-    return false;
-  }
-  return true;
+[[nodiscard]] auto serialise(grape::serdes::Serialiser<OutStream>& ser, const Quaternion& qt)
+    -> bool {
+  return ser.pack(qt.x) and ser.pack(qt.y) and ser.pack(qt.z) and ser.pack(qt.w);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::ReadableStream InStream>
-[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, Quaternion& qt) -> bool {
-  if (not des.unpack(qt.x)) {
-    return false;
-  }
-  if (not des.unpack(qt.y)) {
-    return false;
-  }
-  if (not des.unpack(qt.z)) {
-    return false;
-  }
-  if (not des.unpack(qt.w)) {
-    return false;
-  }
-  return true;
+[[nodiscard]] auto deserialise(grape::serdes::Deserialiser<InStream>& des, Quaternion& qt) -> bool {
+  return des.unpack(qt.x) and des.unpack(qt.y) and des.unpack(qt.z) and des.unpack(qt.w);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::WritableStream OutStream>
-[[nodiscard]] auto pack(grape::serdes::Serialiser<OutStream>& ser, const PoseStamped& pos) -> bool {
-  if (not ser.pack(pos.nanoseconds)) {
-    return false;
-  }
-  if (not pack(ser, pos.position)) {
-    return false;
-  }
-  if (not pack(ser, pos.orientation)) {
-    return false;
-  }
-  return true;
+[[nodiscard]] auto serialise(grape::serdes::Serialiser<OutStream>& ser, const PoseStamped& pos)
+    -> bool {
+  return ser.pack(pos.nanoseconds) and ser.pack(pos.position) and ser.pack(pos.orientation);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <grape::serdes::ReadableStream InStream>
-[[nodiscard]] auto unpack(grape::serdes::Deserialiser<InStream>& des, PoseStamped& pos) -> bool {
-  if (not des.unpack(pos.nanoseconds)) {
-    return false;
-  }
-  if (not unpack(des, pos.position)) {
-    return false;
-  }
-  if (not unpack(des, pos.orientation)) {
-    return false;
-  }
-  return true;
+[[nodiscard]] auto deserialise(grape::serdes::Deserialiser<InStream>& des, PoseStamped& pos)
+    -> bool {
+  return des.unpack(pos.nanoseconds) and des.unpack(pos.position) and des.unpack(pos.orientation);
 }

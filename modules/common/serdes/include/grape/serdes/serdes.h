@@ -5,25 +5,14 @@
 #pragma once
 
 #include <array>
-#include <bit>  // for endian check
 #include <span>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "grape/serdes/concepts.h"
 
 namespace grape::serdes {
-
-//-------------------------------------------------------------------------------------------------
-// Defines the concept of arithmetic data types, including bool and char
-template <typename T>
-concept arithmetic = std::integral<T> || std::floating_point<T>;
-
-// Some preconditions for interoperability
-static_assert(sizeof(float) == 4);
-static_assert(sizeof(double) == 2 * sizeof(float));
-static_assert(sizeof(std::size_t) == sizeof(std::uint64_t));
-static_assert(std::endian::native == std::endian::little);
 
 //=================================================================================================
 /// @brief Simple serialiser that just packs bytes into a stream buffer
@@ -48,12 +37,26 @@ public:
 
   template <arithmetic T>
   [[nodiscard]] auto pack(const std::vector<T>& data) -> bool {
-    return packWithSize(std::span<const T>{ data.begin(), data.size() });
+    return packWithSize(std::span<const T>{ data.data(), data.size() });
   }
 
   template <arithmetic T, std::size_t N>
   [[nodiscard]] auto pack(const std::array<T, N>& data) -> bool {
-    return pack(std::span<const T>{ data.begin(), data.end() });
+    return pack(std::span<const T>{ data.data(), data.size() });
+  }
+
+  template <typename... Types>
+  [[nodiscard]] auto pack(const std::variant<Types...>& value) -> bool {
+    if (not this->pack(value.index())) {
+      return false;
+    }
+    return std::visit([this](const auto& val) { return this->pack(val); }, value);
+  }
+
+  template <typename T>
+    requires Serialisable<T, Stream>
+  [[nodiscard]] auto pack(const T& value) -> bool {
+    return serialise(*this, value);  // call user-defined function
   }
 
 private:
@@ -113,7 +116,7 @@ public:
       return false;
     }
     data.resize(sz);
-    if (not unpack(std::span<T>{ data.begin(), sz })) {
+    if (not unpack(std::span<T>{ data.data(), sz })) {
       stream_.rewind(sizeof(std::uint32_t));  // undo decoding size
       return false;
     }
@@ -122,7 +125,46 @@ public:
 
   template <arithmetic T, std::size_t N>
   [[nodiscard]] auto unpack(std::array<T, N>& data) -> bool {
-    return unpack(std::span<T>{ data.begin(), data.end() });
+    return unpack(std::span<T>{ data.data(), data.size() });
+  }
+
+  template <typename... Types>
+  [[nodiscard]] auto unpack(std::variant<Types...>& value) -> bool {
+    auto idx = std::size_t{};
+    if (not this->unpack(idx)) {
+      return false;
+    }
+
+    if (idx >= sizeof...(Types)) {
+      return false;  // invalid index
+    }
+
+    bool success = false;
+
+    // Helper to unpack at a specific index
+    auto unpack_at_index = [&]<std::size_t I>() {
+      if (idx == I) {
+        using T = std::variant_alternative_t<I, std::variant<Types...>>;
+        T val{};
+        if (this->unpack(val)) {
+          value = std::move(val);
+          success = true;
+        }
+      }
+    };
+
+    // Try to unpack at each possible index
+    [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+      (unpack_at_index.template operator()<Is>(), ...);
+    }(std::make_index_sequence<sizeof...(Types)>{});
+
+    return success;
+  }
+
+  template <typename T>
+    requires Deserialisable<T, Stream>
+  [[nodiscard]] auto unpack(T& value) -> bool {
+    return deserialise(*this, value);  // call user-defined function
   }
 
 private:
