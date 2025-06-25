@@ -62,12 +62,12 @@ using Serialiser = grape::serdes::Serialiser<OutStream>;
 using Deserialiser = grape::serdes::Deserialiser<InStream>;
 
 //-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto serialize(Serialiser& ser, const State& st) -> bool {
+[[nodiscard]] auto serialise(Serialiser& ser, const State& st) -> bool {
   return ser.pack(st.name) and ser.pack(st.timestamp) and ser.pack(st.position);
 }
 
 //-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto deserialize(Deserialiser& des, State& st) -> bool {
+[[nodiscard]] auto deserialise(Deserialiser& des, State& st) -> bool {
   return des.unpack(st.name) and des.unpack(st.timestamp) and des.unpack(st.position);
 }
 
@@ -86,7 +86,7 @@ auto main(int argc, const char* argv[]) -> int {
     // serialise
     auto ostream = OutStream();
     auto serialiser = Serialiser(ostream);
-    if (not serialize(serialiser, state)) {
+    if (not serialiser.pack(state)) {
       std::println("Serialisation error. Exiting");
       return EXIT_FAILURE;
     }
@@ -111,7 +111,7 @@ auto main(int argc, const char* argv[]) -> int {
     // deserialise
     auto state2 = State{};
     auto deserialiser = Deserialiser(istream);
-    if (not deserialize(deserialiser, state2)) {
+    if (not deserialiser.unpack(state2)) {
       std::println("Deserialisation error. Exiting");
       return EXIT_FAILURE;
     }
