@@ -62,7 +62,7 @@ TEST_CASE("Serialize string", "[serdes]") {
   auto ser = Serialiser(ostream);
 
   REQUIRE(ser.pack(std::string{ "Hello, World!" }));
-  REQUIRE(ostream.size() == sizeof(std::uint32_t) + 13);  // 13 is the length of "Hello, World!"
+  REQUIRE(ostream.size() == sizeof(std::size_t) + 13);  // 13 is the length of "Hello, World!"
 
   auto istream = InStream({ ostream.data(), ostream.size() });
   auto des = Deserialiser(istream);
@@ -79,7 +79,7 @@ TEST_CASE("Serialize vector", "[serdes]") {
 
   std::vector<int> vec{ 1, 2, 3, 4, 5 };
   REQUIRE(ser.pack(vec));
-  REQUIRE(ostream.size() == sizeof(std::uint32_t) + (vec.size() * sizeof(int)));
+  REQUIRE(ostream.size() == sizeof(std::size_t) + (vec.size() * sizeof(int)));
 
   auto istream = InStream({ ostream.data(), ostream.size() });
   auto des = Deserialiser(istream);
