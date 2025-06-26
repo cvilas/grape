@@ -29,8 +29,8 @@ auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallbackD
       match_status = grape::ipc::Match::Status::Unmatched;
       break;
   }
-  return { .id = topic_id.topic_id.entity_id,
-           .host = topic_id.topic_id.host_name,
+  return { .remote_entity = { .host = topic_id.topic_id.host_name,
+                              .id = topic_id.topic_id.entity_id },
            .status = match_status };
 }
 }  // namespace
@@ -60,16 +60,18 @@ Subscriber::Subscriber(const std::string& topic, Subscriber::DataCallback&& data
 
   impl_ = std::make_unique<Subscriber::Impl>(topic, event_cb);
 
-  impl_->SetReceiveCallback(
-      [moved_data_cb = std::move(data_cb)](const eCAL::STopicId&, const eCAL::SDataTypeInformation&,
-                                           const eCAL::SReceiveCallbackData& data) -> void {
-        const auto tp =
-            std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
-        if (moved_data_cb != nullptr) {
-          moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
-                          .publish_time = tp });
-        }
-      });
+  impl_->SetReceiveCallback([moved_data_cb = std::move(data_cb)](
+                                const eCAL::STopicId& id, const eCAL::SDataTypeInformation&,
+                                const eCAL::SReceiveCallbackData& data) -> void {
+    const auto tp =
+        std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
+    if (moved_data_cb != nullptr) {
+      moved_data_cb(
+          { .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
+            .publish_time = tp,
+            .publisher = { .host = id.topic_id.host_name, .id = id.topic_id.entity_id } });
+    }
+  });
 }
 
 //-------------------------------------------------------------------------------------------------

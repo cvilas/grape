@@ -19,6 +19,7 @@ namespace grape::ipc {
 struct Sample {
   std::span<const std::byte> data;
   std::chrono::system_clock::time_point publish_time;
+  EntityId publisher;
 };
 
 //=================================================================================================

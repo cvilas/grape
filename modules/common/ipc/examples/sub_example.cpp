@@ -21,11 +21,12 @@ auto main() -> int {
     };
 
     const auto data_cb = [&from_bytes](const grape::ipc::Sample& sample) -> void {
-      std::println("Received message: '{}'", from_bytes(sample.data));
+      std::println("Received message: '{}' (from {})", from_bytes(sample.data),
+                   toString(sample.publisher));
     };
 
     const auto match_cb = [](const grape::ipc::Match& match) -> void {
-      std::println("\n{} (host:'{}', id:{:#x})", toString(match.status), match.host, match.id);
+      std::println("\n{} (entity: {})", toString(match.status), toString(match.remote_entity));
     };
 
     auto subscriber = grape::ipc::Subscriber(topic.name, data_cb, match_cb);

@@ -18,7 +18,7 @@ auto main() -> int {
     const auto topic = grape::ipc::Topic{ .name = "hello_world" };
 
     const auto match_cb = [](const grape::ipc::Match& match) -> void {
-      std::println("\n{} (host:'{}', id:{:#x})", toString(match.status), match.host, match.id);
+      std::println("\n{} (entity: {})", toString(match.status), toString(match.remote_entity));
     };
 
     auto publisher = grape::ipc::Publisher(topic, match_cb);
