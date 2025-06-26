@@ -31,9 +31,8 @@ auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallbackD
       match_status = grape::ipc::Match::Status::Unmatched;
       break;
   }
-
-  return { .id = topic_id.topic_id.entity_id,
-           .host = topic_id.topic_id.host_name,
+  return { .remote_entity = { .host = topic_id.topic_id.host_name,
+                              .id = topic_id.topic_id.entity_id },
            .status = match_status };
 }
 }  // namespace
