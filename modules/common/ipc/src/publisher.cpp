@@ -46,7 +46,7 @@ struct Publisher::Impl : public eCAL::CPublisher {
 };
 
 //-------------------------------------------------------------------------------------------------
-Publisher::Publisher(const Topic& topic, MatchCallback&& match_cb) {
+Publisher::Publisher(const std::string& topic, MatchCallback&& match_cb) {
   if (not ok()) {
     panic<Exception>("Not initialised");
   }
@@ -57,7 +57,7 @@ Publisher::Publisher(const Topic& topic, MatchCallback&& match_cb) {
       moved_match_cb(toMatchEvent(topic_id, event_data));
     }
   };
-  impl_ = std::make_unique<Publisher::Impl>(topic.name, event_cb);
+  impl_ = std::make_unique<Publisher::Impl>(topic, event_cb);
 }
 
 //-------------------------------------------------------------------------------------------------

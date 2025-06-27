@@ -20,8 +20,7 @@ set(SOURCES
     match_bindings.cpp
     publisher_bindings.cpp
     session_bindings.cpp
-    subscriber_bindings.cpp
-    topic_bindings.cpp)
+    subscriber_bindings.cpp)
 
 pybind11_add_module(${PY_MODULE_NAME} ${SOURCES})
 target_link_libraries(${PY_MODULE_NAME} PRIVATE grape::ipc)

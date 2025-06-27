@@ -19,8 +19,7 @@ set(SOURCES
     include/grape/ipc/match.h
     include/grape/ipc/publisher.h
     include/grape/ipc/session.h
-    include/grape/ipc/subscriber.h
-    include/grape/ipc/topic.h)
+    include/grape/ipc/subscriber.h)
 
 # library target
 define_module_library(

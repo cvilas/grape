@@ -4,7 +4,7 @@
 
 import time
 from datetime import datetime
-from grape_ipc_py import init, Config, Topic, Subscriber, ok
+from grape_ipc_py import init, Config, Subscriber, ok
 
 
 def from_bytes(data: bytes) -> str:
@@ -32,11 +32,10 @@ def main():
         init(config)
 
         # Define the topic
-        topic = Topic()
-        topic.name="hello_world"
+        topic = "hello_world"
 
         # Create the subscriber
-        subscriber = Subscriber(topic.name, data_callback, match_callback)
+        subscriber = Subscriber(topic, data_callback, match_callback)
 
         # Sleep loop to keep the subscriber running
         SLEEP_TIME = 0.5  # 500 milliseconds

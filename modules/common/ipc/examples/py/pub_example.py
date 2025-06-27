@@ -3,7 +3,7 @@
 # =================================================================================================
 
 import time
-from grape_ipc_py import init, Config, Topic, Publisher, ok
+from grape_ipc_py import init, Config, Publisher, ok
 
 
 def to_bytes(msg: str) -> bytes:
@@ -24,8 +24,7 @@ def main():
         init(config)
 
         # Define the topic
-        topic = Topic()
-        topic.name="hello_world"
+        topic = "hello_world"
 
         # Create the publisher
         publisher = Publisher(topic, match_callback)

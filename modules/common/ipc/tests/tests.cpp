@@ -21,7 +21,7 @@ namespace {
 //=================================================================================================
 TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   grape::ipc::init(grape::ipc::Config{});
-  const auto topic = grape::ipc::Topic{ .name = "pub_sub_test" };
+  const auto* const topic = "pub_sub_test";
 
   // Create a large payload (eg: 1080p RGB image)
   constexpr auto PAYLOAD_SIZE = 1920U * 1080U * 3;
@@ -47,7 +47,7 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
 
   // create pub/sub
   auto publisher = grape::ipc::Publisher(topic);
-  auto subscriber = grape::ipc::Subscriber(topic.name, recv_callback);
+  auto subscriber = grape::ipc::Subscriber(topic, recv_callback);
 
   // Wait for pub/sub registration
   constexpr auto RETRY_COUNT = 10U;

@@ -49,7 +49,7 @@ auto main(int argc, const char* argv[]) -> int {
     config.scope = grape::ipc::Config::Scope::Network;
     grape::ipc::init(std::move(config));
 
-    auto pub = grape::ipc::Publisher({ .name = grape::ipc::ex::perf::TOPIC });
+    auto pub = grape::ipc::Publisher(grape::ipc::ex::perf::TOPIC);
     std::println("Press CTRL-C to quit");
     while (grape::ipc::ok()) {
       pub.publish(payload);

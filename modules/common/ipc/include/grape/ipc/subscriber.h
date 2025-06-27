@@ -10,7 +10,6 @@
 #include <span>
 
 #include "grape/ipc/match.h"
-#include "grape/ipc/topic.h"
 
 namespace grape::ipc {
 

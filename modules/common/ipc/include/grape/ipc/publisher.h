@@ -8,7 +8,6 @@
 #include <span>
 
 #include "grape/ipc/match.h"
-#include "grape/ipc/topic.h"
 
 namespace grape::ipc {
 
@@ -17,9 +16,9 @@ namespace grape::ipc {
 class Publisher {
 public:
   /// Creates a publisher
-  /// @param topic topic attributes
+  /// @param topic Topic on which to publish data
   /// @param match_cb Match callback, triggered on matched/unmatched with a remote subscriber
-  explicit Publisher(const Topic& topic, MatchCallback&& match_cb = nullptr);
+  explicit Publisher(const std::string& topic, MatchCallback&& match_cb = nullptr);
 
   /// Publish data on topic specified at creation by Session
   void publish(std::span<const std::byte> bytes) const;
