@@ -14,7 +14,7 @@
 auto main() -> int {
   try {
     grape::ipc::init(grape::ipc::Config{});
-    const auto topic = grape::ipc::Topic{ .name = "hello_world" };
+    const auto* const topic = "hello_world";
     const auto from_bytes = [](std::span<const std::byte> bytes) -> std::string {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
       return { reinterpret_cast<const char*>(bytes.data()), bytes.size() };
@@ -29,7 +29,7 @@ auto main() -> int {
       std::println("\n{} (entity: {})", toString(match.status), toString(match.remote_entity));
     };
 
-    auto subscriber = grape::ipc::Subscriber(topic.name, data_cb, match_cb);
+    auto subscriber = grape::ipc::Subscriber(topic, data_cb, match_cb);
 
     constexpr auto SLEEP_TIME = std::chrono::milliseconds(500);
     while (grape::ipc::ok()) {

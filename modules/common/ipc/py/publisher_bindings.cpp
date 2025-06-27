@@ -12,7 +12,7 @@ namespace grape::ipc::py {
 
 void bindPublisher(pybind11::module_& module) {
   pybind11::class_<Publisher>(module, "Publisher")
-      .def(pybind11::init<const Topic&, MatchCallback&&>(), pybind11::arg("topic"),
+      .def(pybind11::init<const std::string&, MatchCallback&&>(), pybind11::arg("topic"),
            pybind11::arg("match_cb") = nullptr,
            "Create a Publisher with the specified topic and optional match callback.")
       .def(

@@ -21,7 +21,7 @@ auto main(int argc, const char* argv[]) -> int {  // NOLINT(bugprone-exception-e
   };
 
   // create publisher
-  static constexpr auto TOPIC = grape::ipc::Topic{ .name = "hello" };
+  static constexpr auto TOPIC = "hello";
   auto pub = grape::ipc::Publisher(TOPIC);
 
   // publish messages
