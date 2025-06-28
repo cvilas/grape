@@ -35,7 +35,10 @@ public:
   Subscriber(const std::string& topic, DataCallback&& data_cb, MatchCallback&& match_cb = nullptr);
 
   /// @return The number of publishers currently matched to this subscriber
-  [[nodiscard]] auto getPublisherCount() const -> std::size_t;
+  [[nodiscard]] auto publisherCount() const -> std::size_t;
+
+  /// @return Unique identifier for this endpoint on the network
+  [[nodiscard]] auto id() const -> std::uint64_t;
 
   ~Subscriber();
   Subscriber(Subscriber&&) noexcept;

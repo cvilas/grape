@@ -52,12 +52,12 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   // Wait for pub/sub registration
   constexpr auto RETRY_COUNT = 10U;
   auto count_down = RETRY_COUNT;
-  while ((subscriber.getPublisherCount() == 0) && (count_down > 0)) {
+  while ((subscriber.publisherCount() == 0) && (count_down > 0)) {
     constexpr auto REG_WAIT_TIME = std::chrono::milliseconds(200);
     std::this_thread::sleep_for(REG_WAIT_TIME);
     count_down--;
   }
-  REQUIRE(subscriber.getPublisherCount() == 1);
+  REQUIRE(subscriber.publisherCount() == 1);
 
   // publish payload
   publisher.publish({ payload.data(), payload.size() });
