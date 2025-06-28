@@ -29,7 +29,7 @@ void bindSubscriber(pybind11::module_& module) {
            pybind11::arg("topic"), pybind11::arg("data_cb"), pybind11::arg("match_cb") = nullptr,
            "Create a Subscriber with the specified topic, data callback, and optional match "
            "callback.")
-      .def("get_publisher_count", &Subscriber::getPublisherCount,
+      .def("get_publisher_count", &Subscriber::publisherCount,
            "Get the number of publishers currently matched to this subscriber.");
 }
 

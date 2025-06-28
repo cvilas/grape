@@ -81,7 +81,13 @@ Subscriber::~Subscriber() = default;
 Subscriber::Subscriber(Subscriber&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
-auto Subscriber::getPublisherCount() const -> std::size_t {
+auto Subscriber::publisherCount() const -> std::size_t {
   return impl_->GetPublisherCount();
 }
+
+//-------------------------------------------------------------------------------------------------
+auto Subscriber::id() const -> std::uint64_t {
+  return impl_->GetTopicId().topic_id.entity_id;
+}
+
 }  // namespace grape::ipc

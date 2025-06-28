@@ -74,4 +74,9 @@ void Publisher::publish(std::span<const std::byte> bytes) const {
   std::ignore = impl_->Send(bytes.data(), bytes.size(), us);
 }
 
+//-------------------------------------------------------------------------------------------------
+auto Publisher::id() const -> std::uint64_t {
+  return impl_->GetTopicId().topic_id.entity_id;
+}
+
 }  // namespace grape::ipc
