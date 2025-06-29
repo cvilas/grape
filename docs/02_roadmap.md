@@ -5,9 +5,14 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 ## Towards a Rover
 
 - [x] Implement joystick interface for Linux
-- [ ] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
+- [x] Implement transactional teleop interface (packet based to switch modes, command velocity, flip flags).  
 - [ ] Fix IPC regression in MacOS
 - [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
+- [ ] Create IPC endpoints templated on TopicAttributes concept
+  - [ ] Rename current Publisher to RawPublisher. Likewise for subscriber
+  - [ ] Create `Publisher<TopicAttributes>`. Likewise for subscriber.
+  - [ ] Apply concept that TopicAttributes must contain data type and topic name specification
+  - [ ] Eliminate the need to call ipc::init if defaults are desired (see syslog::init)
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] 3D scenegraph using SDL
