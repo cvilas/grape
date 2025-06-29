@@ -41,7 +41,7 @@ void bmDeserialize(benchmark::State& state) {
 
   for (auto st : state) {
     (void)st;
-    auto ibuf = grape::serdes::InStream({ obuf.data(), obuf.size() });
+    auto ibuf = grape::serdes::InStream(obuf.data());
     auto deserializer = grape::serdes::Deserialiser(ibuf);
     PoseStamped deserialized_pose;
     if (not deserializer.unpack(deserialized_pose)) {

@@ -31,7 +31,7 @@ TEST_CASE("Serialize arithmetic types", "[serdes]") {
   REQUIRE(ostream.size() == sizeof(std::int8_t) + sizeof(std::uint16_t) + sizeof(std::int32_t) +
                                 sizeof(std::uint64_t) + sizeof(float) + sizeof(double));
 
-  auto istream = InStream({ ostream.data(), ostream.size() });
+  auto istream = InStream(ostream.data());
   auto des = Deserialiser(istream);
 
   std::int8_t i8{};
@@ -64,7 +64,7 @@ TEST_CASE("Serialize string", "[serdes]") {
   REQUIRE(ser.pack(std::string{ "Hello, World!" }));
   REQUIRE(ostream.size() == sizeof(std::size_t) + 13);  // 13 is the length of "Hello, World!"
 
-  auto istream = InStream({ ostream.data(), ostream.size() });
+  auto istream = InStream(ostream.data());
   auto des = Deserialiser(istream);
 
   std::string str;
@@ -81,7 +81,7 @@ TEST_CASE("Serialize vector", "[serdes]") {
   REQUIRE(ser.pack(vec));
   REQUIRE(ostream.size() == sizeof(std::size_t) + (vec.size() * sizeof(int)));
 
-  auto istream = InStream({ ostream.data(), ostream.size() });
+  auto istream = InStream(ostream.data());
   auto des = Deserialiser(istream);
 
   std::vector<int> deserialized_vec;
@@ -98,7 +98,7 @@ TEST_CASE("Serialize array", "[serdes]") {
   REQUIRE(ser.pack(arr));
   REQUIRE(ostream.size() == arr.size() * sizeof(double));
 
-  auto istream = InStream({ ostream.data(), ostream.size() });
+  auto istream = InStream(ostream.data());
   auto des = Deserialiser(istream);
 
   std::array<double, 3> deserialized_arr{};
@@ -118,7 +118,7 @@ TEST_CASE("Serialize variant", "[serdes]") {
   REQUIRE(ser.pack(v1));
   REQUIRE(ostream.size() > 0);
 
-  auto istream = InStream({ ostream.data(), ostream.size() });
+  auto istream = InStream(ostream.data());
   auto des = Deserialiser(istream);
 
   Var v2;
@@ -130,7 +130,7 @@ TEST_CASE("Serialize variant", "[serdes]") {
   ostream.reset();
   const auto v3 = Var{ 3.14F };
   REQUIRE(ser.pack(v3));
-  istream = InStream({ ostream.data(), ostream.size() });
+  istream = InStream(ostream.data());
   Var v4;
   REQUIRE(des.unpack(v4));
   REQUIRE(v3.index() == v4.index());
@@ -140,7 +140,7 @@ TEST_CASE("Serialize variant", "[serdes]") {
   ostream.reset();
   const auto v5 = Var{ std::string("hello") };
   REQUIRE(ser.pack(v5));
-  istream = InStream({ ostream.data(), ostream.size() });
+  istream = InStream(ostream.data());
   Var v6;
   REQUIRE(des.unpack(v6));
   REQUIRE(v5.index() == v6.index());
@@ -171,7 +171,7 @@ TEST_CASE("Serialize custom data structure", "[serdes]") {
   REQUIRE(ser.pack(p1));
   REQUIRE(ostream.size() == 2 * sizeof(int));
 
-  auto istream = InStream({ ostream.data(), ostream.size() });
+  auto istream = InStream(ostream.data());
   auto des = Deserialiser(istream);
 
   Point p2;

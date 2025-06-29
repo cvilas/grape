@@ -100,7 +100,7 @@ auto main() -> int {
 
     // deserialise
     auto cmd2 = Command{};
-    auto istream = InStream({ ostream.data(), ostream.size() });
+    auto istream = InStream(ostream.data());
     auto deserialiser = Deserialiser(istream);
     if (not deserialiser.unpack(cmd2)) {
       std::println("Deserialisation error. Exiting");

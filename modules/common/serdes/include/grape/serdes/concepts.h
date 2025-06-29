@@ -8,21 +8,22 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 
 namespace grape::serdes {
 
 //-------------------------------------------------------------------------------------------------
 // Concept for buffer streams
 template <typename Stream>
-concept WritableStream = requires(Stream strm, const char* data, std::size_t size) {
-  { strm.write(data, size) } -> std::same_as<bool>;
-  /* Writes 'size' bytes from 'data' into stream 's'. Return false on failure  */
+concept WritableStream = requires(Stream strm, std::span<const std::byte> data) {
+  { strm.write(data) } -> std::same_as<bool>;
+  /* Writes 'data' into stream 's'. Return false on failure  */
 };
 
 template <typename Stream>
-concept ReadableStream = requires(Stream strm, char* const data, std::size_t size) {
-  { strm.read(data, size) } -> std::same_as<bool>;
-  /* Reads 'size' bytes into 'data' from stream 's'. Return false on failure  */
+concept ReadableStream = requires(Stream strm, std::span<std::byte> data) {
+  { strm.read(data) } -> std::same_as<bool>;
+  /* Reads 'data' from stream 's'. Return false on failure  */
 };
 
 template <WritableStream Stream>
