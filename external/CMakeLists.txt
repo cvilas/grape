@@ -51,6 +51,34 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
 endif()
 
 # -------------------------------------------------------------------------------------------------
+# FTXUI
+if(ftxui IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(ftxui ${FTXUI_VERSION_REQUIRED} QUIET)
+  if(ftxui_FOUND)
+    message(STATUS "ftxui: Using version ${ftxui_VERSION} from ${ftxui_DIR}")
+    add_dummy_target(ftxui)
+  else()
+    message(STATUS "ftxui: Building ${FTXUI_VERSION_REQUIRED} from source")
+    set(FTXUI_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
+    -DFTXUI_ENABLE_INSTALL=ON 
+    -DFTXUI_BUILD_EXAMPLES=OFF
+    -DFTXUI_QUIET=OFF
+    -DFTXUI_BUILD_DOCS=OFF
+    -DFTXUI_BUILD_TESTS=OFF
+    -DFTXUI_BUILD_TESTS_FUZZER=OFF
+    -DFTXUI_ENABLE_COVERAGE=OFF
+    -DFTXUI_DEV_WARNINGS=OFF
+    -DFTXUI_CLANG_TIDY=OFF)
+    ExternalProject_Add(
+      ftxui
+      GIT_REPOSITORY "https://github.com/ArthurSonzogni/FTXUI.git"
+      GIT_TAG "v${FTXUI_VERSION_REQUIRED}"
+      GIT_SHALLOW true
+      CMAKE_ARGS ${FTXUI_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
 # SDL3
 if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
   find_package(SDL3 ${SDL3_VERSION_REQUIRED} QUIET)
