@@ -5,7 +5,6 @@
 #pragma once
 
 #include <array>
-#include <span>
 #include <string>
 #include <variant>
 #include <vector>
@@ -75,7 +74,7 @@ private:
   template <arithmetic T>
   [[nodiscard]] constexpr auto pack(std::span<const T> data) -> bool {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    return stream_.write(reinterpret_cast<const char*>(data.data()), data.size_bytes());
+    return stream_.write({ reinterpret_cast<const std::byte*>(data.data()), data.size_bytes() });
   }
 
   Stream& stream_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
@@ -186,7 +185,7 @@ private:
   template <arithmetic T>
   [[nodiscard]] constexpr auto unpack(std::span<T> data) -> bool {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    return stream_.read(reinterpret_cast<char*>(data.data()), data.size_bytes());
+    return stream_.read({ reinterpret_cast<std::byte*>(data.data()), data.size_bytes() });
   }
 
   Stream& stream_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)

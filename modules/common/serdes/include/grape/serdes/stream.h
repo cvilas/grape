@@ -17,26 +17,26 @@ template <std::size_t MAX_SIZE>
 class OutStream {
 public:
   /// @brief Write data into stream buffer
-  /// @param data Pointer to data
-  /// @param len Number of bytes to write
+  /// @param data data span to write
   /// @return true on success. false if buffer doesn't have enough space. Nothing is written if so.
-  [[nodiscard]] constexpr auto write(const char* data, std::size_t len) -> bool {
+  [[nodiscard]] constexpr auto write(std::span<const std::byte> data) -> bool {
+    const auto len = data.size_bytes();
     if (offset_ + len > MAX_SIZE) {
       return false;
     }
-    std::copy_n(data, len, buf_.begin() + offset_);
+    std::copy_n(data.data(), len, buf_.begin() + offset_);
     offset_ += len;
     return true;
   }
 
   /// @return Pointer to the stream buffer
-  [[nodiscard]] constexpr auto data() -> char* {
-    return buf_.data();
+  [[nodiscard]] constexpr auto data() -> std::span<std::byte> {
+    return { buf_.data(), offset_ };
   }
 
   /// @return Immutable pointer to the stream buffer
-  [[nodiscard]] constexpr auto data() const -> const char* {
-    return buf_.data();
+  [[nodiscard]] constexpr auto data() const -> std::span<const std::byte> {
+    return { buf_.data(), offset_ };
   }
 
   /// @return Number of bytes written so far in the stream buffer
@@ -61,7 +61,7 @@ public:
 
 private:
   std::size_t offset_{ 0 };
-  std::array<char, MAX_SIZE> buf_{ 0 };
+  std::array<std::byte, MAX_SIZE> buf_{};
 };
 
 //=================================================================================================
@@ -70,19 +70,19 @@ class InStream {
 public:
   /// Initialise
   /// @param data Serialised data to decode
-  explicit constexpr InStream(std::span<const char> data) : stream_(data) {
+  explicit constexpr InStream(std::span<const std::byte> data) : stream_(data) {
   }
 
   /// Reads bytes into user-provided location
-  /// @param to Pointer to user-provided stream
-  /// @param len Number of bytes to read
+  /// @param to user-provided stream with implicitly defined number of bytes to read
   /// @return true on success, false if stream doesn't contain the requested number of bytes.
   /// Nothing is read if so.
-  [[nodiscard]] constexpr auto read(char* const to, std::size_t len) -> bool {
+  [[nodiscard]] constexpr auto read(std::span<std::byte> to) -> bool {
+    const auto len = to.size_bytes();
     if (offset_ + len > stream_.size()) {
       return false;
     }
-    std::copy_n(stream_.data() + offset_, len, to);
+    std::copy_n(stream_.data() + offset_, len, to.data());
     offset_ += len;
     return true;
   }
@@ -104,7 +104,7 @@ public:
 
 private:
   std::size_t offset_{ 0 };
-  std::span<const char> stream_;
+  std::span<const std::byte> stream_;
 };
 
 }  // namespace grape::serdes

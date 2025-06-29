@@ -9,6 +9,21 @@ namespace {
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
+[[nodiscard]] constexpr auto toSpan(const std::string& str) -> std::span<const std::byte> {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  return { reinterpret_cast<const std::byte*>(str.data()), str.size() };
+}
+
+[[nodiscard]] constexpr auto toSpan(std::string& str) -> std::span<std::byte> {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  return { reinterpret_cast<std::byte*>(str.data()), str.size() };
+}
+
+[[nodiscard]] auto toString(std::span<const std::byte> bytes) -> std::string {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  return { reinterpret_cast<const char*>(bytes.data()), bytes.size() };
+}
+
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("OutStream functionality", "[OutStream]") {
   grape::serdes::OutStream<10> out;
@@ -19,19 +34,19 @@ TEST_CASE("OutStream functionality", "[OutStream]") {
   }
 
   SECTION("Write data") {
-    REQUIRE(out.write("Hello", 5));
+    REQUIRE(out.write(toSpan("Hello")));
     REQUIRE(out.size() == 5);
-    REQUIRE(std::string_view(out.data(), 5) == "Hello");
+    REQUIRE(toString(out.data()) == "Hello");
   }
 
   SECTION("Write beyond capacity") {
-    REQUIRE(out.write("HelloWorld", 10));
-    REQUIRE_FALSE(out.write("!", 1));
+    REQUIRE(out.write(toSpan("HelloWorld")));
+    REQUIRE_FALSE(out.write(toSpan("!")));
     REQUIRE(out.size() == 10);
   }
 
   SECTION("Rewind and reset") {
-    REQUIRE(out.write("HelloWorld", 10));
+    REQUIRE(out.write(toSpan("HelloWorld")));
     out.rewind(5);
     REQUIRE(out.size() == 5);
     out.reset();
@@ -41,34 +56,37 @@ TEST_CASE("OutStream functionality", "[OutStream]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("InStream functionality", "[InStream]") {
-  std::string data = "HelloWorld";
-  grape::serdes::InStream in(std::span(data.data(), data.size()));
+  auto istream = std::string("HelloWorld");
+  grape::serdes::InStream in(toSpan(istream));
 
   SECTION("Initial state") {
     REQUIRE(in.size() == 10);
   }
 
   SECTION("Read data") {
-    std::vector<char> buffer(6, '\0');
-    REQUIRE(in.read(buffer.data(), 5));
-    REQUIRE(std::string_view(buffer.data(), 5) == "Hello");
+    std::string str(5, '\0');
+    REQUIRE(in.read(toSpan(str)));
+    REQUIRE(str == "Hello");
   }
 
   SECTION("Read beyond available data") {
-    std::vector<char> buffer(11, '\0');
-    REQUIRE(in.read(buffer.data(), 10));
-    REQUIRE_FALSE(in.read(buffer.data(), 1));
+    std::string buffer(10, '\0');
+    REQUIRE(in.read(toSpan(buffer)));
+    std::string buffer2(1, '\0');
+    REQUIRE_FALSE(in.read(toSpan(buffer2)));
   }
 
   SECTION("Rewind and reset") {
-    std::vector<char> buffer(6, '\0');
-    REQUIRE(in.read(buffer.data(), 5));
+    std::string buffer(5, '\0');
+    REQUIRE(in.read(toSpan(buffer)));
     in.rewind(3);
-    REQUIRE(in.read(buffer.data(), 3));
-    REQUIRE(std::string_view(buffer.data(), 3) == "llo");
+    std::string buffer2(3, '\0');
+    REQUIRE(in.read(toSpan(buffer2)));
+    REQUIRE(buffer2 == "llo");
     in.reset();
-    REQUIRE(in.read(buffer.data(), 5));
-    REQUIRE(std::string_view(buffer.data(), 5) == "Hello");
+    std::string buffer3(5, '\0');
+    REQUIRE(in.read(toSpan(buffer3)));
+    REQUIRE(buffer3 == "Hello");
   }
 }
 

@@ -54,7 +54,7 @@ auto main(int argc, const char* argv[]) -> int {
     std::println("Serialised into {} bytes", ostream.size());
 
     // deserialise
-    auto istream = InStream({ ostream.data(), ostream.size() });
+    auto istream = InStream(ostream.data());
     auto pose2 = PoseStamped{};
     auto deserialiser = Deserialiser(istream);
     if (not deserialiser.unpack(pose2)) {

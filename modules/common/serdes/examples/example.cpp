@@ -25,20 +25,20 @@ struct State {
 
 //-------------------------------------------------------------------------------------------------
 // generic file writer
-auto writeToFile(std::span<const char> data, const std::string& filename) -> bool {
+auto writeToFile(std::span<const std::byte> data, const std::string& filename) -> bool {
   auto file = std::ofstream(filename, std::ios::binary);
   if (not file) {
     std::println(stderr, "Failed to open '{}' for writing", filename);
     return false;
   }
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  file.write(data.data(), static_cast<std::streamsize>(data.size()));
+  file.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
   return true;
 }
 
 //-------------------------------------------------------------------------------------------------
 // generic file reader
-auto readFromFile(const std::string& filename) -> std::optional<std::vector<char>> {
+auto readFromFile(const std::string& filename) -> std::optional<std::vector<std::byte>> {
   auto file = std::ifstream(filename, std::ios::binary | std::ios::ate);
   if (not file) {
     std::println(stderr, "Failed to open '{}' for reading", filename);
@@ -48,9 +48,9 @@ auto readFromFile(const std::string& filename) -> std::optional<std::vector<char
   const auto size = file.tellg();
   file.seekg(0, std::ios::beg);
 
-  std::vector<char> buffer(static_cast<std::size_t>(size));
+  std::vector<std::byte> buffer(static_cast<std::size_t>(size));
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  file.read(buffer.data(), size);
+  file.read(reinterpret_cast<char*>(buffer.data()), size);
 
   return buffer;
 }
@@ -93,7 +93,7 @@ auto main(int argc, const char* argv[]) -> int {
 
     // Write to file
     static constexpr auto FILENAME = "state.grp";
-    if (not writeToFile({ ostream.data(), ostream.size() }, FILENAME)) {
+    if (not writeToFile(ostream.data(), FILENAME)) {
       std::println(stderr, "Exiting");
       return EXIT_FAILURE;
     }
