@@ -25,8 +25,15 @@ control of it's _locomotion_ functions.
 ## TODO
 
 - keyboard teleop console using ftxui
-- consider reporting periodic server status reports when teleop is active
-  - fixes: When multiple clients exist, not all clients receive feedback
+- Report server status periodically when teleop is active
+  - Every second
   - Report mean command latency with the report
-- server side unit test
+- Check that when multiple clients exist, all of them receive feedback
+- Server side unit tests
+  - status reports are received 
+  - switches to teleop mode 
+  - releases teleop mode on timeout
 - IPC endpoints templated on TopicAttributes concept
+  - Rename current Publisher to RawPublisher. Likewise for subscriber
+  - Create `Publisher<TopicAttributes>`. Likewise for subscriber.
+  - Apply concept that TopicAttributes must contain data type and topic name specification
