@@ -11,8 +11,6 @@ declare_module(
 set(SOURCES 
   README.md 
   src/client.cpp 
-  include/grape/robot/teleop/client.h
-  include/grape/robot/teleop/status.h
   include/grape/robot/teleop/topics.h)
 
 # library target
