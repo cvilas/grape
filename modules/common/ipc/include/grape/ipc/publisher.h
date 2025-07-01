@@ -12,7 +12,7 @@
 namespace grape::ipc {
 
 //=================================================================================================
-/// Publishers post topic data. Created by Session. See also Topic.
+/// Publishers post topic data. Created by Session.
 class Publisher {
 public:
   /// Creates a publisher

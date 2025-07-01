@@ -52,6 +52,10 @@ public:
     return std::visit([this](const auto& val) { return this->pack(val); }, value);
   }
 
+  /// Serialises user-defined types using a user-defined free function
+  /// @tparam T Type to serialise
+  /// @param value Value to serialise
+  /// @return True if serialisation was successful, false otherwise
   template <typename T>
     requires Serialisable<T, Stream>
   [[nodiscard]] constexpr auto pack(const T& value) -> bool {
@@ -175,6 +179,10 @@ public:
     return true;
   }
 
+  /// Unpacks user-defined types using a user-defined free function
+  /// @tparam T Type to unpack
+  /// @param value Value to unpack into
+  /// @return True if unpacking was successful, false otherwise
   template <typename T>
     requires Deserialisable<T, Stream>
   [[nodiscard]] constexpr auto unpack(T& value) -> bool {
