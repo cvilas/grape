@@ -22,7 +22,7 @@ struct Sample {
 };
 
 //=================================================================================================
-/// Subscribers receive topic data. Created by Session. See also Topic.
+/// Subscribers receive topic data. Created by Session.
 class Subscriber {
 public:
   /// Function signature for callback on received data

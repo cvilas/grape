@@ -15,21 +15,20 @@ Serialisation and deserialisation facility for structured data
 - Transport over IPC mechanisms
 - Persistent storage and retrieval
 
-### Requirements
-
-In decreasing order of priority:
+### Design considerations
 
 - Interoperable across C++ and Python [Note 0]
 - Fast encoding and decoding
 - Usable without a schema [Note 1]
-- Usable with no dynamic memory allocation atleast in encoding
-- Simple API, even for complex data structures composed from other data structures. Ideally, a free function to encode and to decode as follows:
+- Usable with no dynamic memory allocation
+- Simple API, even for complex data structures composed from other data structures. 
+- Extends fuctionality to custom types via following free functions to encode and decode:
   ```c++
   template<typename SerialiserType, typename DataType>
-  void serialize(SerialiserType&, const DataType&)
+  void serialise(SerialiserType&, const DataType&)
 
   template<typename SerialiserType, typename DataType>
-  void deserialize(SerialiserType&, DataType&)  
+  void deserialise(SerialiserType&, DataType&)  
   ```
 - Good documentation (spec., usage)
 - Error handling preferably as return codes instead of exceptions

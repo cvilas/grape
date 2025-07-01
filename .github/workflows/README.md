@@ -23,6 +23,7 @@
 
 ## TODO
 - Build for both clang and gcc
+- Track regression from baseline for benchmarks. Fail CI if regression > x%
 - Setup configuration presets for applications, developer and CI builds
 - After PR is merged and newly tagged, build and generate deployment artifacts (tarball)
 - Separate [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html) build on realtime module 
