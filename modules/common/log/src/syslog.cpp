@@ -4,15 +4,15 @@
 
 #include "grape/log/syslog.h"
 
-#include <memory>
 #include <mutex>
+#include <optional>
 
 #include "grape/exception.h"
 
 namespace {
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 std::once_flag s_init_flag;
-std::unique_ptr<grape::log::Logger> s_logger{ nullptr };
+std::optional<grape::log::Logger> s_logger{ std::nullopt };
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 }  // namespace
 
@@ -22,7 +22,7 @@ namespace grape::syslog {
 void init(log::Config&& config) {
   auto succeeded = false;
   std::call_once(s_init_flag, [&succeeded, &config]() {
-    s_logger = std::make_unique<log::Logger>(std::move(config));
+    s_logger.emplace(std::move(config));
     succeeded = true;
   });
   if (not succeeded) {
@@ -32,13 +32,11 @@ void init(log::Config&& config) {
 
 //-------------------------------------------------------------------------------------------------
 auto instance() -> log::Logger& {
-  if (s_logger != nullptr) [[likely]] {
+  if (s_logger) [[likely]] {
     return *s_logger;
   }
-
-  std::call_once(s_init_flag, []() { s_logger = std::make_unique<log::Logger>(log::Config{}); });
-
-  return *s_logger;
+  std::call_once(s_init_flag, []() { s_logger.emplace(log::Config{}); });
+  return *s_logger;  // NOLINT(bugprone-unchecked-optional-access)
 }
 
 }  // namespace grape::syslog
