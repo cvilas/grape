@@ -8,7 +8,9 @@
 
 namespace grape::syslog {
 
-/// Initialise the system logger
+/// (Optional) Initialise the system logger.
+/// @note Should be called only once and before calling any logging functions
+/// @note If not called, a default logger is initialised on first call to any logging function
 /// @param config logger configuration
 void init(log::Config&& config);
 
