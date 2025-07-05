@@ -7,7 +7,7 @@
 - Configure git to use your SSH key for signing
 
   ```
-  # Note: To set this only on a specific git reposity and not all of them, 
+  # Note: To set this only on a specific git repository and not all of them, 
   # remove '--global' and run the commands within that repository
   
   # use ssh key to sign
@@ -26,7 +26,7 @@
   git config --global gpg.ssh.allowedSignersFile ~/.ssh/allowed_signers
   ```
 
-- Create 'allowed signers' file, and add a line for your SSH key. The format is:
+- Create `~/.ssh/allowed signers` file, and add a line for your SSH key. The format is:
   ```
   <GitHub username> <public key type> <public key data>
   ```
