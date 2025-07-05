@@ -98,26 +98,12 @@ auto main(int argc, const char* argv[]) -> int {
       const auto* const status_text = teleop_enabled ? "ENABLED" : "DISABLED";
 
       return ftxui::vbox({
-                 ftxui::text("🤖 Robot Keyboard Teleop") | ftxui::bold | ftxui::center,
+                 ftxui::text("Keyboard Teleop") | ftxui::bold | ftxui::center,
                  ftxui::separator(),
-                 ftxui::hbox({
-                     ftxui::text("Robot: "),
-                     ftxui::text(robot_name) | ftxui::color(ftxui::Color::Cyan),
-                 }),
-                 ftxui::hbox({
-                     ftxui::text("Teleop Status: "),
-                     ftxui::text(status_text) | ftxui::color(status_color) | ftxui::bold,
-                 }),
-                 ftxui::hbox({
-                     ftxui::text("Service Active: "),
-                     ftxui::text(teleop_status.is_active ? "YES" : "NO") |
-                         ftxui::color(teleop_status.is_active ? ftxui::Color::Green :
-                                                                ftxui::Color::Red),
-                 }),
-                 ftxui::hbox({
-                     ftxui::text("Command Latency: "),
-                     ftxui::text(std::format("{}", teleop_status.command_latency)),
-                 }),
+                 ftxui::hbox({ftxui::text("Robot: "), ftxui::text(robot_name) | ftxui::color(ftxui::Color::Cyan),}),
+                 ftxui::hbox({ftxui::text("Teleop Status: "), ftxui::text(status_text) | ftxui::color(status_color) | ftxui::bold,}),
+                 ftxui::hbox({ftxui::text("Service Active: "), ftxui::text(teleop_status.is_active ? "YES" : "NO") | ftxui::color(teleop_status.is_active ? ftxui::Color::Green : ftxui::Color::Red),}),
+                 ftxui::hbox({ftxui::text("Command Latency: "), ftxui::text(std::format("{}", teleop_status.command_latency)),}),
                  ftxui::separator(),
                  ftxui::text("Controls:") | ftxui::bold,
                  ftxui::text("  SPACE - Enable/Disable Teleop"),
@@ -127,30 +113,12 @@ auto main(int argc, const char* argv[]) -> int {
                  ftxui::text("  ESC   - Exit"),
                  ftxui::separator(),
                  ftxui::text("Current Command:") | ftxui::bold,
-                 ftxui::hbox({
-                     ftxui::text("  Forward: "),
-                     ftxui::text(std::format("{:+.2f}", move_cmd.forward_speed)) |
-                         ftxui::color(move_cmd.forward_speed != 0.0F ? ftxui::Color::Yellow :
-                                                                       ftxui::Color::White),
-                 }),
-                 ftxui::hbox({
-                     ftxui::text("  Lateral: "),
-                     ftxui::text(std::format("{:+.2f}", move_cmd.lateral_speed)) |
-                         ftxui::color(move_cmd.lateral_speed != 0.0F ? ftxui::Color::Yellow :
-                                                                       ftxui::Color::White),
-                 }),
-                 ftxui::hbox({
-                     ftxui::text("  Turn:    "),
-                     ftxui::text(std::format("{:+.2f}", move_cmd.turn_speed)) |
-                         ftxui::color(move_cmd.turn_speed != 0.0F ? ftxui::Color::Yellow :
-                                                                    ftxui::Color::White),
-                 }),
+                 ftxui::hbox({ftxui::text("  Forward: "), ftxui::text(std::format("{:+.2f}", move_cmd.forward_speed)) | ftxui::color(move_cmd.forward_speed != 0.0F ? ftxui::Color::Yellow : ftxui::Color::White),}),
+                 ftxui::hbox({ftxui::text("  Lateral: "), ftxui::text(std::format("{:+.2f}", move_cmd.lateral_speed)) | ftxui::color(move_cmd.lateral_speed != 0.0F ? ftxui::Color::Yellow : ftxui::Color::White),}),
+                 ftxui::hbox({ftxui::text("  Turn:    "), ftxui::text(std::format("{:+.2f}", move_cmd.turn_speed)) | ftxui::color(move_cmd.turn_speed != 0.0F ? ftxui::Color::Yellow : ftxui::Color::White),}),
                  ftxui::separator(),
-                 ftxui::text("Press SPACE to enable teleop, then use arrow keys and < > to control "
-                             "the robot") |
-                     ftxui::dim | ftxui::center,
-             }) |
-             ftxui::border;
+                 ftxui::text("Press SPACE to enable teleop, then use arrow keys and < > to control the robot") | ftxui::dim | ftxui::center,
+             }) | ftxui::border;
     });
 
     // Combine key handler with main component
