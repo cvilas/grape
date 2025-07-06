@@ -351,6 +351,7 @@ auto Joystick::wait() -> bool {
 auto Joystick::wait(std::chrono::milliseconds timeout) -> bool {
   if (impl_->device_fd < 0 || impl_->epoll_fd < 0) {
     impl_->callback(ErrorEvent{ .timestamp = Clock::now(), .message = "Device not open" });
+    return false;
   }
 
   auto ev = epoll_event{};
