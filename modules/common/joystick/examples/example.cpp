@@ -92,8 +92,8 @@ auto main() -> int {
         is_connected = js.open(devices.at(0));
         continue;
       }
-      // wait for events
-      is_connected = js.wait(EVENT_WAIT_TIMEOUT);
+      // process events
+      is_connected = js.process(EVENT_WAIT_TIMEOUT);
     }
     return EXIT_SUCCESS;
   } catch (...) {
