@@ -40,7 +40,7 @@ void Logger::log(const Record& record) {
     std::memcpy(frame.data(), &record, sizeof(Record));
   };
   if (not queue_.visitToWrite(writer)) {
-    missed_logs_.fetch_add(1, std::memory_order_acquire);
+    missed_logs_.fetch_add(1, std::memory_order_relaxed);
   }
 }
 
@@ -59,8 +59,14 @@ void Logger::flush() noexcept {
     auto record_reader = [this](std::span<const std::byte> frame) -> void {
       assert(sizeof(Record) == frame.size_bytes());
       if (config_.sink != nullptr) {
+        /// @note: Sets logger name in the record here instead of in the logging hot path. This
+        /// requires casting away const qualifier on the record frame. Should be safe to do since
+        /// data types are fixed size and only this location reads the queue
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-        const auto* const record = reinterpret_cast<const Record*>(frame.data());
+        const auto* const const_record = reinterpret_cast<const Record*>(frame.data());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+        auto* record = const_cast<Record*>(const_record);
+        record->logger_name.append(config_.logger_name.c_str());
         config_.sink->write(*record);
       }
     };

@@ -38,7 +38,7 @@ public:
            const std::format_string<Args...> fmt, Args&&... args) {
     log({ .timestamp{ std::chrono::system_clock::now() },  //
           .location{ location },                           //
-          .logger_name{ config_.logger_name.c_str() },     //
+          .logger_name{ /* filled by backend thread */ },  //
           .message{ fmt, std::forward<Args>(args)... },    //
           .severity{ severity } });
   }
