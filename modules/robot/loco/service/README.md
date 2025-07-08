@@ -4,10 +4,6 @@
 
 Locomotion service enables remote clients to move the robot via its locomotion stack
 
-## System Architecture
-
-The locomotion service follows a microservice architecture with clear separation of concerns:
-
 ```mermaid
 ---
 title: Locomotion Service
