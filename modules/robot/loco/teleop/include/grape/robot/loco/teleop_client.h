@@ -14,18 +14,15 @@
 namespace grape::robot::loco {
 
 //=================================================================================================
-/// Client interface for remote teleoperation. Communicates with loco::Service
-///
-/// See loco::Service for details on how the teleoperation service works. This client interface
-/// can send locomotion commands to the robot and receive status updates from locomotion service.
-///
+/// Teleoperation client interface. Sends locomotion commands over the alternate command channel to
+/// to the robot locomotion stack.
 class TeleopClient {
 public:
   /// Status of the teleoperation client
   struct Status {
-    bool is_service_detected{ false };  //!< The loco service endpoint is detected and matched
-    bool is_client_active{ false };     //!< This teleoperation client has control authority
-    std::chrono::system_clock::duration command_latency{};  //!< Avg. latency from client to server
+    bool is_service_detected{ false };  //!< true if locomotion service endpoint is detected
+    bool is_client_active{ false };     //!< true if this client has control authority
+    std::chrono::system_clock::duration command_latency{};  //!< Avg. latency to locomotion service
   };
 
   /// Callback function signature for receiving teleoperation status updates
