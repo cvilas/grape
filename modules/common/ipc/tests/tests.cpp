@@ -38,16 +38,27 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   std::condition_variable recv_cond;
   std::mutex recv_mut;
   auto received_msg = std::vector<std::byte>{};
-  const auto recv_callback = [&recv_mut, &recv_cond,
-                              &received_msg](const grape::ipc::Sample& sample) -> void {
+  auto sample_pub_id = 0UL;
+  const auto recv_callback = [&recv_mut, &recv_cond, &received_msg,
+                              &sample_pub_id](const grape::ipc::Sample& sample) -> void {
     const std::lock_guard<std::mutex> lk(recv_mut);
     received_msg = std::vector<std::byte>(sample.data.begin(), sample.data.end());
+    sample_pub_id = sample.publisher.id;
     recv_cond.notify_all();
   };
 
   // create pub/sub
-  auto publisher = grape::ipc::Publisher(topic);
-  auto subscriber = grape::ipc::Subscriber(topic, recv_callback);
+  auto matched_sub_id = 0UL;
+  const auto pub_match_cb = [&matched_sub_id](const grape::ipc::Match& match) -> void {
+    matched_sub_id = match.remote_entity.id;
+  };
+  auto publisher = grape::ipc::Publisher(topic, pub_match_cb);
+
+  auto matched_pub_id = 0UL;
+  const auto sub_match_cb = [&matched_pub_id](const grape::ipc::Match& match) -> void {
+    matched_pub_id = match.remote_entity.id;
+  };
+  auto subscriber = grape::ipc::Subscriber(topic, recv_callback, sub_match_cb);
 
   // Wait for pub/sub registration
   constexpr auto RETRY_COUNT = 10U;
@@ -58,6 +69,10 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
     count_down--;
   }
   REQUIRE(subscriber.publisherCount() == 1);
+  REQUIRE(matched_sub_id != 0UL);
+  REQUIRE(matched_pub_id != 0UL);
+  REQUIRE(matched_sub_id == subscriber.id());
+  REQUIRE(matched_pub_id == publisher.id());
 
   // publish payload
   publisher.publish({ payload.data(), payload.size() });
@@ -71,6 +86,7 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   // verify message
   REQUIRE(received_msg.size() == PAYLOAD_SIZE);
   REQUIRE(received_msg == payload);
+  REQUIRE(sample_pub_id == publisher.id());
 }
 
 // NOLINTEND(cert-err58-cpp)
