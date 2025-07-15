@@ -13,7 +13,9 @@ set(THIRD_PARTY_COMPILER_WARNINGS -Wall -Wextra -Wpedantic)
 
 # clang warnings
 set(CLANG_WARNINGS -Weverything
+  -Wno-c++23-compat
   -Wno-c++20-compat
+  -Wno-pre-c++23-compat-pedantic
   -Wno-pre-c++20-compat-pedantic
   -Wno-pre-c++17-compat
   -Wno-c++98-compat
