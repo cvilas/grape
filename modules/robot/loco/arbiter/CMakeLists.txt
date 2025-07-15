@@ -4,7 +4,7 @@
 
 declare_module(
   NAME robot_loco_arbiter
-  DEPENDS_ON_MODULES "robot_loco_common;statistics;conio;ipc;log"
+  DEPENDS_ON_MODULES "robot_loco_interface;statistics;conio;ipc;log"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
@@ -13,7 +13,7 @@ set(SOURCES README.md src/arbiter.cpp include/grape/robot/loco/arbiter.h)
 # library target
 define_module_library(
   NAME robot_loco_arbiter
-  PUBLIC_LINK_LIBS "grape::robot_loco_common;grape::statistics;grape::conio;grape::ipc;grape::log"
+  PUBLIC_LINK_LIBS "grape::robot_loco_interface;grape::statistics;grape::conio;grape::ipc;grape::log"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
