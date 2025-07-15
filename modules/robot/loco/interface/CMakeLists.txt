@@ -3,7 +3,7 @@
 # =================================================================================================
 
 declare_module(
-  NAME robot_loco_common
+  NAME robot_loco_interface
   DEPENDS_ON_MODULES "serdes"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
@@ -13,7 +13,7 @@ set(SOURCES
     include/grape/robot/loco/topics.h)
 
 define_module_library(
-  NAME robot_loco_common
+  NAME robot_loco_interface
   PUBLIC_LINK_LIBS "grape::serdes"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
