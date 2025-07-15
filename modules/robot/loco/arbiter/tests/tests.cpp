@@ -111,12 +111,24 @@ TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
   REQUIRE(received_cmds.size() == 3);
   REQUIRE(std::holds_alternative<grape::robot::loco::Move3DCmd>(received_cmds.at(2)));
 
-  // Primary source regains control after teleop times out
+  // A second teleop command should be ignored as long as the first one is active
+  auto test_client2 = TeleopEmulator(ROBOT_NAME, on_loco_status);
+  test_client2.send(grape::robot::loco::Move3DCmd{ .lateral_speed = 0.F });
+  std::this_thread::sleep_for(IPC_PROCESSING_DELAY);
+  REQUIRE(received_cmds.size() == 3);
+
+  // But let the first teleop controller timeout and the second will have control
   static constexpr auto TIMEOUT_MARGIN = std::chrono::milliseconds(500);
   std::this_thread::sleep_for(TIMEOUT_MARGIN + grape::robot::loco::Arbiter::ALT_CONTROLLER_TIMEOUT);
-  test_service.setPrimary(grape::robot::loco::KeepAliveCmd{});
+  test_client2.send(grape::robot::loco::Move3DCmd{ .lateral_speed = 0.F });
+  std::this_thread::sleep_for(IPC_PROCESSING_DELAY);
   REQUIRE(received_cmds.size() == 4);
-  REQUIRE(std::holds_alternative<grape::robot::loco::KeepAliveCmd>(received_cmds.at(3)));
+
+  // Primary source regains control after teleop controllers times out
+  std::this_thread::sleep_for(TIMEOUT_MARGIN + grape::robot::loco::Arbiter::ALT_CONTROLLER_TIMEOUT);
+  test_service.setPrimary(grape::robot::loco::KeepAliveCmd{});
+  REQUIRE(received_cmds.size() == 5);
+  REQUIRE(std::holds_alternative<grape::robot::loco::KeepAliveCmd>(received_cmds.at(4)));
 }
 
 }  // namespace
