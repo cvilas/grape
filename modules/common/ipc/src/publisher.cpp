@@ -75,6 +75,11 @@ void Publisher::publish(std::span<const std::byte> bytes) const {
 }
 
 //-------------------------------------------------------------------------------------------------
+auto Publisher::subscriberCount() const -> std::size_t {
+  return impl_->GetSubscriberCount();
+}
+
+//-------------------------------------------------------------------------------------------------
 auto Publisher::id() const -> std::uint64_t {
   return impl_->GetTopicId().topic_id.entity_id;
 }

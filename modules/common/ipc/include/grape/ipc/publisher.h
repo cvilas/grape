@@ -23,6 +23,9 @@ public:
   /// Publish data on topic specified at creation by Session
   void publish(std::span<const std::byte> bytes) const;
 
+  /// @return The number of subscribers currently matched to this publisher
+  [[nodiscard]] auto subscriberCount() const -> std::size_t;
+
   /// @return Unique identifier for this endpoint on the network
   [[nodiscard]] auto id() const -> std::uint64_t;
 
