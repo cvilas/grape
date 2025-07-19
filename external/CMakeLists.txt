@@ -45,11 +45,6 @@ endmacro()
 # External projects follow
 # -------------------------------------------------------------------------------------------------
 
-if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
-    set(ECAL_DEPENDS yaml-cpp tcp_pubsub)
-    list(APPEND EXTERNAL_PROJECTS_LIST ${ECAL_DEPENDS})
-endif()
-
 # -------------------------------------------------------------------------------------------------
 # FTXUI
 if(ftxui IN_LIST EXTERNAL_PROJECTS_LIST)
@@ -107,34 +102,6 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
 endif()
 
 # -------------------------------------------------------------------------------------------------
-# yaml-cpp (eCAL dependency)
-if(yaml-cpp IN_LIST EXTERNAL_PROJECTS_LIST)
-  find_package(yaml-cpp ${YAML_CPP_VERSION_REQUIRED} QUIET)
-  if(yaml-cpp_FOUND)
-    message(STATUS "yaml-cpp: Using version ${yaml-cpp_VERSION} from ${yaml-cpp_DIR}")
-    add_dummy_target(yaml-cpp)
-  else()
-    message(STATUS "yaml-cpp: Building ${YAML_CPP_VERSION_REQUIRED} from source")
-    set(YAML_CPP_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
-      -DBUILD_TESTING=OFF
-      -DYAML_CPP_BUILD_TOOLS=OFF
-      -DYAML_CPP_BUILD_TESTS=OFF
-      -DYAML_CPP_FORMAT_SOURCE=OFF
-      -DYAML_BUILD_SHARED_LIBS=OFF
-      -DYAML_CPP_INSTALL=ON
-      -DCMAKE_POLICY_VERSION_MINIMUM=3.5) 
-    set(YAML_CPP_PATCH_FILE ${CMAKE_CURRENT_SOURCE_DIR}/sources/yaml_cpp_stdint.patch)
-    ExternalProject_Add(
-      yaml-cpp
-      GIT_REPOSITORY "https://github.com/jbeder/yaml-cpp.git"
-      GIT_TAG ${YAML_CPP_VERSION_REQUIRED}
-      GIT_SHALLOW true
-      PATCH_COMMAND patch -p1 < ${YAML_CPP_PATCH_FILE}
-      CMAKE_ARGS ${YAML_CPP_CMAKE_ARGS})
-  endif()
-endif()
-
-# -------------------------------------------------------------------------------------------------
 # eCAL
 if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
   find_package(eCAL ${ECAL_VERSION_REQUIRED} QUIET)
@@ -153,17 +120,16 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
         -DECAL_BUILD_SAMPLES=OFF
         -DECAL_INSTALL_SAMPLE_SOURCES=OFF
         -DECAL_CPACK_PACK_WITH_INNOSETUP=OFF
-	-DECAL_THIRDPARTY_BUILD_YAML-CPP=OFF
-	-DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=ON
+        -DECAL_THIRDPARTY_BUILD_YAML-CPP=ON
+        -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=ON
         -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON
         -DCMAKE_POLICY_VERSION_MINIMUM=3.5
         -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/submodule_dependencies.cmake)
     ExternalProject_Add(
       eCAL
       GIT_REPOSITORY "https://github.com/eclipse-ecal/ecal.git"
-      GIT_TAG v${ECAL_VERSION_REQUIRED}-rc.3 # TODO(vilas): Update on release v6
+      GIT_TAG v${ECAL_VERSION_REQUIRED}-rc.5 # TODO(vilas): Update on release v6
       GIT_SHALLOW true
-      DEPENDS yaml-cpp
       CMAKE_ARGS ${ECAL_CMAKE_ARGS})
   endif()
 endif()
