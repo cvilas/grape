@@ -6,18 +6,28 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
-- [ ] Propose client-server interface mechanism for robot on-board network 
 - [ ] Create IPC endpoints templated on TopicAttributes concept
   - [ ] Rename current Publisher to RawPublisher. Likewise for subscriber
   - [ ] Create `Publisher<TopicAttributes>`. Likewise for subscriber.
   - [ ] Apply concept that TopicAttributes must contain data type and topic name specification
   - [ ] Eliminate the need to call ipc::init if defaults are desired (see syslog::init)
-- [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
-- [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
-- [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
-- [ ] Real-time time-series plotting using implot (redesign from scratch again)
-- [ ] 3D scenegraph using SDL
-- [ ] Math library: constexpr matrix and quaternions operations to support AHRS implementation
+- [ ] Implement SDL3-based camera streamer (See [README](../modules/camera/README.md))
+- [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs
+  - [ ] Study [scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
+  - [ ] Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
+  - [ ] Review my experimental implementations in scratch/scenegraph/copilot
+  - [ ] Build version 1: Traditional scenegraph using class hierarchy
+  - [ ] Build version 2: Modern scenegraph using ECS approach
+  - [ ] Extend to support asset loading using assimp
+  - [ ] Study [Flecs and ECS](https://github.com/SanderMertens/flecs)
+  - [ ] Study [USD](https://developer.nvidia.com/usd#nvidia)
+  - [ ] Study [glTF with physics extensions](https://github.com/eoineoineoin/glTF_Physics)
+  - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
+  - [ ] Choose a model description format
+  - [ ] Design a text-based scenegraph description format using our scripting engine
+- [ ] Math library: 
+  - [ ] constexpr matrix and quaternions operations to support AHRS implementation
+  - [ ] linear algebra using std::mdspan and c++26 linalg 
 - [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
 - [ ] DSP functions
   - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
@@ -26,7 +36,12 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Differentiator
   - [ ] Integrator
   - [ ] Velocity observer
+- [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
+- [ ] Real-time time-series plotting using implot (redesign from scratch again)
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
+- [ ] Propose client-server messaging interface for robot on-board network 
+- [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
+- [ ] Implement [picam](../modules/rpi/picam/README.md)  
 - [ ] Host monitoring micro-service
   - [ ] Implement library to read CPU, memory, disk usage, network utilisation, temperatures
   - [ ] Add systemd services support in GBS
@@ -34,6 +49,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] IPC: Implement means to isolate IPC to a set of hosts [#129]
   - [ ] IPC: Implement zero-copy read and write [#132]
   - [ ] IPC: Fix 'local' mode communication in MacOS
+- [ ] Integrate [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
 - [ ] Rover
   - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
   - [ ] Implement CANOpen interface for Linux
@@ -56,25 +72,13 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - Auto generated robot kinematics from model
     - [Talk](https://youtu.be/CwN0I8yUqok?feature=shared)
     - [Code](https://github.com/pac48/fast_robot_kinematics)
+- Transition to Vulkan from OpenGL
   - [3D graphics programming](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
   - [Vulkan 3D game engine from scratch](https://youtu.be/hSL9dCjwoCU)
   - [Vulkan in 30 minutes](https://renderdoc.org/vulkan-in-30-minutes.html)
   - [Vulkan Tutorial](https://vulkan-tutorial.com/)
   - [Vulkan guide](https://vkguide.dev/)
-  - [Scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
-  - [Flecs and ECS](https://github.com/SanderMertens/flecs)
-  - [USD](https://developer.nvidia.com/usd#nvidia)
-  - Study glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
-  - Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scnegraph
-
-## Scenegraph for robotics computation and visualisation
-
-- Design scene description format using our scripting engine
-- Design scenegraph library using existing khronos libs
-  - Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
-  - Implement PoC. (Example: [Qt3d](https://github.com/cvilas/scratch/3dvis/qt))
-  - Implement a basic scenegraph example and check performance in MacOS and Linux
-- Define geometric primitives (plane, ellipsoid, cone, cuboid)
+  - Roadmap to reimplement scenegraph in Vulkan
 
 ## References
 
