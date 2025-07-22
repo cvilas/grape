@@ -17,7 +17,9 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] Real-time time-series plotting using implot (redesign from scratch again)
 - [ ] 3D scenegraph using SDL
-- [ ] Math library: constexpr matrix and quaternions operations to support AHRS implementation
+- [ ] Math library: 
+  - [ ] constexpr matrix and quaternions operations to support AHRS implementation
+  - [ ] linear algebra using std::mdspan and c++26 linalg 
 - [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
 - [ ] DSP functions
   - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
