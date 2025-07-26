@@ -6,17 +6,22 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
-- [ ] Propose client-server interface mechanism for robot on-board network 
 - [ ] Create IPC endpoints templated on TopicAttributes concept
   - [ ] Rename current Publisher to RawPublisher. Likewise for subscriber
   - [ ] Create `Publisher<TopicAttributes>`. Likewise for subscriber.
   - [ ] Apply concept that TopicAttributes must contain data type and topic name specification
   - [ ] Eliminate the need to call ipc::init if defaults are desired (see syslog::init)
+- [ ] Propose client-server interface mechanism for robot on-board network 
 - [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
 - [ ] [Stand-alone PoE camera](../modules/rpi/picam/README.md)  
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] Real-time time-series plotting using implot (redesign from scratch again)
-- [ ] 3D scenegraph using SDL
+- [ ] 3D scenegraph using SDL and OpenGL
+  - [ ] Study [scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
+  - [ ] Review, clean up and implement version 1 based on scratch/scenegraph/copilot
+  - [ ] Extend to support asset loading using assimp
+  - [ ] Study glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
+  - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
 - [ ] Math library: 
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
   - [ ] linear algebra using std::mdspan and c++26 linalg 
@@ -63,11 +68,8 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [Vulkan in 30 minutes](https://renderdoc.org/vulkan-in-30-minutes.html)
   - [Vulkan Tutorial](https://vulkan-tutorial.com/)
   - [Vulkan guide](https://vkguide.dev/)
-  - [Scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
   - [Flecs and ECS](https://github.com/SanderMertens/flecs)
   - [USD](https://developer.nvidia.com/usd#nvidia)
-  - Study glTF with [physics extensions](https://github.com/eoineoineoin/glTF_Physics)
-  - Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scnegraph
 
 ## Scenegraph for robotics computation and visualisation
 
