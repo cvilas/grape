@@ -55,4 +55,3 @@ endif()
 
 add_subdirectory(hello)
 add_subdirectory(list)
-add_subdirectory(view)
