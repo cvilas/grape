@@ -3,3 +3,5 @@
 # =================================================================================================
 
 add_subdirectory(view)
+add_subdirectory(pub)
+add_subdirectory(sub)

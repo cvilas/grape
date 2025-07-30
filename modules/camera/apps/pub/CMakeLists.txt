@@ -3,6 +3,6 @@
 # =================================================================================================
 
 define_module_app(
-  NAME camera_view
-  SOURCES view.cpp
+  NAME camera_pub
+  SOURCES camera_pub.cpp
   PUBLIC_LINK_LIBS "grape::conio")

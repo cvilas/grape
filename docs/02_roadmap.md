@@ -6,7 +6,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
-- [ ] Implement SDL3-based camera streamer (See [README](../modules/camera/README.md))
+- [x] Implement SDL3-based camera streamer
 - [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs
   - [ ] Study [scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
   - [ ] Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
@@ -20,6 +20,9 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
   - [ ] Choose a model description format
   - [ ] Design a text-based scenegraph description format using our scripting engine
+- [ ] IPC: Fix ipc in MacOS
+  - [ ] `grape_ipc_perf_pub`/`sub`
+  - [ ] `grape_camera_pub`/`sub`
 - [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
 - [ ] Math library: 
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
@@ -45,7 +48,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Implement the ability to install monitoring micro-service using cpack
   - [ ] IPC: Implement means to isolate IPC to a set of hosts [#129]
   - [ ] IPC: Implement zero-copy read and write [#132]
-  - [ ] IPC: Fix 'local' mode communication in MacOS
 - [ ] Integrate [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
 - [ ] Rover
   - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)

@@ -7,4 +7,6 @@ Cross platform camera support
 
 ## TODO
 
-- [ ] Demo streamer over IPC (capture -> encode -> pub -> sub -> decode -> view)
+- [ ] Fix grape_camera_pub/sub on MacOS
+- [ ] Allow selecting nearest `SDL_CameraSpec` to what was specified
+- [ ] Troubleshoot the massive latency in pub/sub pipeline vs view application
