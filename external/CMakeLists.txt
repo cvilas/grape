@@ -155,4 +155,24 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
   endif()
 endif()
 
+# -------------------------------------------------------------------------------------------------
+# lz4
+if(lz4 IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(lz4 ${LZ4_VERSION_REQUIRED} QUIET)
+  if(lz4_FOUND)
+    message(STATUS "lz4: Using version ${lz4_VERSION} from ${lz4_DIR}")
+    add_dummy_target(lz4)
+  else()
+    message(STATUS "lz4: Building ${LZ4_VERSION_REQUIRED} from source")
+    set(LZ4_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
+      -DLZ4_BUILD_CLI=OFF)
+    ExternalProject_Add(
+      lz4
+      GIT_REPOSITORY "https://github.com/lz4/lz4.git"
+      GIT_TAG "v${LZ4_VERSION_REQUIRED}"
+      GIT_SHALLOW true
+      SOURCE_SUBDIR "build/cmake"
+      CMAKE_ARGS ${LZ4_CMAKE_ARGS})
+  endif()
+endif()
 

@@ -8,3 +8,8 @@ Cross platform camera support
 ## TODO
 
 - [ ] Demo streamer over IPC (capture -> encode -> pub -> sub -> decode -> view)
+  - [x] ImageFrame + doc
+  - [x] Camera interface + doc
+  - [x] Display interface + doc
+  - [ ] encode and pub + doc
+  - [ ] sub and decode + doc

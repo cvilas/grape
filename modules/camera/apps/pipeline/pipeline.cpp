@@ -10,6 +10,8 @@
 #include <SDL3/SDL_main.h>
 
 #include "grape/camera/camera.h"
+#include "grape/camera/compressor.h"
+#include "grape/camera/decompressor.h"
 #include "grape/camera/display.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
@@ -47,9 +49,13 @@ public:
 
 private:
   void onCapturedFrame(const grape::camera::ImageFrame& frame);
+  void onCompressedFrame(std::span<const std::byte> bytes);
+  void onDecompressedFrame(const grape::camera::ImageFrame& frame);
 
   Statistics stats_;
   grape::camera::Display display_;
+  grape::camera::Decompressor decompressor_;
+  grape::camera::Compressor compressor_;
   std::unique_ptr<grape::camera::Camera> capture_;
   std::atomic_bool save_snapshot_ = false;
 };
@@ -72,13 +78,29 @@ void Statistics::compute() {
 
 //-------------------------------------------------------------------------------------------------
 Application::Application(const std::string& camera_name_hint)
-  : capture_(std::make_unique<grape::camera::Camera>(
+  : decompressor_([this](const auto& frame) { onDecompressedFrame(frame); })
+  , compressor_([this](const auto& bytes) { onCompressedFrame(bytes); })
+  , capture_(std::make_unique<grape::camera::Camera>(
         [this](const auto& frame) { onCapturedFrame(frame); }, camera_name_hint)) {
 }
 
 //-------------------------------------------------------------------------------------------------
 void Application::onCapturedFrame(const grape::camera::ImageFrame& frame) {
   stats_.compute();
+  if (not compressor_.compress(frame)) {
+    grape::syslog::Error("Compression failed!");
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
+void Application::onCompressedFrame(std::span<const std::byte> bytes) {
+  if (not decompressor_.decompress(bytes)) {
+    grape::syslog::Error("Decompression failed!");
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
+void Application::onDecompressedFrame(const grape::camera::ImageFrame& frame) {
   display_.render(frame);
   if (save_snapshot_) {
     save_snapshot_ = false;
