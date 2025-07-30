@@ -15,6 +15,7 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_render.h>
 
+#include "grape/conio/program_options.h"
 #include "grape/log/syslog.h"
 #include "grape/utils/format_ranges.h"
 
@@ -56,9 +57,9 @@ private:
 class Camera {
 public:
   explicit Camera(FrameCallback frame_callback);
-  auto init() -> bool;     //!< initialise the camera
-  auto acquire() -> bool;  //!< acquire a frame
-  void save();             //!< save a frame to disk
+  auto init(const std::string& name_hint) -> bool;  //!< initialise the camera
+  auto acquire() -> bool;                           //!< acquire a frame
+  void save();                                      //!< save a frame to disk
 
 private:
   static void save(SDL_Surface* frame);
@@ -90,7 +91,7 @@ class Application {
 public:
   Application();
 
-  auto init() -> SDL_AppResult;
+  auto init(const std::string& camera_name_hint) -> SDL_AppResult;
   auto iterate() -> SDL_AppResult;
   auto handleEvent(SDL_Event* event) -> SDL_AppResult;
 
@@ -120,7 +121,7 @@ Camera::Camera(FrameCallback frame_callback) : frame_callback_(std::move(frame_c
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Camera::init() -> bool {
+auto Camera::init(const std::string& name_hint) -> bool {
   grape::syslog::Info("Available camera drivers: {}", getCameraDrivers());
   grape::syslog::Info("Using camera driver: {}", SDL_GetCurrentCameraDriver());
 
@@ -134,14 +135,24 @@ auto Camera::init() -> bool {
     return false;
   }
 
+  auto chosen_camera_index = -1;
   grape::syslog::Info("Found {} camera{}", camera_count, camera_count > 1 ? "s" : "");
   for (int i = 0; i < camera_count; ++i) {
     const auto id = cameras_ids.get()[i];
+    const auto camera_name = std::string(SDL_GetCameraName(id));
+    if (camera_name.find(name_hint) != std::string::npos) {
+      chosen_camera_index = i;
+    }
+    grape::syslog::Info("[{}] {}", i, camera_name);
     printCameraSpecs(id);
   }
+  if (chosen_camera_index < 0) {
+    grape::syslog::Warn("No camera found matching '{}'. Will open default camera", name_hint);
+    chosen_camera_index = 0;
+  }
 
-  grape::syslog::Info("Opening first camera");
-  camera_.reset(SDL_OpenCamera(cameras_ids.get()[0], nullptr));
+  grape::syslog::Info("Opening camera number {}", chosen_camera_index);
+  camera_.reset(SDL_OpenCamera(cameras_ids.get()[chosen_camera_index], nullptr));
   if (camera_ == nullptr) {
     grape::syslog::Critical("Unable to open camera: {}", SDL_GetError());
     return false;
@@ -207,8 +218,6 @@ auto Camera::getCameraDrivers() -> std::vector<std::string> {
 
 //-------------------------------------------------------------------------------------------------
 void Camera::printCameraSpecs(SDL_CameraID camera_id) {
-  const auto* name = SDL_GetCameraName(camera_id);
-  grape::syslog::Info(" {}", name);
   SDL_CameraSpec** specs = SDL_GetCameraSupportedFormats(camera_id, nullptr);
   if (specs == nullptr) {
     grape::syslog::Warn("Unable to get camera specs: {}", SDL_GetError());
@@ -218,7 +227,7 @@ void Camera::printCameraSpecs(SDL_CameraID camera_id) {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   for (int i = 0; specs[i] != nullptr; ++i) {
     const auto* sp = specs[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    grape::syslog::Info("   {}x{}, {} FPS, {}", sp->width, sp->height,
+    grape::syslog::Info("  {}x{}, {} FPS, {}", sp->width, sp->height,
                         sp->framerate_numerator / sp->framerate_denominator,
                         SDL_GetPixelFormatName(sp->format));
   }
@@ -308,11 +317,11 @@ Application::Application() {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Application::init() -> SDL_AppResult {
+auto Application::init(const std::string& camera_name_hint) -> SDL_AppResult {
   if (not display_->init()) {
     return SDL_APP_FAILURE;
   }
-  if (not capture_->init()) {
+  if (not capture_->init(camera_name_hint)) {
     return SDL_APP_FAILURE;
   }
   return SDL_APP_CONTINUE;
@@ -373,7 +382,7 @@ void setupLogging() {
 }  // namespace
 
 //-------------------------------------------------------------------------------------------------
-auto SDL_AppInit(void** appstate, int /*argc*/, char** /*argv*/) -> SDL_AppResult {
+auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
   setupLogging();
 
   if (not SDL_Init(SDL_INIT_VIDEO | SDL_INIT_CAMERA)) {
@@ -381,8 +390,21 @@ auto SDL_AppInit(void** appstate, int /*argc*/, char** /*argv*/) -> SDL_AppResul
     return SDL_APP_FAILURE;
   }
 
+  // Parse command line arguments
+  const auto args_opt = grape::conio::ProgramDescription("Camera viewer application")
+                            .declareOption<std::string>("hint", "Part of camera name to match", "")
+                            .parse(argc, const_cast<const char**>(argv));
+
+  if (not args_opt.has_value()) {
+    grape::syslog::Critical("Failed to parse command line arguments: {}",
+                            toString(args_opt.error()));
+    return SDL_APP_FAILURE;
+  }
+  const auto& args = args_opt.value();
+  const auto camera_name_hint = args.getOption<std::string>("hint").value_or("");
+
   auto app = std::make_unique<Application>();
-  const auto result = app->init();
+  const auto result = app->init(camera_name_hint);
   if (result != SDL_APP_CONTINUE) {
     return result;
   }
