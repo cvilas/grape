@@ -7,6 +7,4 @@ Cross platform camera support
 
 ## TODO
 
-- [ ] Command line support to open a device by specifying a part of the device name
-- [ ] Configuration file to specify default device and capture settings
 - [ ] Demo streamer over IPC (capture -> encode -> pub -> sub -> decode -> view)
