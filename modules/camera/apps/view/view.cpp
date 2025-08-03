@@ -30,12 +30,12 @@ namespace {
 //=================================================================================================
 /// Image frame data structure for passing between capture and display
 struct Frame {
-  const void* pixels = nullptr;
-  int pitch{};
-  int width{};
-  int height{};
+  std::int32_t pitch{};
+  std::int32_t width{};
+  std::int32_t height{};
   SDL_PixelFormat format{};
   std::chrono::system_clock::time_point timestamp;
+  const void* pixels = nullptr;
 };
 
 using FrameCallback = std::function<void(const Frame& frame)>;
@@ -180,12 +180,12 @@ auto Camera::acquire() -> bool {
     save(frame);
   }
 
-  const auto frame_data = Frame{ .pixels = frame->pixels,
-                                 .pitch = frame->pitch,
+  const auto frame_data = Frame{ .pitch = frame->pitch,
                                  .width = frame->w,
                                  .height = frame->h,
                                  .format = frame->format,
-                                 .timestamp = std::chrono::system_clock::now() };
+                                 .timestamp = std::chrono::system_clock::now(),
+                                 .pixels = frame->pixels };
 
   if (frame_callback_) {
     frame_callback_(frame_data);
