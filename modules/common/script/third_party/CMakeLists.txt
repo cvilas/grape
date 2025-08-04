@@ -2,7 +2,7 @@
 # Copyright (C) 2023 GRAPE Contributors
 # =================================================================================================
 
-set(LUA_SOURCES_DIR ./lua-5.4.7/src)
+set(LUA_SOURCES_DIR ./lua-5.4.8/src)
 set(LUA_SOURCES
     ${LUA_SOURCES_DIR}/lapi.c
     ${LUA_SOURCES_DIR}/lapi.h

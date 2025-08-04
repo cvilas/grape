@@ -19,7 +19,7 @@ define_module_library(
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                        $<INSTALL_INTERFACE:include>
   PRIVATE_INCLUDE_PATHS ""
-  SYSTEM_PRIVATE_INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lua-5.4.7/src/)
+  SYSTEM_PRIVATE_INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lua-5.4.8/src/)
 
 # Subprojects
 add_subdirectory(third_party)
