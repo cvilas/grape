@@ -2,4 +2,4 @@
 # Copyright (C) 2025 GRAPE Contributors
 # =================================================================================================
 
-define_module_test(NAME tests SOURCES tests.cpp)
+define_module_test(NAME tests SOURCES raw_pub_sub_tests.cpp)

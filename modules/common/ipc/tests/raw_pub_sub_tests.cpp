@@ -10,9 +10,9 @@
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
-#include "grape/ipc/publisher.h"
+#include "grape/ipc/raw_publisher.h"
+#include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
-#include "grape/ipc/subscriber.h"
 
 namespace {
 
@@ -52,13 +52,13 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   const auto pub_match_cb = [&matched_sub_id](const grape::ipc::Match& match) -> void {
     matched_sub_id = match.remote_entity.id;
   };
-  auto publisher = grape::ipc::Publisher(topic, pub_match_cb);
+  auto publisher = grape::ipc::RawPublisher(topic, pub_match_cb);
 
   auto matched_pub_id = 0UL;
   const auto sub_match_cb = [&matched_pub_id](const grape::ipc::Match& match) -> void {
     matched_pub_id = match.remote_entity.id;
   };
-  auto subscriber = grape::ipc::Subscriber(topic, recv_callback, sub_match_cb);
+  auto subscriber = grape::ipc::RawSubscriber(topic, recv_callback, sub_match_cb);
 
   // Wait for pub/sub registration
   constexpr auto RETRY_COUNT = 10U;

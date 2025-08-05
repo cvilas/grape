@@ -30,8 +30,8 @@ namespace grape::robot::loco {
 //=================================================================================================
 Arbiter::Arbiter(const std::string& robot_name, CommandCallback&& robot_cmd_cb)
   : robot_command_cb_(std::move(robot_cmd_cb))
-  , status_pub_(robot_name + ArbiterStatusTopic::TOPIC_SUFFIX, nullptr)
-  , alt_cmd_sub_(robot_name + AlternateCommandTopic::TOPIC_SUFFIX,
+  , status_pub_(ArbiterStatusTopic(robot_name), nullptr)
+  , alt_cmd_sub_(AlternateCommandTopic::TOPIC_SUFFIX,
                  [this](const auto& data) { onAlternate(data); })
   , watchdog_thread_([this](const std::stop_token& token) { watchdogLoop(token); }) {
 }
@@ -110,7 +110,7 @@ void Arbiter::watchdogLoop(const std::stop_token& stop_token) {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Arbiter::publishStatus() const {
+void Arbiter::publishStatus() {
   const auto avg_latency = std::chrono::duration_cast<std::chrono::system_clock::duration>(
       std::chrono::duration<float>(cmd_latency_.load()));
   const auto status = ArbiterStatus{ .alt_controller_id = alt_controller_id_.load(),
@@ -123,7 +123,7 @@ void Arbiter::publishStatus() const {
     grape::syslog::Error("Failed to pack status");
     return;
   }
-  status_pub_.publish(stream.data());
+  status_pub_.publish(status);
 }
 
 }  // namespace grape::robot::loco

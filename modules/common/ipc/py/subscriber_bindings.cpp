@@ -7,7 +7,7 @@
 #include <pybind11/stl.h>
 
 #include "bindings.h"
-#include "grape/ipc/subscriber.h"
+#include "grape/ipc/raw_subscriber.h"
 
 namespace grape::ipc::py {
 
@@ -23,13 +23,13 @@ void bindSubscriber(pybind11::module_& module) {
           "The data received by the subscriber")
       .def_readonly("publish_time", &Sample::publish_time, "The time the data was published");
 
-  // Bind the Subscriber class
-  pybind11::class_<Subscriber>(module, "Subscriber")
-      .def(pybind11::init<const std::string&, Subscriber::DataCallback, MatchCallback>(),
+  // Bind the RawSubscriber class
+  pybind11::class_<RawSubscriber>(module, "RawSubscriber")
+      .def(pybind11::init<const std::string&, RawSubscriber::DataCallback, MatchCallback>(),
            pybind11::arg("topic"), pybind11::arg("data_cb"), pybind11::arg("match_cb") = nullptr,
-           "Create a Subscriber with the specified topic, data callback, and optional match "
+           "Create a RawSubscriber with the specified topic, data callback, and optional match "
            "callback.")
-      .def("get_publisher_count", &Subscriber::publisherCount,
+      .def("get_publisher_count", &RawSubscriber::publisherCount,
            "Get the number of publishers currently matched to this subscriber.");
 }
 

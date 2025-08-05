@@ -2,10 +2,10 @@
 # Copyright (C) 2025 GRAPE Contributors
 # =================================================================================================
 
-declare_module(
-  NAME robot_loco_teleop
-  DEPENDS_ON_MODULES "robot_loco_interface;conio;ipc;log"
-  DEPENDS_ON_EXTERNAL_PROJECTS "ftxui")
+#declare_module(
+#  NAME robot_loco_teleop
+#  DEPENDS_ON_MODULES "robot_loco_interface;conio;ipc;log"
+#  DEPENDS_ON_EXTERNAL_PROJECTS "ftxui")
 
 # library sources
 set(SOURCES README.md src/teleop_client.cpp include/grape/robot/loco/teleop_client.h)

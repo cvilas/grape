@@ -2,9 +2,11 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#include "grape/ipc/subscriber.h"
+#include "grape/ipc/raw_publisher.h"
 
-#include <ecal/pubsub/subscriber.h>
+#include <chrono>
+
+#include <ecal/pubsub/publisher.h>
 #include <ecal/pubsub/types.h>
 
 #include "grape/exception.h"
@@ -13,19 +15,19 @@
 namespace {
 
 //-------------------------------------------------------------------------------------------------
-auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallbackData& event_data)
+auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallbackData& event_data)
     -> grape::ipc::Match {
   auto match_status = grape::ipc::Match::Status::Undefined;
   switch (event_data.event_type) {
-    case eCAL::eSubscriberEvent::none:
+    case eCAL::ePublisherEvent::none:
       match_status = grape::ipc::Match::Status::Undefined;
       break;
-    case eCAL::eSubscriberEvent::connected:
+    case eCAL::ePublisherEvent::connected:
       match_status = grape::ipc::Match::Status::Matched;
       break;
-    case eCAL::eSubscriberEvent::disconnected:
+    case eCAL::ePublisherEvent::disconnected:
       [[fallthrough]];
-    case eCAL::eSubscriberEvent::dropped:
+    case eCAL::ePublisherEvent::dropped:
       match_status = grape::ipc::Match::Status::Unmatched;
       break;
   }
@@ -37,56 +39,48 @@ auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallbackD
 
 namespace grape::ipc {
 
-struct Subscriber::Impl : public eCAL::CSubscriber {
-  Impl(const std::string& topic_name, const eCAL::SubEventCallbackT& event_cb)
-    : eCAL::CSubscriber(topic_name, eCAL::SDataTypeInformation(), event_cb) {
+struct RawPublisher::Impl : public eCAL::CPublisher {
+  Impl(const std::string& topic_name, const eCAL::PubEventCallbackT& event_cb)
+    : eCAL::CPublisher(topic_name, eCAL::SDataTypeInformation(), event_cb) {
   }
 };
 
 //-------------------------------------------------------------------------------------------------
-Subscriber::Subscriber(const std::string& topic, Subscriber::DataCallback&& data_cb,
-                       MatchCallback&& match_cb) {
+RawPublisher::RawPublisher(const std::string& topic, MatchCallback&& match_cb) {
   if (not ok()) {
     panic<Exception>("Not initialised");
   }
-
   const auto event_cb = [moved_match_cb = std::move(match_cb)](
                             const eCAL::STopicId& topic_id,
-                            const eCAL::SSubEventCallbackData& event_data) -> void {
+                            const eCAL::SPubEventCallbackData& event_data) -> void {
     if (moved_match_cb != nullptr) {
       moved_match_cb(toMatchEvent(topic_id, event_data));
     }
   };
-
-  impl_ = std::make_unique<Subscriber::Impl>(topic, event_cb);
-
-  impl_->SetReceiveCallback([moved_data_cb = std::move(data_cb)](
-                                const eCAL::STopicId& id, const eCAL::SDataTypeInformation&,
-                                const eCAL::SReceiveCallbackData& data) -> void {
-    const auto tp =
-        std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
-    if (moved_data_cb != nullptr) {
-      moved_data_cb(
-          { .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
-            .publish_time = tp,
-            .publisher = { .host = id.topic_id.host_name, .id = id.topic_id.entity_id } });
-    }
-  });
+  impl_ = std::make_unique<RawPublisher::Impl>(topic, event_cb);
 }
 
 //-------------------------------------------------------------------------------------------------
-Subscriber::~Subscriber() = default;
+RawPublisher::~RawPublisher() = default;
 
 //-------------------------------------------------------------------------------------------------
-Subscriber::Subscriber(Subscriber&&) noexcept = default;
+RawPublisher::RawPublisher(RawPublisher&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
-auto Subscriber::publisherCount() const -> std::size_t {
-  return impl_->GetPublisherCount();
+void RawPublisher::publish(std::span<const std::byte> bytes) const {
+  const auto now = std::chrono::system_clock::now();
+  const auto us =
+      std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+  std::ignore = impl_->Send(bytes.data(), bytes.size(), us);
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Subscriber::id() const -> std::uint64_t {
+auto RawPublisher::subscriberCount() const -> std::size_t {
+  return impl_->GetSubscriberCount();
+}
+
+//-------------------------------------------------------------------------------------------------
+auto RawPublisher::id() const -> std::uint64_t {
   return impl_->GetTopicId().topic_id.entity_id;
 }
 

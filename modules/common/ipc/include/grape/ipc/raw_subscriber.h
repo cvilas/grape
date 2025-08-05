@@ -23,7 +23,7 @@ struct Sample {
 
 //=================================================================================================
 /// Subscribers receive topic data. Created by Session.
-class Subscriber {
+class RawSubscriber {
 public:
   /// Function signature for callback on received data
   using DataCallback = std::function<void(const Sample&)>;
@@ -32,7 +32,8 @@ public:
   /// @param topic Topic on which to listen to for data from matched publishers
   /// @param data_cb Data processing callback, triggered on every newly received data sample
   /// @param match_cb Match callback, triggered when matched/unmatched with a remote publisher
-  Subscriber(const std::string& topic, DataCallback&& data_cb, MatchCallback&& match_cb = nullptr);
+  RawSubscriber(const std::string& topic, DataCallback&& data_cb,
+                MatchCallback&& match_cb = nullptr);
 
   /// @return The number of publishers currently matched to this subscriber
   [[nodiscard]] auto publisherCount() const -> std::size_t;
@@ -40,11 +41,11 @@ public:
   /// @return Unique identifier for this endpoint on the network
   [[nodiscard]] auto id() const -> std::uint64_t;
 
-  ~Subscriber();
-  Subscriber(Subscriber&&) noexcept;
-  Subscriber(const Subscriber&) = delete;
-  auto operator=(const Subscriber&) = delete;
-  auto operator=(Subscriber&&) noexcept = delete;
+  ~RawSubscriber();
+  RawSubscriber(RawSubscriber&&) noexcept;
+  RawSubscriber(const RawSubscriber&) = delete;
+  auto operator=(const RawSubscriber&) = delete;
+  auto operator=(RawSubscriber&&) noexcept = delete;
 
 private:
   struct Impl;

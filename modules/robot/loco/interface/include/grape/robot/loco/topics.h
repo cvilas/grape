@@ -16,9 +16,19 @@ struct AlternateCommandTopic {
 };
 
 /// Topic on which the locomotion service publishes the status of the robot's locomotion system.
-struct ArbiterStatusTopic {
-  static constexpr auto TOPIC_SUFFIX = "/loco/arbiter/status";
+class ArbiterStatusTopic {
+public:
   using DataType = robot::loco::ArbiterStatus;
+  static constexpr auto MAX_SERIALISED_DATA_SIZE = 128U;
+  explicit ArbiterStatusTopic(std::string robot_name) : robot_name_(std::move(robot_name)) {
+  }
+  [[nodiscard]] auto topic() const -> std::string {
+    static constexpr auto TOPIC_SUFFIX = "/loco/arbiter/status";
+    return robot_name_ + TOPIC_SUFFIX;
+  }
+
+private:
+  std::string robot_name_;
 };
 
 }  // namespace grape::robot::loco

@@ -7,9 +7,12 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
 - [ ] Create IPC endpoints templated on TopicAttributes concept
-  - [ ] Rename current Publisher to RawPublisher. Likewise for subscriber
+  - [x] Rename current Publisher to RawPublisher. Likewise for subscriber
   - [ ] Create `Publisher<TopicAttributes>`. Likewise for subscriber.
-  - [ ] Apply concept that TopicAttributes must contain data type and topic name specification
+  - [ ] Define TopicAttributes concept to specify data type, topic name and encoding
+  - [ ] Pass type name, topic name and encoding to publisher and subscriber datainfo objects
+  - [ ] Defines SampleInfo to contain metadata
+  - [ ] Unit tests and examples
   - [ ] Eliminate the need to call ipc::init if defaults are desired (see syslog::init)
 - [ ] Implement SDL3-based camera streamer (See [README](../modules/camera/README.md))
 - [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs

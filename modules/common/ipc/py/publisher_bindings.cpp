@@ -6,18 +6,18 @@
 #include <pybind11/stl.h>
 
 #include "bindings.h"
-#include "grape/ipc/publisher.h"
+#include "grape/ipc/raw_publisher.h"
 
 namespace grape::ipc::py {
 
 void bindPublisher(pybind11::module_& module) {
-  pybind11::class_<Publisher>(module, "Publisher")
+  pybind11::class_<RawPublisher>(module, "RawPublisher")
       .def(pybind11::init<const std::string&, MatchCallback&&>(), pybind11::arg("topic"),
            pybind11::arg("match_cb") = nullptr,
-           "Create a Publisher with the specified topic and optional match callback.")
+           "Create a RawPublisher with the specified topic and optional match callback.")
       .def(
           "publish",
-          [](const Publisher& self, const pybind11::bytes& data) -> void {
+          [](const RawPublisher& self, const pybind11::bytes& data) -> void {
             const std::string& data_str = data.cast<std::string>();
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
             const auto* raw_data = reinterpret_cast<const std::byte*>(data_str.data());
