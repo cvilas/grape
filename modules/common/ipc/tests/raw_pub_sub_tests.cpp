@@ -38,12 +38,12 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   std::condition_variable recv_cond;
   std::mutex recv_mut;
   auto received_msg = std::vector<std::byte>{};
-  auto sample_pub_id = 0UL;
+  auto pub_id = 0UL;
   const auto recv_callback = [&recv_mut, &recv_cond, &received_msg,
-                              &sample_pub_id](const grape::ipc::Sample& sample) -> void {
-    const std::lock_guard<std::mutex> lk(recv_mut);
+                              &pub_id](const grape::ipc::Sample& sample) -> void {
+    const auto lk = std::lock_guard(recv_mut);
     received_msg = std::vector<std::byte>(sample.data.begin(), sample.data.end());
-    sample_pub_id = sample.info.publisher.id;
+    pub_id = sample.info.publisher.id;
     recv_cond.notify_all();
   };
 
@@ -78,15 +78,17 @@ TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
   publisher.publish({ payload.data(), payload.size() });
 
   // wait a reasonable time for subscriber to receive message
-  constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(3000);
-  std::unique_lock lk(recv_mut);
-  recv_cond.wait_for(lk, RECV_WAIT_TIME,
-                     [&received_msg] -> bool { return not received_msg.empty(); });
+  {
+    constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
+    auto lk = std::unique_lock(recv_mut);
+    recv_cond.wait_for(lk, RECV_WAIT_TIME,
+                       [&received_msg] -> bool { return not received_msg.empty(); });
+  }
 
   // verify message
   REQUIRE(received_msg.size() == PAYLOAD_SIZE);
   REQUIRE(received_msg == payload);
-  REQUIRE(sample_pub_id == publisher.id());
+  REQUIRE(pub_id == publisher.id());
 }
 
 // NOLINTEND(cert-err58-cpp)
