@@ -6,7 +6,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
-- [x] Create IPC endpoints templated on TopicAttributes concept
 - [ ] Implement SDL3-based camera streamer (See [README](../modules/camera/README.md))
 - [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs
   - [ ] Study [scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
@@ -33,6 +32,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Differentiator
   - [ ] Integrator
   - [ ] Velocity observer
+- [ ] Optimise the [ring buffer](https://rigtorp.se/ringbuffer/)
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] Real-time time-series plotting using implot (redesign from scratch again)
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)

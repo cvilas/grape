@@ -51,8 +51,8 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   auto pub_id = grape::ipc::EntityId{};
   const auto data_cb = [&recv_cond, &recv_mut, &received_data,
                         &pub_id](const TestDataType& data, const grape::ipc::SampleInfo& info) {
+    const auto lk = std::lock_guard(recv_mut);
     received_data = data;
-    const std::lock_guard<std::mutex> lk(recv_mut);
     pub_id = info.publisher;
     recv_cond.notify_all();
   };
@@ -80,7 +80,7 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   // wait for subscriber to receive it
   {
     constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
-    std::unique_lock<std::mutex> lk(recv_mut);
+    auto lk = std::unique_lock(recv_mut);
     recv_cond.wait_for(lk, RECV_WAIT_TIME, [&pub_id] { return pub_id.id != 0U; });
   }
 
