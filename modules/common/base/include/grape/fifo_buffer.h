@@ -11,7 +11,7 @@
 #include <span>
 #include <vector>
 
-namespace grape::realtime {
+namespace grape {
 
 //=================================================================================================
 /// Lock-free, non-blocking, multi-producer-single-consumer in-place modifiable raw FIFO buffer
@@ -117,4 +117,4 @@ inline auto FIFOBuffer::count() const noexcept -> std::size_t {
   return count_.load(std::memory_order_relaxed);
 }
 
-}  // namespace grape::realtime
+}  // namespace grape

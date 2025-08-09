@@ -5,14 +5,14 @@
 #include <print>
 
 #include "grape/exception.h"
-#include "grape/realtime/fixed_string.h"
+#include "grape/fixed_string.h"
 
 //=================================================================================================
 auto main() -> int {
   try {
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-    using FixedString8 = grape::realtime::FixedString<7>;
-    using FixedString64 = grape::realtime::FixedString<63>;
+    using FixedString8 = grape::FixedString<7>;
+    using FixedString64 = grape::FixedString<63>;
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
     static constexpr FixedString8 STRING("abcdefghij");  //!< this will get truncated to fit

@@ -3,7 +3,7 @@
 //=================================================================================================
 
 #include "catch2/catch_test_macros.hpp"
-#include "grape/realtime/fifo_buffer.h"
+#include "grape/fifo_buffer.h"
 
 namespace {
 
@@ -11,15 +11,15 @@ namespace {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Count should be zero on initialization", "[FIFOBuffer]") {
-  constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 10U };
-  const auto buffer = grape::realtime::FIFOBuffer(CONFIG);
+  constexpr grape::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 10U };
+  const auto buffer = grape::FIFOBuffer(CONFIG);
   REQUIRE(buffer.count() == 0);
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Writes and reads are in FIFO order", "[FIFOBuffer]") {
-  constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
-  grape::realtime::FIFOBuffer buffer(CONFIG);
+  constexpr grape::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
+  grape::FIFOBuffer buffer(CONFIG);
 
   // write
   for (std::size_t i = 0; i < CONFIG.num_frames; ++i) {
@@ -43,8 +43,8 @@ TEST_CASE("Writes and reads are in FIFO order", "[FIFOBuffer]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Attempt to write to a full buffer should fail", "[FIFOBuffer]") {
-  constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
-  grape::realtime::FIFOBuffer buffer(CONFIG);
+  constexpr grape::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
+  grape::FIFOBuffer buffer(CONFIG);
   for (std::size_t i = 0; i < CONFIG.num_frames; ++i) {
     REQUIRE(buffer.visitToWrite([&](std::span<std::byte>) -> void {
       // Writing to fill up the buffer
@@ -59,8 +59,8 @@ TEST_CASE("Attempt to write to a full buffer should fail", "[FIFOBuffer]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Attempt to read from an empty buffer should fail", "[FIFOBuffer]") {
-  constexpr grape::realtime::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
-  grape::realtime::FIFOBuffer buffer(CONFIG);
+  constexpr grape::FIFOBuffer::Config CONFIG{ .frame_length = 64U, .num_frames = 5U };
+  grape::FIFOBuffer buffer(CONFIG);
   REQUIRE_FALSE(buffer.visitToRead([&](std::span<const std::byte>) -> void {
     // Attempting to read from an empty buffer
   }));

@@ -31,9 +31,7 @@ Publisher<TopicAttributes>::Publisher(const TopicAttributes& attr, MatchCallback
 //-------------------------------------------------------------------------------------------------
 template <typename TopicAttributes>
 void Publisher<TopicAttributes>::publish(const TopicAttributes::DataType& data) {
-  // TODO(vilas):
-  // - Don't throw. return grape::realtime::Error
-  auto stream = serdes::OutStream<TopicAttributes::MAX_SERIALISED_DATA_SIZE>{};
+  auto stream = serdes::OutStream<TopicAttributes::SERDES_BUFFER_SIZE>{};
   auto ser = serdes::Serialiser(stream);
   if (not ser.pack(data)) {
     panic<Exception>("Serialisation error");

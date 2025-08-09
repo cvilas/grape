@@ -9,7 +9,7 @@
 #include <thread>
 
 #include "grape/exception.h"
-#include "grape/realtime/fifo_buffer.h"
+#include "grape/fifo_buffer.h"
 
 namespace {
 
@@ -27,7 +27,7 @@ auto main() -> int {
     (void)signal(SIGINT, onSignal);
     (void)signal(SIGTERM, onSignal);
 
-    using Fifo = grape::realtime::FIFOBuffer;
+    using Fifo = grape::FIFOBuffer;
     const auto cfg = Fifo::Config{ .frame_length = 8U, .num_frames = 10U };
     Fifo buffer(cfg);
 

@@ -9,8 +9,8 @@
 #include <string>
 #include <vector>
 
+#include "grape/fifo_buffer.h"
 #include "grape/probe/signal.h"
-#include "grape/realtime/fifo_buffer.h"
 #include "grape/utils/enums.h"
 
 namespace grape::probe {
@@ -131,8 +131,8 @@ private:
   PinConfig pins_;
   std::ranges::subrange<std::vector<Signal>::const_iterator> controllables_;
   Receiver receiver_;
-  realtime::FIFOBuffer snaps_;
-  realtime::FIFOBuffer pending_syncs_;
+  FIFOBuffer snaps_;
+  FIFOBuffer pending_syncs_;
 };
 
 //-------------------------------------------------------------------------------------------------

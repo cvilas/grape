@@ -13,7 +13,7 @@ namespace grape::ipc {
 template <typename T>
 concept TopicAttributes = requires(T obj) {
   typename T::DataType;  //!< data type carried on a topic
-  { T::SERDES_BUFFER_SIZE } -> std::convertible_to<std::size_t>;
+  { T::SERDES_BUFFER_SIZE } -> std::convertible_to<std::size_t>; //!< Data serialisation buffer size
   { obj.topicName() } -> std::convertible_to<std::string>;
 };
 

@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "grape/fixed_string.h"
 #include "grape/probe/type_id.h"
-#include "grape/realtime/fixed_string.h"
 
 namespace grape::probe {
 
@@ -24,11 +24,11 @@ struct Signal {
 
   static constexpr auto MAX_NAME_LENGTH = 63;
 
-  realtime::FixedString<MAX_NAME_LENGTH> name;  //!< Unique identifier name for the signal
-  std::uintptr_t address{ 0 };    //!< Address of the signal in the process address space
-  std::size_t num_elements{ 0 };  //!< Number of elements in the signal sequence
-  TypeId type{};                  //!< Data type of elements in the signal sequence
-  Role role{};                    //!< Mode of usage of the signal
+  FixedString<MAX_NAME_LENGTH> name;  //!< Unique identifier name for the signal
+  std::uintptr_t address{ 0 };        //!< Address of the signal in the process address space
+  std::size_t num_elements{ 0 };      //!< Number of elements in the signal sequence
+  TypeId type{};                      //!< Data type of elements in the signal sequence
+  Role role{};                        //!< Mode of usage of the signal
 };
 
 // Ensure any future changes maintains triviality for the sake of performance

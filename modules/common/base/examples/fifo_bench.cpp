@@ -7,17 +7,17 @@
 
 #include <benchmark/benchmark.h>
 
-#include "grape/realtime/fifo_buffer.h"
+#include "grape/fifo_buffer.h"
 
 namespace {
 
 //-------------------------------------------------------------------------------------------------
 void bmFifoWrite(benchmark::State& state) {
-  using Fifo = grape::realtime::FIFOBuffer;
+  using Fifo = grape::FIFOBuffer;
   const auto data_size = static_cast<std::size_t>(state.range(0));
   const auto config = Fifo::Config{ .frame_length = data_size,
                                     .num_frames = static_cast<std::size_t>(state.max_iterations) };
-  auto fifo = grape::realtime::FIFOBuffer(config);
+  auto fifo = grape::FIFOBuffer(config);
 
   std::vector<std::byte> data(data_size);
   const auto writer = [&data](std::span<std::byte> buffer) -> void {
@@ -36,11 +36,11 @@ void bmFifoWrite(benchmark::State& state) {
 
 //-------------------------------------------------------------------------------------------------
 void bmFifoRead(benchmark::State& state) {
-  using Fifo = grape::realtime::FIFOBuffer;
+  using Fifo = grape::FIFOBuffer;
   const auto data_size = static_cast<std::size_t>(state.range(0));
   const auto config = Fifo::Config{ .frame_length = data_size,
                                     .num_frames = static_cast<std::size_t>(state.max_iterations) };
-  auto fifo = grape::realtime::FIFOBuffer(config);
+  auto fifo = grape::FIFOBuffer(config);
 
   std::vector<std::byte> data(data_size);
   const auto writer = [&data](std::span<std::byte> buffer) -> void {

@@ -5,13 +5,13 @@
 #include <array>
 
 #include "catch2/catch_test_macros.hpp"
-#include "grape/realtime/fixed_string.h"
+#include "grape/fixed_string.h"
 
 namespace {
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
-using FixedString8 = grape::realtime::FixedString<7>;
+using FixedString8 = grape::FixedString<7>;
 using namespace std::string_literals;
 
 //-------------------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ TEST_CASE("Construction from constexpr string", "[FixedString]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Construction from const buffer", "[FixedString]") {
-  using FixedString24 = grape::realtime::FixedString<23>;
+  using FixedString24 = grape::FixedString<23>;
   constexpr std::array<char, 24> BUFFER{ 'H', 'e', 'l', 'l', 'o', ' ', 'W',
                                          'o', 'r', 'l', 'd', '!', '\0' };
 
@@ -139,25 +139,25 @@ TEST_CASE("Size in stack", "[FixedString]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Construct with format string", "[FixedString]") {
   SECTION("Format string fits within capacity") {
-    grape::realtime::FixedString<20> str("{} + {} = {}", 2, 3, 5);
+    grape::FixedString<20> str("{} + {} = {}", 2, 3, 5);
     REQUIRE(std::string_view(str.data()) == "2 + 3 = 5");
     REQUIRE(str.length() == 9);
   }
 
   SECTION("Format string exceeds capacity") {
-    grape::realtime::FixedString<10> str("Long string: {}", "too long");
+    grape::FixedString<10> str("Long string: {}", "too long");
     REQUIRE(std::string_view(str.data()) == "Long strin");
     REQUIRE(str.length() == 10);
   }
 
   SECTION("Empty format string") {
-    grape::realtime::FixedString<5> str("", 42);
+    grape::FixedString<5> str("", 42);
     REQUIRE(std::string_view(str.data()).empty());
     REQUIRE(str.length() == 0);
   }
 
   SECTION("Format string with multiple types") {
-    grape::realtime::FixedString<30> str("{} {} {:.2f}", "Answer:", 42, 1.23456);
+    grape::FixedString<30> str("{} {} {:.2f}", "Answer:", 42, 1.23456);
     REQUIRE(std::string_view(str.data()) == "Answer: 42 1.23");
     REQUIRE(str.length() == 15);
   }

@@ -6,9 +6,9 @@
 
 #include <source_location>
 
-#include "grape/realtime/fixed_string.h"
+#include "grape/fixed_string.h"
 
-namespace grape::realtime {
+namespace grape {
 
 //=================================================================================================
 /// A fixed-size encapsulation for error messages. Suitable for use in real-time context.
@@ -52,4 +52,4 @@ static_assert(std::is_nothrow_copy_assignable_v<Error>);
 static_assert(std::is_nothrow_move_assignable_v<Error>);
 static_assert(std::is_nothrow_destructible_v<Error>);
 
-}  // namespace grape::realtime
+}  // namespace grape

@@ -4,7 +4,7 @@
 
 declare_module(
   NAME script
-  DEPENDS_ON_MODULES base
+  DEPENDS_ON_MODULES "base"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
@@ -13,7 +13,7 @@ set(SOURCES src/script.cpp README.md include/grape/script/script.h)
 # library target
 define_module_library(
   NAME script
-  PUBLIC_LINK_LIBS grape::base
+  PUBLIC_LINK_LIBS "grape::base"
   PRIVATE_LINK_LIBS $<BUILD_LOCAL_INTERFACE:lualib>
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

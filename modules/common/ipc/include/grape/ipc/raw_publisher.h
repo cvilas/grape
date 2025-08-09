@@ -12,7 +12,8 @@
 namespace grape::ipc {
 
 //=================================================================================================
-/// Publishers post topic data. Created by Session.
+/// Publishers post data on a topic.
+///
 class RawPublisher {
 public:
   /// Creates a publisher
@@ -20,7 +21,7 @@ public:
   /// @param match_cb Match callback, triggered on matched/unmatched with a remote subscriber
   explicit RawPublisher(const std::string& topic, MatchCallback&& match_cb = nullptr);
 
-  /// Publish data on topic specified at creation by Session
+  /// Publish data on topic specified at construction
   void publish(std::span<const std::byte> bytes) const;
 
   /// @return The number of subscribers currently matched to this publisher
@@ -29,7 +30,7 @@ public:
   /// @return Unique identifier for this endpoint on the network
   [[nodiscard]] auto id() const -> std::uint64_t;
 
-  ~RawPublisher();
+  virtual ~RawPublisher();
   RawPublisher(RawPublisher&&) noexcept;
   RawPublisher(const RawPublisher&) = delete;
   auto operator=(const RawPublisher&) = delete;

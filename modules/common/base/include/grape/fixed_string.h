@@ -8,7 +8,7 @@
 #include <format>
 #include <string_view>
 
-namespace grape::realtime {
+namespace grape {
 
 //=================================================================================================
 /// Fixed size string
@@ -128,4 +128,4 @@ static_assert(std::is_nothrow_copy_assignable_v<FixedString<1>>);
 static_assert(std::is_nothrow_move_assignable_v<FixedString<1>>);
 static_assert(std::is_nothrow_destructible_v<FixedString<1>>);
 
-}  // namespace grape::realtime
+}  // namespace grape

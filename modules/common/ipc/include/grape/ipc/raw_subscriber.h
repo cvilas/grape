@@ -14,15 +14,21 @@
 namespace grape::ipc {
 
 //=================================================================================================
-/// Defines data sample received by the subscriber, with related meta-information
-struct Sample {
-  std::span<const std::byte> data;
+/// Meta information about data contained in a sample
+struct SampleInfo{
   std::chrono::system_clock::time_point publish_time;
   EntityId publisher;
 };
 
 //=================================================================================================
-/// Subscribers receive topic data. Created by Session.
+/// Defines data sample received by the subscriber, with related meta-information
+struct Sample {
+  std::span<const std::byte> data;
+  SampleInfo info;
+};
+
+//=================================================================================================
+/// Subscribers receive topic data.
 class RawSubscriber {
 public:
   /// Function signature for callback on received data
@@ -41,7 +47,7 @@ public:
   /// @return Unique identifier for this endpoint on the network
   [[nodiscard]] auto id() const -> std::uint64_t;
 
-  ~RawSubscriber();
+  virtual ~RawSubscriber();
   RawSubscriber(RawSubscriber&&) noexcept;
   RawSubscriber(const RawSubscriber&) = delete;
   auto operator=(const RawSubscriber&) = delete;
