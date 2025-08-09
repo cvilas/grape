@@ -28,6 +28,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
   - [ ] Choose a model description format
   - [ ] Design a text-based scenegraph description format using our scripting engine
+- [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
 - [ ] Math library: 
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
   - [ ] linear algebra using std::mdspan and c++26 linalg 
@@ -64,6 +65,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Cross language [binding](https://godbolt.org/z/bYPcjMd9q) to functions for scripting
   - [ ] Message dispatch using [pattern matching](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf)
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
+  - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
 
 ## Study
 
