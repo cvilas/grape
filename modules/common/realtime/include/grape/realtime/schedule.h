@@ -10,7 +10,7 @@
 
 #include <sys/types.h>
 
-#include "grape/realtime/error.h"
+#include "grape/error.h"
 
 namespace grape::realtime {
 

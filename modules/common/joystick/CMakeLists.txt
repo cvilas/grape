@@ -17,7 +17,7 @@ set(SOURCES README.md include/grape/joystick/controls.h include/grape/joystick/d
 
 define_module_library(
   NAME joystick
-  PUBLIC_LINK_LIBS grape::base
+  PUBLIC_LINK_LIBS "grape::base"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

@@ -8,8 +8,8 @@
 #include <source_location>
 #include <type_traits>
 
+#include "grape/fixed_string.h"
 #include "grape/log/severity.h"
-#include "grape/realtime/fixed_string.h"
 
 namespace grape::log {
 
@@ -20,8 +20,8 @@ struct [[nodiscard]] Record {
 
   std::chrono::system_clock::time_point timestamp;
   std::source_location location;
-  realtime::FixedString<MAX_LOGGER_NAME_LEN> logger_name;
-  realtime::FixedString<MAX_LOG_MESSAGE_LEN> message;
+  FixedString<MAX_LOGGER_NAME_LEN> logger_name;
+  FixedString<MAX_LOG_MESSAGE_LEN> message;
   Severity severity{ Severity::Debug };
 };
 
