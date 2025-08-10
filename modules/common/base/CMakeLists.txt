@@ -7,7 +7,8 @@ declare_module(
   DEPENDS_ON_MODULES "utils"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
-set(SOURCES include/grape/exception.h src/exception.cpp)
+set(SOURCES include/grape/error.h include/grape/exception.h include/grape/fifo_buffer.h
+            include/grape/fixed_string.h src/exception.cpp)
 
 define_module_library(
   NAME base
@@ -17,3 +18,4 @@ define_module_library(
   PUBLIC_LINK_LIBS grape::utils)
 
 add_subdirectory(examples)
+add_subdirectory(tests)

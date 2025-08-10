@@ -9,9 +9,9 @@
 #include <source_location>
 #include <stop_token>
 
+#include "grape/fifo_buffer.h"
 #include "grape/log/config.h"
 #include "grape/log/severity.h"
-#include "grape/realtime/fifo_buffer.h"
 
 namespace grape::log {
 
@@ -62,7 +62,7 @@ private:
   Config config_{};
   static_assert(std::atomic_uint32_t::is_always_lock_free);
   std::atomic_uint32_t missed_logs_{ 0 };
-  realtime::FIFOBuffer queue_;
+  FIFOBuffer queue_;
   struct Backend;
   std::unique_ptr<Backend> backend_{ nullptr };
 };

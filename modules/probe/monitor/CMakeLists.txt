@@ -15,7 +15,7 @@ set(SOURCES src/monitor.cpp README.md include/grape/probe/monitor.h)
 # library target
 define_module_library(
   NAME probe_monitor
-  PUBLIC_LINK_LIBS grape::probe_controller
+  PUBLIC_LINK_LIBS "grape::probe_controller"
   PRIVATE_LINK_LIBS $<BUILD_LOCAL_INTERFACE:imguilib> $<BUILD_LOCAL_INTERFACE:implotlib>
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
