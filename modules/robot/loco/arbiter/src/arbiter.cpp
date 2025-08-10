@@ -40,25 +40,25 @@ Arbiter::Arbiter(const std::string& robot_name, CommandCallback&& robot_cmd_cb)
 void Arbiter::onAlternate(const ipc::Sample& sample) {
   if (alt_controller_id_.load() == NULL_ID) {
     // no alt controller active. take control
-    alt_controller_id_.store(sample.publisher.id);
-    grape::syslog::Note("Alternate '{}' has control", toString(sample.publisher));
+    alt_controller_id_.store(sample.info.publisher.id);
+    grape::syslog::Note("Alternate '{}' has control", toString(sample.info.publisher));
     publishStatus();
   }
 
-  if (alt_controller_id_.load() != sample.publisher.id) {
+  if (alt_controller_id_.load() != sample.info.publisher.id) {
     // message not from controlling authority. ignore
     return;
   }
 
   const auto now = std::chrono::system_clock::now();
-  const auto cmd_latency = std::chrono::duration<float>(now - sample.publish_time);
+  const auto cmd_latency = std::chrono::duration<float>(now - sample.info.publish_time);
   cmd_latency_ = cmd_latency_tracker_.append(cmd_latency.count()).mean;
 
   // process command
   last_alt_cmd_time_.store(now);
   const auto cmd = unpack<AlternateCommandTopic::DataType>(sample.data);
   if (not cmd.has_value()) {
-    grape::syslog::Warn("Failed to unpack command from '{}'", toString(sample.publisher));
+    grape::syslog::Warn("Failed to unpack command from '{}'", toString(sample.info.publisher));
     return;
   }
   robot_command_cb_(*cmd);

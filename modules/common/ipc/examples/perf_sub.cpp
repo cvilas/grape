@@ -10,8 +10,8 @@
 
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
-#include "grape/ipc/subscriber.h"
 #include "perf_constants.h"
 
 //=================================================================================================
@@ -63,7 +63,7 @@ void Statistics::add(const Clock::time_point& ts, const grape::ipc::Sample& samp
   }
   msg_count++;
   aggregate_bytes += sample.data.size_bytes();
-  aggregate_latency += (ts - sample.publish_time);
+  aggregate_latency += (ts - sample.info.publish_time);
 }
 
 //=================================================================================================
@@ -95,7 +95,7 @@ auto main(int argc, const char* argv[]) -> int {
       }
     };
 
-    auto sub = grape::ipc::Subscriber(grape::ipc::ex::perf::TOPIC, data_cb);
+    auto sub = grape::ipc::RawSubscriber(grape::ipc::ex::perf::TOPIC, data_cb);
 
     std::println("Press CTRL+C to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);

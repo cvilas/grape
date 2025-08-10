@@ -2,34 +2,37 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#include <cstddef>
 #include <print>
 #include <thread>
 
 #include "grape/exception.h"
-#include "grape/ipc/publisher.h"
+#include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
-#include "topic_example.h"
 
 //=================================================================================================
-// Demonstrates a basic IPC publisher. See sub_example.cpp for the corresponding subscriber.
+// Demonstrates a basic IPC subscriber. See raw_pub_example.cpp for the corresponding publisher.
 auto main() -> int {
   try {
     grape::ipc::init(grape::ipc::Config{});
+    const auto* const topic = "hello_world";
+    const auto from_bytes = [](std::span<const std::byte> bytes) -> std::string {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+      return { reinterpret_cast<const char*>(bytes.data()), bytes.size() };
+    };
+
+    const auto data_cb = [&from_bytes](const grape::ipc::Sample& sample) -> void {
+      std::println("Received message: '{}' (from {})", from_bytes(sample.data),
+                   toString(sample.info.publisher));
+    };
 
     const auto match_cb = [](const grape::ipc::Match& match) -> void {
       std::println("\n{} (entity: {})", toString(match.status), toString(match.remote_entity));
     };
 
-    const auto topic = grape::ipc::ex::ExampleTopicAttributes{};
-    auto publisher = grape::ipc::Publisher(topic, match_cb);
+    auto subscriber = grape::ipc::RawSubscriber(topic, data_cb, match_cb);
 
-    auto counter = 0U;
     constexpr auto SLEEP_TIME = std::chrono::milliseconds(500);
     while (grape::ipc::ok()) {
-      const auto message = std::string("Hello World ") + std::to_string(++counter);
-      std::println("Sending message: '{}'", message);
-      publisher.publish(message);
       std::this_thread::sleep_for(SLEEP_TIME);
     }
     return EXIT_SUCCESS;

@@ -7,8 +7,8 @@
 #include <functional>
 #include <string>
 
-#include "grape/ipc/publisher.h"
-#include "grape/ipc/subscriber.h"
+#include "grape/ipc/raw_publisher.h"
+#include "grape/ipc/raw_subscriber.h"
 #include "grape/robot/loco/topics.h"
 
 namespace grape::robot::loco {
@@ -42,7 +42,7 @@ private:
   void onArbiterStatus(const ipc::Sample& sample) const;
   std::uint64_t id_{ 0 };
   StatusCallback status_cb_{ nullptr };
-  grape::ipc::Subscriber arbiter_status_sub_;
-  grape::ipc::Publisher cmd_pub_;
+  grape::ipc::RawSubscriber arbiter_status_sub_;
+  grape::ipc::RawPublisher cmd_pub_;
 };
 }  // namespace grape::robot::loco

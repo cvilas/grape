@@ -9,8 +9,8 @@
 #include <functional>
 #include <thread>
 
-#include "grape/ipc/publisher.h"
-#include "grape/ipc/subscriber.h"
+#include "grape/ipc/raw_publisher.h"
+#include "grape/ipc/raw_subscriber.h"
 #include "grape/robot/loco/topics.h"
 #include "grape/statistics/sliding_mean.h"
 
@@ -61,8 +61,8 @@ private:
   statistics::SlidingMean<float, LATENCY_TRACKER_WINDOW> cmd_latency_tracker_;
   std::atomic<std::uint64_t> alt_controller_id_{ NULL_ID };
   CommandCallback robot_command_cb_{ nullptr };
-  ipc::Publisher status_pub_;
-  ipc::Subscriber alt_cmd_sub_;
+  ipc::RawPublisher status_pub_;
+  ipc::RawSubscriber alt_cmd_sub_;
   std::jthread watchdog_thread_;
 };
 }  // namespace grape::robot::loco

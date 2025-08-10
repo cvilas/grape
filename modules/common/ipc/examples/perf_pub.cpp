@@ -9,7 +9,7 @@
 
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
-#include "grape/ipc/publisher.h"
+#include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/session.h"
 #include "perf_constants.h"
 
@@ -49,7 +49,7 @@ auto main(int argc, const char* argv[]) -> int {
     config.scope = grape::ipc::Config::Scope::Network;
     grape::ipc::init(std::move(config));
 
-    auto pub = grape::ipc::Publisher(grape::ipc::ex::perf::TOPIC);
+    auto pub = grape::ipc::RawPublisher(grape::ipc::ex::perf::TOPIC);
     std::println("Press CTRL-C to quit");
     while (grape::ipc::ok()) {
       pub.publish(payload);

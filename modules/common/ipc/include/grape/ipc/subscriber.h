@@ -4,51 +4,44 @@
 
 #pragma once
 
-#include <chrono>
-#include <functional>
-#include <memory>
-#include <span>
-
-#include "grape/ipc/match.h"
+#include "grape/exception.h"
+#include "grape/ipc/raw_subscriber.h"
+#include "grape/ipc/topic_attributes.h"
+#include "grape/serdes/serdes.h"
+#include "grape/serdes/stream.h"
 
 namespace grape::ipc {
 
 //=================================================================================================
-/// Defines data sample received by the subscriber, with related meta-information
-struct Sample {
-  std::span<const std::byte> data;
-  std::chrono::system_clock::time_point publish_time;
-  EntityId publisher;
-};
-
-//=================================================================================================
-/// Subscribers receive topic data. Created by Session.
-class Subscriber {
+/// Subscriber templated in topic attributes
+///
+template <typename TopicAttributes>
+class Subscriber : public RawSubscriber {
 public:
-  /// Function signature for callback on received data
-  using DataCallback = std::function<void(const Sample&)>;
+  using DataCallback =
+      std::function<void(const typename TopicAttributes::DataType&, const SampleInfo&)>;
 
-  /// creates a subscriber
-  /// @param topic Topic on which to listen to for data from matched publishers
-  /// @param data_cb Data processing callback, triggered on every newly received data sample
-  /// @param match_cb Match callback, triggered when matched/unmatched with a remote publisher
-  Subscriber(const std::string& topic, DataCallback&& data_cb, MatchCallback&& match_cb = nullptr);
-
-  /// @return The number of publishers currently matched to this subscriber
-  [[nodiscard]] auto publisherCount() const -> std::size_t;
-
-  /// @return Unique identifier for this endpoint on the network
-  [[nodiscard]] auto id() const -> std::uint64_t;
-
-  ~Subscriber();
-  Subscriber(Subscriber&&) noexcept;
-  Subscriber(const Subscriber&) = delete;
-  auto operator=(const Subscriber&) = delete;
-  auto operator=(Subscriber&&) noexcept = delete;
-
-private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  Subscriber(const TopicAttributes& topic_attr, DataCallback&& data_cb,
+             MatchCallback&& match_cb = nullptr);
 };
 
+//-------------------------------------------------------------------------------------------------
+template <typename TopicAttributes>
+Subscriber<TopicAttributes>::Subscriber(const TopicAttributes& topic_attr, DataCallback&& data_cb,
+                                        MatchCallback&& match_cb)
+  : RawSubscriber(
+        topic_attr.topicName(),
+        [moved_data_cb = std::move(data_cb)](const Sample& sample) {
+          auto stream = serdes::InStream(sample.data);
+          auto deserialiser = serdes::Deserialiser(stream);
+          typename TopicAttributes::DataType data{};
+          if (not deserialiser.unpack(data)) {
+            panic<Exception>("Deserialisation error");
+          }
+          if (moved_data_cb != nullptr) {
+            moved_data_cb(data, sample.info);
+          }
+        },
+        std::move(match_cb)) {
+}
 }  // namespace grape::ipc

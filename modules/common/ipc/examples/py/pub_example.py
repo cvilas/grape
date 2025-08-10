@@ -3,7 +3,7 @@
 # =================================================================================================
 
 import time
-from grape_ipc_py import init, Config, Publisher, ok
+from grape_ipc_py import init, Config, RawPublisher, ok
 
 
 def to_bytes(msg: str) -> bytes:
@@ -27,7 +27,7 @@ def main():
         topic = "hello_world"
 
         # Create the publisher
-        publisher = Publisher(topic, match_callback)
+        publisher = RawPublisher(topic, match_callback)
 
         # Publish messages in a loop
         counter = 0
