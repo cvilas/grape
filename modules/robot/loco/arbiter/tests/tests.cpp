@@ -25,8 +25,8 @@ public:
 private:
   void onStatus(const grape::ipc::Sample& sample);
   StatusCallback status_cb_;
-  grape::ipc::Publisher cmd_pub_;
-  grape::ipc::Subscriber status_sub_;
+  grape::ipc::RawPublisher cmd_pub_;
+  grape::ipc::RawSubscriber status_sub_;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -4,40 +4,38 @@
 
 #pragma once
 
-#include <memory>
-#include <span>
-
-#include "grape/ipc/match.h"
+#include "grape/exception.h"
+#include "grape/ipc/raw_publisher.h"
+#include "grape/ipc/topic_attributes.h"
+#include "grape/serdes/serdes.h"
+#include "grape/serdes/stream.h"
 
 namespace grape::ipc {
 
 //=================================================================================================
-/// Publishers post topic data. Created by Session.
-class Publisher {
+/// Publisher templated on topic attributes
+///
+template <typename TopicAttributes>
+class Publisher : public RawPublisher {
 public:
-  /// Creates a publisher
-  /// @param topic Topic on which to publish data
-  /// @param match_cb Match callback, triggered on matched/unmatched with a remote subscriber
-  explicit Publisher(const std::string& topic, MatchCallback&& match_cb = nullptr);
-
-  /// Publish data on topic specified at creation by Session
-  void publish(std::span<const std::byte> bytes) const;
-
-  /// @return The number of subscribers currently matched to this publisher
-  [[nodiscard]] auto subscriberCount() const -> std::size_t;
-
-  /// @return Unique identifier for this endpoint on the network
-  [[nodiscard]] auto id() const -> std::uint64_t;
-
-  ~Publisher();
-  Publisher(Publisher&&) noexcept;
-  Publisher(const Publisher&) = delete;
-  auto operator=(const Publisher&) = delete;
-  auto operator=(Publisher&&) noexcept = delete;
-
-private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  explicit Publisher(const TopicAttributes& topic_attr, MatchCallback&& match_cb = nullptr);
+  void publish(const typename TopicAttributes::DataType& data) const;
 };
 
+//-------------------------------------------------------------------------------------------------
+template <typename TopicAttributes>
+Publisher<TopicAttributes>::Publisher(const TopicAttributes& topic_attr, MatchCallback&& match_cb)
+  : RawPublisher(topic_attr.topicName(), std::move(match_cb)) {
+}
+
+//-------------------------------------------------------------------------------------------------
+template <typename TopicAttributes>
+void Publisher<TopicAttributes>::publish(const typename TopicAttributes::DataType& data) const {
+  auto stream = serdes::OutStream<TopicAttributes::SERDES_BUFFER_SIZE>{};
+  auto ser = serdes::Serialiser(stream);
+  if (not ser.pack(data)) {
+    panic<Exception>("Serialisation error");
+  }
+  RawPublisher::publish(stream.data());
+}
 }  // namespace grape::ipc

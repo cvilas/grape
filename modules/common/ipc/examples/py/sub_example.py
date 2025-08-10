@@ -4,7 +4,7 @@
 
 import time
 from datetime import datetime
-from grape_ipc_py import init, Config, Subscriber, ok
+from grape_ipc_py import init, Config, RawSubscriber, ok
 
 
 def from_bytes(data: bytes) -> str:
@@ -14,8 +14,8 @@ def from_bytes(data: bytes) -> str:
 
 def data_callback(sample):
     """Callback for received data."""
-    message = from_bytes(sample.data)
-    publish_time = sample.publish_time
+    message = from_bytes(sample.data())
+    publish_time = sample.info.publish_time
     print(f"Received message: '{message}' at {publish_time}")
 
 
@@ -35,7 +35,7 @@ def main():
         topic = "hello_world"
 
         # Create the subscriber
-        subscriber = Subscriber(topic, data_callback, match_callback)
+        subscriber = RawSubscriber(topic, data_callback, match_callback)
 
         # Sleep loop to keep the subscriber running
         SLEEP_TIME = 0.5  # 500 milliseconds

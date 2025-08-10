@@ -43,3 +43,6 @@ pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
 ``` 
 * Test by running `examples/pub_example.py` and `examples/sub_example.py`
 
+## Roadmap
+
+- [ ] Support specifying type and encoding information via `RawPublisher` and `RawSubscriber` interfaces
