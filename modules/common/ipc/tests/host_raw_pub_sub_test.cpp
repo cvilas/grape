@@ -19,7 +19,7 @@ namespace {
 // NOLINTBEGIN(cert-err58-cpp)
 
 //=================================================================================================
-TEST_CASE("Basic pub-sub on large message works", "[ipc]") {
+TEST_CASE("Basic pub-sub on large message works in host-only scope", "[ipc]") {
   grape::ipc::init(grape::ipc::Config{});
   const auto* const topic = "pub_sub_test";
 
