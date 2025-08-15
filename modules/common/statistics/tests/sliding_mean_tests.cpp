@@ -75,9 +75,7 @@ TEST_CASE("SlidingMean: Tests reset functionality", "[statistics][sliding_mean]"
     const auto stats_before = sliding_mean.append(2.0);
     REQUIRE(stats_before.mean == Catch::Approx(1.5));
 
-    sliding_mean.reset();
-
-    const auto stats_after = sliding_mean.append(10.0);
+    const auto stats_after = sliding_mean.append(10.0, true);
     REQUIRE(stats_after.mean == Catch::Approx(10.0));
     REQUIRE(stats_after.variance == Catch::Approx(0.0));
   }
@@ -88,9 +86,7 @@ TEST_CASE("SlidingMean: Tests reset functionality", "[statistics][sliding_mean]"
     const auto stats_before = sliding_mean.append(3.0);
     REQUIRE(stats_before.mean == Catch::Approx(2.0));
 
-    sliding_mean.reset();
-
-    const auto stats_after = sliding_mean.append(100.0);
+    const auto stats_after = sliding_mean.append(100.0, true);
     REQUIRE(stats_after.mean == Catch::Approx(100.0));
     REQUIRE(stats_after.variance == Catch::Approx(0.0));
   }
@@ -104,9 +100,7 @@ TEST_CASE("SlidingMean: Tests reset functionality", "[statistics][sliding_mean]"
     const auto stats_before = sliding_mean.append(5.0);  // Should slide to [3,4,5]
     REQUIRE(stats_before.mean == Catch::Approx(4.0));
 
-    sliding_mean.reset();
-
-    const auto stats_after = sliding_mean.append(99.0);
+    const auto stats_after = sliding_mean.append(99.0, true);
     REQUIRE(stats_after.mean == Catch::Approx(99.0));
     REQUIRE(stats_after.variance == Catch::Approx(0.0));
   }
