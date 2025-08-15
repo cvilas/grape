@@ -71,7 +71,11 @@ void RawPublisher::publish(std::span<const std::byte> bytes) const {
   const auto now = std::chrono::system_clock::now();
   const auto us =
       std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
-  std::ignore = impl_->Send(bytes.data(), bytes.size(), us);
+  if (not impl_->Send(bytes.data(), bytes.size(), us)) {
+    if (impl_->GetSubscriberCount() > 0U) {
+      panic<Exception>(std::format("Write failed on topic '{}'", impl_->GetTopicId().topic_name));
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
