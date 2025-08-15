@@ -23,11 +23,9 @@ public:
 
   /// Accumulates data
   /// @param value A data point to add to statistics
+  /// @param reset If true, resets the internal state before adding the new data point
   /// @return Updated stats
-  [[nodiscard]] constexpr auto append(const T& value) -> Stats;
-
-  /// resets accumulator
-  constexpr void reset();
+  [[nodiscard]] constexpr auto append(const T& value, bool reset = false) -> Stats;
 
 private:
   static_assert(N > 1, "Window size N must be > 1");
@@ -41,14 +39,21 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 template <std::floating_point T, std::size_t N>
-constexpr auto SlidingMean<T, N>::append(const T& value) -> typename SlidingMean<T, N>::Stats {
+constexpr auto SlidingMean<T, N>::append(const T& value, bool reset) -> SlidingMean<T, N>::Stats {
+  if (reset) {
+    buffer_.fill({});
+    head_ = {};
+    count_ = {};
+    mean_ = {};
+    scaled_variance_ = {};
+  }
   // Reference:
   // - Knuth TAOCP vol 2, 3rd edition, page 232
   // - Welford's online algorithm: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
   //
-  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
+
   if (count_ < N) {
-    buffer_[head_] = value;
+    buffer_[head_] = value;  // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
     ++count_;
 
     // mean: m(k) = m(k-1) + { x(k) - m(k-1) } / k
@@ -58,8 +63,9 @@ constexpr auto SlidingMean<T, N>::append(const T& value) -> typename SlidingMean
     mean_ += delta / static_cast<T>(count_);
     scaled_variance_ += delta * (value - mean_);
   } else {
-    const auto stale_value = buffer_[head_];
-    buffer_[head_] = value;
+    auto& buf_head = buffer_[head_];  // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+    const auto stale_value = buf_head;
+    buf_head = value;
 
     // mean: m(k) = m(k-1) + { x(k) - x(0) } / k
     // variance: s(k) = s(k-1) + { x(k) - x(0) } * { x(k) - m(k) + x(0) - m(k-1) }
@@ -69,7 +75,6 @@ constexpr auto SlidingMean<T, N>::append(const T& value) -> typename SlidingMean
     mean_ += delta / static_cast<T>(N);
     scaled_variance_ += delta * (value - mean_ + stale_value - stale_mean);
   }
-  // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
   head_ += 1U;
   if (head_ == N) {
     head_ = 0U;
@@ -78,13 +83,4 @@ constexpr auto SlidingMean<T, N>::append(const T& value) -> typename SlidingMean
   return { .mean = mean_, .variance = variance };
 }
 
-//-------------------------------------------------------------------------------------------------
-template <std::floating_point T, std::size_t N>
-constexpr void SlidingMean<T, N>::reset() {
-  buffer_.fill({});
-  head_ = {};
-  count_ = {};
-  mean_ = {};
-  scaled_variance_ = {};
-}
 }  // namespace grape::statistics
