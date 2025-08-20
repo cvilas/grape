@@ -22,7 +22,7 @@
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 camera API to acquire, reformat, compress and publish camera frames.
 // Set SDL_CAMERA_DRIVER environment variable to specify a driver backend.
-// Eg: SDL_CAMERA_DRIVER=v4l2 grape_camera_view
+// Eg: SDL_CAMERA_DRIVER=v4l2 grape_camera_pub
 //-------------------------------------------------------------------------------------------------
 
 namespace grape::camera {

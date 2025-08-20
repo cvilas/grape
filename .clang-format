@@ -79,14 +79,14 @@ BreakBeforeBraces: Custom
 # Control of individual brace wrapping cases
 BraceWrapping: {
   AfterClass: 'false'
-    AfterControlStatement: 'false'
-    AfterEnum : 'false'
-    AfterFunction : 'false'
-    AfterNamespace : 'false'
-    AfterStruct : 'false'
-    AfterUnion : 'false'
-    BeforeCatch : 'false'
-    BeforeElse : 'false'
-    IndentBraces : 'false'
+  AfterControlStatement: 'false'
+  AfterEnum : 'false'
+  AfterFunction : 'false'
+  AfterNamespace : 'false'
+  AfterStruct : 'false'
+  AfterUnion : 'false'
+  BeforeCatch : 'false'
+  BeforeElse : 'false'
+  IndentBraces : 'false'
 }
 ...

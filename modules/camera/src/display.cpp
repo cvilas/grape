@@ -97,7 +97,7 @@ void Display::render(const ImageFrame& frame) {
   }
 
   if (not SDL_RenderPresent(renderer.get())) {
-    syslog::Warn("Failed to preset image: {}", SDL_GetError());
+    syslog::Warn("Failed to present image: {}", SDL_GetError());
   }
 }
 
