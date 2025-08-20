@@ -39,7 +39,7 @@ public:
   };
 
   explicit Publisher(const std::string& topic, const std::string& camera_name_hint);
-  auto stats() const -> const Stats&;
+  [[nodiscard]] auto stats() const -> const Stats&;
   auto iterate() -> SDL_AppResult;
   auto handleEvent(SDL_Event* event) -> SDL_AppResult;
 
@@ -225,7 +225,7 @@ auto SDL_AppIterate(void* appstate) -> SDL_AppResult {
   if (dt > STATS_REPORT_PERIOD) {
     last_ts = now;
     const auto& stats = app->stats();
-    grape::syslog::Note("Avg. stats: secs/frame={}, bytes/frame={}, compression={}",
+    grape::syslog::Info("Avg. stats: secs/frame={}, bytes/frame={}, compression={}",
                         stats.publish_period.load(std::memory_order_relaxed),
                         stats.publish_bytes.load(std::memory_order_relaxed),
                         stats.format_conv_ratio.load(std::memory_order_relaxed) *

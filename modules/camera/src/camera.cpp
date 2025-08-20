@@ -24,15 +24,14 @@ auto enumerateCameraDrivers() -> std::vector<std::string> {
 
 //-------------------------------------------------------------------------------------------------
 void printCameraSpecs(SDL_CameraID camera_id) {
-  auto** specs = SDL_GetCameraSupportedFormats(camera_id, nullptr);
+  int count = 0;
+  auto** specs = SDL_GetCameraSupportedFormats(camera_id, &count);
   if (specs == nullptr) {
     grape::syslog::Warn("Unable to get camera specs: {}", SDL_GetError());
     return;
   }
   grape::syslog::Info("  Supported specs:");
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-  for (int i = 0; specs[i] != nullptr; ++i) {
-    const auto* sp = specs[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  for (const auto* sp : std::span{ specs, static_cast<std::size_t>(count) }) {
     grape::syslog::Info("  {}x{}, {} FPS, {}", sp->width, sp->height,
                         sp->framerate_numerator / sp->framerate_denominator,
                         SDL_GetPixelFormatName(sp->format));
@@ -47,7 +46,7 @@ auto calcPixelBufferSize(const SDL_Surface* surf) -> int {
     return (surf->w * surf->h * 3) / 2;
   }
   if (surf->format == SDL_PIXELFORMAT_MJPG) {
-    return surf->pitch;
+    return surf->w * surf->h;  // TODO(Vilas): likely incorrect. Should be surf->pitch per docs
   }
   // TODO(Vilas): Support more formats here as required
   grape::panic<grape::Exception>(
@@ -79,23 +78,26 @@ Camera::Camera(Callback callback, const std::string& name_hint)
   }
 
   auto chosen_camera_index = -1;
+  auto chosen_camera_name = std::string{};
   syslog::Info("Found {} camera{}", camera_count, camera_count > 1 ? "s" : "");
   for (int i = 0; i < camera_count; ++i) {
     const auto id = cameras_ids.get()[i];
     const auto camera_name = std::string(SDL_GetCameraName(id));
-    if (camera_name.find(name_hint) != std::string::npos) {
-      chosen_camera_index = i;
-    }
     syslog::Info("[{}] {}", i, camera_name);
     printCameraSpecs(id);
+    if (camera_name.find(name_hint) != std::string::npos) {
+      chosen_camera_index = i;
+      chosen_camera_name = camera_name;
+    }
   }
   if (chosen_camera_index < 0) {
     syslog::Warn("No camera found matching '{}'. Will open default camera", name_hint);
     chosen_camera_index = 0;
   }
 
-  syslog::Info("Opening camera number {}", chosen_camera_index);
-  impl_->camera.reset(SDL_OpenCamera(cameras_ids.get()[chosen_camera_index], nullptr));
+  syslog::Note("Opening camera '{}'", chosen_camera_name);
+  const auto camera_spec = nullptr;  // accept whatever format the device offers
+  impl_->camera.reset(SDL_OpenCamera(cameras_ids.get()[chosen_camera_index], camera_spec));
   if (impl_->camera == nullptr) {
     panic<Exception>(std::format("Unable to open camera: {}", SDL_GetError()));
   }
@@ -111,6 +113,17 @@ void Camera::acquire() {
   const auto now = std::chrono::system_clock::now();
   if (sdl_frame == nullptr) {
     return;  // No frame available, but continue
+  }
+
+  static bool call_once = true;
+  if (call_once) {
+    SDL_CameraSpec spec;
+    if (SDL_GetCameraFormat(impl_->camera.get(), &spec)) {
+      syslog::Note("Capturing at {}x{}, {} FPS, {}", spec.width, spec.height,
+                   spec.framerate_numerator / spec.framerate_denominator,
+                   SDL_GetPixelFormatName(spec.format));
+    }
+    call_once = false;
   }
 
   static const auto data_size = calcPixelBufferSize(sdl_frame);

@@ -16,7 +16,6 @@
 #include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
 #include "grape/log/syslog.h"
-#include "grape/statistics/sliding_mean.h"
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 to display camera frames acquired by the corresponding publisher appln.
@@ -33,16 +32,12 @@ public:
   auto iterate() -> SDL_AppResult;
   auto handleEvent(SDL_Event* event) -> SDL_AppResult;
   void saveImage();
-  auto latency() const -> std::chrono::system_clock::duration;
+  [[nodiscard]] auto latency() const -> std::chrono::system_clock::duration;
 
 private:
   void onReceivedSample(const ipc::Sample& sample);
   void onDecompressedFrame(const ImageFrame& frame);
   void onPublisherMatch(const ipc::Match& match);
-
-  static constexpr auto STATS_WINDOW = 600U;
-  std::atomic<float> latency_;
-  statistics::SlidingMean<float, STATS_WINDOW> latency_accum_;
 
   std::mutex image_lock_;
   ImageFrame::Header image_header_;
@@ -71,12 +66,6 @@ void Subscriber::onReceivedSample(const ipc::Sample& sample) {
 
 //-------------------------------------------------------------------------------------------------
 void Subscriber::onDecompressedFrame(const ImageFrame& frame) {
-  const auto now = std::chrono::system_clock::now();
-  const auto latency =
-      std::chrono::duration_cast<std::chrono::duration<float>>(now - frame.header.timestamp)
-          .count();
-  latency_.store(latency_accum_.append(latency).mean, std::memory_order_relaxed);
-
   auto guard = std::lock_guard(image_lock_);
   if (image_data_.size() < frame.pixels.size_bytes()) {
     image_data_.resize(frame.pixels.size_bytes());
@@ -98,19 +87,21 @@ void Subscriber::saveImage() {
 
 //-------------------------------------------------------------------------------------------------
 auto Subscriber::latency() const -> std::chrono::system_clock::duration {
-  return std::chrono::duration_cast<std::chrono::system_clock::duration>(
-      std::chrono::duration<float>(latency_.load(std::memory_order_relaxed)));
+  return display_.latency();
 }
 
 //-------------------------------------------------------------------------------------------------
 auto Subscriber::iterate() -> SDL_AppResult {
-  static auto last_ts = std::chrono::system_clock::now();
+  static auto last_image_ts = std::chrono::system_clock::time_point{};
+
   auto guard = std::lock_guard(image_lock_);
   const auto frame = grape::camera::ImageFrame{ .header = image_header_, .pixels = image_data_ };
-  const auto now_ts = frame.header.timestamp;
-  if (now_ts > last_ts) {
-    last_ts = now_ts;
+  const auto image_ts = frame.header.timestamp;
+
+  if (image_ts > last_image_ts) {
+    last_image_ts = image_ts;
     display_.render(frame);
+
     if (save_snapshot_) {
       save_snapshot_ = false;
       const auto fname = std::format("snapshot_{:%FT%T}.bmp", std::chrono::system_clock::now());
@@ -207,7 +198,7 @@ auto SDL_AppIterate(void* appstate) -> SDL_AppResult {
   const auto dt = now - last_ts;
   if (dt > STATS_REPORT_PERIOD) {
     last_ts = now;
-    grape::syslog::Note("Avg. latency={}", app->latency());
+    grape::syslog::Info("Avg. latency={}", app->latency());
   }
   return app->iterate();
 }

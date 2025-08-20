@@ -24,18 +24,6 @@
 namespace {
 
 //=================================================================================================
-/// Encapsulates data and model for statistics calculations
-class Statistics {
-public:
-  void compute();
-
-private:
-  static constexpr auto REPORT_INTERVAL = std::chrono::seconds(30);
-  uint64_t frame_count_{ 0 };
-  std::chrono::system_clock::time_point start_ts_;
-};
-
-//=================================================================================================
 /// Encapsulates processing pipeline
 class Application {
 public:
@@ -48,27 +36,10 @@ public:
 private:
   void onCapturedFrame(const grape::camera::ImageFrame& frame);
 
-  Statistics stats_;
   grape::camera::Display display_;
   std::unique_ptr<grape::camera::Camera> capture_;
   std::atomic_bool save_snapshot_ = false;
 };
-
-//-------------------------------------------------------------------------------------------------
-void Statistics::compute() {
-  const auto ts = std::chrono::system_clock::now();
-  if (frame_count_ == 0) {
-    start_ts_ = ts;
-  }
-  frame_count_++;
-  if (ts - start_ts_ > REPORT_INTERVAL) {
-    const auto stop = std::chrono::system_clock::now();
-    const auto dt = std::chrono::duration<double>(stop - start_ts_).count();
-    const auto frame_rate = std::floor(static_cast<double>(frame_count_) / dt);
-    grape::syslog::Info("[{} frames/s (avg. over {})]", frame_rate, REPORT_INTERVAL);
-    frame_count_ = 0;
-  }
-}
 
 //-------------------------------------------------------------------------------------------------
 Application::Application(const std::string& camera_name_hint)
@@ -78,12 +49,18 @@ Application::Application(const std::string& camera_name_hint)
 
 //-------------------------------------------------------------------------------------------------
 void Application::onCapturedFrame(const grape::camera::ImageFrame& frame) {
-  stats_.compute();
   display_.render(frame);
   if (save_snapshot_) {
     save_snapshot_ = false;
     const auto fname = std::format("snapshot_{:%FT%T}.bmp", std::chrono::system_clock::now());
     std::ignore = grape::camera::save(frame, fname);
+  }
+  const auto now = std::chrono::system_clock::now();
+  static auto last_report_ts = now;
+  static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
+  if (now - last_report_ts > STATS_REPORT_PERIOD) {
+    last_report_ts = now;
+    grape::syslog::Info("Avg. Latency = {}", display_.latency());
   }
 }
 
