@@ -10,19 +10,19 @@ declare_module(
 find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 find_package(lz4 ${LZ4_VERSION_REQUIRED} REQUIRED)
 
-set(SOURCES 
-  include/grape/camera/camera.h
-  include/grape/camera/compressor.h
-  include/grape/camera/decompressor.h
-  include/grape/camera/display.h
-  include/grape/camera/formatter.h
-  include/grape/camera/image_frame.h
-  src/camera.cpp
-  src/compressor.cpp
-  src/decompressor.cpp
-  src/display.cpp
-  src/formatter.cpp
-  src/image_frame.cpp)
+set(SOURCES
+    include/grape/camera/camera.h
+    include/grape/camera/compressor.h
+    include/grape/camera/decompressor.h
+    include/grape/camera/display.h
+    include/grape/camera/formatter.h
+    include/grape/camera/image_frame.h
+    src/camera.cpp
+    src/compressor.cpp
+    src/decompressor.cpp
+    src/display.cpp
+    src/formatter.cpp
+    src/image_frame.cpp)
 
 define_module_library(
   NAME camera

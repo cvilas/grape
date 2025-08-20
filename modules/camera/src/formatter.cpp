@@ -24,9 +24,10 @@ auto Formatter::format(const ImageFrame& src) -> bool {
   // - NV12/YV12 image data size = width * height * 3/2 (Y plane + UV plane)
   // - NV12/YV12 image data pitch = width
 
+  // Pass through if source format is MJPG or already in target format
   static constexpr auto HDR_SIZE = sizeof(ImageFrame::Header);
   const auto src_size = HDR_SIZE + src.pixels.size_bytes();
-  if (src.header.format == TARGET_FMT) {
+  if ((src.header.format == TARGET_FMT) or (src.header.format == SDL_PIXELFORMAT_MJPG)) {
     callback_(src, { .src_size = src_size, .dst_size = src_size });
     return true;
   }

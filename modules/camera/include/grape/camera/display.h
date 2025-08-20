@@ -18,6 +18,9 @@ public:
   /// @param frame The image frame to display
   void render(const ImageFrame& frame);
 
+  /// @return average image display latency
+  [[nodiscard]] auto latency() const -> std::chrono::system_clock::duration;
+
   Display();
   ~Display();
   Display(const Display&) = delete;

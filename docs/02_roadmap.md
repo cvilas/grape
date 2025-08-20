@@ -8,13 +8,12 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [x] Implement transactional teleop interface.  
 - [x] Implement SDL3-based camera streamer
 - [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs
-  - [ ] Study [scenegraphs](https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph)
-  - [ ] Review [type-erasure](https://github.com/cvilas/scratch/blob/master/type_erasure.cpp) as an abstraction technique for drawing shapes
+  - [ ] Review `Getting Started` section of OpenGL [book](https://learnopengl.com/)
   - [ ] Review my experimental implementations in scratch/scenegraph/copilot
   - [ ] Build version 1: Traditional scenegraph using class hierarchy
+  - [ ] Study [Flecs and ECS](https://github.com/SanderMertens/flecs)
   - [ ] Build version 2: Modern scenegraph using ECS approach
   - [ ] Extend to support asset loading using assimp
-  - [ ] Study [Flecs and ECS](https://github.com/SanderMertens/flecs)
   - [ ] Study [USD](https://developer.nvidia.com/usd#nvidia)
   - [ ] Study [glTF with physics extensions](https://github.com/eoineoineoin/glTF_Physics)
   - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
@@ -23,6 +22,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] IPC: Fix ipc in MacOS
   - [ ] `grape_ipc_perf_pub`/`sub`
   - [ ] `grape_camera_pub`/`sub`
+- [ ] Fix frequent IPC pub/sub mismatch reports (try with `grape_camera_pub`/`grape_camera_sub`)
 - [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
 - [ ] Math library: 
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
