@@ -2,12 +2,11 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#define SDL_MAIN_USE_CALLBACKS 1  // NOLINT(cppcoreguidelines-macro-usage)
-
 #include <atomic>
 #include <chrono>
+#include <csignal>
 
-#include <SDL3/SDL_main.h>
+#include <SDL3/SDL.h>
 
 #include "grape/camera/camera.h"
 #include "grape/camera/compressor.h"
@@ -38,10 +37,9 @@ public:
     std::atomic<std::size_t> publish_bytes;
   };
 
-  explicit Publisher(const std::string& topic, const std::string& camera_name_hint);
+  Publisher(const std::string& topic, const std::string& camera_name_hint);
   [[nodiscard]] auto stats() const -> const Stats&;
-  auto iterate() -> SDL_AppResult;
-  auto handleEvent(SDL_Event* event) -> SDL_AppResult;
+  void update();
 
 private:
   void onCapturedFrame(const ImageFrame& frame);
@@ -125,31 +123,10 @@ auto Publisher::stats() const -> const Stats& {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Publisher::iterate() -> SDL_AppResult {
+void Publisher::update() {
   capture_->acquire();
-  return SDL_APP_CONTINUE;
 }
 
-//-------------------------------------------------------------------------------------------------
-auto Publisher::handleEvent(SDL_Event* event) -> SDL_AppResult {
-  if (event->type == SDL_EVENT_QUIT) {
-    syslog::Info("Quit!");
-    capture_.reset();
-    return SDL_APP_SUCCESS;
-  }
-
-  if (event->type == SDL_EVENT_CAMERA_DEVICE_DENIED) {
-    syslog::Error("Camera access denied!");
-    return SDL_APP_FAILURE;
-  }
-
-  if (event->type == SDL_EVENT_CAMERA_DEVICE_APPROVED) {
-    syslog::Info("Camera access approved!");
-    return SDL_APP_CONTINUE;
-  }
-
-  return SDL_APP_CONTINUE;
-}
 }  // namespace grape::camera
 
 namespace {
@@ -169,19 +146,37 @@ void setupLogging() {
   grape::syslog::init(std::move(log_config));
 }
 
+//-------------------------------------------------------------------------------------------------
+void setupIpc() {
+  auto ipc_config = grape::ipc::Config{};
+  ipc_config.scope = grape::ipc::Config::Scope::Network;
+  grape::ipc::init(std::move(ipc_config));
+}
+
+//-------------------------------------------------------------------------------------------------
+std::atomic_bool s_exit = false;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+void onSignal(int /*signum*/) {
+  s_exit = true;
+  std::puts("\nExit signal received");
+}
+
+//-------------------------------------------------------------------------------------------------
+void setupSignalHandling() {
+  std::ignore = signal(SIGINT, onSignal);
+  std::ignore = signal(SIGTERM, onSignal);
+}
 }  // namespace
 
 //-------------------------------------------------------------------------------------------------
-auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
+auto main(int argc, char* argv[]) -> int {
   try {
+    setupSignalHandling();
     setupLogging();
-    auto ipc_config = grape::ipc::Config{};
-    ipc_config.scope = grape::ipc::Config::Scope::Network;
-    grape::ipc::init(std::move(ipc_config));
+    setupIpc();
 
     if (not SDL_Init(SDL_INIT_CAMERA)) {
       grape::syslog::Critical("SDL_Init failed: {}", SDL_GetError());
-      return SDL_APP_FAILURE;
+      return EXIT_FAILURE;
     }
 
     // Parse command line arguments
@@ -194,53 +189,55 @@ auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
     if (not args_opt.has_value()) {
       grape::syslog::Critical("Failed to parse command line arguments: {}",
                               toString(args_opt.error()));
-      return SDL_APP_FAILURE;
+      return EXIT_FAILURE;
     }
     const auto& args = args_opt.value();
     const auto camera_name_hint = args.getOption<std::string>("hint").value_or("");
     const auto topic = args.getOption<std::string>("topic").value_or("/camera");
 
-    auto app = std::make_unique<grape::camera::Publisher>(topic, camera_name_hint);
-    *appstate = app.get();
+    auto publisher = grape::camera::Publisher(topic, camera_name_hint);
     grape::syslog::Note("Publishing images on topic: '{}'", topic);
 
-    // Transfer ownership to static storage for automatic cleanup on exit
-    static auto app_holder = std::move(app);
+    // Main event loop
+    SDL_Event event;
+    auto last_stats_ts = std::chrono::steady_clock::now();
 
-    return SDL_APP_CONTINUE;
+    while (not s_exit) {
+      while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_EVENT_QUIT) {
+          grape::syslog::Info("Quit!");
+          return EXIT_SUCCESS;
+        }
+
+        if (event.type == SDL_EVENT_CAMERA_DEVICE_DENIED) {
+          grape::syslog::Error("Camera access denied!");
+          return EXIT_FAILURE;
+        }
+
+        if (event.type == SDL_EVENT_CAMERA_DEVICE_APPROVED) {
+          grape::syslog::Info("Camera access approved!");
+        }
+      }
+
+      publisher.update();
+
+      // Periodically report stats
+      const auto now = std::chrono::steady_clock::now();
+      static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
+      const auto dt = now - last_stats_ts;
+      if (dt > STATS_REPORT_PERIOD) {
+        last_stats_ts = now;
+        const auto& stats = publisher.stats();
+        grape::syslog::Info("Avg. stats: secs/frame={}, bytes/frame={}, compression={}",
+                            stats.publish_period.load(std::memory_order_relaxed),
+                            stats.publish_bytes.load(std::memory_order_relaxed),
+                            stats.format_conv_ratio.load(std::memory_order_relaxed) *
+                                stats.compression_ratio.load(std::memory_order_relaxed));
+      }
+    }
+    return EXIT_SUCCESS;
   } catch (...) {
     grape::Exception::print();
-    return SDL_APP_FAILURE;
+    return EXIT_FAILURE;
   }
-}
-
-//-------------------------------------------------------------------------------------------------
-auto SDL_AppIterate(void* appstate) -> SDL_AppResult {
-  auto* app = static_cast<grape::camera::Publisher*>(appstate);
-
-  static auto last_ts = std::chrono::steady_clock::now();
-  const auto now = std::chrono::steady_clock::now();
-  static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
-  const auto dt = now - last_ts;
-  if (dt > STATS_REPORT_PERIOD) {
-    last_ts = now;
-    const auto& stats = app->stats();
-    grape::syslog::Info("Avg. stats: secs/frame={}, bytes/frame={}, compression={}",
-                        stats.publish_period.load(std::memory_order_relaxed),
-                        stats.publish_bytes.load(std::memory_order_relaxed),
-                        stats.format_conv_ratio.load(std::memory_order_relaxed) *
-                            stats.compression_ratio.load(std::memory_order_relaxed));
-  }
-  return app->iterate();
-}
-
-//-------------------------------------------------------------------------------------------------
-auto SDL_AppEvent(void* appstate, SDL_Event* event) -> SDL_AppResult {
-  auto* app = static_cast<grape::camera::Publisher*>(appstate);
-  return app->handleEvent(event);
-}
-
-//-------------------------------------------------------------------------------------------------
-void SDL_AppQuit(void* /*appstate*/, SDL_AppResult /*result*/) {
-  // Cleanup is handled automatically by the static app_holder destructor
 }
