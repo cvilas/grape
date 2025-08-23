@@ -43,25 +43,27 @@ auto Formatter::format(const ImageFrame& src) -> bool {
     return false;
   }
 
-  const auto reqd_buf_size = (src.header.width * src.header.height * 3) / 2;  // see notes above
-  if (buffer_.size() < reqd_buf_size) {
-    buffer_.resize(reqd_buf_size);
-    syslog::Debug("Formatter buffer resized to {} bytes", reqd_buf_size);
+  const auto nv12_data_size = (src.header.width * src.header.height * 3) / 2;  // see notes above
+  if (buffer_.size() < nv12_data_size) {
+    buffer_.resize(nv12_data_size);
+    syslog::Debug("Formatter buffer resized to {} bytes", nv12_data_size);
   }
+  const auto nv12_pitch = src.header.width;
   if (not SDL_ConvertPixels(src_surface->w, src_surface->h, src_surface->format, src.pixels.data(),
-                            src_surface->pitch, TARGET_FMT, buffer_.data(), src_surface->w)) {
+                            src_surface->pitch, TARGET_FMT, buffer_.data(),
+                            static_cast<int>(nv12_pitch))) {
     syslog::Error("Failed to format: {}", SDL_GetError());
     return false;
   }
 
-  const auto dst = ImageFrame{ .header = { .pitch = src.header.width,
+  const auto dst = ImageFrame{ .header = { .pitch = nv12_pitch,
                                            .width = src.header.width,
                                            .height = src.header.height,
                                            .format = static_cast<std::uint32_t>(TARGET_FMT),
                                            .timestamp = src.header.timestamp },
-                               .pixels = { buffer_.data(), reqd_buf_size } };
+                               .pixels = { buffer_.data(), nv12_data_size } };
 
-  const auto dst_size = HDR_SIZE + reqd_buf_size;
+  const auto dst_size = HDR_SIZE + nv12_data_size;
   callback_(dst, { .src_size = src_size, .dst_size = dst_size });
 
   return true;
