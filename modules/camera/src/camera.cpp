@@ -42,16 +42,27 @@ void printCameraSpecs(SDL_CameraID camera_id) {
 
 //-------------------------------------------------------------------------------------------------
 auto calcPixelBufferSize(const SDL_Surface* surf) -> int {
-  if (surf->format == SDL_PIXELFORMAT_NV12) {
-    return (surf->w * surf->h * 3) / 2;
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+#endif
+  switch (surf->format) {
+    case SDL_PIXELFORMAT_NV12:
+      [[fallthrough]];
+    case SDL_PIXELFORMAT_YV12:
+      return (surf->w * surf->h * 3) / 2;
+    case SDL_PIXELFORMAT_YUY2:
+      return surf->w * surf->h * 2;
+    case SDL_PIXELFORMAT_MJPG:
+      return surf->w * surf->h;  // TODO(Vilas): likely incorrect. Should be surf->pitch per docs
+    default:
+      grape::syslog::Error("Unsupported format {}. Using defaults",
+                           SDL_GetPixelFormatName(surf->format));
+      return surf->h * surf->pitch;  // safe default
   }
-  if (surf->format == SDL_PIXELFORMAT_MJPG) {
-    return surf->w * surf->h;  // TODO(Vilas): likely incorrect. Should be surf->pitch per docs
-  }
-  // TODO(Vilas): Support more formats here as required
-  grape::panic<grape::Exception>(
-      std::format("Unsupported format {}", SDL_GetPixelFormatName(surf->format)));
-  return 0;
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 }
 
 }  // namespace
