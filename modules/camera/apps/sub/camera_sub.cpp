@@ -2,12 +2,11 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#define SDL_MAIN_USE_CALLBACKS 1  // NOLINT(cppcoreguidelines-macro-usage)
-
 #include <chrono>
+#include <csignal>
 #include <mutex>
 
-#include <SDL3/SDL_main.h>
+#include <SDL3/SDL.h>
 
 #include "grape/camera/decompressor.h"
 #include "grape/camera/display.h"
@@ -29,8 +28,7 @@ class Subscriber {
 public:
   explicit Subscriber(const std::string& topic);
 
-  auto iterate() -> SDL_AppResult;
-  auto handleEvent(SDL_Event* event) -> SDL_AppResult;
+  void update();
   void saveImage();
   [[nodiscard]] auto latency() const -> std::chrono::system_clock::duration;
 
@@ -91,7 +89,7 @@ auto Subscriber::latency() const -> std::chrono::system_clock::duration {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Subscriber::iterate() -> SDL_AppResult {
+void Subscriber::update() {
   static auto last_image_ts = std::chrono::system_clock::time_point{};
 
   auto guard = std::lock_guard(image_lock_);
@@ -108,25 +106,8 @@ auto Subscriber::iterate() -> SDL_AppResult {
       std::ignore = grape::camera::save(frame, fname);
     }
   }
-  return SDL_APP_CONTINUE;
 }
 
-//-------------------------------------------------------------------------------------------------
-auto Subscriber::handleEvent(SDL_Event* event) -> SDL_AppResult {
-  if (event->type == SDL_EVENT_QUIT) {
-    syslog::Info("Quit!");
-    return SDL_APP_SUCCESS;
-  }
-
-  if (event->type == SDL_EVENT_KEY_DOWN) {
-    if (event->key.scancode == SDL_SCANCODE_S) {
-      saveImage();
-    }
-    return SDL_APP_CONTINUE;
-  }
-
-  return SDL_APP_CONTINUE;
-}
 }  // namespace grape::camera
 
 namespace {
@@ -146,19 +127,38 @@ void setupLogging() {
   grape::syslog::init(std::move(log_config));
 }
 
+//-------------------------------------------------------------------------------------------------
+void setupIpc() {
+  auto ipc_config = grape::ipc::Config{};
+  ipc_config.scope = grape::ipc::Config::Scope::Network;
+  grape::ipc::init(std::move(ipc_config));
+}
+
+//-------------------------------------------------------------------------------------------------
+std::atomic_bool s_exit = false;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+void onSignal(int /*signum*/) {
+  s_exit = true;
+  std::puts("\nExit signal received");
+}
+
+//-------------------------------------------------------------------------------------------------
+void setupSignalHandling() {
+  std::ignore = signal(SIGINT, onSignal);
+  std::ignore = signal(SIGTERM, onSignal);
+}
+
 }  // namespace
 
 //-------------------------------------------------------------------------------------------------
-auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
+auto main(int argc, char* argv[]) -> int {
   try {
+    setupSignalHandling();
     setupLogging();
-    auto ipc_config = grape::ipc::Config{};
-    ipc_config.scope = grape::ipc::Config::Scope::Network;
-    grape::ipc::init(std::move(ipc_config));
+    setupIpc();
 
     if (not SDL_Init(SDL_INIT_VIDEO)) {
       grape::syslog::Critical("SDL_Init failed: {}", SDL_GetError());
-      return SDL_APP_FAILURE;
+      return EXIT_FAILURE;
     }
 
     // Parse command line arguments
@@ -169,47 +169,48 @@ auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
     if (not args_opt.has_value()) {
       grape::syslog::Critical("Failed to parse command line arguments: {}",
                               toString(args_opt.error()));
-      return SDL_APP_FAILURE;
+      return EXIT_FAILURE;
     }
     const auto& args = args_opt.value();
     const auto topic = args.getOption<std::string>("topic").value_or("/camera");
     grape::syslog::Note("Subscribing to images on topic: '{}'", topic);
 
-    auto app = std::make_unique<grape::camera::Subscriber>(topic);
-    *appstate = app.get();
+    auto subscriber = grape::camera::Subscriber(topic);
 
-    // Transfer ownership to static storage for automatic cleanup on exit
-    static auto app_holder = std::move(app);
+    // Main event loop
+    SDL_Event event;
+    auto last_stats_ts = std::chrono::steady_clock::now();
 
-    return SDL_APP_CONTINUE;
+    while (not s_exit) {
+      while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_EVENT_QUIT) {
+          grape::syslog::Info("Quit!");
+          return EXIT_SUCCESS;
+        }
+
+        if (event.type == SDL_EVENT_KEY_DOWN) {
+          if (event.key.scancode == SDL_SCANCODE_S) {
+            subscriber.saveImage();
+          }
+        }
+      }
+
+      subscriber.update();
+
+      // Periodically report stats
+      const auto now = std::chrono::steady_clock::now();
+      static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
+      const auto dt = now - last_stats_ts;
+      if (dt > STATS_REPORT_PERIOD) {
+        last_stats_ts = now;
+        grape::syslog::Info("Avg. latency={}", subscriber.latency());
+      }
+    }
+
+    SDL_Quit();
+    return EXIT_SUCCESS;
   } catch (...) {
     grape::Exception::print();
-    return SDL_APP_FAILURE;
+    return EXIT_FAILURE;
   }
-}
-
-//-------------------------------------------------------------------------------------------------
-auto SDL_AppIterate(void* appstate) -> SDL_AppResult {
-  auto* app = static_cast<grape::camera::Subscriber*>(appstate);
-
-  static auto last_ts = std::chrono::steady_clock::now();
-  const auto now = std::chrono::steady_clock::now();
-  static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
-  const auto dt = now - last_ts;
-  if (dt > STATS_REPORT_PERIOD) {
-    last_ts = now;
-    grape::syslog::Info("Avg. latency={}", app->latency());
-  }
-  return app->iterate();
-}
-
-//-------------------------------------------------------------------------------------------------
-auto SDL_AppEvent(void* appstate, SDL_Event* event) -> SDL_AppResult {
-  auto* app = static_cast<grape::camera::Subscriber*>(appstate);
-  return app->handleEvent(event);
-}
-
-//-------------------------------------------------------------------------------------------------
-void SDL_AppQuit(void* /*appstate*/, SDL_AppResult /*result*/) {
-  // Cleanup is handled automatically by the static app_holder destructor
 }
