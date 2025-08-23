@@ -28,7 +28,11 @@ Cross platform camera support
 
 ## TODO
 
+- [ ] Integrate statistics accumulator in each processor (camera, formatter, compressor) instead of in `camera_pub` and `camera_sub`
 - [ ] Introduce lockless ring buffer between compressor and publisher (main thread)
 - [ ] Introduce lockless ring buffer between decompressor and display (main thread)
 - [ ] Allow setting compression quality to tune overall pub-sub latency
-- [ ] Allow selecting nearest `SDL_CameraSpec` to what was specified
+- [ ] Allow user to specify capture resolution and fps. Let program select nearest `SDL_CameraSpec`
+- [ ] Resolve discrepency between reported capture fps and actual fps (may require publish to be on a separate thread)
+  - [ ] Introduce lockless ring buffer between compressor and publisher
+
