@@ -23,7 +23,7 @@ public:
   void reset() {
     reset_.store(true, std::memory_order_relaxed);
   }
-  auto mean() const -> float {
+  [[nodiscard]] auto mean() const -> float {
     return mean_.load(std::memory_order_relaxed);
   }
 
