@@ -194,7 +194,7 @@ auto main(int argc, char* argv[]) -> int {
     const auto camera_name_hint = args.getOption<std::string>("hint").value_or("");
     const auto topic = args.getOption<std::string>("topic").value_or("/camera");
 
-    auto publisher = grape::camera::Publisher(topic, camera_name_hint);
+    auto publisher = std::make_unique<grape::camera::Publisher>(topic, camera_name_hint);
     grape::syslog::Note("Publishing images on topic: '{}'", topic);
 
     // Main event loop
@@ -204,8 +204,7 @@ auto main(int argc, char* argv[]) -> int {
     while (not s_exit) {
       while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
-          grape::syslog::Info("Quit!");
-          return EXIT_SUCCESS;
+          s_exit = true;
         }
 
         if (event.type == SDL_EVENT_CAMERA_DEVICE_DENIED) {
@@ -218,7 +217,7 @@ auto main(int argc, char* argv[]) -> int {
         }
       }
 
-      publisher.update();
+      publisher->update();
 
       // Periodically report stats
       const auto now = std::chrono::steady_clock::now();
@@ -226,7 +225,7 @@ auto main(int argc, char* argv[]) -> int {
       const auto dt = now - last_stats_ts;
       if (dt > STATS_REPORT_PERIOD) {
         last_stats_ts = now;
-        const auto& stats = publisher.stats();
+        const auto& stats = publisher->stats();
         grape::syslog::Info("Avg. stats: secs/frame={}, bytes/frame={}, compression={}",
                             stats.publish_period.load(std::memory_order_relaxed),
                             stats.publish_bytes.load(std::memory_order_relaxed),
@@ -234,6 +233,9 @@ auto main(int argc, char* argv[]) -> int {
                                 stats.compression_ratio.load(std::memory_order_relaxed));
       }
     }
+    publisher.reset();
+    SDL_Quit();
+    grape::syslog::Info("Quit!");
     return EXIT_SUCCESS;
   } catch (...) {
     grape::Exception::print();
