@@ -2,7 +2,6 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#include <chrono>
 #include <print>
 #include <thread>
 #include <vector>

@@ -31,7 +31,7 @@ void Arbiter::onAlternate(const AlternateCommandTopic::DataType& cmd, const ipc:
     return;
   }
 
-  const auto now = std::chrono::system_clock::now();
+  const auto now = SystemClock::now();
   const auto cmd_latency = std::chrono::duration<float>(now - info.publish_time);
   cmd_latency_ = cmd_latency_tracker_.append(cmd_latency.count()).mean;
 
@@ -54,7 +54,7 @@ void Arbiter::setPrimary(const Command& cmd) const {
 void Arbiter::watchdogLoop(const std::stop_token& stop_token) {
   static constexpr auto STATUS_UPDATE_INTERVAL = std::chrono::milliseconds(1000);
   static constexpr auto ALT_CHECK_INTERVAL = STATUS_UPDATE_INTERVAL / 2;
-  auto last_status_update_time = std::chrono::system_clock::now();
+  auto last_status_update_time = SystemClock::now();
   while (not stop_token.stop_requested()) {
     std::this_thread::sleep_for(ALT_CHECK_INTERVAL);
 
@@ -63,7 +63,7 @@ void Arbiter::watchdogLoop(const std::stop_token& stop_token) {
       continue;  // only monitor when Alternate controller is active
     }
 
-    const auto now = std::chrono::system_clock::now();
+    const auto now = SystemClock::now();
     auto publish_status = false;
 
     if (now - last_alt_cmd_time_.load() > ALT_CONTROLLER_TIMEOUT) {
@@ -87,7 +87,7 @@ void Arbiter::watchdogLoop(const std::stop_token& stop_token) {
 
 //-------------------------------------------------------------------------------------------------
 void Arbiter::publishStatus() const {
-  const auto avg_latency = std::chrono::duration_cast<std::chrono::system_clock::duration>(
+  const auto avg_latency = std::chrono::duration_cast<SystemClock::Duration>(
       std::chrono::duration<float>(cmd_latency_.load()));
   const auto status = ArbiterStatus{ .alt_controller_id = alt_controller_id_.load(),
                                      .alt_command_latency = avg_latency };

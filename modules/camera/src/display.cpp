@@ -117,7 +117,7 @@ void Display::render(const ImageFrame& frame) {
   fdst.w = new_w;
   fdst.h = new_h;
 
-  const auto now = std::chrono::system_clock::now();
+  const auto now = SystemClock::now();
 
   if (not SDL_RenderTexture(renderer, texture, nullptr, &fdst)) {
     syslog::Warn("Failed to render texture: {}", SDL_GetError());
@@ -133,10 +133,10 @@ void Display::render(const ImageFrame& frame) {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Display::latency() const -> std::chrono::system_clock::duration {
+auto Display::latency() const -> SystemClock::Duration {
   const auto mean_latency = impl_->latency_accum.mean();
   impl_->latency_accum.reset();
-  return std::chrono::duration_cast<std::chrono::system_clock::duration>(
+  return std::chrono::duration_cast<SystemClock::Duration>(
       std::chrono::duration<float>(mean_latency));
 }
 

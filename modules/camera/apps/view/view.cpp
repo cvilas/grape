@@ -4,7 +4,6 @@
 
 #define SDL_MAIN_USE_CALLBACKS 1  // NOLINT(cppcoreguidelines-macro-usage)
 
-#include <chrono>
 #include <cmath>
 
 #include <SDL3/SDL_main.h>
@@ -14,6 +13,7 @@
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
+#include "grape/time.h"
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 camera API to acquire and show camera frames.
@@ -52,10 +52,10 @@ void Application::onCapturedFrame(const grape::camera::ImageFrame& frame) {
   display_.render(frame);
   if (save_snapshot_) {
     save_snapshot_ = false;
-    const auto fname = std::format("snapshot_{:%FT%T}.bmp", std::chrono::system_clock::now());
+    const auto fname = std::format("snapshot_{:%FT%T}.bmp", grape::SystemClock::now());
     std::ignore = grape::camera::save(frame, fname);
   }
-  const auto now = std::chrono::system_clock::now();
+  const auto now = grape::SystemClock::now();
   static auto last_report_ts = now;
   static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
   if (now - last_report_ts > STATS_REPORT_PERIOD) {

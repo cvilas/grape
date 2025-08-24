@@ -8,7 +8,7 @@ declare_module(
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 set(SOURCES include/grape/error.h include/grape/exception.h include/grape/fifo_buffer.h
-            include/grape/fixed_string.h src/exception.cpp)
+            include/grape/fixed_string.h include/grape/time.h src/exception.cpp)
 
 define_module_library(
   NAME base

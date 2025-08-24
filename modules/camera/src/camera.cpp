@@ -121,7 +121,7 @@ Camera::~Camera() = default;
 void Camera::acquire() {
   auto timestamp_ns = std::uint64_t{};  // unused
   auto* sdl_frame = SDL_AcquireCameraFrame(impl_->camera.get(), &timestamp_ns);
-  const auto now = std::chrono::system_clock::now();
+  const auto now = SystemClock::now();
   if (sdl_frame == nullptr) {
     return;  // No frame available, but continue
   }

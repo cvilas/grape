@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <span>
+
+#include "grape/time.h"
 
 namespace grape::camera {
 
@@ -15,11 +16,11 @@ namespace grape::camera {
 /// Single image frame data
 struct ImageFrame {
   struct Header {
-    std::uint32_t pitch{};   //!< Bytes per row of pixels
-    std::uint32_t width{};   //!< Width of the image in pixels
-    std::uint32_t height{};  //!< Height of the image in pixels (number of rows)
-    std::uint32_t format{};  //!< driver backend-specific pixel format
-    std::chrono::system_clock::time_point timestamp;  //!< image acquistion timestamp
+    std::uint32_t pitch{};             //!< Bytes per row of pixels
+    std::uint32_t width{};             //!< Width of the image in pixels
+    std::uint32_t height{};            //!< Height of the image in pixels (number of rows)
+    std::uint32_t format{};            //!< driver backend-specific pixel format
+    SystemClock::TimePoint timestamp;  //!< image acquistion timestamp
   };
   Header header;
   std::span<std::byte> pixels;  //!< pixel data

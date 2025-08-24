@@ -4,35 +4,33 @@
 
 #pragma once
 
-#include <chrono>
 #include <functional>
 #include <variant>
 
 #include "grape/joystick/controls.h"
+#include "grape/time.h"
 
 namespace grape::joystick {
 
-using Clock = std::chrono::system_clock;
-
 struct ButtonEvent {
-  Clock::time_point timestamp;
+  SystemClock::TimePoint timestamp;
   ControlId id{};
   bool pressed{ false };
 };
 
 struct AxisEvent {
-  Clock::time_point timestamp;
+  SystemClock::TimePoint timestamp;
   ControlId id{};
   float value{ 0.F };  //!< Normalised value in range [-1, 1]
 };
 
 struct ConnectionEvent {
-  Clock::time_point timestamp;
+  SystemClock::TimePoint timestamp;
   bool is_connected{ false };
 };
 
 struct ErrorEvent {
-  Clock::time_point timestamp;
+  SystemClock::TimePoint timestamp;
   std::string message;
 };
 

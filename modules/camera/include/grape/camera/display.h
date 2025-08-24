@@ -19,7 +19,7 @@ public:
   void render(const ImageFrame& frame);
 
   /// @return average image display latency
-  [[nodiscard]] auto latency() const -> std::chrono::system_clock::duration;
+  [[nodiscard]] auto latency() const -> SystemClock::Duration;
 
   Display();
   ~Display();
