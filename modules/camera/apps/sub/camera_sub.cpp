@@ -2,7 +2,6 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#include <chrono>
 #include <csignal>
 #include <mutex>
 
@@ -15,6 +14,7 @@
 #include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
 #include "grape/log/syslog.h"
+#include "grape/time.h"
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 to display camera frames acquired by the corresponding publisher appln.
@@ -30,7 +30,7 @@ public:
 
   void update();
   void saveImage();
-  [[nodiscard]] auto latency() const -> std::chrono::system_clock::duration;
+  [[nodiscard]] auto latency() const -> SystemClock::Duration;
 
 private:
   void onReceivedSample(const ipc::Sample& sample);
@@ -84,13 +84,13 @@ void Subscriber::saveImage() {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Subscriber::latency() const -> std::chrono::system_clock::duration {
+auto Subscriber::latency() const -> SystemClock::Duration {
   return display_.latency();
 }
 
 //-------------------------------------------------------------------------------------------------
 void Subscriber::update() {
-  static auto last_image_ts = std::chrono::system_clock::time_point{};
+  static auto last_image_ts = SystemClock::TimePoint{};
 
   auto guard = std::lock_guard(image_lock_);
   const auto frame = grape::camera::ImageFrame{ .header = image_header_, .pixels = image_data_ };
@@ -102,7 +102,7 @@ void Subscriber::update() {
 
     if (save_snapshot_) {
       save_snapshot_ = false;
-      const auto fname = std::format("snapshot_{:%FT%T}.bmp", std::chrono::system_clock::now());
+      const auto fname = std::format("snapshot_{:%FT%T}.bmp", SystemClock::now());
       std::ignore = grape::camera::save(frame, fname);
     }
   }
@@ -184,8 +184,7 @@ auto main(int argc, char* argv[]) -> int {
     while (not s_exit) {
       while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
-          grape::syslog::Info("Quit!");
-          return EXIT_SUCCESS;
+          s_exit = true;
         }
 
         if (event.type == SDL_EVENT_KEY_DOWN) {
@@ -208,6 +207,7 @@ auto main(int argc, char* argv[]) -> int {
     }
 
     SDL_Quit();
+    grape::syslog::Info("Quit!");
     return EXIT_SUCCESS;
   } catch (...) {
     grape::Exception::print();

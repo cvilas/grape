@@ -4,19 +4,19 @@
 
 #pragma once
 
-#include <chrono>
 #include <functional>
 #include <memory>
 #include <span>
 
 #include "grape/ipc/match.h"
+#include "grape/time.h"
 
 namespace grape::ipc {
 
 //=================================================================================================
 /// Meta information about data contained in a sample
 struct SampleInfo {
-  std::chrono::system_clock::time_point publish_time;
+  SystemClock::TimePoint publish_time;
   EntityId publisher;
 };
 

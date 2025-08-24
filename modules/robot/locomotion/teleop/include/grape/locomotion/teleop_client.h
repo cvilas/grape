@@ -20,9 +20,9 @@ class TeleopClient {
 public:
   /// Status of the teleoperation client
   struct Status {
-    bool is_service_detected{ false };  //!< true if locomotion service endpoint is detected
-    bool is_client_active{ false };     //!< true if this client has control authority
-    std::chrono::system_clock::duration command_latency{};  //!< Avg. latency to locomotion service
+    bool is_service_detected{ false };        //!< true if locomotion service endpoint is detected
+    bool is_client_active{ false };           //!< true if this client has control authority
+    SystemClock::Duration command_latency{};  //!< Avg. latency to locomotion service
   };
 
   /// Callback function signature for receiving teleoperation status updates

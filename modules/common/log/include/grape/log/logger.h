@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include <chrono>
 #include <format>
 #include <source_location>
 #include <stop_token>
 
 #include "grape/fifo_buffer.h"
 #include "grape/log/config.h"
+#include "grape/log/record.h"
 #include "grape/log/severity.h"
 
 namespace grape::log {
@@ -36,7 +36,7 @@ public:
   template <typename... Args>
   void log(Severity severity, const std::source_location& location,
            const std::format_string<Args...> fmt, Args&&... args) {
-    log({ .timestamp{ std::chrono::system_clock::now() },  //
+    log({ .timestamp{ SystemClock::now() },                //
           .location{ location },                           //
           .logger_name{ /* filled by backend thread */ },  //
           .message{ fmt, std::forward<Args>(args)... },    //

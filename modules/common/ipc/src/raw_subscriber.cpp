@@ -63,8 +63,7 @@ RawSubscriber::RawSubscriber(const std::string& topic, RawSubscriber::DataCallba
   impl_->SetReceiveCallback([moved_data_cb = std::move(data_cb)](
                                 const eCAL::STopicId& id, const eCAL::SDataTypeInformation&,
                                 const eCAL::SReceiveCallbackData& data) -> void {
-    const auto tp =
-        std::chrono::system_clock::time_point(std::chrono::microseconds(data.send_timestamp));
+    const auto tp = SystemClock::TimePoint(SystemClock::Duration{ data.send_timestamp });
     if (moved_data_cb != nullptr) {
       moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
                       .info = { .publish_time = tp,

@@ -4,7 +4,7 @@
 
 declare_module(
   NAME serdes
-  DEPENDS_ON_MODULES ""
+  DEPENDS_ON_MODULES "base"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
@@ -14,7 +14,7 @@ set(SOURCES README.md include/grape/serdes/concepts.h include/grape/serdes/serde
 # library target
 define_module_library(
   NAME serdes
-  PUBLIC_LINK_LIBS ""
+  PUBLIC_LINK_LIBS "grape::base"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

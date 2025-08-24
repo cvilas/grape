@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <chrono>
 #include <cstdint>
 #include <format>
 #include <string>
@@ -19,7 +18,7 @@ namespace grape::locomotion {
 /// Status of the arbiter component in the robot GNC pipeline
 struct ArbiterStatus {
   std::uint64_t alt_controller_id{ 0UL };
-  std::chrono::system_clock::duration alt_command_latency{ 0 };  //!<
+  SystemClock::Duration alt_command_latency{ 0 };  //!<
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -40,11 +39,11 @@ template <serdes::ReadableStream S>
   if (not des.unpack(data.alt_controller_id)) {
     return false;
   }
-  std::chrono::system_clock::duration::rep ticks{};
+  SystemClock::Duration::rep ticks{};
   if (not des.unpack(ticks)) {
     return false;
   }
-  data.alt_command_latency = std::chrono::system_clock::duration(ticks);
+  data.alt_command_latency = SystemClock::Duration(ticks);
   return true;
 }
 

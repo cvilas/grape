@@ -4,13 +4,12 @@
 
 #include "grape/ipc/raw_publisher.h"
 
-#include <chrono>
-
 #include <ecal/pubsub/publisher.h>
 #include <ecal/pubsub/types.h>
 
 #include "grape/exception.h"
 #include "grape/ipc/session.h"
+#include "grape/time.h"
 
 namespace {
 
@@ -68,10 +67,8 @@ RawPublisher::RawPublisher(RawPublisher&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
 void RawPublisher::publish(std::span<const std::byte> bytes) const {
-  const auto now = std::chrono::system_clock::now();
-  const auto us =
-      std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
-  if (not impl_->Send(bytes.data(), bytes.size(), us)) {
+  const auto now = SystemClock::now().time_since_epoch().count();
+  if (not impl_->Send(bytes.data(), bytes.size(), now)) {
     if (impl_->GetSubscriberCount() > 0U) {
       panic<Exception>(std::format("Write failed on topic '{}'", impl_->GetTopicId().topic_name));
     }
