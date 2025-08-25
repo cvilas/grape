@@ -89,3 +89,4 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [How to start a modern C++ project - Mikhail Svetkin - Meeting C++ 2023](https://youtu.be/UI_QayAb9U0)
 - [VULKAN: From 2D to 3D // C++ 3D Multiplayer Game From Scratch // LIVE TUTORIAL](https://youtu.be/hSL9dCjwoCU)
 - [3D graphics programming](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
+- [LLVm's realtime safety revolution](https://youtu.be/b_hd5FAv1dw)

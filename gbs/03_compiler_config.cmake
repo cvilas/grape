@@ -29,7 +29,9 @@ set(CLANG_WARNINGS -Weverything
   -Wno-exit-time-destructors
   -Wno-documentation-unknown-command
   -Wno-reserved-macro-identifier
-  -Wno-old-style-cast)
+  -Wno-old-style-cast
+  -Wfunction-effects # https://clang.llvm.org/docs/FunctionEffectAnalysis.html
+  -Wperf-constraint-implies-noexcept) 
 
 # GCC warnings
 set(GCC_WARNINGS
