@@ -47,8 +47,6 @@ void TeleopClient::onArbiterMatch(const ipc::Match& match) const {
     case ipc::Match::Status::Matched:
       status_cb_({ .is_service_detected = true });
       break;
-    case ipc::Match::Status::Undefined:
-      break;
   }
 }
 }  // namespace grape::locomotion

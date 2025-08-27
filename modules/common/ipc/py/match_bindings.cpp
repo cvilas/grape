@@ -14,7 +14,6 @@ void bindMatch(pybind11::module_& module) {
       .def_readwrite("id", &EntityId::id);
 
   pybind11::enum_<Match::Status>(module, "MatchStatus")
-      .value("Undefined", Match::Status::Undefined)
       .value("Unmatched", Match::Status::Unmatched)
       .value("Matched", Match::Status::Matched)
       .export_values();

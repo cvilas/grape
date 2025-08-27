@@ -28,7 +28,6 @@ struct EntityId {
 /// Match event between a pub<->sub pair
 struct Match {
   enum class Status : std::uint8_t {
-    Undefined,  //!< unknown status
     Unmatched,  //!< a previously matched remote endpoint is no longer available
     Matched     //!< matched a new remote endpoint
   };

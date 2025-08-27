@@ -19,7 +19,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] IPC: Fix ipc in MacOS
   - [ ] `grape_ipc_perf_pub`/`sub`
   - [ ] `grape_camera_pub`/`sub`
-- [ ] Fix frequent IPC pub/sub mismatch reports (try with `grape_camera_pub`/`grape_camera_sub`)
+- [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
 - [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
 - [ ] Math library: 
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
@@ -37,7 +37,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] Real-time time-series plotting using implot (redesign from scratch again)
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] Propose client-server messaging interface for robot on-board network 
-- [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
 - [ ] Implement [picam](../modules/rpi/picam/README.md)  
 - [ ] Host monitoring micro-service
   - [ ] Implement library to read CPU, memory, disk usage, network utilisation, temperatures
