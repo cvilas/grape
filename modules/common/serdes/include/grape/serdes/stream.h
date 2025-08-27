@@ -24,7 +24,7 @@ public:
     if (offset_ + len > MAX_SIZE) {
       return false;
     }
-    std::copy_n(data.data(), len, buf_.begin() + offset_);
+    std::copy_n(data.data(), len, std::next(buf_.begin(), static_cast<int>(offset_)));
     offset_ += len;
     return true;
   }
@@ -82,7 +82,7 @@ public:
     if (offset_ + len > stream_.size()) {
       return false;
     }
-    std::copy_n(stream_.data() + offset_, len, to.data());
+    std::copy_n(std::next(stream_.data(), static_cast<int>(offset_)), len, to.data());
     offset_ += len;
     return true;
   }

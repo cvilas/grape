@@ -49,7 +49,7 @@ public:
     if (not this->pack(value.index())) {
       return false;
     }
-    return std::visit([this](const auto& val) { return this->pack(val); }, value);
+    return std::visit([this](const auto& val) -> auto { return this->pack(val); }, value);
   }
 
   /// Serialises user-defined types using a user-defined free function
@@ -147,10 +147,10 @@ public:
     using unpack_fn = bool (*)(Deserialiser*, variant_type*);
 
     // Generate function pointer array at compile time - make static for true O(1)
-    static constexpr auto DISPATCH_TABLE = []() constexpr {
+    static constexpr auto DISPATCH_TABLE = []() constexpr -> auto {
       std::array<unpack_fn, sizeof...(Types)> table{};
 
-      [&table]<std::size_t... Is>(std::index_sequence<Is...>) constexpr {
+      [&table]<std::size_t... Is>(std::index_sequence<Is...>) constexpr -> auto {
         auto make_unpacker = []<std::size_t I>() constexpr -> unpack_fn {
           return [](Deserialiser* self, variant_type* var) -> bool {
             using T = std::variant_alternative_t<I, variant_type>;

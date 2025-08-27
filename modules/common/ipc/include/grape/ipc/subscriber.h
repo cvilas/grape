@@ -31,7 +31,7 @@ Subscriber<TopicAttributes>::Subscriber(const TopicAttributes& topic_attr, DataC
                                         MatchCallback&& match_cb)
   : RawSubscriber(
         topic_attr.topicName(),
-        [moved_data_cb = std::move(data_cb)](const Sample& sample) {
+        [moved_data_cb = std::move(data_cb)](const Sample& sample) -> void {
           auto stream = serdes::InStream(sample.data);
           auto deserialiser = serdes::Deserialiser(stream);
           typename TopicAttributes::DataType data{};

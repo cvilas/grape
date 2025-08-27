@@ -8,7 +8,7 @@
 set -e
 
 # Supported LLVM version
-LLVM_VERSION=20 
+LLVM_VERSION=21 
 
 # Download
 wget https://apt.llvm.org/llvm.sh

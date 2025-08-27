@@ -44,7 +44,7 @@ private:
 //-------------------------------------------------------------------------------------------------
 Application::Application(const std::string& camera_name_hint)
   : capture_(std::make_unique<grape::camera::Camera>(
-        [this](const auto& frame) { onCapturedFrame(frame); }, camera_name_hint)) {
+        [this](const auto& frame) -> void { onCapturedFrame(frame); }, camera_name_hint)) {
 }
 
 //-------------------------------------------------------------------------------------------------

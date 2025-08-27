@@ -13,8 +13,8 @@ TeleopClient::TeleopClient(const std::string& robot_name, StatusCallback&& statu
   : status_cb_(std::move(status_cb))
   , arbiter_status_sub_(
         ArbiterStatusTopic(robot_name),
-        [this](const auto& st, const auto& info) { onArbiterStatus(st, info); },
-        [this](const auto& match) { onArbiterMatch(match); })
+        [this](const auto& st, const auto& info) -> void { onArbiterStatus(st, info); },
+        [this](const auto& match) -> void { onArbiterMatch(match); })
   , cmd_pub_(AlternateCommandTopic(robot_name)) {
   id_ = cmd_pub_.id();
 }

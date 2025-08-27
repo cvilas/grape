@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <condition_variable>
+#include <mutex>
 #include <random>
 #include <thread>
 #include <vector>
@@ -48,9 +49,9 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   std::mutex recv_mut;
   auto received_data = TestDataType{};
   auto pub_id = grape::ipc::EntityId{};
-  const auto data_cb = [&recv_cond, &recv_mut, &received_data,
-                        &pub_id](const TestDataType& data, const grape::ipc::SampleInfo& info) {
-    const auto lk = std::lock_guard(recv_mut);
+  const auto data_cb = [&recv_cond, &recv_mut, &received_data, &pub_id](
+                           const TestDataType& data, const grape::ipc::SampleInfo& info) -> void {
+    const auto lk = std::scoped_lock{ recv_mut };
     received_data = data;
     pub_id = info.publisher;
     recv_cond.notify_all();
@@ -80,7 +81,7 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   {
     constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
     auto lk = std::unique_lock(recv_mut);
-    recv_cond.wait_for(lk, RECV_WAIT_TIME, [&pub_id] { return pub_id.id != 0U; });
+    recv_cond.wait_for(lk, RECV_WAIT_TIME, [&pub_id] -> bool { return pub_id.id != 0U; });
   }
 
   // verify

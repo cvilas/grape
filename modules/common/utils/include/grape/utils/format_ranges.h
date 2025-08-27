@@ -10,6 +10,7 @@
 // Remove this file when GCC adds support for formatting ranges
 //=================================================================================================
 
+#ifndef __clang__
 #include <concepts>
 #include <format>
 
@@ -56,3 +57,4 @@ struct std::formatter<Container> {  // NOLINT(cert-dcl58-cpp)
     return out;
   }
 };
+#endif

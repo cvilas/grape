@@ -34,7 +34,7 @@ TeleopEmulator::TeleopEmulator(const std::string& robot_name, StatusCallback&& s
   : status_cb_(std::move(status_cb))
   , cmd_pub_(grape::locomotion::AlternateCommandTopic(robot_name))
   , status_sub_(grape::locomotion::ArbiterStatusTopic(robot_name),
-                [this](const auto& st, const auto& info) { onStatus(st, info); }) {
+                [this](const auto& st, const auto& info) -> void { onStatus(st, info); }) {
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -60,9 +60,9 @@ TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
   auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Host };
   grape::ipc::init(std::move(ipc_config));
   auto received_cmds = std::vector<grape::locomotion::Command>{};
-  const auto robot_cb = [&received_cmds](const auto& cmd) { received_cmds.push_back(cmd); };
+  const auto robot_cb = [&received_cmds](const auto& cmd) -> void { received_cmds.push_back(cmd); };
   auto test_service = grape::locomotion::Arbiter(ROBOT_NAME, robot_cb);
-  const auto on_loco_status = [](const auto&) {};
+  const auto on_loco_status = [](const auto&) -> void {};
   auto test_client = TeleopEmulator(ROBOT_NAME, on_loco_status);
 
   // Wait for client-service connection

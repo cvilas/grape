@@ -61,10 +61,12 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 Publisher::Publisher(const std::string& topic, const std::string& camera_name_hint)
-  : publisher_(topic, [this](const auto& match) { onSubscriberMatch(match); })
-  , compressor_([this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
-  , formatter_([this](const auto& frame, const auto& stats) { onFormattedFrame(frame, stats); })
-  , capture_(std::make_unique<Camera>([this](const auto& frame) { onCapturedFrame(frame); },
+  : publisher_(topic, [this](const auto& match) -> void { onSubscriberMatch(match); })
+  , compressor_(
+        [this](const auto& frame, const auto& stats) -> void { onCompressedFrame(frame, stats); })
+  , formatter_(
+        [this](const auto& frame, const auto& stats) -> void { onFormattedFrame(frame, stats); })
+  , capture_(std::make_unique<Camera>([this](const auto& frame) -> void { onCapturedFrame(frame); },
                                       camera_name_hint)) {
 }
 

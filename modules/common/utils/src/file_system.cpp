@@ -23,7 +23,7 @@ auto readProgramPath() -> std::filesystem::path {
 #ifdef __APPLE__
   std::uint32_t buf_len = program_path.size();
   std::ignore = _NSGetExecutablePath(program_path.data(), &buf_len);
-#elif defined(__linux__)
+#elifdef __linux__
   std::ignore = readlink("/proc/self/exe", program_path.data(), PATH_MAX - 1);
 #endif
   return { program_path.data() };

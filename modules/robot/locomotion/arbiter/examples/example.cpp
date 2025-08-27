@@ -19,7 +19,8 @@ public:
   explicit DummyRobot(std::string robot_name) : name_(std::move(robot_name)) {
   }
   void move(const grape::locomotion::Command& cmd) {
-    std::visit([this](const auto& val) { std::println("[{}] {}", name_, toString(val)); }, cmd);
+    std::visit([this](const auto& val) -> void { std::println("[{}] {}", name_, toString(val)); },
+               cmd);
   }
 
 private:
@@ -58,7 +59,9 @@ auto main(int argc, const char* argv[]) -> int {
 
     // Create a dummy robot platform and hook command arbitrator to it
     auto robot = DummyRobot(robot_name);
-    const auto robot_cb = [&robot](const grape::locomotion::Command& cmd) { robot.move(cmd); };
+    const auto robot_cb = [&robot](const grape::locomotion::Command& cmd) -> void {
+      robot.move(cmd);
+    };
     auto loco_service = grape::locomotion::Arbiter(robot_name, robot_cb);
 
     // That's it. Run the teleop client example to interact

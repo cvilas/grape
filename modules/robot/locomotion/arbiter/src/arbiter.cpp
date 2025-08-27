@@ -13,8 +13,8 @@ Arbiter::Arbiter(const std::string& robot_name, CommandCallback&& robot_cmd_cb)
   : robot_command_cb_(std::move(robot_cmd_cb))
   , status_pub_(ArbiterStatusTopic(robot_name), nullptr)
   , alt_cmd_sub_(AlternateCommandTopic(robot_name),
-                 [this](const auto& cmd, const auto& info) { onAlternate(cmd, info); })
-  , watchdog_thread_([this](const std::stop_token& token) { watchdogLoop(token); }) {
+                 [this](const auto& cmd, const auto& info) -> void { onAlternate(cmd, info); })
+  , watchdog_thread_([this](const std::stop_token& token) -> void { watchdogLoop(token); }) {
 }
 
 //-------------------------------------------------------------------------------------------------

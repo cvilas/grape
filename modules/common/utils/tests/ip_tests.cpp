@@ -49,7 +49,7 @@ TEST_CASE("Parses compressed IPv6 address strings to IPAddress", "[IPAddress]") 
     const auto ip = grape::utils::IPAddress::fromString("::1");
     REQUIRE(ip.has_value());
     REQUIRE(ip->version == grape::utils::IPAddress::Version::IPv6);
-    REQUIRE(std::all_of(ip->bytes.begin(), ip->bytes.end() - 1,
+    REQUIRE(std::all_of(ip->bytes.begin(), std::prev(ip->bytes.end()),
                         [](const auto& vl) -> auto { return (vl == 0); }));
     REQUIRE(ip->bytes[15] == 0x01);
   }
@@ -62,7 +62,7 @@ TEST_CASE("Parses compressed IPv6 address strings to IPAddress", "[IPAddress]") 
     REQUIRE(ip->bytes[1] == 0x01);
     REQUIRE(ip->bytes[2] == 0x0d);
     REQUIRE(ip->bytes[3] == 0xb8);
-    REQUIRE(std::all_of(ip->bytes.begin() + 4, ip->bytes.end(),
+    REQUIRE(std::all_of(std::next(ip->bytes.begin(), 4), ip->bytes.end(),
                         [](const auto& vl) -> auto { return (vl == 0); }));
   }
 
@@ -129,7 +129,7 @@ TEST_CASE("Converts compressed IPv6 address to string", "[IPAddress]") {
     grape::utils::IPAddress ip;
     ip.version = grape::utils::IPAddress::Version::IPv6;
     // Set last segment to 1 (::1)
-    std::fill(ip.bytes.begin(), ip.bytes.begin() + 14, 0);
+    std::fill(ip.bytes.begin(), std::next(ip.bytes.begin(), 14), 0);
     ip.bytes[15] = 0x01;
 
     REQUIRE(toString(ip) == "::1");
@@ -144,7 +144,7 @@ TEST_CASE("Converts compressed IPv6 address to string", "[IPAddress]") {
     ip.bytes[2] = 0x0d;
     ip.bytes[3] = 0xb8;
     // Zero out remaining segments
-    std::fill(ip.bytes.begin() + 4, ip.bytes.begin() + 16, 0);
+    std::fill(std::next(ip.bytes.begin(), 4), std::next(ip.bytes.begin(), 16), 0);
 
     REQUIRE(toString(ip) == "2001:db8::");
   }

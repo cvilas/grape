@@ -81,7 +81,7 @@ Camera::Camera(Callback callback, const std::string& name_hint)
 
   auto camera_count = 0;
   // NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cppcoreguidelines-no-malloc)
-  auto camera_ids_deleter = [](SDL_CameraID* ptr) { SDL_free(ptr); };
+  auto camera_ids_deleter = [](SDL_CameraID* ptr) -> void { SDL_free(ptr); };
   auto cameras_ids = std::unique_ptr<SDL_CameraID, decltype(camera_ids_deleter)>(
       SDL_GetCameras(&camera_count), camera_ids_deleter);
   if ((cameras_ids == nullptr) or (camera_count == 0)) {

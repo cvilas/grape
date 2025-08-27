@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <condition_variable>
 #include <format>
+#include <mutex>
 #include <random>
 #include <thread>
 #include <vector>
@@ -45,7 +46,7 @@ TEST_CASE("Basic pub-sub in network scope works", "[ipc]") {
   auto pub_id = 0UL;
   const auto recv_callback = [&recv_mut, &recv_cond, &received_msg,
                               &pub_id](const grape::ipc::Sample& sample) -> void {
-    const auto lk = std::lock_guard(recv_mut);
+    const auto lk = std::scoped_lock{ recv_mut };
     received_msg = std::vector<std::byte>(sample.data.begin(), sample.data.end());
     pub_id = sample.info.publisher.id;
     recv_cond.notify_all();

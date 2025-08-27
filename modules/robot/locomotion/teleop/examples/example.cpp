@@ -27,7 +27,7 @@ auto main(int argc, const char* argv[]) -> int {
     auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
     grape::ipc::init(std::move(ipc_config));
 
-    const auto on_teleop_status = [](const auto& status) {
+    const auto on_teleop_status = [](const auto& status) -> void {
       std::println("Teleop status: is_service_detected={}, is_client_active={}, command_latency={}",
                    status.is_service_detected, status.is_client_active, status.command_latency);
     };

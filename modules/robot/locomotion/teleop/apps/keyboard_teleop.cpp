@@ -57,7 +57,9 @@ auto main(int argc, const char* argv[]) -> int {
     grape::ipc::init(std::move(ipc_config));
 
     auto teleop_status = grape::locomotion::TeleopClient::Status{};
-    const auto on_teleop_status = [&teleop_status](const auto& status) { teleop_status = status; };
+    const auto on_teleop_status = [&teleop_status](const auto& status) -> void {
+      teleop_status = status;
+    };
     auto teleoperator = grape::locomotion::TeleopClient(robot_name, on_teleop_status);
     auto screen = ftxui::ScreenInteractive::Fullscreen();
 
@@ -123,7 +125,7 @@ auto main(int argc, const char* argv[]) -> int {
     });
 
     // Main UI renderer
-    auto main_component = ftxui::Renderer([&] {
+    auto main_component = ftxui::Renderer([&] -> ftxui::Element {
       return ftxui::vbox({
                  ftxui::text("Keyboard Teleop") | ftxui::bold | ftxui::center,
                  ftxui::separator(),
