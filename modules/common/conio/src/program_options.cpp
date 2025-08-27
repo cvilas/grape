@@ -43,12 +43,10 @@ void ProgramOptions::insertHelp(std::vector<Option>& options) {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto ProgramDescription::parse(int argc, const char** argv) const
-    -> std::expected<ProgramOptions, ProgramOptions::Error> {
+auto ProgramDescription::parse(int argc, const char** argv) const -> ProgramOptions {
   auto declared_options = options_;
   ProgramOptions::insertHelp(declared_options);
 
-  using Error = ProgramOptions::Error;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   const auto args_list = std::vector<std::string>(argv, argv + argc);
   for (const auto& arg : args_list) {
@@ -78,7 +76,7 @@ auto ProgramDescription::parse(int argc, const char** argv) const
   // check all required arguments are specified
   for (const auto& entry : declared_options) {
     if (entry.is_required and not entry.is_specified) {
-      return std::unexpected(Error{ .code = Error::Code::Undefined, .key = entry.key });
+      panic<Exception>(std::format("Undefined option: {}", entry.key));
     }
   }
 
@@ -90,7 +88,7 @@ auto ProgramDescription::parse(int argc, const char** argv) const
       declared_options,
       [](const auto& opt_a, const auto& opt_b) -> auto { return opt_a.key == opt_b.key; });
   if (dup_it != declared_options.end()) {
-    return std::unexpected(Error{ .code = Error::Code::Redeclared, .key = dup_it->key });
+    panic<Exception>(std::format("Redeclared option: {}", dup_it->key));
   }
 
   return ProgramOptions(std::move(declared_options));

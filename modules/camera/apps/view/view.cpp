@@ -132,18 +132,11 @@ auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
     }
 
     // Parse command line arguments
-    const auto args_opt =
-        grape::conio::ProgramDescription("Camera viewer application")
-            .declareOption<std::string>("hint", "Part of camera name to match", "")
-            .parse(argc, const_cast<const char**>(argv));
+    const auto args = grape::conio::ProgramDescription("Camera viewer application")
+                          .declareOption<std::string>("hint", "Part of camera name to match", "")
+                          .parse(argc, const_cast<const char**>(argv));
 
-    if (not args_opt.has_value()) {
-      grape::syslog::Critical("Failed to parse command line arguments: {}",
-                              toString(args_opt.error()));
-      return SDL_APP_FAILURE;
-    }
-    const auto& args = args_opt.value();
-    const auto camera_name_hint = args.getOption<std::string>("hint").value_or("");
+    const auto camera_name_hint = args.getOption<std::string>("hint");
 
     auto app = std::make_unique<Application>(camera_name_hint);
     *appstate = app.get();

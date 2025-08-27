@@ -15,14 +15,10 @@
 // Paired with robot_loco_service_example (in service module) to demonstrate behaviour
 auto main(int argc, const char* argv[]) -> int {
   try {
-    const auto args_opt = grape::conio::ProgramDescription("Robot teleop client example")
-                              .declareOption<std::string>("robot", "Robot name", "dummy_robot")
-                              .parse(argc, argv);
-    if (not args_opt.has_value()) {
-      throw std::runtime_error(toString(args_opt.error()));
-    }
-    const auto& args = args_opt.value();
-    const auto robot_name = args.getOptionOrThrow<std::string>("robot");
+    const auto args = grape::conio::ProgramDescription("Robot teleop client example")
+                          .declareOption<std::string>("robot", "Robot name", "dummy_robot")
+                          .parse(argc, argv);
+    const auto robot_name = args.getOption<std::string>("robot");
 
     auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
     grape::ipc::init(std::move(ipc_config));

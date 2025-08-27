@@ -68,14 +68,11 @@ void Statistics::add(const grape::SystemClock::TimePoint& ts, const grape::ipc::
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    const auto maybe_args =
+    const auto args =
         grape::conio::ProgramDescription(
             "Subscribing/reporting end of IPC performance measurement application pair")
             .parse(argc, argv);
-    if (not maybe_args.has_value()) {
-      grape::panic<grape::Exception>(toString(maybe_args.error()));
-    }
-    [[maybe_unused]] const auto& args = maybe_args.value();
+
     auto config = grape::ipc::Config{};
     config.scope = grape::ipc::Config::Scope::Network;
     grape::ipc::init(std::move(config));
