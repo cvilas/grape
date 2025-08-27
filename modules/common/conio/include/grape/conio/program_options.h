@@ -6,14 +6,12 @@
 
 #include <concepts>
 #include <cstdint>
-#include <expected>
 #include <format>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "grape/exception.h"
-#include "grape/utils/enums.h"
 #include "grape/utils/utils.h"
 
 namespace grape::conio {
@@ -30,19 +28,6 @@ concept StringStreamable = requires(std::string str, T value) {
 /// Container for command line arguments of an application. Created by ProgramDescription.
 class ProgramOptions {
 public:
-  /// Error description
-  struct Error {
-    enum class Code : std::uint8_t {
-      Undeclared,   //!< accessed an undeclared option
-      Redeclared,   //!< option declared multiple times
-      Undefined,    //!< option declared as required but not defined
-      Unparsable,   //!< option not parsable as requested type
-      TypeMismatch  //!< option type at declaration does not match type at definition
-    };
-    Code code;
-    std::string key;
-  };
-
   /// Holds program options and their details
   struct Option {
     std::string key;
@@ -58,17 +43,11 @@ public:
   /// @return true if option is found
   [[nodiscard]] auto hasOption(const std::string& key) const -> bool;
 
-  /// Get the value to a command line option
+  /// Get the value to a command line option or throw if the option was not specified
   /// @param key The command line option (without the '--').
   /// @return  The value of the specified option.
   template <StringStreamable T>
-  [[nodiscard]] auto getOption(const std::string& key) const -> std::expected<T, Error>;
-
-  /// Get the value to a command line option or throw if the option was not specified
-  /// @param key The command line option (without the '--').
-  /// @return The value of the specified option.
-  template <StringStreamable T>
-  [[nodiscard]] auto getOptionOrThrow(const std::string& key) const -> T;
+  [[nodiscard]] auto getOption(const std::string& key) const -> T;
 
 private:
   friend class ProgramDescription;
@@ -124,8 +103,7 @@ public:
   /// @param argc Number of arguments on the command line
   /// @param argv array of C-style strings
   /// @return Object containing command line options
-  [[nodiscard]] auto parse(int argc, const char** argv) const
-      -> std::expected<ProgramOptions, ProgramOptions::Error>;
+  [[nodiscard]] auto parse(int argc, const char** argv) const -> ProgramOptions;
 
 private:
   std::vector<ProgramOptions::Option> options_;
@@ -169,15 +147,15 @@ auto ProgramDescription::declareOption(const std::string& key, const std::string
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T, Error> {
+auto ProgramOptions::getOption(const std::string& key) const -> T {
   const auto it = std::find_if(options_.begin(), options_.end(),
                                [&key](const auto& opt) -> bool { return key == opt.key; });
   if (it == options_.end()) {
-    return std::unexpected(Error{ .code = Error::Code::Undeclared, .key = key });
+    panic<Exception>(std::format("Undeclared option: {}", key));
   }
 
   if (it->type != utils::getTypeName<T>()) {
-    return std::unexpected(Error{ .code = Error::Code::TypeMismatch, .key = key });
+    panic<Exception>(std::format("Type mismatch for option: {}", key));
   }
 
   if constexpr (std::is_same_v<T, std::string>) {
@@ -189,31 +167,10 @@ auto ProgramOptions::getOption(const std::string& key) const -> std::expected<T,
   T value;
   std::istringstream stream(it->value);
   if (not(stream >> value)) {
-    return std::unexpected(Error{ .code = Error::Code::Unparsable, .key = key });
+    panic<Exception>(std::format("Unparsable value for option: {}", key));
   }
 
   return value;
-}
-
-//-------------------------------------------------------------------------------------------------
-template <conio::StringStreamable T>
-auto ProgramOptions::getOptionOrThrow(const std::string& key) const -> T {
-  return getOption<T>(key)
-      .transform_error([](const auto& err) -> auto {
-        panic<Exception>(toString(err));
-        return Error{};  // unreachable
-      })
-      .value();
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] constexpr auto toString(const ProgramOptions::Error::Code& code) -> std::string_view {
-  return enums::name(code);
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] inline auto toString(const ProgramOptions::Error& ex) -> std::string {
-  return std::format("Option '{}' {}", ex.key, toString(ex.code));
 }
 
 }  // namespace grape::conio

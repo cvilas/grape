@@ -179,20 +179,13 @@ auto main(int argc, char* argv[]) -> int {
     }
 
     // Parse command line arguments
-    const auto args_opt =
-        grape::conio::ProgramDescription("Camera viewer application")
-            .declareOption<std::string>("hint", "Part of camera name to match", "")
-            .declareOption<std::string>("topic", "image stream topic", "/camera")
-            .parse(argc, const_cast<const char**>(argv));
+    const auto args = grape::conio::ProgramDescription("Camera viewer application")
+                          .declareOption<std::string>("hint", "Part of camera name to match", "")
+                          .declareOption<std::string>("topic", "image stream topic", "/camera")
+                          .parse(argc, const_cast<const char**>(argv));
 
-    if (not args_opt.has_value()) {
-      grape::syslog::Critical("Failed to parse command line arguments: {}",
-                              toString(args_opt.error()));
-      return EXIT_FAILURE;
-    }
-    const auto& args = args_opt.value();
-    const auto camera_name_hint = args.getOption<std::string>("hint").value_or("");
-    const auto topic = args.getOption<std::string>("topic").value_or("/camera");
+    const auto camera_name_hint = args.getOption<std::string>("hint");
+    const auto topic = args.getOption<std::string>("topic");
 
     auto publisher = grape::camera::Publisher(topic, camera_name_hint);
     grape::syslog::Note("Publishing images on topic: '{}'", topic);

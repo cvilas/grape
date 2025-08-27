@@ -41,14 +41,10 @@ auto status(bool en, const grape::locomotion::TeleopClient::Status& st) -> ftxui
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
   try {
-    const auto args_opt = grape::conio::ProgramDescription("Keyboard teleop console")
-                              .declareOption<std::string>("robot", "Robot name", "dummy_robot")
-                              .parse(argc, argv);
-    if (not args_opt.has_value()) {
-      throw std::runtime_error(toString(args_opt.error()));
-    }
-    const auto& args = args_opt.value();
-    const auto robot_name = args.getOptionOrThrow<std::string>("robot");
+    const auto args = grape::conio::ProgramDescription("Keyboard teleop console")
+                          .declareOption<std::string>("robot", "Robot name", "dummy_robot")
+                          .parse(argc, argv);
+    const auto robot_name = args.getOption<std::string>("robot");
     static constexpr auto MAX_LINEAR_SPEED = 1.F;
     static constexpr auto MAX_TURN_SPEED = 30.F * static_cast<float>(std::numbers::pi) / 180.F;
     static constexpr auto SPEED_STEP = 0.1F;

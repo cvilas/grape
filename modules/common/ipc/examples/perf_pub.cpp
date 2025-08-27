@@ -31,16 +31,13 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto DEFAULT_PAYLOAD_SIZE = 8U;
     static constexpr std::byte DEFAULT_PAYLOAD_FILL{ 0x01 };
 
-    const auto maybe_args =
+    const auto args =
         grape::conio::ProgramDescription(
             "Publishing end of IPC performance measurement application pair")
             .declareOption<std::size_t>("size", "payload size in bytes", DEFAULT_PAYLOAD_SIZE)
             .parse(argc, argv);
-    if (not maybe_args.has_value()) {
-      grape::panic<grape::Exception>(toString(maybe_args.error()));
-    }
-    const auto& args = maybe_args.value();
-    const auto payload_size = args.getOption<std::size_t>("size").value();
+
+    const auto payload_size = args.getOption<std::size_t>("size");
     const auto payload = std::vector<std::byte>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 
