@@ -13,25 +13,25 @@
 namespace {
 
 //-------------------------------------------------------------------------------------------------
-auto toMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallbackData& event_data)
-    -> grape::ipc::Match {
-  auto match_status = grape::ipc::Match::Status::Undefined;
+void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallbackData& event_data,
+                     const grape::ipc::MatchCallback& match_cb) {
+  auto match_status = grape::ipc::Match::Status{};
   switch (event_data.event_type) {
     case eCAL::eSubscriberEvent::none:
-      match_status = grape::ipc::Match::Status::Undefined;
-      break;
+      [[fallthrough]];
+    case eCAL::eSubscriberEvent::dropped:
+      /* A message was dropped. Choosing to ignore this event! */
+      return;
     case eCAL::eSubscriberEvent::connected:
       match_status = grape::ipc::Match::Status::Matched;
       break;
     case eCAL::eSubscriberEvent::disconnected:
-      [[fallthrough]];
-    case eCAL::eSubscriberEvent::dropped:
       match_status = grape::ipc::Match::Status::Unmatched;
       break;
   }
-  return { .remote_entity = { .host = topic_id.topic_id.host_name,
-                              .id = topic_id.topic_id.entity_id },
-           .status = match_status };
+  match_cb(
+      { .remote_entity = { .host = topic_id.topic_id.host_name, .id = topic_id.topic_id.entity_id },
+        .status = match_status });
 }
 }  // namespace
 
@@ -54,7 +54,7 @@ RawSubscriber::RawSubscriber(const std::string& topic, RawSubscriber::DataCallba
                             const eCAL::STopicId& topic_id,
                             const eCAL::SSubEventCallbackData& event_data) -> void {
     if (moved_match_cb != nullptr) {
-      moved_match_cb(toMatchEvent(topic_id, event_data));
+      raiseMatchEvent(topic_id, event_data, moved_match_cb);
     }
   };
 
