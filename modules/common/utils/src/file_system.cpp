@@ -11,7 +11,7 @@
 #include <sys/types.h>  // for getpwuid
 #include <unistd.h>
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 #include <mach-o/dyld.h>
 #endif
 
@@ -20,7 +20,7 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 auto readProgramPath() -> std::filesystem::path {
   auto program_path = std::array<char, PATH_MAX>{};
-#ifdef __APPLE__
+#if defined(__APPLE__)
   std::uint32_t buf_len = program_path.size();
   std::ignore = _NSGetExecutablePath(program_path.data(), &buf_len);
 #elif defined(__linux__)

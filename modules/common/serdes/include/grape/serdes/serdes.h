@@ -142,18 +142,17 @@ public:
       return false;
     }
 
-    // O(1) dispatch using constexpr function pointer array (creates a compile-time jump table)
-    using variant_type = std::variant<Types...>;
-    using unpack_fn = bool (*)(Deserialiser*, variant_type*);
+    using VariantType = std::variant<Types...>;
+    using UnpackFn = bool (*)(Deserialiser*, VariantType*);
 
-    // Generate function pointer array at compile time - make static for true O(1)
+    // create function pointer array for O(1) dispatch
     static constexpr auto DISPATCH_TABLE = []() constexpr {
-      std::array<unpack_fn, sizeof...(Types)> table{};
+      std::array<UnpackFn, sizeof...(Types)> table{};
 
       [&table]<std::size_t... Is>(std::index_sequence<Is...>) constexpr {
-        auto make_unpacker = []<std::size_t I>() constexpr -> unpack_fn {
-          return [](Deserialiser* self, variant_type* var) -> bool {
-            using T = std::variant_alternative_t<I, variant_type>;
+        auto make_unpacker = []<std::size_t I>() constexpr -> UnpackFn {
+          return [](Deserialiser* self, VariantType* var) -> bool {
+            using T = std::variant_alternative_t<I, VariantType>;
             T val{};
             if (self->unpack(val)) {
               *var = std::move(val);
@@ -169,7 +168,7 @@ public:
       return table;
     }();
 
-    // dispatch function call to unpack the variant type
+    // unpack the type at index idx in the variant
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     if (not DISPATCH_TABLE[idx](this, &value)) {
       stream_.rewind(sizeof(std::size_t));
