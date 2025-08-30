@@ -5,7 +5,7 @@
 #include "grape/realtime/schedule.h"
 
 #include <cerrno>
-#ifdef __linux__
+#if defined(__linux__)
 #include <malloc.h>
 #endif
 #include <system_error>
@@ -19,7 +19,7 @@ namespace grape::realtime {
 auto lockMemory() -> std::expected<void, Error> {
   // The implementation here follows from John Ogness' talk, 'A Checklist for Writing Linux
   // Real-Time Applications' at Embedded Liux Conference Europe 2020. See docs.
-#ifdef __linux__
+#if defined(__linux__)
   // Lock all current and future process address space into RAM, preventing paging into swap area
   if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
     const auto err = std::error_code(errno, std::system_category());
@@ -58,7 +58,7 @@ auto lockMemory() -> std::expected<void, Error> {
 
 //-------------------------------------------------------------------------------------------------
 auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> std::expected<void, Error> {
-#ifdef __linux__
+#if defined(__linux__)
   cpu_set_t mask;
   CPU_ZERO(&mask);
   for (const auto cpu_no : cpus) {
@@ -79,7 +79,7 @@ auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid) -> std::expec
 
 //-------------------------------------------------------------------------------------------------
 auto setSchedule(Schedule schedule, pid_t pid) -> std::expected<void, Error> {
-#ifdef __linux__
+#if defined(__linux__)
   sched_param param{};
   param.sched_priority = schedule.priority;
   const auto prio = (schedule.policy == Schedule::Policy::Realtime ? SCHED_FIFO : SCHED_OTHER);
