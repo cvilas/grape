@@ -15,7 +15,6 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallbackData& event_data,
                      const grape::ipc::MatchCallback& match_cb) {
-  auto match_status = grape::ipc::Match::Status{};
   switch (event_data.event_type) {
     case eCAL::eSubscriberEvent::none:
       [[fallthrough]];
@@ -23,15 +22,16 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallba
       /* A message was dropped. Choosing to ignore this event! */
       return;
     case eCAL::eSubscriberEvent::connected:
-      match_status = grape::ipc::Match::Status::Matched;
-      break;
+      match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
+                                    .id = topic_id.topic_id.entity_id },
+                 .status = grape::ipc::Match::Status::Matched });
+      return;
     case eCAL::eSubscriberEvent::disconnected:
-      match_status = grape::ipc::Match::Status::Unmatched;
-      break;
+      match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
+                                    .id = topic_id.topic_id.entity_id },
+                 .status = grape::ipc::Match::Status::Unmatched });
+      return;
   }
-  match_cb(
-      { .remote_entity = { .host = topic_id.topic_id.host_name, .id = topic_id.topic_id.entity_id },
-        .status = match_status });
 }
 }  // namespace
 
