@@ -16,7 +16,6 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallbackData& event_data,
                      const grape::ipc::MatchCallback& match_cb) {
-  auto match_status = grape::ipc::Match::Status{};
   switch (event_data.event_type) {
     case eCAL::ePublisherEvent::none:
       [[fallthrough]];
@@ -24,15 +23,16 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallba
       /* some subscribers missed one or more messages. Choosing to ignore this event! */
       return;
     case eCAL::ePublisherEvent::connected:
-      match_status = grape::ipc::Match::Status::Matched;
-      break;
+      match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
+                                    .id = topic_id.topic_id.entity_id },
+                 .status = grape::ipc::Match::Status::Matched });
+      return;
     case eCAL::ePublisherEvent::disconnected:
-      match_status = grape::ipc::Match::Status::Unmatched;
-      break;
+      match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
+                                    .id = topic_id.topic_id.entity_id },
+                 .status = grape::ipc::Match::Status::Unmatched });
+      return;
   }
-  match_cb(
-      { .remote_entity = { .host = topic_id.topic_id.host_name, .id = topic_id.topic_id.entity_id },
-        .status = match_status });
 }
 }  // namespace
 
