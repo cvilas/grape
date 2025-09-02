@@ -94,7 +94,7 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       SDL3
       URL https://github.com/libsdl-org/SDL/archive/refs/tags/release-${SDL3_VERSION_REQUIRED}.tar.gz
-      URL_MD5 a6ec5c70c6388a0ada3c56098220810b
+      URL_MD5 a343b4a90cf5ff58e73dec07a782d8ba
       CMAKE_ARGS ${SDL3_CMAKE_ARGS})
   endif()
 endif()
