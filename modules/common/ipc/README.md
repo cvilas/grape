@@ -31,7 +31,7 @@ participating hosts and the network infrastructure to enable message passing acr
 
 - In your IPC application set `scope` to `ipc::Config:Scope::Network`
 - On your host
-  - [Configure multicast routes](https://eclipse-ecal.github.io/ecal/latest/getting_started/cloud.html#fa-ubuntu-multicast-configuration-on-ubuntu)  
+  - [Configure multicast routes](https://eclipse-ecal.github.io/ecal/latest/getting_started/network.html)  
   - For TCP pub/sub, ensure hostnames are [resolvable](https://eclipse-ecal.github.io/ecal/latest/getting_started/services.html#hostname-resolution)
 - You may need to configure network Switches in your LAN for ['IGMP snooping'](https://en.wikipedia.org/wiki/IGMP_snooping). Refer to your device's user manual.
 
@@ -45,4 +45,6 @@ pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
 
 ## Roadmap
 
+- [ ] Implement means to isolate communication to within a group of processes and to create multiple such groups.
+  - [ ] See [this discussion](https://github.com/eclipse-ecal/ecal/discussions/2093) for a solution
 - [ ] Support specifying type and encoding information via `RawPublisher` and `RawSubscriber` interfaces

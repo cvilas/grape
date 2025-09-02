@@ -16,8 +16,13 @@ auto main() -> int {
   try {
     grape::ipc::init(grape::ipc::Config{});
 
-    const auto data_cb = [](const std::string& data, const grape::ipc::SampleInfo& info) -> void {
-      std::println("Received message: '{}' (from {})", data, toString(info.publisher));
+    const auto data_cb = [](const std::expected<std::string, grape::ipc::Error>& data,
+                            const grape::ipc::SampleInfo& info) -> void {
+      if (data) {
+        std::println("Received message: '{}' (from {})", *data, toString(info.publisher));
+      } else {
+        std::println("Error: {} (data from {})", toString(data.error()), toString(info.publisher));
+      }
     };
 
     const auto match_cb = [](const grape::ipc::Match& match) -> void {

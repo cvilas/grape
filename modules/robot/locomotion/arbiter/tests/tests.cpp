@@ -19,11 +19,12 @@ class TeleopEmulator {
 public:
   using StatusCallback = std::function<void(const grape::locomotion::ArbiterStatus&)>;
   explicit TeleopEmulator(const std::string& robot_name, StatusCallback&& status_cb);
-  void send(const grape::locomotion::Command& cmd);
+  [[nodiscard]] auto send(const grape::locomotion::Command& cmd) -> bool;
   [[nodiscard]] auto isServiceDetected() const -> bool;
 
 private:
-  void onStatus(const grape::locomotion::ArbiterStatus& status, const grape::ipc::SampleInfo& info);
+  void onStatus(const std::expected<grape::locomotion::ArbiterStatus, grape::ipc::Error>& status,
+                const grape::ipc::SampleInfo& info);
   StatusCallback status_cb_;
   grape::ipc::Publisher<grape::locomotion::AlternateCommandTopic> cmd_pub_;
   grape::ipc::Subscriber<grape::locomotion::ArbiterStatusTopic> status_sub_;
@@ -38,15 +39,18 @@ TeleopEmulator::TeleopEmulator(const std::string& robot_name, StatusCallback&& s
 }
 
 //-------------------------------------------------------------------------------------------------
-void TeleopEmulator::send(const grape::locomotion::Command& cmd) {
-  cmd_pub_.publish(cmd);
+auto TeleopEmulator::send(const grape::locomotion::Command& cmd) -> bool {
+  return cmd_pub_.publish(cmd).has_value();
 }
 
 //-------------------------------------------------------------------------------------------------
-void TeleopEmulator::onStatus(const grape::locomotion::ArbiterStatus& status,
-                              const grape::ipc::SampleInfo& info) {
+void TeleopEmulator::onStatus(
+    const std::expected<grape::locomotion::ArbiterStatus, grape::ipc::Error>& status,
+    const grape::ipc::SampleInfo& info) {
   (void)info;
-  status_cb_(status);
+  if (status) {
+    status_cb_(status.value());
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -84,7 +88,7 @@ TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
 
   // Send a teleop command - this should now get through
   static constexpr auto IPC_PROCESSING_DELAY = std::chrono::milliseconds(50);
-  test_client.send(grape::locomotion::Move3DCmd{ .forward_speed = 1.0F });
+  REQUIRE(test_client.send(grape::locomotion::Move3DCmd{ .forward_speed = 1.0F }));
   std::this_thread::sleep_for(IPC_PROCESSING_DELAY);
   REQUIRE(received_cmds.size() == 2);
   REQUIRE(std::holds_alternative<grape::locomotion::Move3DCmd>(received_cmds.at(1)));
@@ -94,21 +98,21 @@ TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
   REQUIRE(received_cmds.size() == 2);  // no new received command
 
   // But teleop commands should continue to get through
-  test_client.send(grape::locomotion::Move3DCmd{ .lateral_speed = 0.F });
+  REQUIRE(test_client.send(grape::locomotion::Move3DCmd{ .lateral_speed = 0.F }));
   std::this_thread::sleep_for(IPC_PROCESSING_DELAY);
   REQUIRE(received_cmds.size() == 3);
   REQUIRE(std::holds_alternative<grape::locomotion::Move3DCmd>(received_cmds.at(2)));
 
   // A second teleop command should be ignored as long as the first one is active
   auto test_client2 = TeleopEmulator(ROBOT_NAME, on_loco_status);
-  test_client2.send(grape::locomotion::Move3DCmd{ .lateral_speed = 0.F });
+  REQUIRE(test_client2.send(grape::locomotion::Move3DCmd{ .lateral_speed = 0.F }));
   std::this_thread::sleep_for(IPC_PROCESSING_DELAY);
   REQUIRE(received_cmds.size() == 3);
 
   // But let the first teleop controller timeout and the second will have control
   static constexpr auto TIMEOUT_MARGIN = std::chrono::milliseconds(500);
   std::this_thread::sleep_for(TIMEOUT_MARGIN + grape::locomotion::Arbiter::ALT_CONTROLLER_TIMEOUT);
-  test_client2.send(grape::locomotion::Move3DCmd{ .lateral_speed = 0.F });
+  REQUIRE(test_client2.send(grape::locomotion::Move3DCmd{ .lateral_speed = 0.F }));
   std::this_thread::sleep_for(IPC_PROCESSING_DELAY);
   REQUIRE(received_cmds.size() == 4);
 

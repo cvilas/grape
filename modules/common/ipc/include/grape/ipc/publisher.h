@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "grape/exception.h"
 #include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/topic_attributes.h"
 #include "grape/serdes/serdes.h"
@@ -19,7 +18,8 @@ template <typename TopicAttributes>
 class Publisher : public RawPublisher {
 public:
   explicit Publisher(const TopicAttributes& topic_attr, MatchCallback&& match_cb = nullptr);
-  void publish(const typename TopicAttributes::DataType& data) const;
+  [[nodiscard]] auto publish(const typename TopicAttributes::DataType& data) const
+      -> std::expected<void, Error>;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -30,12 +30,13 @@ Publisher<TopicAttributes>::Publisher(const TopicAttributes& topic_attr, MatchCa
 
 //-------------------------------------------------------------------------------------------------
 template <typename TopicAttributes>
-void Publisher<TopicAttributes>::publish(const typename TopicAttributes::DataType& data) const {
+auto Publisher<TopicAttributes>::publish(const typename TopicAttributes::DataType& data) const
+    -> std::expected<void, Error> {
   auto stream = serdes::OutStream<TopicAttributes::SERDES_BUFFER_SIZE>{};
   auto ser = serdes::Serialiser(stream);
   if (not ser.pack(data)) {
-    panic<Exception>("Serialisation error");
+    return std::unexpected{ Error::SerialisationFailed };
   }
-  RawPublisher::publish(stream.data());
+  return RawPublisher::publish(stream.data());
 }
 }  // namespace grape::ipc

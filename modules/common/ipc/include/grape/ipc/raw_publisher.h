@@ -4,9 +4,11 @@
 
 #pragma once
 
+#include <expected>
 #include <memory>
 #include <span>
 
+#include "grape/ipc/error.h"
 #include "grape/ipc/match.h"
 
 namespace grape::ipc {
@@ -22,7 +24,8 @@ public:
   explicit RawPublisher(const std::string& topic, MatchCallback&& match_cb = nullptr);
 
   /// Publish data on topic specified at construction
-  void publish(std::span<const std::byte> bytes) const;
+  /// @return nothing on success, error on failure
+  [[nodiscard]] auto publish(std::span<const std::byte> bytes) const -> std::expected<void, Error>;
 
   /// @return The number of subscribers currently matched to this publisher
   [[nodiscard]] auto subscriberCount() const -> std::size_t;

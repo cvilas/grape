@@ -47,7 +47,8 @@ private:
   static constexpr std::uint64_t NULL_ID = 0UL;
   static constexpr auto LATENCY_TRACKER_WINDOW = 128U;
 
-  void onAlternate(const AlternateCommandTopic::DataType& cmd, const ipc::SampleInfo& info);
+  void onAlternate(const std::expected<AlternateCommandTopic::DataType, ipc::Error>& cmd,
+                   const ipc::SampleInfo& info);
   void publishStatus() const;
   void watchdogLoop(const std::stop_token& stop_token);
 

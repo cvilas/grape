@@ -33,6 +33,7 @@ Cross platform camera support
 - [ ] Introduce lockless ring buffer between decompressor and display (main thread)
 - [ ] Allow setting compression quality to tune overall pub-sub latency
 - [ ] Allow user to specify capture resolution and fps. Let program select nearest `SDL_CameraSpec`
-- [ ] Resolve discrepency between reported capture fps and actual fps (may require publish to be on a separate thread)
-  - [ ] Introduce lockless ring buffer between compressor and publisher
+- [ ] Experimentally determine and then document how to improve network performance
+  - [ ] Set UDP buffer sizes as required in eCAL config (ecal.yaml)
+  - [ ] Increase system socket buffer sizes in /etc/sysctl.conf (net.core.rmem_max/wmem_max/rmem_default/wmem_default)
 
