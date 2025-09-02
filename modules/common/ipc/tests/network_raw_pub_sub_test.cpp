@@ -79,7 +79,8 @@ TEST_CASE("Basic pub-sub in network scope works", "[ipc]") {
   REQUIRE(matched_pub_id == publisher.id());
 
   // publish payload
-  publisher.publish({ payload.data(), payload.size() });
+  const auto pub_result = publisher.publish({ payload.data(), payload.size() });
+  REQUIRE(pub_result.has_value());
 
   // wait a reasonable time for subscriber to receive message
   {

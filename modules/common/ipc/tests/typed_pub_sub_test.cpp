@@ -49,9 +49,13 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   auto received_data = TestDataType{};
   auto pub_id = grape::ipc::EntityId{};
   const auto data_cb = [&recv_cond, &recv_mut, &received_data,
-                        &pub_id](const TestDataType& data, const grape::ipc::SampleInfo& info) {
+                        &pub_id](const std::expected<TestDataType, grape::ipc::Error>& data,
+                                 const grape::ipc::SampleInfo& info) {
     const auto lk = std::lock_guard(recv_mut);
-    received_data = data;
+    if (not data) {
+      return;
+    }
+    received_data = data.value();
     pub_id = info.publisher;
     recv_cond.notify_all();
   };
@@ -74,7 +78,7 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   const auto test_data = TestDataType{ .id = 42, .message = "Custom struct message" };
 
   // publish it
-  publisher.publish(test_data);
+  REQUIRE(publisher.publish(test_data).has_value());
 
   // wait for subscriber to receive it
   {

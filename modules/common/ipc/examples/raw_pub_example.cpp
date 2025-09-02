@@ -32,7 +32,10 @@ auto main() -> int {
     while (grape::ipc::ok()) {
       const auto message = std::string("Hello World ") + std::to_string(++counter);
       std::println("Sending message: '{}'", message);
-      publisher.publish(to_bytes(message));
+      const auto result = publisher.publish(to_bytes(message));
+      if (not result) {
+        std::println("Publish failed: {}", toString(result.error()));
+      }
       std::this_thread::sleep_for(SLEEP_TIME);
     }
     return EXIT_SUCCESS;

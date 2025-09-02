@@ -12,7 +12,7 @@
 
 //=================================================================================================
 // Example demonstrates teleop controller API.
-// Paired with robot_loco_service_example (in service module) to demonstrate behaviour
+// Paired with locomotion_arbiter_example to demonstrate behaviour
 auto main(int argc, const char* argv[]) -> int {
   try {
     const auto args = grape::conio::ProgramDescription("Robot teleop client example")
@@ -24,8 +24,20 @@ auto main(int argc, const char* argv[]) -> int {
     grape::ipc::init(std::move(ipc_config));
 
     const auto on_teleop_status = [](const auto& status) {
-      std::println("Teleop status: is_service_detected={}, is_client_active={}, command_latency={}",
-                   status.is_service_detected, status.is_client_active, status.command_latency);
+      struct Visitor {
+        using TeleopClient = grape::locomotion::TeleopClient;
+        void operator()(const TeleopClient::ServiceStatus& st) {
+          std::println("Service {}", st.is_detected ? "detected" : "lost");
+        }
+        void operator()(const TeleopClient::ClientStatus& st) {
+          const auto* const is_active = st.is_client_active ? "active" : "inactive";
+          std::println("Teleop {} (latency={})", is_active, st.command_latency);
+        }
+        void operator()(const TeleopClient::Error& st) {
+          std::println("{}", st.message);
+        }
+      };
+      std::visit(Visitor(), status);
     };
 
     auto teleoperator = grape::locomotion::TeleopClient(robot_name, on_teleop_status);
@@ -40,7 +52,9 @@ auto main(int argc, const char* argv[]) -> int {
         }
       }
       if (enable) {
-        teleoperator.send(grape::locomotion::KeepAliveCmd{});  // No-op; keep teleop alive
+        if (not teleoperator.send(grape::locomotion::KeepAliveCmd{})) {
+          std::println("Failed to send command");
+        }
       }
       std::this_thread::sleep_for(CONTROL_PERIOD);
     }

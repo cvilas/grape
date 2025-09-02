@@ -4,8 +4,6 @@
 
 #include "grape/locomotion/teleop_client.h"
 
-#include "grape/log/syslog.h"
-
 namespace grape::locomotion {
 
 //-------------------------------------------------------------------------------------------------
@@ -20,19 +18,24 @@ TeleopClient::TeleopClient(const std::string& robot_name, StatusCallback&& statu
 }
 
 //-------------------------------------------------------------------------------------------------
-void TeleopClient::send(const AlternateCommandTopic::DataType& cmd) {
-  cmd_pub_.publish(cmd);
+auto TeleopClient::send(const AlternateCommandTopic::DataType& cmd) -> bool {
+  return cmd_pub_.publish(cmd).has_value();
 }
 
 //-------------------------------------------------------------------------------------------------
-void TeleopClient::onArbiterStatus(const ArbiterStatus& status, const ipc::SampleInfo& info) const {
+void TeleopClient::onArbiterStatus(const std::expected<ArbiterStatus, ipc::Error>& maybe_status,
+                                   const ipc::SampleInfo& info) const {
   (void)info;
-  const auto teleop_status =
-      TeleopClient::Status{ .is_service_detected = true,
-                            .is_client_active = (status.alt_controller_id == id_),
-                            .command_latency = status.alt_command_latency };
-  if (status_cb_ != nullptr) {
-    status_cb_(teleop_status);
+  if (status_cb_ == nullptr) {
+    return;
+  }
+  if (maybe_status) {
+    const auto& status = maybe_status.value();
+    status_cb_(ClientStatus{ .is_client_active = (status.alt_controller_id == id_),
+                             .command_latency = status.alt_command_latency });
+  } else {
+    const auto err_msg = toString(maybe_status.error());
+    status_cb_(Error{ .message = std::format("Invalid Arbiter status: {}", err_msg) });
   }
 }
 
@@ -41,11 +44,11 @@ void TeleopClient::onArbiterMatch(const ipc::Match& match) const {
   switch (match.status) {
     case ipc::Match::Status::Unmatched:
       if (arbiter_status_sub_.publisherCount() == 0) {
-        status_cb_({ .is_service_detected = false });  // notify client that nobody is listening
+        status_cb_(ServiceStatus{ .is_detected = false });
       }
       break;
     case ipc::Match::Status::Matched:
-      status_cb_({ .is_service_detected = true });
+      status_cb_(ServiceStatus{ .is_detected = true });
       break;
   }
 }

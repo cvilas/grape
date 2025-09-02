@@ -66,13 +66,14 @@ RawPublisher::~RawPublisher() = default;
 RawPublisher::RawPublisher(RawPublisher&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
-void RawPublisher::publish(std::span<const std::byte> bytes) const {
+auto RawPublisher::publish(std::span<const std::byte> bytes) const -> std::expected<void, Error> {
   const auto now = SystemClock::now().time_since_epoch().count();
   if (not impl_->Send(bytes.data(), bytes.size(), now)) {
     if (impl_->GetSubscriberCount() > 0U) {
-      panic<Exception>(std::format("Write failed on topic '{}'", impl_->GetTopicId().topic_name));
+      return std::unexpected{ Error::PublishFailed };
     }
   }
+  return {};
 }
 
 //-------------------------------------------------------------------------------------------------

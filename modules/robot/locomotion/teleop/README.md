@@ -21,3 +21,10 @@ control of its _locomotion_ functions.
 
 - Terminal-based client applications for wide deployability, including on the robot itself
 - Interacts with [locomotion command arbiter](../arbiter/README.md) to inject control command on the alternate channel
+
+## TODO
+
+- [ ] Handle following failures. Use strategy employed in Joystick event handling 
+  - [ ] In `TeleopClient::send`
+  - [ ] In `TeleopClient::onArbiterStatus`
+- [ ] Report error events in `keyboard_teleop` 

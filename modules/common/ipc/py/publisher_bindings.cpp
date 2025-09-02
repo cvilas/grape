@@ -19,13 +19,13 @@ void bindPublisher(pybind11::module_& module) {
            "Get the number of subscribers currently matched to this publisher.")
       .def(
           "publish",
-          [](const RawPublisher& self, const pybind11::bytes& data) -> void {
+          [](const RawPublisher& self, const pybind11::bytes& data) -> bool {
             const std::string& data_str = data.cast<std::string>();
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
             const auto* raw_data = reinterpret_cast<const std::byte*>(data_str.data());
             const std::size_t size = data_str.size();
             const std::span<const std::byte> bytes(raw_data, size);
-            self.publish(bytes);
+            return self.publish(bytes).has_value();
           },
           pybind11::arg("data"), "Publish data on the topic specified at creation.");
 }

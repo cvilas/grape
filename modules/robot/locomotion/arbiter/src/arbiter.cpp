@@ -18,7 +18,12 @@ Arbiter::Arbiter(const std::string& robot_name, CommandCallback&& robot_cmd_cb)
 }
 
 //-------------------------------------------------------------------------------------------------
-void Arbiter::onAlternate(const AlternateCommandTopic::DataType& cmd, const ipc::SampleInfo& info) {
+void Arbiter::onAlternate(const std::expected<AlternateCommandTopic::DataType, ipc::Error>& cmd,
+                          const ipc::SampleInfo& info) {
+  if (not cmd) {
+    syslog::Error("Error receiving alternate command: {}", toString(cmd.error()));
+    return;
+  }
   if (alt_controller_id_.load() == NULL_ID) {
     // no alt controller active. take control
     alt_controller_id_.store(info.publisher.id);
@@ -37,7 +42,7 @@ void Arbiter::onAlternate(const AlternateCommandTopic::DataType& cmd, const ipc:
 
   // process command
   last_alt_cmd_time_.store(now);
-  robot_command_cb_(cmd);
+  robot_command_cb_(cmd.value());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -91,7 +96,10 @@ void Arbiter::publishStatus() const {
       std::chrono::duration<float>(cmd_latency_.load()));
   const auto status = ArbiterStatus{ .alt_controller_id = alt_controller_id_.load(),
                                      .alt_command_latency = avg_latency };
-  status_pub_.publish(status);
+  const auto pub_result = status_pub_.publish(status);
+  if (not pub_result) {
+    syslog::Error("Error publishing status: {}", toString(pub_result.error()));
+  }
 }
 
 }  // namespace grape::locomotion

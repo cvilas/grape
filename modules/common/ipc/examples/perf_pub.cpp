@@ -48,7 +48,10 @@ auto main(int argc, const char* argv[]) -> int {
     auto pub = grape::ipc::RawPublisher(grape::ipc::ex::perf::TOPIC);
     std::println("Press CTRL-C to quit");
     while (grape::ipc::ok()) {
-      pub.publish(payload);
+      const auto pub_result = pub.publish(payload);
+      if (not pub_result) {
+        std::println("Publish failed: {}", toString(pub_result.error()));
+      }
       // force a context switch to mimic reality of cache invalidation, etc
       std::this_thread::sleep_for(std::chrono::nanoseconds(1));
     }

@@ -15,6 +15,7 @@ set(SOURCES
     src/raw_publisher.cpp
     src/raw_subscriber.cpp
     README.md
+    include/grape/ipc/error.h
     include/grape/ipc/config.h
     include/grape/ipc/match.h
     include/grape/ipc/session.h

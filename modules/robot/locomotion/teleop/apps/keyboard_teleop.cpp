@@ -18,23 +18,21 @@
 
 namespace {
 //-------------------------------------------------------------------------------------------------
-auto status(bool en, const grape::locomotion::TeleopClient::Status& st) -> ftxui::Element {
-  if (not st.is_service_detected) {
-    return ftxui::text("Service Unreachable") | ftxui::color(ftxui::Color::Red);
-  }
-  if ((not en) and (not st.is_client_active)) {
-    return ftxui::text("Inactive") | ftxui::color(ftxui::Color::GrayLight);
-  }
-  if ((not en) and st.is_client_active) {
-    return ftxui::text("Canceling") | ftxui::color(ftxui::Color::Yellow) | ftxui::bold;
-  }
-  if (en and (not st.is_client_active)) {
-    return ftxui::text("Requesting") | ftxui::color(ftxui::Color::Yellow) | ftxui::bold;
-  }
-  if (en and st.is_client_active) {
-    return ftxui::text("Active") | ftxui::color(ftxui::Color::Green) | ftxui::bold;
-  }
-  return ftxui::text("Unknown") | ftxui::color(ftxui::Color::Red) | ftxui::bold;
+void onTeleopStatus(const grape::locomotion::TeleopClient::Status& status) {
+  struct Visitor {
+    using TeleopClient = grape::locomotion::TeleopClient;
+    void operator()(const TeleopClient::ServiceStatus& st) {
+      std::println("Service {}", st.is_detected ? "detected" : "lost");
+    }
+    void operator()(const TeleopClient::ClientStatus& st) {
+      const auto* const is_active = st.is_client_active ? "active" : "inactive";
+      std::println("Teleop {} (latency={})", is_active, st.command_latency);
+    }
+    void operator()(const TeleopClient::Error& st) {
+      std::println("{}", st.message);
+    }
+  };
+  std::visit(Visitor(), status);
 }
 }  // namespace
 
@@ -52,9 +50,8 @@ auto main(int argc, const char* argv[]) -> int {
     auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
     grape::ipc::init(std::move(ipc_config));
 
-    auto teleop_status = grape::locomotion::TeleopClient::Status{};
-    const auto on_teleop_status = [&teleop_status](const auto& status) { teleop_status = status; };
-    auto teleoperator = grape::locomotion::TeleopClient(robot_name, on_teleop_status);
+    auto status_info = ftxui::text("");
+    auto teleoperator = grape::locomotion::TeleopClient(robot_name, onTeleopStatus);
     auto screen = ftxui::ScreenInteractive::Fullscreen();
 
     auto teleop_enable = false;
@@ -120,18 +117,12 @@ auto main(int argc, const char* argv[]) -> int {
 
     // Main UI renderer
     auto main_component = ftxui::Renderer([&] {
+      const auto robot_decor = ftxui::color(ftxui::Color::Cyan) | ftxui::bold;
+      const auto robot_info = ftxui::text(robot_name) | robot_decor;
       return ftxui::vbox({
                  ftxui::text("Keyboard Teleop") | ftxui::bold | ftxui::center,
                  ftxui::separator(),
-                 ftxui::hbox({
-                     ftxui::text("Robot: "),
-                     ftxui::text(robot_name) | ftxui::color(ftxui::Color::Cyan) | ftxui::bold |
-                         ftxui::flex,
-                     ftxui::text("Status: "),
-                     status(teleop_enable, teleop_status) | ftxui::flex,
-                     ftxui::text("Command Latency: "),
-                     ftxui::text(std::format("{:<10}", teleop_status.command_latency)),
-                 }),
+                 ftxui::hbox({ robot_info, status_info }),
                  ftxui::separator(),
                  ftxui::text("Controls:") | ftxui::bold,
                  ftxui::text("  SPACE - Enable/Disable Teleop"),
@@ -155,7 +146,7 @@ auto main(int argc, const char* argv[]) -> int {
     while (not loop.HasQuitted() and grape::ipc::ok()) {
       loop.RunOnce();
       if (teleop_enable) {
-        teleoperator.send(move_cmd);
+        std::ignore = teleoperator.send(move_cmd);  // TODO(Vilas): Handle error
       }
       move_cmd = {};
       screen.PostEvent(ftxui::Event::Custom);

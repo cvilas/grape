@@ -37,7 +37,7 @@ void onSignal(int /*signum*/) {
 
 //=================================================================================================
 // Creates a dummy robot locomotion service utilising the command arbiter.
-// Paired with robot_loco_teleop_example (in teleop module) to demonstrate arbiter behaviour
+// Paired with teleop_example to demonstrate arbiter behaviour
 auto main(int argc, const char* argv[]) -> int {
   try {
     std::ignore = signal(SIGINT, onSignal);

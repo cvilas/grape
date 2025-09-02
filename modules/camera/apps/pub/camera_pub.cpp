@@ -98,7 +98,10 @@ void Publisher::onCompressedFrame(std::span<const std::byte> bytes,
     stats_.publish_bytes.store(static_cast<std::size_t>(stats.mean), std::memory_order_relaxed);
   }
 
-  publisher_.publish(bytes);
+  const auto pub_result = publisher_.publish(bytes);
+  if (not pub_result) {
+    syslog::Error("Publish failed: {}", toString(pub_result.error()));
+  }
 
   static auto last_ts = std::chrono::steady_clock::now();
   auto ts = std::chrono::steady_clock::now();
