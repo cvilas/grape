@@ -67,7 +67,6 @@ if(ftxui IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       ftxui
       URL https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v${FTXUI_VERSION_REQUIRED}.tar.gz
-      URL_MD5 31860ee294b8fc2520b22f15a84dbe4c
       CMAKE_ARGS ${FTXUI_CMAKE_ARGS})
   endif()
 endif()
@@ -94,7 +93,6 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       SDL3
       URL https://github.com/libsdl-org/SDL/archive/refs/tags/release-${SDL3_VERSION_REQUIRED}.tar.gz
-      URL_MD5 a343b4a90cf5ff58e73dec07a782d8ba
       CMAKE_ARGS ${SDL3_CMAKE_ARGS})
   endif()
 endif()
@@ -147,7 +145,6 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       eCAL
       URL https://github.com/eclipse-ecal/ecal/releases/download/v${ECAL_VERSION_REQUIRED}/ecal-fat-source.tar.gz
-      URL_MD5 b709faee1c224eb6b15782db2396243a
       CMAKE_ARGS ${ECAL_CMAKE_ARGS})
   endif()
 endif()
@@ -166,7 +163,6 @@ if(lz4 IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       lz4
       URL https://github.com/lz4/lz4/archive/refs/tags/v${LZ4_VERSION_REQUIRED}.tar.gz
-      URL_MD5 dead9f5f1966d9ae56e1e32761e4e675
       SOURCE_SUBDIR "build/cmake"
       CMAKE_ARGS ${LZ4_CMAKE_ARGS})
   endif()
