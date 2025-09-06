@@ -445,7 +445,6 @@ endfunction()
 FetchContent_Declare(
   Catch2
   URL https://github.com/catchorg/Catch2/archive/refs/tags/v${CATCH2_VERSION_REQUIRED}.tar.gz
-  URL_MD5 c2fef0ffbe8af6b20e86f8d0e79b6aac
   EXCLUDE_FROM_ALL
   SYSTEM)
 FetchContent_MakeAvailable(Catch2)
@@ -784,7 +783,6 @@ endif(NOT CMAKE_CROSSCOMPILING)
 FetchContent_Declare(
   benchmark
   URL https://github.com/google/benchmark/archive/refs/tags/v${BENCHMARK_VERSION_REQUIRED}.tar.gz
-  URL_MD5 7c6b08131a141e511b1159a91b4d6dbb
   EXCLUDE_FROM_ALL
   SYSTEM)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
