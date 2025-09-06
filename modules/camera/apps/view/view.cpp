@@ -52,7 +52,7 @@ void Application::onCapturedFrame(const grape::camera::ImageFrame& frame) {
   display_.render(frame);
   if (save_snapshot_) {
     save_snapshot_ = false;
-    const auto fname = std::format("snapshot_{:%FT%T}.bmp", grape::SystemClock::now());
+    const auto fname = std::format("snapshot_{:%FT%T}.bmp", frame.header.timestamp);
     std::ignore = grape::camera::save(frame, fname);
   }
   const auto now = grape::SystemClock::now();
@@ -77,6 +77,7 @@ auto Application::iterate() -> SDL_AppResult {
 
 //-------------------------------------------------------------------------------------------------
 auto Application::handleEvent(SDL_Event* event) -> SDL_AppResult {
+  static auto show_timestamp = false;
   if (event->type == SDL_EVENT_QUIT) {
     grape::syslog::Info("Quit!");
     capture_.reset();
@@ -96,6 +97,10 @@ auto Application::handleEvent(SDL_Event* event) -> SDL_AppResult {
   if (event->type == SDL_EVENT_KEY_DOWN) {
     if (event->key.scancode == SDL_SCANCODE_S) {
       saveImage();
+    }
+    if (event->key.scancode == SDL_SCANCODE_T) {
+      show_timestamp = !show_timestamp;
+      display_.showTimestamp(show_timestamp);
     }
     return SDL_APP_CONTINUE;
   }
