@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <memory>
 
 #include "grape/camera/image_frame.h"
@@ -18,6 +19,9 @@ public:
   /// @param frame The image frame to display
   void render(const ImageFrame& frame);
 
+  /// Enable/disable timestamp display
+  void showTimestamp(bool en);
+
   /// @return average image display latency
   [[nodiscard]] auto latency() const -> SystemClock::Duration;
 
@@ -29,6 +33,7 @@ public:
   auto operator=(Display&&) = delete;
 
 private:
+  std::atomic_bool show_timestamp_{ false };
   struct Impl;
   std::unique_ptr<Impl> impl_;
 };

@@ -54,7 +54,6 @@ Display::Display() : impl_(std::make_unique<Impl>()) {
                                       SDL_WINDOW_RESIZABLE, &window, &renderer)) {
     panic<Exception>(std::format("SDL_CreateWindowAndRenderer failed: {}", SDL_GetError()));
   }
-
   impl_->window.reset(window);
   impl_->renderer.reset(renderer);
 }
@@ -63,73 +62,97 @@ Display::Display() : impl_(std::make_unique<Impl>()) {
 Display::~Display() = default;
 
 //-------------------------------------------------------------------------------------------------
+void Display::showTimestamp(bool en) {
+  show_timestamp_ = en;
+}
+
+//-------------------------------------------------------------------------------------------------
 void Display::render(const ImageFrame& frame) {
   const auto& header = frame.header;
   auto* renderer = impl_->renderer.get();
 
+  // initialise texture to render image into
   static auto previous_image_header = ImageFrame::Header{};
   if (not matchesFormat(previous_image_header, header)) {
     previous_image_header = header;
-    syslog::Note("Receiving {}x{}, {}", header.width, header.height,
-                 SDL_GetPixelFormatName(static_cast<SDL_PixelFormat>(header.format)));
-
-    impl_->texture.reset(SDL_CreateTexture(
-        renderer, static_cast<SDL_PixelFormat>(header.format), SDL_TEXTUREACCESS_STREAMING,
-        static_cast<int>(header.width), static_cast<int>(header.height)));
+    const auto fmt = static_cast<SDL_PixelFormat>(header.format);
+    const auto iw = static_cast<int>(header.width);
+    const auto ih = static_cast<int>(header.height);
+    syslog::Note("Receiving {}x{}, {}", iw, ih, SDL_GetPixelFormatName(fmt));
+    impl_->texture.reset(SDL_CreateTexture(renderer, fmt, SDL_TEXTUREACCESS_STREAMING, iw, ih));
     if (impl_->texture == nullptr) {
       syslog::Error("Failed to create texture: {}", SDL_GetError());
       return;
     }
+
+    // maintain aspect ratio as window size changes
+    if (not SDL_SetRenderLogicalPresentation(renderer, iw, ih,
+                                             SDL_LOGICAL_PRESENTATION_LETTERBOX)) {
+      syslog::Error("Failed to set presentation mode: {}", SDL_GetError());
+      return;
+    }
   }
 
+  // render image into texture
   auto* texture = impl_->texture.get();
   if (not SDL_UpdateTexture(texture, nullptr, frame.pixels.data(),
                             static_cast<int>(header.pitch))) {
-    syslog::Error("Failed to update texture:", SDL_GetError());
+    syslog::Error("Failed to update texture: {}", SDL_GetError());
+    return;
+  }
+  if (not SDL_RenderTexture(renderer, texture, nullptr, nullptr)) {
+    syslog::Warn("Failed to render texture: {}", SDL_GetError());
     return;
   }
 
-  // Setup background colour
-  constexpr auto BGCOLOR = std::array<float, 4>{ 0.4F, 0.6F, 1.0F, SDL_ALPHA_OPAQUE_FLOAT };
-  if (not SDL_SetRenderDrawColorFloat(renderer, BGCOLOR.at(0), BGCOLOR.at(1), BGCOLOR.at(2),
-                                      BGCOLOR.at(3))) {
-    syslog::Warn("Failed to draw background: {}", SDL_GetError());
+  // render OSD
+  if (show_timestamp_) {
+    [&] {
+      // set font color
+      static constexpr auto COLOR = std::array<Uint8, 4>{ 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE };
+      if (!SDL_SetRenderDrawColor(renderer, COLOR.at(0), COLOR.at(1), COLOR.at(2), COLOR.at(3))) {
+        syslog::Warn("Failed to set font color: {}", SDL_GetError());
+        return;
+      }
+
+      // Determine image scaling and invert it to scale text such that its size appears constant
+      auto window_w = 1;
+      auto window_h = 1;
+      if (!SDL_GetRenderOutputSize(renderer, &window_w, &window_h)) {
+        syslog::Warn("Failed to get window size: {}", SDL_GetError());
+        return;
+      }
+      const auto scale_x = static_cast<float>(window_w) / static_cast<float>(header.width);
+      const auto scale_y = static_cast<float>(window_h) / static_cast<float>(header.height);
+      const auto ts_scale = 1.F / ((scale_x < scale_y) ? scale_x : scale_y);
+
+      // print timestamp
+      static constexpr auto TS_X = 10;
+      static constexpr auto TS_Y = 10;
+      const auto ts_text = std::format("{}", header.timestamp);
+      if (!SDL_SetRenderScale(renderer, ts_scale, ts_scale)) {
+        syslog::Warn("Failed to scale font: {}", SDL_GetError());
+        return;
+      }
+      if (!SDL_RenderDebugText(renderer, TS_X, TS_Y, ts_text.c_str())) {
+        syslog::Warn("Failed to render text: {}", SDL_GetError());
+        return;
+      }
+      if (!SDL_SetRenderScale(renderer, 1.0F, 1.0F)) {
+        syslog::Warn("Failed to reset font scale: {}", SDL_GetError());
+        return;
+      }
+    }();
   }
-  if (not SDL_RenderClear(renderer)) {
-    syslog::Warn("Failed to clear renderer: {}", SDL_GetError());
-  }
 
-  auto dst = SDL_Rect{};
-  auto fdst = SDL_FRect{};
-  SDL_GetRenderOutputSize(renderer, &dst.w, &dst.h);
-  SDL_RectToFRect(&dst, &fdst);
-
-  // Calculate view dimensions maintaining aspect ratio
-  const auto src_w = static_cast<float>(texture->w);
-  const auto src_h = static_cast<float>(texture->h);
-  const auto scale_w = fdst.w / src_w;
-  const auto scale_h = fdst.h / src_h;
-  const auto scale = std::min(scale_w, scale_h);
-  const auto new_w = src_w * scale;
-  const auto new_h = src_h * scale;
-  fdst.x = (fdst.w - new_w) / 2;
-  fdst.y = (fdst.h - new_h) / 2;
-  fdst.w = new_w;
-  fdst.h = new_h;
-
+  // show image
   const auto now = SystemClock::now();
-
-  if (not SDL_RenderTexture(renderer, texture, nullptr, &fdst)) {
-    syslog::Warn("Failed to render texture: {}", SDL_GetError());
-  }
-
   if (not SDL_RenderPresent(renderer)) {
-    syslog::Warn("Failed to present image: {}", SDL_GetError());
+    syslog::Error("Failed to present image: {}", SDL_GetError());
+    return;
   }
-
-  const auto dt =
-      std::chrono::duration_cast<std::chrono::duration<float>>(now - header.timestamp).count();
-  impl_->latency_accum.append(dt);
+  const auto dt = now - header.timestamp;
+  impl_->latency_accum.append(std::chrono::duration_cast<std::chrono::duration<float>>(dt).count());
 }
 
 //-------------------------------------------------------------------------------------------------

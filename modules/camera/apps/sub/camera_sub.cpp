@@ -30,6 +30,7 @@ public:
 
   void update();
   void saveImage();
+  void toggleTimestamp();
   [[nodiscard]] auto latency() const -> SystemClock::Duration;
 
 private:
@@ -81,6 +82,13 @@ void Subscriber::onPublisherMatch(const ipc::Match& match) {
 //-------------------------------------------------------------------------------------------------
 void Subscriber::saveImage() {
   save_snapshot_ = true;
+}
+
+//-------------------------------------------------------------------------------------------------
+void Subscriber::toggleTimestamp() {
+  static bool en_ts = false;
+  en_ts = !en_ts;
+  display_.showTimestamp(en_ts);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -184,6 +192,9 @@ auto main(int argc, char* argv[]) -> int {
         if (event.type == SDL_EVENT_KEY_DOWN) {
           if (event.key.scancode == SDL_SCANCODE_S) {
             subscriber.saveImage();
+          }
+          if (event.key.scancode == SDL_SCANCODE_T) {
+            subscriber.toggleTimestamp();
           }
         }
       }
