@@ -88,8 +88,7 @@ void Display::render(const ImageFrame& frame) {
     // maintain aspect ratio as window size changes
     if (not SDL_SetRenderLogicalPresentation(renderer, iw, ih,
                                              SDL_LOGICAL_PRESENTATION_LETTERBOX)) {
-      syslog::Error("Failed to set presentation mode: {}", SDL_GetError());
-      return;
+      syslog::Warn("Failed to set presentation mode: {}", SDL_GetError());
     }
   }
 
@@ -97,59 +96,49 @@ void Display::render(const ImageFrame& frame) {
   auto* texture = impl_->texture.get();
   if (not SDL_UpdateTexture(texture, nullptr, frame.pixels.data(),
                             static_cast<int>(header.pitch))) {
-    syslog::Error("Failed to update texture: {}", SDL_GetError());
-    return;
+    syslog::Warn("Failed to update texture: {}", SDL_GetError());
   }
   if (not SDL_RenderTexture(renderer, texture, nullptr, nullptr)) {
     syslog::Warn("Failed to render texture: {}", SDL_GetError());
-    return;
   }
 
   // render OSD
   if (show_timestamp_) {
-    [&] {
-      // set font color
-      static constexpr auto COLOR = std::array<Uint8, 4>{ 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE };
-      if (!SDL_SetRenderDrawColor(renderer, COLOR.at(0), COLOR.at(1), COLOR.at(2), COLOR.at(3))) {
-        syslog::Warn("Failed to set font color: {}", SDL_GetError());
-        return;
-      }
+    // set font color
+    static constexpr auto COLOR = std::array<Uint8, 4>{ 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE };
+    if (!SDL_SetRenderDrawColor(renderer, COLOR.at(0), COLOR.at(1), COLOR.at(2), COLOR.at(3))) {
+      syslog::Warn("Failed to set font color: {}", SDL_GetError());
+    }
 
-      // Determine image scaling and invert it to scale text such that its size appears constant
-      auto window_w = 1;
-      auto window_h = 1;
-      if (!SDL_GetRenderOutputSize(renderer, &window_w, &window_h)) {
-        syslog::Warn("Failed to get window size: {}", SDL_GetError());
-        return;
-      }
-      const auto scale_x = static_cast<float>(window_w) / static_cast<float>(header.width);
-      const auto scale_y = static_cast<float>(window_h) / static_cast<float>(header.height);
-      const auto ts_scale = 1.F / ((scale_x < scale_y) ? scale_x : scale_y);
+    // Determine image scaling and invert it to scale text such that its size appears constant
+    auto window_w = 1;
+    auto window_h = 1;
+    if (!SDL_GetRenderOutputSize(renderer, &window_w, &window_h)) {
+      syslog::Warn("Failed to get window size: {}", SDL_GetError());
+    }
+    const auto scale_x = static_cast<float>(window_w) / static_cast<float>(header.width);
+    const auto scale_y = static_cast<float>(window_h) / static_cast<float>(header.height);
+    const auto ts_scale = 1.F / ((scale_x < scale_y) ? scale_x : scale_y);
 
-      // print timestamp
-      static constexpr auto TS_X = 10;
-      static constexpr auto TS_Y = 10;
-      const auto ts_text = std::format("{}", header.timestamp);
-      if (!SDL_SetRenderScale(renderer, ts_scale, ts_scale)) {
-        syslog::Warn("Failed to scale font: {}", SDL_GetError());
-        return;
-      }
-      if (!SDL_RenderDebugText(renderer, TS_X, TS_Y, ts_text.c_str())) {
-        syslog::Warn("Failed to render text: {}", SDL_GetError());
-        return;
-      }
-      if (!SDL_SetRenderScale(renderer, 1.0F, 1.0F)) {
-        syslog::Warn("Failed to reset font scale: {}", SDL_GetError());
-        return;
-      }
-    }();
+    // print timestamp
+    static constexpr auto TS_X = 10;
+    static constexpr auto TS_Y = 10;
+    const auto ts_text = std::format("{}", header.timestamp);
+    if (!SDL_SetRenderScale(renderer, ts_scale, ts_scale)) {
+      syslog::Warn("Failed to scale font: {}", SDL_GetError());
+    }
+    if (!SDL_RenderDebugText(renderer, TS_X, TS_Y, ts_text.c_str())) {
+      syslog::Warn("Failed to render text: {}", SDL_GetError());
+    }
+    if (!SDL_SetRenderScale(renderer, 1.0F, 1.0F)) {
+      syslog::Warn("Failed to reset font scale: {}", SDL_GetError());
+    }
   }
 
   // show image
   const auto now = SystemClock::now();
   if (not SDL_RenderPresent(renderer)) {
-    syslog::Error("Failed to present image: {}", SDL_GetError());
-    return;
+    syslog::Warn("Failed to present image: {}", SDL_GetError());
   }
   const auto dt = now - header.timestamp;
   impl_->latency_accum.append(std::chrono::duration_cast<std::chrono::duration<float>>(dt).count());
