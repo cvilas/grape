@@ -55,9 +55,9 @@ set(GCC_WARNINGS
   -Wpointer-arith
 )
 
-if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
   add_compile_options(-fcolor-diagnostics -fexperimental-library ${CLANG_WARNINGS})
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES GNU)
   add_compile_options(-fdiagnostics-color=always ${GCC_WARNINGS})
 else()
   message(FATAL_ERROR "Unsupported compiler '${CMAKE_CXX_COMPILER_ID}'")
@@ -92,7 +92,7 @@ endif()
 
 option(ENABLE_MSAN "Enable memory sanitizer" FALSE)
 if(${ENABLE_MSAN})
-  if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+  if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
     message(WARNING "Memory sanitizer requires all code (including libc++) to be MSAN-instrumented to avoid false positives")
   endif()
   if("address" IN_LIST SANITIZERS
