@@ -17,22 +17,79 @@
 #include "grape/locomotion/teleop_client.h"
 
 namespace {
+
+struct State {
+  bool is_service_detected{ false };
+  bool is_client_active{ false };
+  grape::SystemClock::Duration latency{};
+  std::string last_error_msg;
+};
+
 //-------------------------------------------------------------------------------------------------
-void onTeleopStatus(const grape::locomotion::TeleopClient::Status& status) {
+auto toStatusUi(const std::string& robot_name, bool en, State state)
+    -> std::pair<ftxui::Element, ftxui::Element> {
+  const auto service_status =
+      state.is_service_detected ?
+          ftxui::text(" [Reachable    ]") | ftxui::color(ftxui::Color::Green) :
+          ftxui::text(" [Not Reachable]") | ftxui::color(ftxui::Color::YellowLight);
+
+  // service_detected | teleop_enabled | client_active | reported state
+  // -----------------|----------------|---------------|---------------
+  // 0                | x              | x             | unknown
+  // 1                | 0              | 0             | inactive
+  // 1                | 0              | 1             | canceling
+  // 1                | 1              | 0             | requesting
+  // 1                | 1              | 1             | active
+
+  const auto client_status = [&] {
+    if (!state.is_service_detected) {
+      return ftxui::text(" [Control: Unknown   ]") | ftxui::color(ftxui::Color::YellowLight);
+    }
+    if (!en && !state.is_client_active) {
+      return ftxui::text(" [Control: Inactive  ]") | ftxui::color(ftxui::Color::GrayLight);
+    }
+    if (!en && state.is_client_active) {
+      return ftxui::text(" [Control: Canceling ]") | ftxui::color(ftxui::Color::YellowLight);
+    }
+    if (en && !state.is_client_active) {
+      return ftxui::text(" [Control: Requesting]") | ftxui::color(ftxui::Color::YellowLight);
+    }
+    if (en && state.is_client_active) {
+      return ftxui::text(" [Control: Active    ]") | ftxui::color(ftxui::Color::Green);
+    }
+    return ftxui::text(" [Control: ??        ]") | ftxui::color(ftxui::Color::Red);
+  }();
+
+  const auto latency_text = ftxui::text(std::format(" [Latency: {:<10}]", state.latency));
+  static auto error_msg = ftxui::Element{ ftxui::text("No Errors") };
+  error_msg = state.last_error_msg.empty() ?
+                  error_msg :
+                  ftxui::text(std::format("Last Error: {}", state.last_error_msg)) |
+                      ftxui::color(ftxui::Color::YellowLight);
+  return { ftxui::hbox({ ftxui::text("Robot: "), ftxui::text(robot_name) | ftxui::bold,
+                         service_status, client_status, latency_text }),
+           error_msg };
+}
+
+//-------------------------------------------------------------------------------------------------
+auto onTeleopStatus(const grape::locomotion::TeleopClient::Status& teleop_status) -> State {
+  static auto state = State{};
   struct Visitor {
     using TeleopClient = grape::locomotion::TeleopClient;
     void operator()(const TeleopClient::ServiceStatus& st) {
-      std::println("Service {}", st.is_detected ? "detected" : "lost");
+      state.is_service_detected = st.is_detected;
     }
     void operator()(const TeleopClient::ClientStatus& st) {
-      const auto* const is_active = st.is_client_active ? "active" : "inactive";
-      std::println("Teleop {} (latency={})", is_active, st.command_latency);
+      state.is_client_active = st.is_client_active;
+      state.latency = st.command_latency;
     }
     void operator()(const TeleopClient::Error& st) {
-      std::println("{}", st.message);
+      const auto now = std::chrono::system_clock::now();
+      state.last_error_msg = std::format("[{}]: {}", now, st.message);
     }
   };
-  std::visit(Visitor(), status);
+  std::visit(Visitor(), teleop_status);
+  return state;
 }
 }  // namespace
 
@@ -50,10 +107,12 @@ auto main(int argc, const char* argv[]) -> int {
     auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
     grape::ipc::init(std::move(ipc_config));
 
-    auto status_info = ftxui::text("");
-    auto teleoperator = grape::locomotion::TeleopClient(robot_name, onTeleopStatus);
+    auto state = State{};
+    auto teleoperator = grape::locomotion::TeleopClient(
+        robot_name, [&state](const auto& status) { state = onTeleopStatus(status); });
     auto screen = ftxui::ScreenInteractive::Fullscreen();
 
+    auto cmd_error = false;
     auto teleop_enable = false;
     auto move_cmd = grape::locomotion::Move3DCmd{};
     auto speed_scale = 0.F;
@@ -117,40 +176,47 @@ auto main(int argc, const char* argv[]) -> int {
 
     // Main UI renderer
     auto main_component = ftxui::Renderer([&] {
-      const auto robot_decor = ftxui::color(ftxui::Color::Cyan) | ftxui::bold;
-      const auto robot_info = ftxui::text(robot_name) | robot_decor;
-      return ftxui::vbox({
-                 ftxui::text("Keyboard Teleop") | ftxui::bold | ftxui::center,
-                 ftxui::separator(),
-                 ftxui::hbox({ robot_info, status_info }),
-                 ftxui::separator(),
-                 ftxui::text("Controls:") | ftxui::bold,
-                 ftxui::text("  SPACE - Enable/Disable Teleop"),
-                 ftxui::text("  +/-   - Speed step up/down"),
-                 ftxui::text("  ↑/↓   - Forward/Backward"),
-                 ftxui::text("  ←/→   - Lateral Left/Right"),
-                 ftxui::text("  </>   - Rotate Left/Right"),
-                 ftxui::text("  ESC   - Exit"),
-                 ftxui::separator(),
-                 ftxui::text("Command:") | ftxui::bold,
-                 ftxui::hbox(
-                     { ftxui::text("Step Speed: "), ftxui::text(std::format("{}", speed_scale)) }),
-                 ftxui::hbox({ ftxui::text(std::format("{}", toString(move_cmd))) }),
-                 ftxui::separator(),
-             }) |
+      const auto [status_ui, error_ui] = toStatusUi(robot_name, teleop_enable, state);
+      const auto cmd_ui =
+          ftxui::hbox({ ftxui::text(toString(move_cmd)) |
+                        ftxui::color(cmd_error ? ftxui::Color::Red : ftxui::Color::White) });
+      return ftxui::vbox({ ftxui::text("Keyboard Teleop") | ftxui::bold | ftxui::center,  //
+                           ftxui::separator(),                                            //
+                           status_ui,                                                     //
+                           ftxui::separator(),                                            //
+                           ftxui::text("Controls:") | ftxui::bold,                        //
+                           ftxui::text("  SPACE - Enable/Disable Teleop"),                //
+                           ftxui::text("  +/-   - Speed step up/down"),                   //
+                           ftxui::text("  ↑/↓   - Forward/Backward"),                     //
+                           ftxui::text("  ←/→   - Lateral Left/Right"),                   //
+                           ftxui::text("  </>   - Rotate Left/Right"),
+                           ftxui::text("  ESC   - Exit"),          //
+                           ftxui::separator(),                     //
+                           ftxui::text("Command:") | ftxui::bold,  //
+                           ftxui::hbox({ ftxui::text("Step Speed: "),
+                                         ftxui::text(std::format("{}", speed_scale)) }),  //
+                           cmd_ui,                                                        //
+                           ftxui::separator(),                                            //
+                           error_ui }) |
              ftxui::border;
     });
 
     static constexpr auto CONTROL_PERIOD = std::chrono::milliseconds(100);
     auto loop = ftxui::Loop(&screen, main_component | key_handler);
     while (not loop.HasQuitted() and grape::ipc::ok()) {
+      const auto start_update_ts = std::chrono::steady_clock::now();
       loop.RunOnce();
       if (teleop_enable) {
-        std::ignore = teleoperator.send(move_cmd);  // TODO(Vilas): Handle error
+        cmd_error = !teleoperator.send(move_cmd);
       }
-      move_cmd = {};
       screen.PostEvent(ftxui::Event::Custom);
-      std::this_thread::sleep_for(CONTROL_PERIOD);
+      move_cmd = {};
+
+      auto elapsed = std::chrono::steady_clock::now() - start_update_ts;
+      auto sleep_time = CONTROL_PERIOD - elapsed;
+      if (sleep_time > std::chrono::milliseconds(0)) {
+        std::this_thread::sleep_for(sleep_time);
+      }
     }
     return EXIT_SUCCESS;
   } catch (...) {
