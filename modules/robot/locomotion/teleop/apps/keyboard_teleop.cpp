@@ -84,7 +84,7 @@ auto onTeleopStatus(const grape::locomotion::TeleopClient::Status& teleop_status
       state.latency = st.command_latency;
     }
     void operator()(const TeleopClient::Error& st) {
-      const auto now = std::chrono::system_clock::now();
+      const auto now = grape::SystemClock::now();
       state.last_error_msg = std::format("[{}]: {}", now, st.message);
     }
   };
