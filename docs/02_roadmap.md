@@ -22,6 +22,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
 - [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
 - [ ] Math library: 
+  - [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
   - [ ] linear algebra using std::mdspan and c++26 linalg 
 - [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
@@ -48,6 +49,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] Rover
   - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
   - [ ] Implement CANOpen interface for Linux
+  - [ ] Monitoring tools: position tracker, battery monitor, topic_echo
   - [ ] Steam Deck as operator controller: joystick teleop, FPV and mission control
   - [ ] Record and playback time-series multi-modal data
 - [ ] CI updates (See TODO in [README](../.github/workflows/README.md))
