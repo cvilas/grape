@@ -88,10 +88,11 @@ Camera::Camera(Callback callback, const std::string& name_hint)
     panic<Exception>(std::format("No cameras enumerated: {}", SDL_GetError()));
   }
 
-  auto chosen_camera_index = -1;
+  auto chosen_camera_index = std::numeric_limits<std::size_t>::max();
   auto chosen_camera_name = std::string{};
   syslog::Info("Found {} camera{}", camera_count, camera_count > 1 ? "s" : "");
-  for (int i = 0; i < camera_count; ++i) {
+  for (auto i = 0U; std::cmp_less(i, camera_count); ++i) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const auto id = cameras_ids.get()[i];
     const auto camera_name = std::string(SDL_GetCameraName(id));
     syslog::Info("[{}] {}", i, camera_name);
@@ -101,13 +102,14 @@ Camera::Camera(Callback callback, const std::string& name_hint)
       chosen_camera_name = camera_name;
     }
   }
-  if (chosen_camera_index < 0) {
+  if (chosen_camera_index == std::numeric_limits<std::size_t>::max()) {
     syslog::Warn("No camera found matching '{}'. Will open default camera", name_hint);
-    chosen_camera_index = 0;
+    chosen_camera_index = 0U;
   }
 
-  syslog::Note("Opening camera '{}'", chosen_camera_name);
+  syslog::Note("Opening camera [{}] {}", chosen_camera_index, chosen_camera_name);
   const auto camera_spec = nullptr;  // accept whatever format the device offers
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   impl_->camera.reset(SDL_OpenCamera(cameras_ids.get()[chosen_camera_index], camera_spec));
   if (impl_->camera == nullptr) {
     panic<Exception>(std::format("Unable to open camera: {}", SDL_GetError()));

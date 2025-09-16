@@ -55,9 +55,10 @@ private:
 /// User function to throw an exception
 template <typename T>
   requires std::derived_from<T, Exception>
-constexpr void panic(const std::string& message,
-                     const std::source_location& location = std::source_location::current(),
-                     utils::StackTrace trace = utils::StackTrace::current()) {
+[[noreturn]] constexpr void
+panic(const std::string& message,
+      const std::source_location& location = std::source_location::current(),
+      utils::StackTrace trace = utils::StackTrace::current()) {
   throw T{ message, location, std::move(trace) };
 }
 

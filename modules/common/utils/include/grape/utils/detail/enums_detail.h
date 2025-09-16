@@ -24,7 +24,7 @@ template <auto E>
 consteval auto extractEnumeratorName() -> std::string_view {
   const std::string_view func_name = __PRETTY_FUNCTION__;
 
-#if defined(__clang__)
+#ifdef __clang__
   const std::string_view start_token = "[E = ";
   const std::string_view end_token = "]";
 #elif defined(__GNUC__) || defined(__GNUG__)

@@ -165,7 +165,7 @@ public:
         ((table[Is] = make_unpacker.template operator()<Is>()), ...);
       }(std::make_index_sequence<sizeof...(Types)>{});
 
-      return table;
+      return std::move(table);
     }();
 
     // unpack the type at index idx in the variant

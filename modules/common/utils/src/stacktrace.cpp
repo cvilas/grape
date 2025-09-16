@@ -25,6 +25,7 @@ auto StackTrace::current() -> StackTrace {
   trace.symbol_list_.resize(static_cast<std::size_t>(frame_count));
 
   for (auto i = 1U; std::cmp_less(i, frame_count); ++i) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto symbol_str = std::string(symbols.get()[i]);
     const auto name_begin = symbol_str.find('(');
     const auto name_end = symbol_str.find('+', name_begin);

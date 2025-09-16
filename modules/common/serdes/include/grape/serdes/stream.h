@@ -24,7 +24,8 @@ public:
     if (offset_ + len > MAX_SIZE) {
       return false;
     }
-    std::copy_n(data.data(), len, buf_.begin() + offset_);
+    auto to = std::span{ buf_ }.subspan(offset_, len);
+    std::copy(data.begin(), data.end(), to.begin());
     offset_ += len;
     return true;
   }
@@ -82,7 +83,8 @@ public:
     if (offset_ + len > stream_.size()) {
       return false;
     }
-    std::copy_n(stream_.data() + offset_, len, to.data());
+    const auto from = stream_.subspan(offset_, len);
+    std::ranges::copy(from, to.begin());
     offset_ += len;
     return true;
   }

@@ -37,10 +37,6 @@ concept Configurable = requires(T obj, const ConfigTable& table) {
 /// Use ConfigTable to access values in the table.
 class ConfigScript {
 public:
-  enum class Error : std::uint8_t {
-    Unloadable,  //!< Error loading lua script file or string
-  };
-
   explicit ConfigScript(const std::string& script_string);
   explicit ConfigScript(const std::filesystem::path& script_path);
 
@@ -127,11 +123,6 @@ private:
   int lua_table_ref_;
   size_t size_{};
 };
-
-//-------------------------------------------------------------------------------------------------
-constexpr auto toString(ConfigScript::Error code) -> std::string_view {
-  return enums::name(code);
-}
 
 //-------------------------------------------------------------------------------------------------
 constexpr auto toString(ConfigTable::Error code) -> std::string_view {

@@ -3,8 +3,8 @@
 //=================================================================================================
 
 #include <algorithm>
-#include <condition_variable>
 #include <random>
+#include <semaphore>
 #include <thread>
 #include <vector>
 
@@ -43,21 +43,19 @@ template <grape::serdes::ReadableStream Stream>
 TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]") {
   grape::ipc::init(grape::ipc::Config{});
 
-  // define data callback
-  std::condition_variable recv_cond;
-  std::mutex recv_mut;
+  std::binary_semaphore is_data_received{ 0 };
   auto received_data = TestDataType{};
   auto pub_id = grape::ipc::EntityId{};
-  const auto data_cb = [&recv_cond, &recv_mut, &received_data,
+
+  const auto data_cb = [&is_data_received, &received_data,
                         &pub_id](const std::expected<TestDataType, grape::ipc::Error>& data,
                                  const grape::ipc::SampleInfo& info) {
-    const auto lk = std::lock_guard(recv_mut);
     if (not data) {
       return;
     }
     received_data = data.value();
     pub_id = info.publisher;
-    recv_cond.notify_all();
+    is_data_received.release();
   };
 
   // create pub/sub
@@ -80,12 +78,10 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   // publish it
   REQUIRE(publisher.publish(test_data).has_value());
 
-  // wait for subscriber to receive it
-  {
-    constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
-    auto lk = std::unique_lock(recv_mut);
-    recv_cond.wait_for(lk, RECV_WAIT_TIME, [&pub_id] { return pub_id.id != 0U; });
-  }
+  // wait for subscriber to receive it with timeout
+  constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
+  const auto success = is_data_received.try_acquire_for(RECV_WAIT_TIME);
+  REQUIRE(success);
 
   // verify
   REQUIRE(received_data.id == test_data.id);

@@ -7,6 +7,25 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
 - [x] Implement SDL3-based camera streamer
+- [ ] Implement [picam](../modules/rpi/picam/README.md)  
+  - [ ] Make camera pipeline recognise pi camera (libcamera + pipewire)
+  - [ ] Implement image down-scaler
+  - [ ] Implement rate limiter for fractional frame rates
+  - [ ] Make compressor support acceleration factor to tune speed vs compression
+  - [ ] Application configuration file where these parameters can be set on the pub side
+  - [ ] Make it work on Pi (camera -> rate limit -> down scale -> format -> compress -> pub == sub -> display)
+- [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
+  - [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
+  - [ ] constexpr matrix and quaternions operations to support AHRS implementation
+  - [ ] 3D viewing and signal plotting (SDL3, imgui, implot)
+- [ ] DSP functions
+  - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
+  - [ ] Delay line
+  - [ ] Low pass filter
+  - [ ] Differentiator
+  - [ ] Integrator
+  - [ ] Velocity observer
+- [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
 - [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs
   - [ ] Review `Getting Started` section of OpenGL [book](https://learnopengl.com/)
   - [ ] Review my experimental implementations in scratch/scenegraph/copilot
@@ -16,29 +35,10 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Extend to support asset loading using assimp
   - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
   - [ ] Design a text-based scenegraph description format using our scripting engine
-- [ ] IPC: Fix ipc in MacOS
-  - [ ] `grape_ipc_perf_pub`/`sub`
-  - [ ] `grape_camera_pub`/`sub`
-- [ ] Robustify IPC across hosts (specifically TCP across hosts do not work well enough)
-- [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
-- [ ] Math library: 
-  - [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
-  - [ ] constexpr matrix and quaternions operations to support AHRS implementation
-  - [ ] linear algebra using std::mdspan and c++26 linalg 
-- [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
-- [ ] DSP functions
-  - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
-  - [ ] Delay line
-  - [ ] Low pass filter
-  - [ ] Differentiator
-  - [ ] Integrator
-  - [ ] Velocity observer
-- [ ] Optimise the [ring buffer](https://rigtorp.se/ringbuffer/)
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] Real-time time-series plotting using implot (redesign from scratch again)
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] Propose client-server messaging interface for robot on-board network 
-- [ ] Implement [picam](../modules/rpi/picam/README.md)  
 - [ ] Host monitoring micro-service
   - [ ] Implement library to read CPU, memory, disk usage, network utilisation, temperatures
   - [ ] Add systemd services support in GBS
@@ -59,6 +59,11 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Message dispatch using [pattern matching](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf)
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
+  - [ ] linear algebra using std::mdspan and c++26 linalg 
+- [ ] IPC: Fix ipc in MacOS
+  - [ ] `grape_ipc_perf_pub`/`sub`
+  - [ ] `grape_camera_pub`/`sub`
+- [ ] Optimise the [ring buffer](https://rigtorp.se/ringbuffer/)
 
 ## Study
 

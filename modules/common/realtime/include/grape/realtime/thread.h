@@ -9,7 +9,7 @@
 #include <functional>
 #include <string>
 #include <thread>
-#if defined(__linux__)
+#ifdef __linux__
 #include <sys/prctl.h>
 #endif
 #include <type_traits>
@@ -107,7 +107,7 @@ inline void Thread::stop() noexcept {
 //-------------------------------------------------------------------------------------------------
 inline void Thread::threadFunction() noexcept {
   try {
-#if defined(__linux__)
+#ifdef __linux__
     // for easy identification on tools like htop, set the name of the thread
     if (not config_.name.empty()) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

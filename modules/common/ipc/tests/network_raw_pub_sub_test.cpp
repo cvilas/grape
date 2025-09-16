@@ -3,9 +3,9 @@
 //=================================================================================================
 
 #include <algorithm>
-#include <condition_variable>
 #include <format>
 #include <random>
+#include <semaphore>
 #include <thread>
 #include <vector>
 
@@ -39,16 +39,14 @@ TEST_CASE("Basic pub-sub in network scope works", "[ipc]") {
                         [&gen, &dis]() -> std::byte { return static_cast<std::byte>(dis(gen)); });
 
   // define subscriber callback
-  std::condition_variable recv_cond;
-  std::mutex recv_mut;
+  std::binary_semaphore is_data_received{ 0 };
   auto received_msg = std::vector<std::byte>{};
   auto pub_id = 0UL;
-  const auto recv_callback = [&recv_mut, &recv_cond, &received_msg,
+  const auto recv_callback = [&is_data_received, &received_msg,
                               &pub_id](const grape::ipc::Sample& sample) -> void {
-    const auto lk = std::lock_guard(recv_mut);
     received_msg = std::vector<std::byte>(sample.data.begin(), sample.data.end());
     pub_id = sample.info.publisher.id;
-    recv_cond.notify_all();
+    is_data_received.release();
   };
 
   // create pub/sub
@@ -83,12 +81,9 @@ TEST_CASE("Basic pub-sub in network scope works", "[ipc]") {
   REQUIRE(pub_result.has_value());
 
   // wait a reasonable time for subscriber to receive message
-  {
-    constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
-    auto lk = std::unique_lock(recv_mut);
-    recv_cond.wait_for(lk, RECV_WAIT_TIME,
-                       [&received_msg] -> bool { return not received_msg.empty(); });
-  }
+  constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
+  const auto success = is_data_received.try_acquire_for(RECV_WAIT_TIME);
+  REQUIRE(success);
 
   // verify message
   REQUIRE(received_msg.size() == PAYLOAD_SIZE);
