@@ -51,7 +51,7 @@ auto PinConfig::signals() const -> const std::vector<Signal>& {
 
 //-------------------------------------------------------------------------------------------------
 auto PinConfig::sort() -> std::ranges::subrange<std::vector<Signal>::const_iterator> {
-  const auto compare_by_role_and_address = [](const Signal& i1, const Signal& i2) -> bool {
+  const auto compare_by_role_and_address = [](const Signal& i1, const Signal& i2) noexcept -> bool {
     // compare by role, and if roles are the same, then compare by address
     if (i1.role == i2.role) {
       return (i1.address < i2.address);
@@ -64,7 +64,7 @@ auto PinConfig::sort() -> std::ranges::subrange<std::vector<Signal>::const_itera
 
   // return sub-range of Role::Control
   return std::ranges::equal_range(signals_, Signal::Role::Control, {},
-                                  [](const auto& sig) -> auto { return sig.role; });
+                                  [](const auto& sig) noexcept -> auto { return sig.role; });
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -87,7 +87,8 @@ auto Controller::snap() -> Error {
     const auto buffer_size = buffer.size_bytes();
     for (const auto& sig : signals) {
       const auto count = length(sig.type) * sig.num_elements;
-      auto* dest = static_cast<void*>(buffer.data() + offset);
+      auto subspan = std::span(buffer).subspan(offset);
+      auto* dest = static_cast<void*>(subspan.data());
       offset += count;
       if (offset > buffer_size) {
         buffer_check = Error::BufferTooSmall;
@@ -132,8 +133,9 @@ void Controller::sync() {
       // this should never happen
       panic<Exception>("Sync buffer too small");
     }
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
-    std::memcpy(reinterpret_cast<void*>(it->address), buffer.data() + offset_size, count);
+    auto subspan = std::span(buffer).subspan(offset_size, count);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    std::memcpy(std::bit_cast<void*>(it->address), subspan.data(), subspan.size_bytes());
   };
   while (pending_syncs_.visitToRead(updater)) {
     // loop until queue is cleared
@@ -144,8 +146,9 @@ void Controller::sync() {
 auto Controller::qset(const std::string& name, std::span<const std::byte> value) -> Error {
   const auto& signals = pins_.signals();
 
-  const auto it = std::ranges::find_if(
-      controllables_, [&name](const auto& sig) -> auto { return (name == sig.name.cStr()); });
+  const auto it = std::ranges::find_if(controllables_, [&name](const auto& sig) noexcept -> bool {
+    return (name == sig.name.cStr());
+  });
 
   if (it == signals.end()) {
     return Error::SignalNotFound;
@@ -171,7 +174,7 @@ auto Controller::qset(const std::string& name, std::span<const std::byte> value)
       return;
     }
     std::memcpy(buffer.data(), &offset, offset_size);
-    std::memcpy(buffer.data() + offset_size, value.data(), value_size);
+    std::memcpy(&buffer[offset_size], value.data(), value_size);
   };
 
   if (not pending_syncs_.visitToWrite(writer)) {

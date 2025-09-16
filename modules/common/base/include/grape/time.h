@@ -5,6 +5,7 @@
 #pragma once
 
 #include <chrono>
+#include <format>
 
 namespace grape {
 
@@ -35,3 +36,15 @@ struct SystemClock {
 };
 
 }  // namespace grape
+
+//=================================================================================================
+// Specializes std::formatter for grape::SystemClock::Duration
+// NOLINTBEGIN(cert-dcl58-cpp)
+template <>
+struct std::formatter<grape::SystemClock::Duration> : std::formatter<std::int64_t> {
+  auto format(const grape::SystemClock::Duration& dt, std::format_context& ctx) const {
+    auto it = std::formatter<std::int64_t>::format(dt.count(), ctx);
+    return std::format_to(it, "ns");
+  }
+};
+// NOLINTEND(cert-dcl58-cpp)

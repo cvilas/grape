@@ -34,9 +34,8 @@ auto Decompressor::decompress(std::span<const std::byte> bytes) -> bool {
 
   // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto decompressed_data_size = LZ4_decompress_safe(
-      reinterpret_cast<const char*>(bytes.data() + HDR_SIZE),
-      reinterpret_cast<char*>(buffer_.data()), static_cast<int>(bytes.size_bytes() - HDR_SIZE),
-      static_cast<int>(data_size));
+      reinterpret_cast<const char*>(&bytes[HDR_SIZE]), reinterpret_cast<char*>(buffer_.data()),
+      static_cast<int>(bytes.size_bytes() - HDR_SIZE), static_cast<int>(data_size));
   // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
   if (decompressed_data_size <= 0) {
     syslog::Error("Failed to decompress image data");

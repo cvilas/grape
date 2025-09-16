@@ -34,7 +34,7 @@ Subscriber<TopicAttributes>::Subscriber(const TopicAttributes& topic_attr, DataC
   : RawSubscriber(
         topic_attr.topicName(),
         [moved_data_cb = std::move(data_cb)](const Sample& sample) {
-          if (moved_data_cb == nullptr) {
+          if (not moved_data_cb) {
             return;
           }
           auto result = std::expected<typename TopicAttributes::DataType, Error>{ std::in_place };

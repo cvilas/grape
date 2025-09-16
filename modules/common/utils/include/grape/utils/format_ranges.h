@@ -47,8 +47,8 @@ struct std::formatter<Container> {  // NOLINT(cert-dcl58-cpp)
     const auto end = std::end(container);
     if (it != end) {
       out = std::format_to(out, "{}", *it);
-      ++it;
-      for (; it != end; ++it) {
+      ++it;                      // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      for (; it != end; ++it) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         out = std::format_to(out, "{} {}", SEPARATOR, *it);
       }
     }

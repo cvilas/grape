@@ -15,8 +15,7 @@ namespace grape::script {
 ConfigScript::ConfigScript(const std::string& script_string) : ConfigScript() {
   auto* const state = lua_state_.get();
   if (luaL_dostring(state, script_string.c_str()) != LUA_OK) {
-    panic<Exception>(
-        std::format("{}: {}", lua_tostring(state, -1), toString(ConfigScript::Error::Unloadable)));
+    panic<Exception>(std::format("Unloadable: {}", lua_tostring(state, -1)));
   }
 }
 
@@ -24,8 +23,7 @@ ConfigScript::ConfigScript(const std::string& script_string) : ConfigScript() {
 ConfigScript::ConfigScript(const std::filesystem::path& script_path) : ConfigScript() {
   auto* const state = lua_state_.get();
   if (luaL_dofile(state, script_path.c_str()) != LUA_OK) {
-    panic<Exception>(
-        std::format("{}: {}", lua_tostring(state, -1), toString(ConfigScript::Error::Unloadable)));
+    panic<Exception>(std::format("Unloadable: {}", lua_tostring(state, -1)));
   }
 }
 
@@ -194,10 +192,11 @@ auto readIndex(lua_State* state, const int table_ref, const size_t index)
 template <typename T>
 auto readKey(lua_State* state, int table_ref, const std::string& key)
     -> std::expected<T, ConfigTable::Error> {
+  // NOLINTNEXTLINE(cert-err58-cpp)
   const auto read_leaf = [state](const auto& /*token*/) -> std::expected<T, ConfigTable::Error> {
     return readLeaf<T>(state);
   };
-  const auto return_error = [](const auto& error) -> std::expected<T, ConfigTable::Error> {
+  const auto return_error = [](const auto& error) noexcept -> std::expected<T, ConfigTable::Error> {
     return std::unexpected(error);
   };
   return readToLeaf(state, table_ref, key)  //
@@ -270,11 +269,11 @@ auto ConfigTable::readString(const std::string& key) const
 //-------------------------------------------------------------------------------------------------
 auto ConfigTable::readTable(const std::string& key) const
     -> std::expected<ConfigTable, ConfigTable::Error> {
-  const auto on_success =
-      [this](const ConfigTableDetail& det) -> std::expected<ConfigTable, Error> {
-    return ConfigTable(this->lua_state_, det.table_reference);
+  // NOLINTNEXTLINE(cert-err58-cpp)
+  const auto on_success = [this](const auto& detail) -> std::expected<ConfigTable, Error> {
+    return ConfigTable(this->lua_state_, detail.table_reference);
   };
-  const auto on_fail = [](const ConfigTable::Error& error) -> std::expected<ConfigTable, Error> {
+  const auto on_fail = [](const auto& error) noexcept -> std::expected<ConfigTable, Error> {
     return std::unexpected(error);
   };
   return readKey<ConfigTableDetail>(lua_state_.get(), lua_table_ref_, key)  //
@@ -304,11 +303,11 @@ auto ConfigTable::readString(size_t index) const -> std::expected<std::string, C
 
 //-------------------------------------------------------------------------------------------------
 auto ConfigTable::readTable(size_t index) const -> std::expected<ConfigTable, ConfigTable::Error> {
-  const auto on_success =
-      [this](const ConfigTableDetail& det) -> std::expected<ConfigTable, Error> {
-    return ConfigTable(this->lua_state_, det.table_reference);
+  // NOLINTNEXTLINE(cert-err58-cpp)
+  const auto on_success = [this](const auto& detail) -> std::expected<ConfigTable, Error> {
+    return ConfigTable(this->lua_state_, detail.table_reference);
   };
-  const auto on_fail = [](const auto& error) -> std::expected<ConfigTable, Error> {
+  const auto on_fail = [](const auto& error) noexcept -> std::expected<ConfigTable, Error> {
     return std::unexpected(error);
   };
   return readIndex<ConfigTableDetail>(lua_state_.get(), lua_table_ref_, index)  //

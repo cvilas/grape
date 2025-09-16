@@ -212,7 +212,7 @@ auto readDeviceInfo(const std::filesystem::path& path) -> std::expected<DeviceIn
     return std::unexpected{ std::format("Cannot open device: {}", err.message()) };
   }
 
-  auto guard = ScopeGuard([fd]() -> void { ::close(fd); });
+  auto guard = ScopeGuard([fd]() noexcept -> void { ::close(fd); });
 
   constexpr auto MAX_NAME_LEN = 256U;
   std::array<char, MAX_NAME_LEN> name = { 0 };

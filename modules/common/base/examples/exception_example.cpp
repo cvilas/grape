@@ -10,12 +10,12 @@
 namespace {
 enum class MyException : std::uint8_t { Bad, RealBad };
 
-void functionThatThrows() {
+[[noreturn]] void functionThatThrows() {
   grape::panic<grape::Exception>(
       std::format("Boom!! [{}]", grape::enums::name(MyException::RealBad)));
 }
 
-void doWork() {
+[[noreturn]] void doWork() {
   functionThatThrows();
 }
 }  // namespace

@@ -3,6 +3,7 @@
 //=================================================================================================
 
 #include <csignal>
+#include <cstring>
 #include <mutex>
 
 #include <SDL3/SDL.h>
@@ -65,7 +66,7 @@ void Subscriber::onReceivedSample(const ipc::Sample& sample) {
 
 //-------------------------------------------------------------------------------------------------
 void Subscriber::onDecompressedFrame(const ImageFrame& frame) {
-  auto guard = std::lock_guard(image_lock_);
+  auto guard = std::scoped_lock(image_lock_);
   if (image_data_.size() < frame.pixels.size_bytes()) {
     image_data_.resize(frame.pixels.size_bytes());
   }
@@ -100,7 +101,7 @@ auto Subscriber::latency() const -> SystemClock::Duration {
 void Subscriber::update() {
   static auto last_image_ts = SystemClock::TimePoint{};
 
-  auto guard = std::lock_guard(image_lock_);
+  auto guard = std::scoped_lock(image_lock_);
   const auto frame = grape::camera::ImageFrame{ .header = image_header_, .pixels = image_data_ };
   const auto image_ts = frame.header.timestamp;
 

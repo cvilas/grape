@@ -2,6 +2,7 @@
 
 ```bash
 GCC_VERSION=15.2.0
+INSTALL_DIR=$HOME/programs/gcc-$GCC_VERSION
 
 # Download sources
 wget https://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz
@@ -12,7 +13,7 @@ cd gcc-$GCC_VERSION
 # Configure, build (many hours for Pi5/4GB), install
 cd ..
 mkdir gcc-build && cd gcc-build
-../gcc-$GCC_VERSION/configure --enable-languages=c,c++,fortran --disable-multilib --prefix=$HOME/programs/gcc-$GCC_VERSION
+../gcc-$GCC_VERSION/configure --enable-languages=c,c++,fortran --disable-multilib --prefix=$INSTALL_DIR
 make 
 sudo make install
 
@@ -20,10 +21,10 @@ sudo make install
 PRIORITY=$((${GCC_VERSION%%.*} * 10))
 sudo update-alternatives --remove-all gcc 
 sudo update-alternatives --remove-all gfortran
-sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/local/bin/gfortran $PRIORITY
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/local/bin/gcc $PRIORITY \
---slave /usr/bin/g++ g++ /usr/local/bin/g++ \
---slave /usr/bin/gcov gcov /usr/local/bin/gcov
+sudo update-alternatives --install /usr/bin/gfortran gfortran $INSTALL_DIR/bin/gfortran $PRIORITY
+sudo update-alternatives --install /usr/bin/gcc gcc $INSTALL_DIR/bin/gcc $PRIORITY \
+--slave /usr/bin/g++ g++ $INSTALL_DIR/bin/g++ \
+--slave /usr/bin/gcov gcov $INSTALL_DIR/bin/gcov
 
 # You might have to add the following to your shell configuration (~/.bashrc or ~/.zshrc)
 export GCC_VERSION=15.2.0
