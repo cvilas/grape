@@ -50,10 +50,19 @@ Display::Display() : impl_(std::make_unique<Impl>()) {
   SDL_Window* window = nullptr;
   SDL_Renderer* renderer = nullptr;
 
+  const auto num_supported_renderers = SDL_GetNumRenderDrivers();
+  auto supported_renderers = std::vector<std::string_view>{};
+  for (int i = 0; i < num_supported_renderers; ++i) {
+    supported_renderers.emplace_back(SDL_GetRenderDriver(i));
+  }
+  syslog::Info("Supported renderers: {}", supported_renderers);
+
   if (not SDL_CreateWindowAndRenderer("Camera View", DEFAULT_WIDTH, DEFAULT_HEIGHT,
                                       SDL_WINDOW_RESIZABLE, &window, &renderer)) {
     panic<Exception>(std::format("SDL_CreateWindowAndRenderer failed: {}", SDL_GetError()));
   }
+  syslog::Note("Using renderer: {}", SDL_GetRendererName(renderer));
+
   impl_->window.reset(window);
   impl_->renderer.reset(renderer);
 }
