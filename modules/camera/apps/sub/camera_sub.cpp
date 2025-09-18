@@ -12,6 +12,7 @@
 #include "grape/camera/display.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/fifo_buffer.h"
 #include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
 #include "grape/log/syslog.h"
@@ -39,10 +40,8 @@ private:
   void onDecompressedFrame(const ImageFrame& frame);
   void onPublisherMatch(const ipc::Match& match);
 
-  std::mutex image_lock_;
-  ImageFrame::Header image_header_;
-  std::vector<std::byte> image_data_;
-
+  std::atomic_bool mark_fifo_for_deletion_ = false;
+  std::unique_ptr<FIFOBuffer> fifo_;
   Display display_;
   Decompressor decompressor_;
   ipc::RawSubscriber subscriber_;
@@ -59,19 +58,100 @@ Subscriber::Subscriber(const std::string& topic)
 
 //-------------------------------------------------------------------------------------------------
 void Subscriber::onReceivedSample(const ipc::Sample& sample) {
-  if (not decompressor_.decompress(sample.data)) {
-    syslog::Error("Decompression failed!");
+  if (mark_fifo_for_deletion_) {
+    // FIFO is in the process of being deleted. Drop incoming samples until it is reset
+    return;
+  }
+
+  // create FIFO on first sample
+  static constexpr auto SAMPLE_SIZE_OFFSET = sizeof(std::size_t);
+  if (not fifo_) {
+    static constexpr auto NUM_SAMPLES = 10U;
+    const auto max_sample_size = sample.data.size_bytes() * 2U;
+    const auto fifo_config = FIFOBuffer::Config{
+      .frame_length = SAMPLE_SIZE_OFFSET + max_sample_size,
+      .num_frames = NUM_SAMPLES,
+    };
+    fifo_ = std::make_unique<FIFOBuffer>(fifo_config);
+    syslog::Note("FIFO created: {} samples, {} bytes per sample", fifo_config.num_frames,
+                 fifo_config.frame_length);
+  }
+
+  // define sample writer
+  auto is_fifo_frame_size_sufficient = false;
+  const auto sample_writer = [&](std::span<std::byte> frame) {
+    const auto sample_len = sample.data.size_bytes();
+    is_fifo_frame_size_sufficient = (frame.size_bytes() >= SAMPLE_SIZE_OFFSET + sample_len);
+    if (not is_fifo_frame_size_sufficient) {
+      return;
+    }
+    std::memcpy(frame.data(), &sample_len, SAMPLE_SIZE_OFFSET);
+    std::memcpy(&frame[SAMPLE_SIZE_OFFSET], sample.data.data(), sample_len);
+  };
+
+  // Copy sample into FIFO
+  const auto write_succeeded = fifo_->visitToWrite(sample_writer);
+  if (not is_fifo_frame_size_sufficient) {
+    syslog::Error("Frame dropped: FIFO frame size insufficient");
+    // Mark current FIFO as invalid. We can't reset and recreate FIFO here as the display thread
+    // concurrently accesses it. Mark it as invalid here, so both threads stop interacting with it
+    // until the FIFO is reset. In a subsequent call, this method will recreate the FIFO.
+    mark_fifo_for_deletion_ = true;
+    return;
+  }
+  if (not write_succeeded) {
+    syslog::Error("Frame dropped: FIFO full");
+    return;
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
+void Subscriber::update() {
+  if (mark_fifo_for_deletion_) {
+    fifo_.reset();
+    mark_fifo_for_deletion_ = false;
+  }
+
+  if (not fifo_) {
+    return;
+  }
+
+  // define frame reader
+  const auto frame_reader = [&](std::span<const std::byte> data) {
+    if (data.size_bytes() < sizeof(std::size_t)) {
+      return;
+    }
+    static constexpr auto SAMPLE_SIZE_OFFSET = sizeof(std::size_t);
+    std::size_t frame_len = 0;
+    std::memcpy(&frame_len, data.data(), SAMPLE_SIZE_OFFSET);
+    if (frame_len + SAMPLE_SIZE_OFFSET > data.size_bytes()) {
+      return;
+    }
+    const auto frame_data = data.subspan(SAMPLE_SIZE_OFFSET, frame_len);
+    if (not decompressor_.decompress(frame_data)) {
+      syslog::Error("Decompression failed!");
+    }
+  };
+
+  // process all pending frames
+  while (fifo_->visitToRead(frame_reader)) {
   }
 }
 
 //-------------------------------------------------------------------------------------------------
 void Subscriber::onDecompressedFrame(const ImageFrame& frame) {
-  auto guard = std::scoped_lock(image_lock_);
-  if (image_data_.size() < frame.pixels.size_bytes()) {
-    image_data_.resize(frame.pixels.size_bytes());
+  static auto last_image_ts = SystemClock::TimePoint{};
+  const auto image_ts = frame.header.timestamp;
+  if (image_ts > last_image_ts) {
+    last_image_ts = image_ts;
+    display_.render(frame);
+
+    if (save_snapshot_) {
+      save_snapshot_ = false;
+      const auto fname = std::format("snapshot_{:%FT%T}.bmp", SystemClock::now());
+      std::ignore = grape::camera::save(frame, fname);
+    }
   }
-  image_header_ = frame.header;
-  std::ranges::copy(frame.pixels, image_data_.begin());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -95,26 +175,6 @@ void Subscriber::toggleTimestamp() {
 //-------------------------------------------------------------------------------------------------
 auto Subscriber::latency() const -> SystemClock::Duration {
   return display_.latency();
-}
-
-//-------------------------------------------------------------------------------------------------
-void Subscriber::update() {
-  static auto last_image_ts = SystemClock::TimePoint{};
-
-  auto guard = std::scoped_lock(image_lock_);
-  const auto frame = grape::camera::ImageFrame{ .header = image_header_, .pixels = image_data_ };
-  const auto image_ts = frame.header.timestamp;
-
-  if (image_ts > last_image_ts) {
-    last_image_ts = image_ts;
-    display_.render(frame);
-
-    if (save_snapshot_) {
-      save_snapshot_ = false;
-      const auto fname = std::format("snapshot_{:%FT%T}.bmp", SystemClock::now());
-      std::ignore = grape::camera::save(frame, fname);
-    }
-  }
 }
 
 }  // namespace grape::camera
