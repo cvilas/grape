@@ -8,12 +8,11 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [x] Implement transactional teleop interface.  
 - [x] Implement SDL3-based camera streamer
 - [ ] Implement [picam](../modules/rpi/picam/README.md)  
-  - [ ] Make camera pipeline recognise pi camera (libcamera + pipewire)
-  - [ ] Implement image down-scaler
-  - [ ] Implement rate limiter for fractional frame rates
+  - [ ] Make camera pipeline recognise pi5 camera (libcamera (pi fork) + pipewire on Ubuntu 24.04)
+  - [ ] Document ubuntu 24.04 + libcamera (pi fork) setup
+  - [ ] Document how to build and run pi camera publishing service  
   - [ ] Make compressor support acceleration factor to tune speed vs compression
-  - [ ] Application configuration file where these parameters can be set on the pub side
-  - [ ] Make it work on Pi (camera -> rate limit -> down scale -> format -> compress -> pub == sub -> display)
+  - [ ] Application configuration file where following parameters can be set on the pub side: camera name, scale, rate divisor, compression speed
 - [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
   - [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
@@ -60,6 +59,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
   - [ ] linear algebra using std::mdspan and c++26 linalg 
+  - [ ] Study [Catch23](https://github.com/philsquared/Catch23) when it is still simple, and replace Catch2
 - [ ] IPC: Fix ipc in MacOS
   - [ ] `grape_ipc_perf_pub`/`sub`
   - [ ] `grape_camera_pub`/`sub`

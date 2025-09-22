@@ -17,6 +17,7 @@ set(SOURCES
     include/grape/camera/display.h
     include/grape/camera/formatter.h
     include/grape/camera/image_frame.h
+    include/grape/camera/rate_limiter.h
     src/camera.cpp
     src/compressor.cpp
     src/decompressor.cpp
