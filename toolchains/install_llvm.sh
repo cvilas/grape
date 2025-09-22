@@ -22,6 +22,7 @@ sudo apt-get install -y \
   clang-$LLVM_VERSION clang-tidy-$LLVM_VERSION clang-format-$LLVM_VERSION \
   llvm-$LLVM_VERSION-dev libc++-$LLVM_VERSION-dev libc++abi-$LLVM_VERSION-dev \
   libomp-$LLVM_VERSION-dev libunwind-$LLVM_VERSION-dev lld-$LLVM_VERSION
+sudo apt-get autoremove -y
 
 # Set this version as the default
 PRIORITY=$((${LLVM_VERSION%%.*} * 10))
