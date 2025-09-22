@@ -40,3 +40,4 @@ define_module_library(
 add_subdirectory(py)
 add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(apps)
