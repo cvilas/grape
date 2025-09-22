@@ -444,7 +444,7 @@ endfunction()
 
 FetchContent_Declare(
   Catch2
-  URL https://github.com/catchorg/Catch2/archive/refs/tags/v${CATCH2_VERSION_REQUIRED}.tar.gz
+  URL ${CMAKE_SOURCE_DIR}/external/sources/Catch2-${CATCH2_VERSION_REQUIRED}.tar.gz
   EXCLUDE_FROM_ALL
   SYSTEM)
 FetchContent_MakeAvailable(Catch2)
@@ -782,7 +782,7 @@ endif(NOT CMAKE_CROSSCOMPILING)
 # Set up facilities for google benchmark framework
 FetchContent_Declare(
   benchmark
-  URL https://github.com/google/benchmark/archive/refs/tags/v${BENCHMARK_VERSION_REQUIRED}.tar.gz
+  URL ${CMAKE_SOURCE_DIR}/external/sources/benchmark-${BENCHMARK_VERSION_REQUIRED}.tar.gz
   EXCLUDE_FROM_ALL
   SYSTEM)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
