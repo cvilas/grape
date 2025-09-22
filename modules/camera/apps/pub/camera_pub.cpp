@@ -10,6 +10,7 @@
 #include "grape/camera/camera.h"
 #include "grape/camera/compressor.h"
 #include "grape/camera/formatter.h"
+#include "grape/camera/rate_limiter.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/ipc/raw_publisher.h"
@@ -26,7 +27,8 @@
 namespace grape::camera {
 
 //=================================================================================================
-/// Encapsulates processing pipeline: [capture] -> [format] -> [compress] -> [publish]
+/// Encapsulates processing pipeline:
+/// [capture] -> [rate limit] -> [scale] -> [format] -> [compress] -> [publish]
 class Publisher {
 public:
   struct Stats {
@@ -47,6 +49,7 @@ private:
   void onSubscriberMatch(const ipc::Match& match);
 
   static constexpr auto STATS_WINDOW = 600U;
+  static constexpr auto RATE_DIVISOR = 1U;
   Stats stats_;
   statistics::SlidingMean<float, STATS_WINDOW> publish_period_;
   statistics::SlidingMean<float, STATS_WINDOW> publish_bytes_;
@@ -56,6 +59,7 @@ private:
   ipc::RawPublisher publisher_;
   Compressor compressor_;
   Formatter formatter_;
+  RateLimiter rate_limiter_;
   std::unique_ptr<Camera> capture_;
 };
 
@@ -64,7 +68,8 @@ Publisher::Publisher(const std::string& topic, const std::string& camera_name_hi
   : publisher_(topic, [this](const auto& match) { onSubscriberMatch(match); })
   , compressor_([this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
   , formatter_([this](const auto& frame, const auto& stats) { onFormattedFrame(frame, stats); })
-  , capture_(std::make_unique<Camera>([this](const auto& frame) { onCapturedFrame(frame); },
+  , rate_limiter_(RATE_DIVISOR, [this](const auto& frame) { onCapturedFrame(frame); })
+  , capture_(std::make_unique<Camera>([this](const auto& frame) { rate_limiter_.process(frame); },
                                       camera_name_hint)) {
 }
 
