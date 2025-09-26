@@ -4,7 +4,7 @@
 
 declare_module(
   NAME camera
-  DEPENDS_ON_MODULES "statistics;ipc;log;conio"
+  DEPENDS_ON_MODULES "statistics;ipc;log;conio;script"
   DEPENDS_ON_EXTERNAL_PROJECTS "SDL3;lz4")
 
 find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
@@ -25,6 +25,7 @@ set(SOURCES
     src/display.cpp
     src/formatter.cpp
     src/image_frame.cpp
+    src/rate_limiter.cpp
     src/scaler.cpp
     src/helpers.h
     src/helpers.cpp)
