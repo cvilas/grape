@@ -9,6 +9,7 @@
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
 #include "grape/utils/format_ranges.h"
+#include "helpers.h"
 
 namespace {
 //-------------------------------------------------------------------------------------------------
@@ -38,31 +39,6 @@ void printCameraSpecs(SDL_CameraID camera_id) {
   }
   // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,bugprone-multi-level-implicit-pointer-conversion)
   SDL_free(specs);
-}
-
-//-------------------------------------------------------------------------------------------------
-auto calcPixelBufferSize(const SDL_Surface* surf) -> int {
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch-enum"
-#endif
-  switch (surf->format) {
-    case SDL_PIXELFORMAT_NV12:
-      [[fallthrough]];
-    case SDL_PIXELFORMAT_YV12:
-      return (surf->w * surf->h * 3) / 2;
-    case SDL_PIXELFORMAT_YUY2:
-      return surf->w * surf->h * 2;
-    case SDL_PIXELFORMAT_MJPG:
-      return surf->w * surf->h;  // TODO(Vilas): likely incorrect. Should be surf->pitch per docs
-    default:
-      grape::syslog::Error("Unsupported format {}. Using defaults",
-                           SDL_GetPixelFormatName(surf->format));
-      return surf->h * surf->pitch;  // safe default
-  }
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 }
 
 }  // namespace

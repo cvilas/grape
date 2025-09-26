@@ -11,6 +11,7 @@
 #include "grape/camera/compressor.h"
 #include "grape/camera/formatter.h"
 #include "grape/camera/rate_limiter.h"
+#include "grape/camera/scaler.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/ipc/raw_publisher.h"
@@ -44,12 +45,14 @@ public:
 
 private:
   void onCapturedFrame(const ImageFrame& frame);
+  void onScaledFrame(const ImageFrame& frame);
   void onFormattedFrame(const ImageFrame& frame, const Formatter::Stats& fmt_stats);
   void onCompressedFrame(std::span<const std::byte> bytes, const Compressor::Stats& comp_stats);
   void onSubscriberMatch(const ipc::Match& match);
 
   static constexpr auto STATS_WINDOW = 600U;
   static constexpr auto RATE_DIVISOR = 1U;
+  static constexpr auto SCALE = 1.F;
   Stats stats_;
   statistics::SlidingMean<float, STATS_WINDOW> publish_period_;
   statistics::SlidingMean<float, STATS_WINDOW> publish_bytes_;
@@ -59,6 +62,7 @@ private:
   ipc::RawPublisher publisher_;
   Compressor compressor_;
   Formatter formatter_;
+  Scaler scaler_;
   RateLimiter rate_limiter_;
   std::unique_ptr<Camera> capture_;
 };
@@ -68,6 +72,7 @@ Publisher::Publisher(const std::string& topic, const std::string& camera_name_hi
   : publisher_(topic, [this](const auto& match) { onSubscriberMatch(match); })
   , compressor_([this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
   , formatter_([this](const auto& frame, const auto& stats) { onFormattedFrame(frame, stats); })
+  , scaler_(SCALE, [this](const auto& frame) { onScaledFrame(frame); })
   , rate_limiter_(RATE_DIVISOR, [this](const auto& frame) { onCapturedFrame(frame); })
   , capture_(std::make_unique<Camera>([this](const auto& frame) { rate_limiter_.process(frame); },
                                       camera_name_hint)) {
@@ -75,6 +80,13 @@ Publisher::Publisher(const std::string& topic, const std::string& camera_name_hi
 
 //-------------------------------------------------------------------------------------------------
 void Publisher::onCapturedFrame(const ImageFrame& frame) {
+  if (not scaler_.scale(frame)) {
+    syslog::Error("Scaling failed!");
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
+void Publisher::onScaledFrame(const ImageFrame& frame) {
   if (not formatter_.format(frame)) {
     syslog::Error("Formatting failed!");
   }

@@ -18,12 +18,16 @@ set(SOURCES
     include/grape/camera/formatter.h
     include/grape/camera/image_frame.h
     include/grape/camera/rate_limiter.h
+    include/grape/camera/scaler.h
     src/camera.cpp
     src/compressor.cpp
     src/decompressor.cpp
     src/display.cpp
     src/formatter.cpp
-    src/image_frame.cpp)
+    src/image_frame.cpp
+    src/scaler.cpp
+    src/helpers.h
+    src/helpers.cpp)
 
 define_module_library(
   NAME camera
