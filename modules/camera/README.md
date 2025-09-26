@@ -3,28 +3,11 @@
 Cross platform camera support
 
 - Uses [SDL3](https://github.com/libsdl-org/SDL/) for device handling and display
-- Use [PipeWire](https://pipewire.org/) for concurrent access to a camera from multiple 
-  applications. Set `SDL_CAMERA_DRIVER=pipewire` on the command line or as environment variable
+- Use [PipeWire](https://pipewire.org/) for concurrent access to cameras from multiple applications. 
+  To make use of pipewire, you must
+  - Install pipewire development packages before building SDL3. 
+  - On your terminal `export SDL_CAMERA_DRIVER=pipewire` (or add this to your terminal config script such as ~/.bashrc)
 
-## Implementation outline
-
-### `camera_pub`
-
-```                                                                 
-┌──────────┐   ┌───────────┐   ┌─────────────┐   ┌───────────────┐ 
-│  Camera  │─▶│ Formatter │─▶│ Compressor  │─▶│ IPC Publisher │ 
-│          │   │           │   │ (LZ4)       │   │ (raw bytes)   │
-└──────────┘   └───────────┘   └─────────────┘   └───────────────┘ 
-```
-
-### `camera_sub`
-
-```
-┌────────────────┐   ┌─────────────┐   ┌────────────────┐
-│ IPC Subscriber │─▶│Decompressor │─▶│    Display     │
-│  (raw bytes)   │   │    (LZ4)    │   │  + snapshot    |
-└────────────────┘   └─────────────┘   └────────────────┘          
-```
 
 ## TODO
 

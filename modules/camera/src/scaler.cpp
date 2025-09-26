@@ -14,6 +14,7 @@ namespace grape::camera {
 //-------------------------------------------------------------------------------------------------
 Scaler::Scaler(float scale, Callback&& callback)
   : scale_(std::abs(scale)), callback_{ std::move(callback) } {
+  syslog::Info("Image scaling set to {}", scale_);
 }
 
 //-------------------------------------------------------------------------------------------------

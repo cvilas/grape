@@ -13,7 +13,9 @@
 namespace grape::camera {
 
 //-------------------------------------------------------------------------------------------------
-Compressor::Compressor(Callback&& cb) : callback_(std::move(cb)) {
+Compressor::Compressor(std::uint16_t speed, Callback&& cb)
+  : speed_(speed), callback_(std::move(cb)) {
+  syslog::Info("Compression speed set to {}", speed_);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -31,11 +33,10 @@ auto Compressor::compress(const ImageFrame& image) -> bool {
   std::memcpy(buffer_.data(), &(image.header), HDR_SIZE);
 
   // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-  static constexpr auto LZ4_ACC = 100;  // 1 = max compression, 65537 = max speed; see lz4 docs
   const auto compressed_data_size =
       LZ4_compress_fast(reinterpret_cast<const char*>(image.pixels.data()),
                         reinterpret_cast<char*>(std::next(buffer_.data(), HDR_SIZE)),
-                        static_cast<int>(data_size), max_compressed_data_size, LZ4_ACC);
+                        static_cast<int>(data_size), max_compressed_data_size, speed_);
   // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
   if (compressed_data_size <= 0) {
     syslog::Error("Failed to compress image data");

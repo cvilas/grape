@@ -53,7 +53,7 @@ private:
 };
 
 /// User function to throw an exception
-template <typename T>
+template <typename T = Exception>
   requires std::derived_from<T, Exception>
 [[noreturn]] constexpr void
 panic(const std::string& message,

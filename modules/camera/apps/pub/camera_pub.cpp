@@ -17,6 +17,7 @@
 #include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/session.h"
 #include "grape/log/syslog.h"
+#include "grape/script/script.h"
 #include "grape/statistics/sliding_mean.h"
 
 //-------------------------------------------------------------------------------------------------
@@ -39,7 +40,16 @@ public:
     std::atomic<std::size_t> publish_bytes;
   };
 
-  Publisher(const std::string& topic, const std::string& camera_name_hint);
+  struct Config {
+    std::string camera_name;
+    std::string pub_topic{ "/camera" };
+    float image_scale_factor{ 1.F };
+    std::uint8_t frame_rate_divisor{ 1U };
+    std::uint16_t compression_speed{ 1 };
+    static auto init(const grape::script::ConfigTable& table) -> Config;
+  };
+
+  explicit Publisher(const Config& cfg);
   [[nodiscard]] auto stats() const -> const Stats&;
   void update();
 
@@ -51,8 +61,6 @@ private:
   void onSubscriberMatch(const ipc::Match& match);
 
   static constexpr auto STATS_WINDOW = 600U;
-  static constexpr auto RATE_DIVISOR = 1U;
-  static constexpr auto SCALE = 1.F;
   Stats stats_;
   statistics::SlidingMean<float, STATS_WINDOW> publish_period_;
   statistics::SlidingMean<float, STATS_WINDOW> publish_bytes_;
@@ -68,14 +76,16 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-Publisher::Publisher(const std::string& topic, const std::string& camera_name_hint)
-  : publisher_(topic, [this](const auto& match) { onSubscriberMatch(match); })
-  , compressor_([this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
+Publisher::Publisher(const Config& cfg)
+  : publisher_(cfg.pub_topic, [this](const auto& match) { onSubscriberMatch(match); })
+  , compressor_(cfg.compression_speed,
+                [this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
   , formatter_([this](const auto& frame, const auto& stats) { onFormattedFrame(frame, stats); })
-  , scaler_(SCALE, [this](const auto& frame) { onScaledFrame(frame); })
-  , rate_limiter_(RATE_DIVISOR, [this](const auto& frame) { onCapturedFrame(frame); })
+  , scaler_(cfg.image_scale_factor, [this](const auto& frame) { onScaledFrame(frame); })
+  , rate_limiter_(cfg.frame_rate_divisor, [this](const auto& frame) { onCapturedFrame(frame); })
   , capture_(std::make_unique<Camera>([this](const auto& frame) { rate_limiter_.process(frame); },
-                                      camera_name_hint)) {
+                                      cfg.camera_name)) {
+  syslog::Note("Publishing images on topic: '{}'", cfg.pub_topic);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -146,6 +156,44 @@ void Publisher::update() {
   capture_->acquire();
 }
 
+//-------------------------------------------------------------------------------------------------
+auto Publisher::Config::init(const script::ConfigTable& table) -> Publisher::Config {
+  auto config = Config{};
+  const auto camera_name_option = table.read<std::string>("camera_name");
+  if (not camera_name_option) {
+    panic(std::format("Error reading camera_name: {}", toString(camera_name_option.error())));
+  }
+  config.camera_name = camera_name_option.value();
+
+  const auto pub_topic_option = table.read<std::string>("pub_topic");
+  if (not pub_topic_option) {
+    panic(std::format("Error reading pub_topic: {}", toString(pub_topic_option.error())));
+  }
+  config.pub_topic = pub_topic_option.value();
+
+  const auto image_scale_factor_option = table.read<float>("image_scale_factor");
+  if (not image_scale_factor_option) {
+    panic(std::format("Error reading image_scale_factor: {}",
+                      toString(image_scale_factor_option.error())));
+  }
+  config.image_scale_factor = image_scale_factor_option.value();
+
+  const auto frame_rate_divisor_option = table.read<int>("frame_rate_divisor");
+  if (not frame_rate_divisor_option) {
+    panic(std::format("Error reading frame_rate_divisor: {}",
+                      toString(frame_rate_divisor_option.error())));
+  }
+  config.frame_rate_divisor = static_cast<std::uint8_t>(frame_rate_divisor_option.value());
+
+  const auto compression_speed_option = table.read<int>("compression_speed");
+  if (not compression_speed_option) {
+    panic(std::format("Error reading compression_speed: {}",
+                      toString(compression_speed_option.error())));
+  }
+  config.compression_speed = static_cast<std::uint16_t>(compression_speed_option.value());
+  return config;
+}
+
 }  // namespace grape::camera
 
 namespace {
@@ -199,16 +247,21 @@ auto main(int argc, char* argv[]) -> int {
     }
 
     // Parse command line arguments
-    const auto args = grape::conio::ProgramDescription("Camera viewer application")
-                          .declareOption<std::string>("hint", "Part of camera name to match", "")
-                          .declareOption<std::string>("topic", "image stream topic", "/camera")
-                          .parse(argc, const_cast<const char**>(argv));
+    const auto args =
+        grape::conio::ProgramDescription("Camera viewer application")
+            .declareOption<std::string>("config", "Configuration file", "camera_pub/config.lua")
+            .parse(argc, const_cast<const char**>(argv));
+    const auto config_file_name = args.getOption<std::string>("config");
+    const auto config_file_path = grape::utils::resolveFilePath(config_file_name);
+    if (not config_file_path) {
+      grape::syslog::Critical("Could not find config file '{}'", config_file_name);
+      return EXIT_FAILURE;
+    }
+    grape::syslog::Note("Using config file '{}'", config_file_path.value().string());
+    const auto config_script = grape::script::ConfigScript(config_file_path.value());
+    const auto config = grape::camera::Publisher::Config::init(config_script.table());
 
-    const auto camera_name_hint = args.getOption<std::string>("hint");
-    const auto topic = args.getOption<std::string>("topic");
-
-    auto publisher = std::make_unique<grape::camera::Publisher>(topic, camera_name_hint);
-    grape::syslog::Note("Publishing images on topic: '{}'", topic);
+    auto publisher = std::make_unique<grape::camera::Publisher>(config);
 
     // Main event loop
     SDL_Event event;
