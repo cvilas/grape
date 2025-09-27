@@ -27,7 +27,7 @@ auto Decompressor::decompress(std::span<const std::byte> bytes) -> bool {
   ImageFrame image;
   std::memcpy(&image.header, bytes.data(), HDR_SIZE);
 
-  const auto data_size = image.header.width * image.header.height * 3U;  // enough up to for RGB24
+  const auto data_size = image.header.width * image.header.height * 3U;  // enough for up to RGB24
   if (buffer_.size() < data_size) {
     buffer_.resize(data_size);
   }
