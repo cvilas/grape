@@ -47,7 +47,7 @@ struct RawPublisher::Impl : public eCAL::CPublisher {
 //-------------------------------------------------------------------------------------------------
 RawPublisher::RawPublisher(const std::string& topic, MatchCallback&& match_cb) {
   if (not ok()) {
-    panic<Exception>("Not initialised");
+    panic("Not initialised");
   }
   const auto event_cb = [moved_match_cb = std::move(match_cb)](
                             const eCAL::STopicId& topic_id,

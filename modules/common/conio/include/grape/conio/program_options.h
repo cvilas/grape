@@ -151,11 +151,11 @@ auto ProgramOptions::getOption(const std::string& key) const -> T {
   const auto it = std::find_if(options_.begin(), options_.end(),
                                [&key](const auto& opt) -> bool { return key == opt.key; });
   if (it == options_.end()) {
-    panic<Exception>(std::format("Undeclared option: {}", key));
+    panic(std::format("Undeclared option: {}", key));
   }
 
   if (it->type != utils::getTypeName<T>()) {
-    panic<Exception>(std::format("Type mismatch for option: {}", key));
+    panic(std::format("Type mismatch for option: {}", key));
   }
 
   if constexpr (std::is_same_v<T, std::string>) {
@@ -167,7 +167,7 @@ auto ProgramOptions::getOption(const std::string& key) const -> T {
   T value;
   std::istringstream stream(it->value);
   if (not(stream >> value)) {
-    panic<Exception>(std::format("Unparsable value for option: {}", key));
+    panic(std::format("Unparsable value for option: {}", key));
   }
 
   return value;

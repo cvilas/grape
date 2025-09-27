@@ -26,7 +26,7 @@ void init(log::Config&& config) {
     succeeded = true;
   });
   if (not succeeded) {
-    panic<Exception>("init() must be called only once and before using logging functions");
+    panic("init() must be called only once and before using logging functions");
   }
 }
 

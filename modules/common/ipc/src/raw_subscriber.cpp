@@ -47,7 +47,7 @@ struct RawSubscriber::Impl : public eCAL::CSubscriber {
 RawSubscriber::RawSubscriber(const std::string& topic, RawSubscriber::DataCallback&& data_cb,
                              MatchCallback&& match_cb) {
   if (not ok()) {
-    panic<Exception>("Not initialised");
+    panic("Not initialised");
   }
 
   const auto event_cb = [moved_match_cb = std::move(match_cb)](

@@ -47,7 +47,7 @@ auto main() -> int {
     monitor.setSender([&probe](const std::string& name, std::span<const std::byte> data) -> void {
       const auto ret = probe.qset(name, data);
       if (ret != grape::probe::Controller::Error::None) {
-        grape::panic<grape::Exception>(std::format("{}: {}", name, toString(ret)));
+        grape::panic(std::format("{}: {}", name, toString(ret)));
       }
     });
 

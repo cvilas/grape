@@ -131,7 +131,7 @@ void Controller::sync() {
     const auto count = it->num_elements * length(it->type);
     if (offset_size + count > buffer.size_bytes()) {
       // this should never happen
-      panic<Exception>("Sync buffer too small");
+      panic("Sync buffer too small");
     }
     auto subspan = std::span(buffer).subspan(offset_size, count);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)

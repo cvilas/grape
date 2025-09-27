@@ -76,7 +76,7 @@ auto ProgramDescription::parse(int argc, const char** argv) const -> ProgramOpti
   // check all required arguments are specified
   for (const auto& entry : declared_options) {
     if (entry.is_required and not entry.is_specified) {
-      panic<Exception>(std::format("Undefined option: {}", entry.key));
+      panic(std::format("Undefined option: {}", entry.key));
     }
   }
 
@@ -88,7 +88,7 @@ auto ProgramDescription::parse(int argc, const char** argv) const -> ProgramOpti
       declared_options,
       [](const auto& opt_a, const auto& opt_b) noexcept -> auto { return opt_a.key == opt_b.key; });
   if (dup_it != declared_options.end()) {
-    panic<Exception>(std::format("Redeclared option: {}", dup_it->key));
+    panic(std::format("Redeclared option: {}", dup_it->key));
   }
 
   return ProgramOptions(std::move(declared_options));

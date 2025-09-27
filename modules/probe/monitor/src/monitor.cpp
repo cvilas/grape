@@ -143,7 +143,7 @@ ScrollingBuffer::ScrollingBuffer(std::size_t length,
     frame_size_ += grape::probe::length(signal_info.type) * signal_info.num_elements;
   }
   if (timestamp_offset_in_frame_ == std::numeric_limits<std::size_t>::max()) {
-    grape::panic<grape::Exception>(
+    grape::panic(
         std::format("Timestamp {}", toString(grape::probe::Monitor::Error::SignalNotFound)));
   }
   frame_data_.resize(length_ * frame_size_);
@@ -153,7 +153,7 @@ ScrollingBuffer::ScrollingBuffer(std::size_t length,
 void ScrollingBuffer::addFrame(std::span<const std::byte> frame) {
   const auto passed_frame_size = frame.size_bytes();
   if (passed_frame_size != frame_size_) {
-    grape::panic<grape::Exception>(
+    grape::panic(
         std::format("Expected frame size: {} bytes, got {} bytes", frame_size_, passed_frame_size));
   }
   using OffsetType = std::vector<std::byte>::difference_type;
@@ -290,7 +290,7 @@ struct Monitor::Impl {
 //-------------------------------------------------------------------------------------------------
 Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
-    panic<Exception>(std::format("SDL_Init: {}", SDL_GetError()));
+    panic(std::format("SDL_Init: {}", SDL_GetError()));
   }
 
   // Create window with graphics context
@@ -299,12 +299,12 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
   const auto win_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
   impl_->window = SDL_CreateWindow("Implot Example", WIN_W, WIN_H, win_flags);
   if (impl_->window == nullptr) {
-    panic<Exception>(std::format("SDL_CreateWindow: {}", SDL_GetError()));
+    panic(std::format("SDL_CreateWindow: {}", SDL_GetError()));
   }
   impl_->renderer = SDL_CreateRenderer(impl_->window, nullptr);
   SDL_SetRenderVSync(impl_->renderer, 1);
   if (impl_->renderer == nullptr) {
-    panic<Exception>(std::format("Error: SDL_CreateRenderer(): {}", SDL_GetError()));
+    panic(std::format("Error: SDL_CreateRenderer(): {}", SDL_GetError()));
   }
   SDL_ShowWindow(impl_->window);
 
@@ -312,7 +312,7 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
   IMGUI_CHECKVERSION();
   impl_->imgui_ctx = ImGui::CreateContext();
   if (nullptr == impl_->imgui_ctx) {
-    panic<Exception>(std::format("ImGui::CreateContext: {}", toString(Error::Renderer)));
+    panic(std::format("ImGui::CreateContext: {}", toString(Error::Renderer)));
   }
   ImGuiIO& io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // NOLINT(hicpp-signed-bitwise)
@@ -320,11 +320,11 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
   ImGui::StyleColorsDark();
 
   if (not ImGui_ImplSDL3_InitForSDLRenderer(impl_->window, impl_->renderer)) {
-    panic<Exception>(std::format("Error: ImGui_ImplSDL3_InitForSDLRenderer: {}", SDL_GetError()));
+    panic(std::format("Error: ImGui_ImplSDL3_InitForSDLRenderer: {}", SDL_GetError()));
   }
 
   if (not ImGui_ImplSDLRenderer3_Init(impl_->renderer)) {
-    panic<Exception>(std::format("Error: ImGui_ImplSDLRenderer3_Init: {}", SDL_GetError()));
+    panic(std::format("Error: ImGui_ImplSDLRenderer3_Init: {}", SDL_GetError()));
   }
 
   impl_->implot_ctx = ImPlot::CreateContext();

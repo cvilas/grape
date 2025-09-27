@@ -61,7 +61,7 @@ Camera::Camera(Callback callback, const std::string& name_hint)
   auto cameras_ids = std::unique_ptr<SDL_CameraID, decltype(camera_ids_deleter)>(
       SDL_GetCameras(&camera_count), camera_ids_deleter);
   if ((cameras_ids == nullptr) or (camera_count == 0)) {
-    panic<Exception>(std::format("No cameras enumerated: {}", SDL_GetError()));
+    panic(std::format("No cameras enumerated: {}", SDL_GetError()));
   }
 
   auto chosen_camera_index = std::numeric_limits<std::size_t>::max();
@@ -88,7 +88,7 @@ Camera::Camera(Callback callback, const std::string& name_hint)
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   impl_->camera.reset(SDL_OpenCamera(cameras_ids.get()[chosen_camera_index], camera_spec));
   if (impl_->camera == nullptr) {
-    panic<Exception>(std::format("Unable to open camera: {}", SDL_GetError()));
+    panic(std::format("Unable to open camera: {}", SDL_GetError()));
   }
 }
 
