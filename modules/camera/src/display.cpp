@@ -59,7 +59,7 @@ Display::Display() : impl_(std::make_unique<Impl>()) {
 
   if (not SDL_CreateWindowAndRenderer("Camera View", DEFAULT_WIDTH, DEFAULT_HEIGHT,
                                       SDL_WINDOW_RESIZABLE, &window, &renderer)) {
-    panic<Exception>(std::format("SDL_CreateWindowAndRenderer failed: {}", SDL_GetError()));
+    panic(std::format("SDL_CreateWindowAndRenderer failed: {}", SDL_GetError()));
   }
   syslog::Note("Using renderer: {}", SDL_GetRendererName(renderer));
 

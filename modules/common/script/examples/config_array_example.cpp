@@ -71,19 +71,19 @@ auto main(int argc, const char* argv[]) -> int {
 void Pose::configure(const grape::script::ConfigTable& table) {
   const auto x_res = table.read<float>("x");
   if (not x_res.has_value()) {
-    grape::panic<grape::Exception>(std::format("Key 'x' {}", toString(x_res.error())));
+    grape::panic(std::format("Key 'x' {}", toString(x_res.error())));
   }
   x = x_res.value();
 
   const auto y_res = table.read<float>("y");
   if (not y_res.has_value()) {
-    grape::panic<grape::Exception>(std::format("Key 'y' {}", toString(y_res.error())));
+    grape::panic(std::format("Key 'y' {}", toString(y_res.error())));
   }
   y = y_res.value();
 
   const auto rz_res = table.read<float>("rz");
   if (not rz_res.has_value()) {
-    grape::panic<grape::Exception>(std::format("Key 'rz' {}", toString(rz_res.error())));
+    grape::panic(std::format("Key 'rz' {}", toString(rz_res.error())));
   }
   rz = rz_res.value();
 }
@@ -92,13 +92,13 @@ void Pose::configure(const grape::script::ConfigTable& table) {
 void Robot::configure(const grape::script::ConfigTable& table) {
   const auto name_res = table.read<std::string>("name");
   if (not name_res.has_value()) {
-    grape::panic<grape::Exception>(std::format("Key 'name' {}", toString(name_res.error())));
+    grape::panic(std::format("Key 'name' {}", toString(name_res.error())));
   }
   name = name_res.value();
 
   const auto pose_tab = table.read<grape::script::ConfigTable>("pose");
   if (not pose_tab.has_value()) {
-    grape::panic<grape::Exception>(std::format("Key 'pose' {}", toString(pose_tab.error())));
+    grape::panic(std::format("Key 'pose' {}", toString(pose_tab.error())));
   }
   pose.configure(pose_tab.value());
 }
@@ -107,14 +107,13 @@ void Robot::configure(const grape::script::ConfigTable& table) {
 void RobotCluster::configure(const grape::script::ConfigTable& table) {
   const auto name_res = table.read<std::string>("cluster_name");
   if (not name_res.has_value()) {
-    grape::panic<grape::Exception>(
-        std::format("Key 'cluster_name' {}", toString(name_res.error())));
+    grape::panic(std::format("Key 'cluster_name' {}", toString(name_res.error())));
   }
   name = name_res.value();
 
   const auto members_res = table.read<grape::script::ConfigTable>("members");
   if (not members_res.has_value()) {
-    grape::panic<grape::Exception>(std::format("Key 'members' {}", toString(members_res.error())));
+    grape::panic(std::format("Key 'members' {}", toString(members_res.error())));
   }
   const auto& members_table = members_res.value();
   const auto sz = members_table.size();
@@ -122,7 +121,7 @@ void RobotCluster::configure(const grape::script::ConfigTable& table) {
   for (size_t i = 0; i < sz; ++i) {
     const auto robot_res = members_table.read<grape::script::ConfigTable>(i);
     if (not robot_res.has_value()) {
-      grape::panic<grape::Exception>(std::format("Robot({}) {}", i, toString(robot_res.error())));
+      grape::panic(std::format("Robot({}) {}", i, toString(robot_res.error())));
     }
     members.at(i).configure(robot_res.value());
   }

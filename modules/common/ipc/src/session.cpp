@@ -52,7 +52,7 @@ namespace grape::ipc {
 //-------------------------------------------------------------------------------------------------
 void init(Config&& config) {
   if (s_manager.has_value()) {
-    panic<Exception>("Already initialised");
+    panic("Already initialised");
   }
   s_manager.emplace(std::move(config));
 }
@@ -60,7 +60,7 @@ void init(Config&& config) {
 //-------------------------------------------------------------------------------------------------
 auto ok() -> bool {
   if (not s_manager) {
-    panic<Exception>("Not initialised. Call init() first.");
+    panic("Not initialised. Call init() first.");
   }
   return eCAL::Ok();
 }

@@ -29,7 +29,7 @@ public:
     const auto mode = std::ofstream::out | (append ? std::ofstream::app : std::ofstream::trunc);
     fstream_.open(file_path, mode);
     if (fstream_.fail()) {
-      panic<Exception>(std::format("Unable to open {}", file_path.string()));
+      panic(std::format("Unable to open {}", file_path.string()));
     }
     fstream_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
   }
