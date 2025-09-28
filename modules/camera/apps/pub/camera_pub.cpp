@@ -158,40 +158,14 @@ void Publisher::update() {
 
 //-------------------------------------------------------------------------------------------------
 auto Publisher::Config::init(const script::ConfigTable& table) -> Publisher::Config {
-  auto config = Config{};
-  const auto camera_name_option = table.read<std::string>("camera_name");
-  if (not camera_name_option) {
-    panic(std::format("Error reading camera_name: {}", toString(camera_name_option.error())));
-  }
-  config.camera_name = camera_name_option.value();
-
-  const auto pub_topic_option = table.read<std::string>("pub_topic");
-  if (not pub_topic_option) {
-    panic(std::format("Error reading pub_topic: {}", toString(pub_topic_option.error())));
-  }
-  config.pub_topic = pub_topic_option.value();
-
-  const auto image_scale_factor_option = table.read<float>("image_scale_factor");
-  if (not image_scale_factor_option) {
-    panic(std::format("Error reading image_scale_factor: {}",
-                      toString(image_scale_factor_option.error())));
-  }
-  config.image_scale_factor = image_scale_factor_option.value();
-
-  const auto frame_rate_divisor_option = table.read<int>("frame_rate_divisor");
-  if (not frame_rate_divisor_option) {
-    panic(std::format("Error reading frame_rate_divisor: {}",
-                      toString(frame_rate_divisor_option.error())));
-  }
-  config.frame_rate_divisor = static_cast<std::uint8_t>(frame_rate_divisor_option.value());
-
-  const auto compression_speed_option = table.read<int>("compression_speed");
-  if (not compression_speed_option) {
-    panic(std::format("Error reading compression_speed: {}",
-                      toString(compression_speed_option.error())));
-  }
-  config.compression_speed = static_cast<std::uint16_t>(compression_speed_option.value());
-  return config;
+  return Config{
+    //
+    .camera_name = table.readOrThrow<std::string>("camera_name"),
+    .pub_topic = table.readOrThrow<std::string>("pub_topic"),
+    .image_scale_factor = table.readOrThrow<float>("image_scale_factor"),
+    .frame_rate_divisor = static_cast<std::uint8_t>(table.readOrThrow<int>("frame_rate_divisor")),
+    .compression_speed = static_cast<std::uint16_t>(table.readOrThrow<int>("compression_speed"))
+  };
 }
 
 }  // namespace grape::camera

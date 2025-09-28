@@ -69,33 +69,14 @@ auto main(int argc, const char* argv[]) -> int {
 
 //-------------------------------------------------------------------------------------------------
 void Pose::configure(const grape::script::ConfigTable& table) {
-  const auto x_res = table.read<float>("x");
-  if (not x_res.has_value()) {
-    grape::panic(std::format("Key 'x' {}", toString(x_res.error())));
-  }
-  x = x_res.value();
-
-  const auto y_res = table.read<float>("y");
-  if (not y_res.has_value()) {
-    grape::panic(std::format("Key 'y' {}", toString(y_res.error())));
-  }
-  y = y_res.value();
-
-  const auto rz_res = table.read<float>("rz");
-  if (not rz_res.has_value()) {
-    grape::panic(std::format("Key 'rz' {}", toString(rz_res.error())));
-  }
-  rz = rz_res.value();
+  x = table.readOrThrow<float>("x");
+  y = table.readOrThrow<float>("y");
+  rz = table.readOrThrow<float>("rz");
 }
 
 //-------------------------------------------------------------------------------------------------
 void Robot::configure(const grape::script::ConfigTable& table) {
-  const auto name_res = table.read<std::string>("name");
-  if (not name_res.has_value()) {
-    grape::panic(std::format("Key 'name' {}", toString(name_res.error())));
-  }
-  name = name_res.value();
-
+  name = table.readOrThrow<std::string>("name");
   const auto pose_tab = table.read<grape::script::ConfigTable>("pose");
   if (not pose_tab.has_value()) {
     grape::panic(std::format("Key 'pose' {}", toString(pose_tab.error())));
@@ -105,12 +86,7 @@ void Robot::configure(const grape::script::ConfigTable& table) {
 
 //-------------------------------------------------------------------------------------------------
 void RobotCluster::configure(const grape::script::ConfigTable& table) {
-  const auto name_res = table.read<std::string>("cluster_name");
-  if (not name_res.has_value()) {
-    grape::panic(std::format("Key 'cluster_name' {}", toString(name_res.error())));
-  }
-  name = name_res.value();
-
+  name = table.readOrThrow<std::string>("cluster_name");
   const auto members_res = table.read<grape::script::ConfigTable>("members");
   if (not members_res.has_value()) {
     grape::panic(std::format("Key 'members' {}", toString(members_res.error())));
