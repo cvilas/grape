@@ -43,15 +43,6 @@ auto main(int argc, const char* argv[]) -> int {
 
 //-------------------------------------------------------------------------------------------------
 void PersonnelRecord::configure(const grape::script::ConfigTable& table) {
-  const auto age_result = table.read<int>("age");
-  if (not age_result.has_value()) {
-    grape::panic(std::format("Error reading age: {}", toString(age_result.error())));
-  }
-  age = static_cast<unsigned int>(age_result.value());
-
-  const auto name_result = table.read<std::string>("name");
-  if (not name_result.has_value()) {
-    grape::panic(std::format("Error reading name: {}", toString(name_result.error())));
-  }
-  name = name_result.value();
+  age = static_cast<unsigned int>(table.readOrThrow<int>("age"));
+  name = table.readOrThrow<std::string>("name");
 }

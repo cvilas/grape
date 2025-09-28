@@ -7,8 +7,10 @@
 #include <concepts>
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <memory>
 
+#include "grape/exception.h"
 #include "grape/utils/enums.h"
 
 struct lua_State;  //!< Internal detail. Don't worry about it!
@@ -65,6 +67,13 @@ public:
   /// @return Value of the specified key if found, error code otherwise.
   template <Parsable T>
   [[nodiscard]] auto read(const std::string& key) const -> std::expected<T, Error>;
+
+  /// Convenience method that throws instead
+  /// @tparam T The value data type
+  /// @param key The key to read
+  /// @return Value of the specified key if found
+  template <Parsable T>
+  [[nodiscard]] auto readOrThrow(const std::string& key) const -> T;
 
   /// If this table holds an array of values instead of key-value pairs, read the value at
   /// a specific index.
@@ -144,6 +153,16 @@ inline auto ConfigTable::read(const std::string& key) const
   } else if constexpr (std::is_same_v<T, ConfigTable>) {
     return readTable(key);
   }
+}
+
+//-------------------------------------------------------------------------------------------------
+template <Parsable T>
+inline auto ConfigTable::readOrThrow(const std::string& key) const -> T {
+  const auto option = read<T>(key);
+  if (not option) {
+    panic(std::format("Error reading {}: {}", key, toString(option.error())));
+  }
+  return option.value();
 }
 
 //-------------------------------------------------------------------------------------------------
