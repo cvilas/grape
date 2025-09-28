@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace grape::ipc::py {
-void bindConfig(pybind11::module_& module);
-void bindSession(pybind11::module_& module);
-void bindMatch(pybind11::module_& module);
-void bindPublisher(pybind11::module_& module);
-void bindSubscriber(pybind11::module_& module);
+void bindConfig(nanobind::module_& module);
+void bindSession(nanobind::module_& module);
+void bindMatch(nanobind::module_& module);
+void bindPublisher(nanobind::module_& module);
+void bindSubscriber(nanobind::module_& module);
 }  // namespace grape::ipc::py
