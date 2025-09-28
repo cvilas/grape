@@ -4,7 +4,7 @@
 
 #include "bindings.h"
 
-PYBIND11_MODULE(grape_ipc_py, module) {
+NB_MODULE(grape_ipc_py, module) {
   module.doc() = "Python bindings for grape::ipc";
   grape::ipc::py::bindConfig(module);
   grape::ipc::py::bindSession(module);
