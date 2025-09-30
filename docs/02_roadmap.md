@@ -7,7 +7,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
 - [x] Implement SDL3-based camera streamer
-- [ ] Implement system clock
+- [x] Implement system clock
 - [ ] Implement [picam](../modules/rpi/picam/README.md)  
   - [ ] Make camera pipeline recognise pi5 camera (libcamera (pi fork) + pipewire on Ubuntu 24.04)
   - [ ] Document how to build and run pi camera publishing service  
@@ -53,6 +53,7 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] Support C++26
   - [ ] Auto serdes using [variadic structured bindings](https://youtu.be/qIDFyhtUMnQ)
   - [ ] Cross language [binding](https://godbolt.org/z/bYPcjMd9q) to functions for scripting
+  - [ ] Automatic differentiation using reflection
   - [ ] Message dispatch using [pattern matching](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf)
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
@@ -66,7 +67,8 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 ## Study
 
 - Performance
-  - [std::execution](https://en.cppreference.com/w/cpp/execution). Play with reference implementation [stdexec](https://github.com/NVIDIA/stdexec)
+  - Concurrency (many tasks at once) and parallelism (task broken into multiple pieces at once) 
+    using senders and receivers ([std::execution](https://en.cppreference.com/w/cpp/execution)). 
   - Polymorphic resource allocators (see `std::pmr` namespace) and how to use them in embedded systems
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
 - Robot model/kinematics/Visualisation. (Goal: Single model description format for kinematic calculations and scenegraph visualisation)

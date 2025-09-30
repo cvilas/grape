@@ -1,0 +1,109 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.5 Chrome/138.0.7204.251 Electron/37.6.1 Safari/537.36" version="28.2.5">
+  <diagram name="Page-1" id="h9Fu1T1iGzOCEMohWCH5">
+    <mxGraphModel dx="2484" dy="1104" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-1" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.clock;" vertex="1" parent="1">
+          <mxGeometry x="-85" y="320" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-4" value="&lt;font color=&quot;#606060&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;&lt;b&gt;Ego Clock Driver&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="-130" y="80" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-7" value="" style="html=1;shape=mxgraph.sysml.port;sysMLPortType=flowN;rotation=90;strokeColor=#d79b00;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="-140" y="110" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-8" value="" style="html=1;shape=mxgraph.sysml.port;sysMLPortType=flowN;rotation=90;strokeColor=#d79b00;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="-20" y="110" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-9" value="&lt;font color=&quot;#606060&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;&lt;b&gt;Ego Clock &lt;/b&gt;&lt;i style=&quot;&quot;&gt;&lt;b&gt;1&lt;/b&gt;&lt;/i&gt;&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="70" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-10" value="" style="html=1;shape=mxgraph.sysml.port;sysMLPortType=flowN;rotation=90;strokeColor=#d79b00;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="60" y="230" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-12" value="" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="wM9oI5CDTE-kQ0QqtvxV-8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="30" as="sourcePoint" />
+            <mxPoint x="440" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-14" value="&lt;font&gt;&amp;lt;&amp;lt;ipc&amp;gt;&amp;gt;&lt;/font&gt;&lt;div&gt;&lt;font&gt;topic: /clock&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font&gt;datatype: ClockTransform&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#0000FF;" vertex="1" parent="1">
+          <mxGeometry x="290" y="70" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-15" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="wM9oI5CDTE-kQ0QqtvxV-10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="30" y="120" as="sourcePoint" />
+            <mxPoint x="270" y="-20" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="30" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-16" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.clock;" vertex="1" parent="1">
+          <mxGeometry x="115" y="320" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-18" value="&lt;font&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;/font&gt;&lt;div&gt;&lt;font&gt;method: tick&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#0000FF;" vertex="1" parent="1">
+          <mxGeometry x="-210" y="130" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-19" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="wM9oI5CDTE-kQ0QqtvxV-1" target="wM9oI5CDTE-kQ0QqtvxV-4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-10" y="190" as="sourcePoint" />
+            <mxPoint x="270" y="-20" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-20" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="wM9oI5CDTE-kQ0QqtvxV-16" target="wM9oI5CDTE-kQ0QqtvxV-9">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-80" y="220" as="sourcePoint" />
+            <mxPoint x="-80" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-21" value="NTP" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-100" y="350" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-22" value="NTP" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="350" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-23" value="&lt;font color=&quot;#606060&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;&lt;b&gt;Ego Clock &lt;i&gt;n&lt;/i&gt;&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="310" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-24" value="" style="html=1;shape=mxgraph.sysml.port;sysMLPortType=flowN;rotation=90;strokeColor=#d79b00;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="300" y="230" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-25" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.clock;" vertex="1" parent="1">
+          <mxGeometry x="355" y="320" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-26" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="wM9oI5CDTE-kQ0QqtvxV-25" target="wM9oI5CDTE-kQ0QqtvxV-23">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="160" y="220" as="sourcePoint" />
+            <mxPoint x="160" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-27" value="NTP" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="340" y="350" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-28" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="wM9oI5CDTE-kQ0QqtvxV-24">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="270" y="120" as="sourcePoint" />
+            <mxPoint x="50" y="290" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="270" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-29" value="" style="pointerEvents=1;verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.waveforms.pulse_1;" vertex="1" parent="1">
+          <mxGeometry x="-220" y="95" width="25" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-30" value="&lt;font color=&quot;#606060&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;&lt;b&gt;Clock source&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#606060&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;&lt;b&gt;(RT clock, Sim)&lt;/b&gt;&lt;/span&gt;&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#606060;" vertex="1" parent="1">
+          <mxGeometry x="-360" y="80" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-31" value="" style="html=1;shape=mxgraph.sysml.port;sysMLPortType=flowN;rotation=90;strokeColor=#606060;" vertex="1" parent="1">
+          <mxGeometry x="-250" y="110" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="wM9oI5CDTE-kQ0QqtvxV-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="wM9oI5CDTE-kQ0QqtvxV-31" target="wM9oI5CDTE-kQ0QqtvxV-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
