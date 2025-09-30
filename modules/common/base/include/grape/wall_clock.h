@@ -10,25 +10,28 @@
 namespace grape {
 
 //=================================================================================================
-/// Platform-agnostic system clock
+/// Global/wall clock.
 ///
-/// Avoids difference in internal representation across compilers
+/// Provides timing with reference to an external standard time source (e.g. NTP)
+///
+/// (This is a platform and compiler agnostic alias for std::chrono::system_clock)
 struct WallClock {
   using Duration = std::chrono::duration<std::int64_t, std::nano>;
   using TimePoint = std::chrono::time_point<std::chrono::system_clock, Duration>;
+  static constexpr bool IS_STEADY = false;
 
   /// @return time now
   [[nodiscard]] static auto now() -> TimePoint {
     return std::chrono::time_point_cast<Duration>(std::chrono::system_clock::now());
   }
 
-  /// Returns a timepoint formatted as nanoseconds since Unix epoch
+  /// @return nanoseconds since clock epoch, given time point
   [[nodiscard]] static constexpr auto toNanos(const WallClock::TimePoint& tp) -> std::int64_t {
     const auto ns = std::chrono::duration_cast<Duration>(tp.time_since_epoch());
     return static_cast<std::int64_t>(ns.count());
   }
 
-  /// Returns nanoseconds since Unix epoch formatted as a timepoint
+  /// @return time point given nanoseconds since clock epoch
   [[nodiscard]] static constexpr auto fromNanos(std::int64_t nanos) -> WallClock::TimePoint {
     const auto dur = std::chrono::duration_cast<Duration>(std::chrono::nanoseconds(nanos));
     return WallClock::TimePoint(dur);
