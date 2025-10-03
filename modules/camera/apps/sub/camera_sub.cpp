@@ -16,7 +16,7 @@
 #include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
 #include "grape/log/syslog.h"
-#include "grape/time.h"
+#include "grape/wall_clock.h"
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 to display camera frames acquired by the corresponding publisher appln.
@@ -33,7 +33,7 @@ public:
   void update();
   void saveImage();
   void toggleTimestamp();
-  [[nodiscard]] auto latency() const -> SystemClock::Duration;
+  [[nodiscard]] auto latency() const -> WallClock::Duration;
 
 private:
   void onReceivedSample(const ipc::Sample& sample);
@@ -140,7 +140,7 @@ void Subscriber::update() {
 
 //-------------------------------------------------------------------------------------------------
 void Subscriber::onDecompressedFrame(const ImageFrame& frame) {
-  static auto last_image_ts = SystemClock::TimePoint{};
+  static auto last_image_ts = WallClock::TimePoint{};
   const auto image_ts = frame.header.timestamp;
   if (image_ts > last_image_ts) {
     last_image_ts = image_ts;
@@ -148,7 +148,7 @@ void Subscriber::onDecompressedFrame(const ImageFrame& frame) {
 
     if (save_snapshot_) {
       save_snapshot_ = false;
-      const auto fname = std::format("snapshot_{:%FT%T}.bmp", SystemClock::now());
+      const auto fname = std::format("snapshot_{:%FT%T}.bmp", WallClock::now());
       std::ignore = grape::camera::save(frame, fname);
     }
   }
@@ -173,7 +173,7 @@ void Subscriber::toggleTimestamp() {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Subscriber::latency() const -> SystemClock::Duration {
+auto Subscriber::latency() const -> WallClock::Duration {
   return display_.latency();
 }
 

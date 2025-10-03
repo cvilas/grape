@@ -23,7 +23,7 @@ public:
   void showTimestamp(bool en);
 
   /// @return average image display latency
-  [[nodiscard]] auto latency() const -> SystemClock::Duration;
+  [[nodiscard]] auto latency() const -> WallClock::Duration;
 
   Display();
   ~Display();

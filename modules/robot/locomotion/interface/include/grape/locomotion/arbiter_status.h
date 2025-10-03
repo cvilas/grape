@@ -18,7 +18,7 @@ namespace grape::locomotion {
 /// Status of the arbiter component in the robot GNC pipeline
 struct ArbiterStatus {
   std::uint64_t alt_controller_id{ 0UL };
-  SystemClock::Duration alt_command_latency{ 0 };  //!<
+  WallClock::Duration alt_command_latency{ 0 };  //!<
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -39,11 +39,11 @@ template <serdes::ReadableStream S>
   if (not des.unpack(data.alt_controller_id)) {
     return false;
   }
-  SystemClock::Duration::rep ticks{};
+  WallClock::Duration::rep ticks{};
   if (not des.unpack(ticks)) {
     return false;
   }
-  data.alt_command_latency = SystemClock::Duration(ticks);
+  data.alt_command_latency = WallClock::Duration(ticks);
   return true;
 }
 

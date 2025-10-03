@@ -25,7 +25,7 @@ TEST_CASE("Basic pub-sub in network scope works", "[ipc]") {
 
   grape::ipc::init(std::move(config));
   const auto topic =
-      std::format("pub_sub_test_{}", grape::SystemClock::now().time_since_epoch().count());
+      std::format("pub_sub_test_{}", grape::WallClock::now().time_since_epoch().count());
 
   // Create a large payload (eg: 1080p RGB image)
   constexpr auto PAYLOAD_SIZE = 1920U * 1080U * 3;

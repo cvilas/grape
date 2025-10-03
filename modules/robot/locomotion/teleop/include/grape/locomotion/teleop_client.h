@@ -27,8 +27,8 @@ public:
   };
 
   struct ClientStatus {
-    bool is_client_active{ false };           //!< true if this client has control authority
-    SystemClock::Duration command_latency{};  //!< Avg. latency to locomotion service
+    bool is_client_active{ false };         //!< true if this client has control authority
+    WallClock::Duration command_latency{};  //!< Avg. latency to locomotion service
   };
 
   /// Callback function signature for receiving status updates

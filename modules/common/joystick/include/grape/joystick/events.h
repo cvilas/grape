@@ -8,29 +8,29 @@
 #include <variant>
 
 #include "grape/joystick/controls.h"
-#include "grape/time.h"
+#include "grape/wall_clock.h"
 
 namespace grape::joystick {
 
 struct ButtonEvent {
-  SystemClock::TimePoint timestamp;
+  WallClock::TimePoint timestamp;
   ControlId id{};
   bool pressed{ false };
 };
 
 struct AxisEvent {
-  SystemClock::TimePoint timestamp;
+  WallClock::TimePoint timestamp;
   ControlId id{};
   float value{ 0.F };  //!< Normalised value in range [-1, 1]
 };
 
 struct ConnectionEvent {
-  SystemClock::TimePoint timestamp;
+  WallClock::TimePoint timestamp;
   bool is_connected{ false };
 };
 
 struct ErrorEvent {
-  SystemClock::TimePoint timestamp;
+  WallClock::TimePoint timestamp;
   std::string message;
 };
 

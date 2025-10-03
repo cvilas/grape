@@ -175,10 +175,10 @@ private:
 }
 
 //-------------------------------------------------------------------------------------------------
-auto toTimePoint(const timeval& tv) -> grape::SystemClock::TimePoint {
-  const auto dur = std::chrono::duration_cast<grape::SystemClock::Duration>(
+auto toTimePoint(const timeval& tv) -> grape::WallClock::TimePoint {
+  const auto dur = std::chrono::duration_cast<grape::WallClock::Duration>(
       std::chrono::seconds(tv.tv_sec) + std::chrono::microseconds(tv.tv_usec));
-  return grape::SystemClock::TimePoint{ dur };
+  return grape::WallClock::TimePoint{ dur };
 }
 
 }  // namespace
@@ -279,12 +279,12 @@ Joystick::~Joystick() {
 auto Joystick::open(const std::filesystem::path& device_path) const -> bool {
   close();
 
-  const auto tp = SystemClock::now();
+  const auto tp = WallClock::now();
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
   impl_->device_fd = ::open(device_path.c_str(), O_RDONLY | O_NONBLOCK);
   if (impl_->device_fd < 0) {
     const auto err = std::error_code(errno, std::system_category());
-    impl_->callback(ErrorEvent{ .timestamp = SystemClock::now(),
+    impl_->callback(ErrorEvent{ .timestamp = WallClock::now(),
                                 .message = std::format("Cannot open device: {}", err.message()) });
     return false;
   }
@@ -338,14 +338,14 @@ void Joystick::close() const {
   }
   impl_->range.clear();
   if (was_open) {  // raise disconnect event once per connect event
-    impl_->callback(ConnectionEvent{ .timestamp = SystemClock::now(), .is_connected = false });
+    impl_->callback(ConnectionEvent{ .timestamp = WallClock::now(), .is_connected = false });
   }
 }
 
 //-------------------------------------------------------------------------------------------------
 auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
   if (impl_->device_fd < 0 || impl_->epoll_fd < 0) {
-    impl_->callback(ErrorEvent{ .timestamp = SystemClock::now(), .message = "Device not open" });
+    impl_->callback(ErrorEvent{ .timestamp = WallClock::now(), .message = "Device not open" });
     return false;
   }
 
@@ -353,7 +353,7 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
   const auto nfds = epoll_wait(impl_->epoll_fd, &ev, 1, static_cast<int>(timeout.count()));
   if (nfds < 0) {
     const auto err = std::error_code(errno, std::system_category());
-    impl_->callback(ErrorEvent{ .timestamp = SystemClock::now(),
+    impl_->callback(ErrorEvent{ .timestamp = WallClock::now(),
                                 .message = std::format("epoll_wait: {}", err.message()) });
     return false;
   }
@@ -364,7 +364,7 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
 
   if (0U != (ev.events & (EPOLLHUP | EPOLLERR))) {
     impl_->callback(
-        ErrorEvent{ .timestamp = SystemClock::now(), .message = "Device error or hang-up" });
+        ErrorEvent{ .timestamp = WallClock::now(), .message = "Device error or hang-up" });
     return false;
   }
 
@@ -378,12 +378,12 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
       if (errno == EAGAIN) {
         return true;  // No more events to read
       }
-      impl_->callback(ErrorEvent{ .timestamp = SystemClock::now(),
+      impl_->callback(ErrorEvent{ .timestamp = WallClock::now(),
                                   .message = std::format("Read failed: {}", err.message()) });
       return false;
     }
     if (std::cmp_less(bytes_read, EVENT_SZ)) {
-      impl_->callback(ErrorEvent{ .timestamp = SystemClock::now(), .message = "Partial read" });
+      impl_->callback(ErrorEvent{ .timestamp = WallClock::now(), .message = "Partial read" });
       return false;
     }
     if ((iev.type == EV_SYN) && (iev.code == SYN_DROPPED)) {
@@ -398,7 +398,7 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
       // event frames by the get we get here. Not much to do other than to report this as error
       // and let user reinitialise the device. The only solution is for the user application
       // to ensure that it processes events fast enough.
-      impl_->callback(ErrorEvent{ .timestamp = SystemClock::now(), .message = "Events dropped" });
+      impl_->callback(ErrorEvent{ .timestamp = WallClock::now(), .message = "Events dropped" });
       return false;
     }
     if (iev.type == EV_ABS) {
@@ -419,7 +419,7 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
 
 //-------------------------------------------------------------------------------------------------
 auto Joystick::readState() const -> bool {
-  const auto tp = SystemClock::now();
+  const auto tp = WallClock::now();
 
   // Get available buttons on the device
   auto keys_map = BitSet<KEY_MAX>{};

@@ -11,7 +11,7 @@
 #include "grape/exception.h"
 #include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
-#include "grape/time.h"
+#include "grape/wall_clock.h"
 #include "perf_constants.h"
 
 //=================================================================================================
@@ -31,16 +31,16 @@ struct Statistics {
   static constexpr auto REPORT_DURATION = std::chrono::seconds(1);
   uint64_t msg_count{ 0 };
   uint64_t aggregate_bytes{ 0 };
-  grape::SystemClock::Duration aggregate_latency{ 0 };
-  grape::SystemClock::TimePoint start;
+  grape::WallClock::Duration aggregate_latency{ 0 };
+  grape::WallClock::TimePoint start;
   void print() const;
   void reset();
-  void add(const grape::SystemClock::TimePoint& ts, const grape::ipc::Sample& sample);
+  void add(const grape::WallClock::TimePoint& ts, const grape::ipc::Sample& sample);
 };
 
 //-------------------------------------------------------------------------------------------------
 void Statistics::print() const {
-  const auto stop = grape::SystemClock::now();
+  const auto stop = grape::WallClock::now();
   const auto dt = std::chrono::duration<double>(stop - start).count();
   const auto msg_rate = std::floor(static_cast<double>(msg_count) / dt);
   const auto byte_rate = std::floor(static_cast<double>(aggregate_bytes) / dt);
@@ -56,7 +56,7 @@ void Statistics::reset() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Statistics::add(const grape::SystemClock::TimePoint& ts, const grape::ipc::Sample& sample) {
+void Statistics::add(const grape::WallClock::TimePoint& ts, const grape::ipc::Sample& sample) {
   if (msg_count == 0) {
     start = ts;
   }
@@ -86,7 +86,7 @@ auto main(int argc, const char* argv[]) -> int {
     Statistics stats;
 
     const auto data_cb = [&stats](const grape::ipc::Sample& sample) -> void {
-      const auto ts = grape::SystemClock::now();
+      const auto ts = grape::WallClock::now();
       stats.add(ts, sample);
       static constexpr std::array<char, 4> PROGRESS{ '|', '/', '-', '\\' };
       std::print("\r[{}]", PROGRESS.at(stats.msg_count % 4));

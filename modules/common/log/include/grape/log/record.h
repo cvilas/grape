@@ -9,7 +9,7 @@
 
 #include "grape/fixed_string.h"
 #include "grape/log/severity.h"
-#include "grape/time.h"
+#include "grape/wall_clock.h"
 
 namespace grape::log {
 
@@ -18,7 +18,7 @@ struct [[nodiscard]] Record {
   static constexpr auto MAX_LOGGER_NAME_LEN = 63U;
   static constexpr auto MAX_LOG_MESSAGE_LEN = 255U;
 
-  SystemClock::TimePoint timestamp;
+  WallClock::TimePoint timestamp;
   std::source_location location;
   FixedString<MAX_LOGGER_NAME_LEN> logger_name;
   FixedString<MAX_LOG_MESSAGE_LEN> message;

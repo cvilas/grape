@@ -10,14 +10,14 @@
 
 #include "grape/ipc/match.h"
 #include "grape/ipc/qos.h"
-#include "grape/time.h"
+#include "grape/wall_clock.h"
 
 namespace grape::ipc {
 
 //=================================================================================================
 /// Meta information about data contained in a sample
 struct SampleInfo {
-  SystemClock::TimePoint publish_time;
+  WallClock::TimePoint publish_time;
   EntityId publisher;
 };
 
