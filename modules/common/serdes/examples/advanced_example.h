@@ -26,7 +26,7 @@ struct Quaternion {
 
 //-------------------------------------------------------------------------------------------------
 struct PoseStamped {
-  std::uint64_t nanoseconds{};
+  std::int64_t nanoseconds{};
   Position position{};
   Quaternion orientation{};
 };

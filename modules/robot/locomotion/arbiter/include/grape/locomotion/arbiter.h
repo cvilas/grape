@@ -52,11 +52,11 @@ private:
   void publishStatus() const;
   void watchdogLoop(const std::stop_token& stop_token);
 
-  static_assert(std::atomic<SystemClock::TimePoint>::is_always_lock_free);
+  static_assert(std::atomic<WallClock::TimePoint>::is_always_lock_free);
   static_assert(std::atomic<float>::is_always_lock_free);
   static_assert(std::atomic<std::uint64_t>::is_always_lock_free);
 
-  std::atomic<SystemClock::TimePoint> last_alt_cmd_time_;
+  std::atomic<WallClock::TimePoint> last_alt_cmd_time_;
   std::atomic<float> cmd_latency_;
   statistics::SlidingMean<float, LATENCY_TRACKER_WINDOW> cmd_latency_tracker_;
   std::atomic<std::uint64_t> alt_controller_id_{ NULL_ID };

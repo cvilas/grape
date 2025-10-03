@@ -9,7 +9,7 @@
 
 #include "grape/exception.h"
 #include "grape/ipc/session.h"
-#include "grape/time.h"
+#include "grape/wall_clock.h"
 
 namespace {
 
@@ -78,7 +78,7 @@ RawPublisher::RawPublisher(RawPublisher&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
 auto RawPublisher::publish(std::span<const std::byte> bytes) const -> std::expected<void, Error> {
-  const auto now = SystemClock::now().time_since_epoch().count();
+  const auto now = WallClock::now().time_since_epoch().count();
   if (not impl_->Send(bytes.data(), bytes.size(), now)) {
     if (impl_->GetSubscriberCount() > 0U) {
       return std::unexpected{ Error::PublishFailed };

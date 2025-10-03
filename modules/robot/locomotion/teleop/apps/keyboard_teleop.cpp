@@ -21,7 +21,7 @@ namespace {
 struct State {
   bool is_service_detected{ false };
   bool is_client_active{ false };
-  grape::SystemClock::Duration latency{};
+  grape::WallClock::Duration latency{};
   std::string last_error_msg;
 };
 
@@ -84,7 +84,7 @@ auto onTeleopStatus(const grape::locomotion::TeleopClient::Status& teleop_status
       state.latency = st.command_latency;
     }
     void operator()(const TeleopClient::Error& st) {
-      const auto now = grape::SystemClock::now();
+      const auto now = grape::WallClock::now();
       state.last_error_msg = std::format("[{}]: {}", now, st.message);
     }
   };

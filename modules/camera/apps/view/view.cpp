@@ -13,7 +13,7 @@
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
-#include "grape/time.h"
+#include "grape/wall_clock.h"
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 camera API to acquire and show camera frames.
@@ -55,7 +55,7 @@ void Application::onCapturedFrame(const grape::camera::ImageFrame& frame) {
     const auto fname = std::format("snapshot_{:%FT%T}.bmp", frame.header.timestamp);
     std::ignore = grape::camera::save(frame, fname);
   }
-  const auto now = grape::SystemClock::now();
+  const auto now = grape::WallClock::now();
   static auto last_report_ts = now;
   static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
   if (now - last_report_ts > STATS_REPORT_PERIOD) {

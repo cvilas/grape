@@ -165,7 +165,7 @@ void Display::render(const ImageFrame& frame) {
   }
 
   // show image
-  const auto now = SystemClock::now();
+  const auto now = WallClock::now();
   if (not SDL_RenderPresent(renderer)) {
     syslog::Warn("Failed to present image: {}", SDL_GetError());
   }
@@ -174,10 +174,10 @@ void Display::render(const ImageFrame& frame) {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Display::latency() const -> SystemClock::Duration {
+auto Display::latency() const -> WallClock::Duration {
   const auto mean_latency = impl_->latency_accum.mean();
   impl_->latency_accum.reset();
-  return std::chrono::duration_cast<SystemClock::Duration>(
+  return std::chrono::duration_cast<WallClock::Duration>(
       std::chrono::duration<float>(mean_latency));
 }
 
