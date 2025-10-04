@@ -7,14 +7,26 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
 - [x] Implement SDL3-based camera streamer
-- [ ] Implement libcamera support in [picam](../modules/rpi/picam/README.md)
+- [ ] Implement system clock
+- [ ] Implement [picam](../modules/rpi/picam/README.md)  
+  - [ ] Make camera pipeline recognise pi5 camera (libcamera (pi fork) + pipewire on Ubuntu 24.04)
+  - [ ] Document how to build and run pi camera publishing service  
+  - [ ] Improve performance over network
+    - [ ] Test1: Compare perf pub/sub performance between TCP and UDP transports, and between hosts
+    - [ ] Test2: camera pub on PC1, camera sub1 on PC1, camera sub2 on PC2. Measure latency and throughput. Tweak (frame rate, image scale, compression) for steady stream
 - [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
   - [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation
   - [ ] 3D viewing and signal plotting (SDL3, imgui, implot)
+- [ ] DSP functions
+  - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
+  - [ ] Delay line
+  - [ ] Low pass filter
+  - [ ] Differentiator
+  - [ ] Integrator
+  - [ ] Velocity observer
 - [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
 - [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs
-  - [ ] Read: Forward kinematics using product of exponentials method. Use this representation for both math and visualisation
   - [ ] Review `Getting Started` section of OpenGL [book](https://learnopengl.com/)
   - [ ] Review my experimental implementations in scratch/scenegraph/copilot
   - [ ] Build version 1: Traditional scenegraph using class hierarchy
@@ -23,13 +35,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Extend to support asset loading using assimp
   - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
   - [ ] Design a text-based scenegraph description format using our scripting engine
-- [ ] DSP functions
-  - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
-  - [ ] Delay line
-  - [ ] Low pass filter
-  - [ ] Differentiator
-  - [ ] Integrator
-  - [ ] Velocity observer
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] Real-time time-series plotting using implot (redesign from scratch again)
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
