@@ -46,8 +46,40 @@ void printCameraSpecs(SDL_CameraID camera_id) {
 namespace grape::camera {
 
 struct Camera::Impl {
+  void openCamera(SDL_CameraID id);
   std::unique_ptr<SDL_Camera, void (*)(SDL_Camera*)> camera{ nullptr, SDL_CloseCamera };
 };
+
+//-------------------------------------------------------------------------------------------------
+void Camera::Impl::openCamera(SDL_CameraID id) {
+  int count = 0;
+  auto** specs = SDL_GetCameraSupportedFormats(id, &count);
+  if (specs == nullptr) {
+    grape::syslog::Warn("Unable to get camera specs: {}", SDL_GetError());
+    return;
+  }
+  const auto specs_view = std::span{ specs, static_cast<std::size_t>(count) };
+  auto best_score = 0;
+  auto best_spec = *specs_view[0];
+  for (const auto* sp : specs_view) {
+    const auto fps = sp->framerate_numerator / sp->framerate_denominator;
+    const auto score = sp->width * fps;  // choose the highest horizontal resolution and frames/sec
+    if (score > best_score) {
+      best_spec = *sp;
+      best_score = score;
+    }
+  }
+  // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,bugprone-multi-level-implicit-pointer-conversion)
+  SDL_free(specs);
+
+  grape::syslog::Info("Best spec found: {}x{}, {} FPS, {}", best_spec.width, best_spec.height,
+                      best_spec.framerate_numerator / best_spec.framerate_denominator,
+                      SDL_GetPixelFormatName(best_spec.format));
+  camera.reset(SDL_OpenCamera(id, &best_spec));
+  if (camera == nullptr) {
+    panic(std::format("Unable to open camera: {}", SDL_GetError()));
+  }
+}
 
 //-------------------------------------------------------------------------------------------------
 Camera::Camera(Callback callback, const std::string& name_hint)
@@ -84,12 +116,9 @@ Camera::Camera(Callback callback, const std::string& name_hint)
   }
 
   syslog::Note("Opening camera [{}] {}", chosen_camera_index, chosen_camera_name);
-  const auto camera_spec = nullptr;  // accept whatever format the device offers
+
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-  impl_->camera.reset(SDL_OpenCamera(cameras_ids.get()[chosen_camera_index], camera_spec));
-  if (impl_->camera == nullptr) {
-    panic(std::format("Unable to open camera: {}", SDL_GetError()));
-  }
+  impl_->openCamera(cameras_ids.get()[chosen_camera_index]);
 }
 
 //-------------------------------------------------------------------------------------------------

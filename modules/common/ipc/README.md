@@ -45,6 +45,15 @@ pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
 
 ## Roadmap
 
-- [ ] Implement means to isolate communication to within a group of processes and to create multiple such groups.
-  - [ ] See [this discussion](https://github.com/eclipse-ecal/ecal/discussions/2093) for a solution
+- [ ] Implement means to isolate communication to within a group of processes and to create 
+      multiple such groups. See [this discussion](https://github.com/eclipse-ecal/ecal/discussions/2093) 
+      for a solution.
 - [ ] Support specifying type and encoding information via `RawPublisher` and `RawSubscriber` interfaces
+- [ ] Define quality of service (QoS) settings per topic
+  - [ ] `BestEffort`: Use UDP for interhost communication 
+  - [ ] `Reliable`: Use TCP for interhost communication. Note the disadvantage of 1:1 connections 
+        and hence, multiple transmissions for the same message to each subscriber. 
+        [reference](https://eclipse-ecal.github.io/ecal/stable/advanced/layers/tcp.html)
+- [ ] Support zero-copy. Note the disadvantes due to synchronisation between readers and writers. 
+      [reference](https://eclipse-ecal.github.io/ecal/stable/advanced/layers/shm.html)
+  - [ ] Implement zero-copy on the publisher side by using `CPayloadWriter`
