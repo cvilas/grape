@@ -52,7 +52,7 @@ private:
 Subscriber::Subscriber(const std::string& topic)
   : decompressor_([this](const auto& frame) { onDecompressedFrame(frame); })
   , subscriber_(
-        topic, [this](const auto& sample) { onReceivedSample(sample); },
+        topic, ipc::QoS::Reliable, [this](const auto& sample) { onReceivedSample(sample); },
         [this](const auto& match) { onPublisherMatch(match); }) {
 }
 

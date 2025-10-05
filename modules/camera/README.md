@@ -16,5 +16,3 @@ Cross platform camera support
 - [ ] Experimentally determine and then document how to improve network performance
   - [ ] Set UDP buffer sizes as required in eCAL config (ecal.yaml)
   - [ ] Increase system socket buffer sizes in /etc/sysctl.conf (net.core.rmem_max/wmem_max/rmem_default/wmem_default)
-  - [ ] Set publisher and subscriber configuration on a per-topic basis (tcp vs udp for large data)
-

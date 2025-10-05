@@ -2,7 +2,7 @@
 """Subscriber test script for IPC communication."""
 import sys
 import time
-from grape_ipc_py import Config, init, RawSubscriber, ok
+from grape_ipc_py import Config, init, RawSubscriber, QoS, ok
 
 class TestSubscriber:
     def __init__(self):
@@ -33,7 +33,7 @@ def main():
         # Create subscriber
         topic = "test_topic"
         test_sub = TestSubscriber()
-        subscriber = RawSubscriber(topic, test_sub.data_callback, test_sub.match_callback)
+        subscriber = RawSubscriber(topic, QoS.BestEffort, test_sub.data_callback, test_sub.match_callback)
         
         print("Subscriber started, waiting for publishers...")
         

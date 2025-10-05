@@ -33,19 +33,39 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallba
       return;
   }
 }
+
+//-------------------------------------------------------------------------------------------------
+auto createConfig(grape::ipc::QoS qos) -> eCAL::Subscriber::Configuration {
+  auto config = eCAL::GetSubscriberConfiguration();
+  switch (qos) {
+    case grape::ipc::QoS::BestEffort:
+      config.layer.shm.enable = true;
+      config.layer.udp.enable = true;
+      config.layer.tcp.enable = false;
+      break;
+    case grape::ipc::QoS::Reliable:
+      config.layer.shm.enable = true;
+      config.layer.udp.enable = false;
+      config.layer.tcp.enable = true;
+      break;
+  }
+  return config;
+}
+
 }  // namespace
 
 namespace grape::ipc {
 
 struct RawSubscriber::Impl : public eCAL::CSubscriber {
-  Impl(const std::string& topic_name, const eCAL::SubEventCallbackT& event_cb)
-    : eCAL::CSubscriber(topic_name, eCAL::SDataTypeInformation(), event_cb) {
+  Impl(const std::string& topic_name, const eCAL::SubEventCallbackT& event_cb,
+       const eCAL::Subscriber::Configuration& config)
+    : eCAL::CSubscriber(topic_name, eCAL::SDataTypeInformation(), event_cb, config) {
   }
 };
 
 //-------------------------------------------------------------------------------------------------
-RawSubscriber::RawSubscriber(const std::string& topic, RawSubscriber::DataCallback&& data_cb,
-                             MatchCallback&& match_cb) {
+RawSubscriber::RawSubscriber(const std::string& topic, QoS qos,
+                             RawSubscriber::DataCallback&& data_cb, MatchCallback&& match_cb) {
   if (not ok()) {
     panic("Not initialised");
   }
@@ -58,7 +78,7 @@ RawSubscriber::RawSubscriber(const std::string& topic, RawSubscriber::DataCallba
     }
   };
 
-  impl_ = std::make_unique<RawSubscriber::Impl>(topic, event_cb);
+  impl_ = std::make_unique<RawSubscriber::Impl>(topic, event_cb, createConfig(qos));
 
   impl_->SetReceiveCallback([moved_data_cb = std::move(data_cb)](
                                 const eCAL::STopicId& id, const eCAL::SDataTypeInformation&,

@@ -23,10 +23,6 @@ struct Manager {
         break;
       case grape::ipc::Config::Scope::Network:
         ecal_config.communication_mode = eCAL::eCommunicationMode::network;
-        // ecal_config.publisher.layer.tcp.enable = true;
-        // ecal_config.publisher.layer.udp.enable = false;
-        // ecal_config.subscriber.layer.tcp.enable = true;
-        // ecal_config.subscriber.layer.udp.enable = false;
         break;
     }
     eCAL::Initialize(ecal_config, grape_config.name);

@@ -10,6 +10,7 @@ define_module_pybinding(
   bindings.cpp
   config_bindings.cpp
   match_bindings.cpp
+  qos_bindings.cpp
   publisher_bindings.cpp
   session_bindings.cpp
   subscriber_bindings.cpp)

@@ -17,27 +17,26 @@ namespace grape::ipc {
 //=================================================================================================
 /// Subscriber templated in topic attributes
 ///
-template <typename TopicAttributes>
+template <TopicAttributes Topic>
 class Subscriber : public RawSubscriber {
 public:
-  using DataCallback = std::function<void(
-      const std::expected<typename TopicAttributes::DataType, Error>&, const SampleInfo&)>;
+  using DataCallback =
+      std::function<void(const std::expected<typename Topic::DataType, Error>&, const SampleInfo&)>;
 
-  Subscriber(const TopicAttributes& topic_attr, DataCallback&& data_cb,
-             MatchCallback&& match_cb = nullptr);
+  Subscriber(const Topic& topic_attr, DataCallback&& data_cb, MatchCallback&& match_cb = nullptr);
 };
 
 //-------------------------------------------------------------------------------------------------
-template <typename TopicAttributes>
-Subscriber<TopicAttributes>::Subscriber(const TopicAttributes& topic_attr, DataCallback&& data_cb,
-                                        MatchCallback&& match_cb)
+template <TopicAttributes Topic>
+Subscriber<Topic>::Subscriber(const Topic& topic_attr, DataCallback&& data_cb,
+                              MatchCallback&& match_cb)
   : RawSubscriber(
-        topic_attr.topicName(),
+        topic_attr.topicName(), Topic::QOS,
         [moved_data_cb = std::move(data_cb)](const Sample& sample) {
           if (not moved_data_cb) {
             return;
           }
-          auto result = std::expected<typename TopicAttributes::DataType, Error>{ std::in_place };
+          auto result = std::expected<typename Topic::DataType, Error>{ std::in_place };
           auto stream = serdes::InStream(sample.data);
           auto deserialiser = serdes::Deserialiser(stream);
           if (not deserialiser.unpack(*result)) {
