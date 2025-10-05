@@ -29,7 +29,8 @@ auto main() -> int {
       std::println("\n{} (entity: {})", toString(match.status), toString(match.remote_entity));
     };
 
-    auto subscriber = grape::ipc::RawSubscriber(topic, data_cb, match_cb);
+    auto subscriber =
+        grape::ipc::RawSubscriber(topic, grape::ipc::QoS::BestEffort, data_cb, match_cb);
 
     constexpr auto SLEEP_TIME = std::chrono::milliseconds(500);
     while (grape::ipc::ok()) {

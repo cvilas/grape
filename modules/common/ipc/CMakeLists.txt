@@ -18,6 +18,7 @@ set(SOURCES
     include/grape/ipc/error.h
     include/grape/ipc/config.h
     include/grape/ipc/match.h
+    include/grape/ipc/qos.h
     include/grape/ipc/session.h
     include/grape/ipc/raw_publisher.h
     include/grape/ipc/raw_subscriber.h

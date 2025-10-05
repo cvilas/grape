@@ -9,6 +9,7 @@
 #include <span>
 
 #include "grape/ipc/match.h"
+#include "grape/ipc/qos.h"
 #include "grape/time.h"
 
 namespace grape::ipc {
@@ -36,9 +37,10 @@ public:
 
   /// creates a subscriber
   /// @param topic Topic on which to listen to for data from matched publishers
+  /// @param qos Quality of service desired on this topic
   /// @param data_cb Data processing callback, triggered on every newly received data sample
   /// @param match_cb Match callback, triggered when matched/unmatched with a remote publisher
-  RawSubscriber(const std::string& topic, DataCallback&& data_cb,
+  RawSubscriber(const std::string& topic, QoS qos, DataCallback&& data_cb,
                 MatchCallback&& match_cb = nullptr);
 
   /// @return The number of publishers currently matched to this subscriber

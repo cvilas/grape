@@ -29,10 +29,11 @@ void bindSubscriber(nanobind::module_& module) {
 
   // Bind the RawSubscriber class
   nanobind::class_<RawSubscriber>(module, "RawSubscriber")
-      .def(nanobind::init<const std::string&, RawSubscriber::DataCallback, MatchCallback>(),
-           nanobind::arg("topic"), nanobind::arg("data_cb"), nanobind::arg("match_cb") = nullptr,
-           "Create a RawSubscriber with the specified topic, data callback, and optional match "
-           "callback.")
+      .def(nanobind::init<const std::string&, QoS, RawSubscriber::DataCallback, MatchCallback>(),
+           nanobind::arg("topic"), nanobind::arg("qos"), nanobind::arg("data_cb"),
+           nanobind::arg("match_cb") = nullptr,
+           "Create a RawSubscriber with the specified topic, QoS, data callback, and "
+           "optional match callback.")
       .def("get_publisher_count", &RawSubscriber::publisherCount,
            "Get the number of publishers currently matched to this subscriber.");
 }

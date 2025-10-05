@@ -4,7 +4,7 @@
 
 import time
 from datetime import datetime
-from grape_ipc_py import init, Config, RawSubscriber, ok
+from grape_ipc_py import init, Config, RawSubscriber, QoS, ok
 
 
 def from_bytes(data: bytes) -> str:
@@ -35,7 +35,7 @@ def main():
         topic = "hello_world"
 
         # Create the subscriber
-        subscriber = RawSubscriber(topic, data_callback, match_callback)
+        subscriber = RawSubscriber(topic, QoS.BestEffort, data_callback, match_callback)
 
         # Sleep loop to keep the subscriber running
         SLEEP_TIME = 0.5  # 500 milliseconds

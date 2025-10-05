@@ -7,6 +7,8 @@
 #include <concepts>
 #include <string>
 
+#include "grape/ipc/qos.h"
+
 namespace grape::ipc {
 
 //=================================================================================================
@@ -18,6 +20,9 @@ concept TopicAttributes = requires(T obj) {
 
   // Data type must be default constructible
   requires std::default_initializable<typename T::DataType>;
+
+  // Defines quality of service setting
+  { T::QOS } -> std::convertible_to<QoS>;
 
   // Defines max buffer size required to serialise data into raw bytes
   { T::SERDES_BUFFER_SIZE } -> std::convertible_to<std::size_t>;

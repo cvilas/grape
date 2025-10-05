@@ -11,9 +11,6 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [ ] Implement [picam](../modules/rpi/picam/README.md)  
   - [ ] Make camera pipeline recognise pi5 camera (libcamera (pi fork) + pipewire on Ubuntu 24.04)
   - [ ] Document how to build and run pi camera publishing service  
-  - [ ] Improve performance over network
-    - [ ] Test1: Compare perf pub/sub performance between TCP and UDP transports, and between hosts
-    - [ ] Test2: camera pub on PC1, camera sub1 on PC1, camera sub2 on PC2. Measure latency and throughput. Tweak (frame rate, image scale, compression) for steady stream
 - [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
   - [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
   - [ ] constexpr matrix and quaternions operations to support AHRS implementation

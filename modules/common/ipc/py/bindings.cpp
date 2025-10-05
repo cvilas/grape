@@ -9,6 +9,7 @@ NB_MODULE(grape_ipc_py, module) {
   grape::ipc::py::bindConfig(module);
   grape::ipc::py::bindSession(module);
   grape::ipc::py::bindMatch(module);
+  grape::ipc::py::bindQoS(module);
   grape::ipc::py::bindPublisher(module);
   grape::ipc::py::bindSubscriber(module);
 }

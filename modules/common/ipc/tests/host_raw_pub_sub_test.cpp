@@ -44,6 +44,8 @@ TEST_CASE("Basic pub-sub on large message works in host-only scope", "[ipc]") {
     is_data_received.release();
   };
 
+  const auto qos = grape::ipc::QoS::BestEffort;
+
   // create pub/sub
   auto matched_sub_id = 0UL;
   const auto pub_match_cb = [&matched_sub_id](const grape::ipc::Match& match) -> void {
@@ -55,7 +57,7 @@ TEST_CASE("Basic pub-sub on large message works in host-only scope", "[ipc]") {
   const auto sub_match_cb = [&matched_pub_id](const grape::ipc::Match& match) -> void {
     matched_pub_id = match.remote_entity.id;
   };
-  auto subscriber = grape::ipc::RawSubscriber(topic, recv_callback, sub_match_cb);
+  auto subscriber = grape::ipc::RawSubscriber(topic, qos, recv_callback, sub_match_cb);
 
   // Wait for pub/sub registration
   constexpr auto RETRY_COUNT = 10U;

@@ -14,6 +14,7 @@ class AlternateCommandTopic {
 public:
   using DataType = locomotion::Command;
   static constexpr auto TOPIC_SUFFIX = "/locomotion/command/alternate";
+  static constexpr auto QOS = ipc::QoS::BestEffort;
   static constexpr auto SERDES_BUFFER_SIZE = 128U;
   explicit AlternateCommandTopic(std::string robot_name) : robot_name_(std::move(robot_name)) {
   }
@@ -30,6 +31,7 @@ class ArbiterStatusTopic {
 public:
   using DataType = locomotion::ArbiterStatus;
   static constexpr auto TOPIC_SUFFIX = "/locomotion/arbiter/status";
+  static constexpr auto QOS = ipc::QoS::BestEffort;
   static constexpr auto SERDES_BUFFER_SIZE = 128U;
   explicit ArbiterStatusTopic(std::string robot_name) : robot_name_(std::move(robot_name)) {
   }

@@ -101,6 +101,10 @@ void Display::render(const ImageFrame& frame) {
     }
   }
 
+  if (not SDL_RenderClear(renderer)) {
+    syslog::Warn("Failed to clear screen: {}", SDL_GetError());
+  }
+
   // render image into texture
   auto* texture = impl_->texture.get();
   if (not SDL_UpdateTexture(texture, nullptr, frame.pixels.data(),
@@ -122,7 +126,7 @@ void Display::render(const ImageFrame& frame) {
     // Determine image scaling and invert it to scale text such that its size appears constant
     auto window_w = 1;
     auto window_h = 1;
-    if (!SDL_GetRenderOutputSize(renderer, &window_w, &window_h)) {
+    if (not SDL_GetRenderOutputSize(renderer, &window_w, &window_h)) {
       syslog::Warn("Failed to get window size: {}", SDL_GetError());
     }
     const auto scale_x = static_cast<float>(window_w) / static_cast<float>(header.width);
@@ -133,13 +137,13 @@ void Display::render(const ImageFrame& frame) {
     static constexpr auto TS_X = 10;
     static constexpr auto TS_Y = 10;
     const auto ts_text = std::format("{}", header.timestamp);
-    if (!SDL_SetRenderScale(renderer, ts_scale, ts_scale)) {
+    if (not SDL_SetRenderScale(renderer, ts_scale, ts_scale)) {
       syslog::Warn("Failed to scale font: {}", SDL_GetError());
     }
-    if (!SDL_RenderDebugText(renderer, TS_X, TS_Y, ts_text.c_str())) {
+    if (not SDL_RenderDebugText(renderer, TS_X, TS_Y, ts_text.c_str())) {
       syslog::Warn("Failed to render text: {}", SDL_GetError());
     }
-    if (!SDL_SetRenderScale(renderer, 1.0F, 1.0F)) {
+    if (not SDL_SetRenderScale(renderer, 1.0F, 1.0F)) {
       syslog::Warn("Failed to reset font scale: {}", SDL_GetError());
     }
   }
