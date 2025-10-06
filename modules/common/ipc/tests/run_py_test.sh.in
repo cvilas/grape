@@ -1,0 +1,74 @@
+#!/bin/bash
+# =================================================================================================
+# Copyright (C) 2025 GRAPE Contributors
+# =================================================================================================
+# Script to run Python test for grape_ipc_py in a virtual environment
+
+WHEELS_DIR=@PY_WHEELS_DIR@
+TEST_SCRIPT=@CMAKE_CURRENT_SOURCE_DIR@/host_raw_pub_sub_test.py
+VENV_DIR="/tmp/grape_ipc_py_test_venv_$$"  # Using $$ to append the PID for uniqueness
+TEST_RESULT=0
+
+# Cleans up regardless of exit path
+cleanup() {
+    echo -e "Performing cleanup..."
+    # Check if the wheel was installed
+    if pip list | grep -q "grape_ipc_py"; then
+        echo -e "Uninstalling grape_ipc_py..."
+        pip uninstall -y grape_ipc_py
+    fi
+    
+    # Deactivate virtual environment 
+    if [[ -n "${VIRTUAL_ENV}" ]]; then
+        echo -e "Deactivating virtual environment..."
+        deactivate
+    fi
+    
+    # Remove the virtual environment directory
+    if [[ -d "${VENV_DIR}" ]]; then
+        echo -e "Removing virtual environment directory..."
+        rm -rf "${VENV_DIR}"
+    fi
+    
+    # Return with the stored test result
+    if [ ${TEST_RESULT} -eq 0 ]; then
+        echo -e "Test passed successfully!"
+    else
+        echo -e "Test failed with exit code ${TEST_RESULT}"
+        exit ${TEST_RESULT}
+    fi
+}
+
+# Set trap to call cleanup function on script exit (normal or abnormal)
+trap cleanup EXIT
+
+echo -e "Setting up test environment..."
+echo -e "Using wheels directory: ${WHEELS_DIR}"
+echo -e "Creating virtual environment at ${VENV_DIR}"
+@Python_EXECUTABLE@ -m venv "${VENV_DIR}"
+
+# Activate virtual environment
+echo -e "Activating virtual environment"
+source "${VENV_DIR}/bin/activate"
+pip install --upgrade pip
+
+# Find the latest grape_ipc_py wheel
+echo -e "Looking for grape_ipc_py wheel..."
+WHEEL_PATH=$(ls -t ${WHEELS_DIR}/grape_ipc_py*.whl 2> /dev/null | head -n 1)
+
+if [ -z "${WHEEL_PATH}" ]; then
+    echo -e "ERROR: No grape_ipc_py wheel found in ${WHEELS_DIR}"
+    TEST_RESULT=1
+    exit 1  # This will trigger the cleanup trap
+fi
+
+echo -e "Found wheel: $(basename ${WHEEL_PATH})"
+
+# Install the wheel
+echo -e "Installing wheel..."
+pip install "${WHEEL_PATH}"
+
+# Run the test
+echo -e "Running test script..."
+python "${TEST_SCRIPT}"
+TEST_RESULT=$?
