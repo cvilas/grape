@@ -34,13 +34,24 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallba
       return;
   }
 }
+
+//-------------------------------------------------------------------------------------------------
+auto createConfig() -> eCAL::Publisher::Configuration {
+  auto config = eCAL::GetPublisherConfiguration();
+  config.layer.shm.enable = true;
+  config.layer.udp.enable = true;
+  config.layer.tcp.enable = true;
+  return config;
+}
+
 }  // namespace
 
 namespace grape::ipc {
 
 struct RawPublisher::Impl : public eCAL::CPublisher {
-  Impl(const std::string& topic_name, const eCAL::PubEventCallbackT& event_cb)
-    : eCAL::CPublisher(topic_name, eCAL::SDataTypeInformation(), event_cb) {
+  Impl(const std::string& topic_name, const eCAL::PubEventCallbackT& event_cb,
+       const eCAL::Publisher::Configuration& config)
+    : eCAL::CPublisher(topic_name, eCAL::SDataTypeInformation(), event_cb, config) {
   }
 };
 
@@ -56,7 +67,7 @@ RawPublisher::RawPublisher(const std::string& topic, MatchCallback&& match_cb) {
       raiseMatchEvent(topic_id, event_data, moved_match_cb);
     }
   };
-  impl_ = std::make_unique<RawPublisher::Impl>(topic, event_cb);
+  impl_ = std::make_unique<RawPublisher::Impl>(topic, event_cb, createConfig());
 }
 
 //-------------------------------------------------------------------------------------------------
