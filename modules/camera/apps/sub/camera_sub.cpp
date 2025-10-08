@@ -232,7 +232,7 @@ auto main(int argc, char* argv[]) -> int {
 
     // Parse command line arguments
     const auto args = grape::conio::ProgramDescription("Camera viewer application")
-                          .declareOption<std::string>("topic", "image stream topic", "/camera")
+                          .declareOption<std::string>("topic", "image stream topic")
                           .parse(argc, const_cast<const char**>(argv));
 
     const auto topic = args.getOption<std::string>("topic");
