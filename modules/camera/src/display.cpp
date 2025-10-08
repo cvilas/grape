@@ -57,9 +57,25 @@ Display::Display() : impl_(std::make_unique<Impl>()) {
   }
   syslog::Info("Supported renderers: {}", supported_renderers);
 
-  if (not SDL_CreateWindowAndRenderer("Camera View", DEFAULT_WIDTH, DEFAULT_HEIGHT,
-                                      SDL_WINDOW_RESIZABLE, &window, &renderer)) {
-    panic(std::format("SDL_CreateWindowAndRenderer failed: {}", SDL_GetError()));
+  window = SDL_CreateWindow("Camera View", DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_WINDOW_RESIZABLE);
+  if (window == nullptr) {
+    panic(std::format("SDL_CreateWindow failed: {}", SDL_GetError()));
+  }
+
+  // Choose an available renderer in order of preferance, otherwise fallback to a default
+  static constexpr auto PREFERRED_RENDERERS = { "opengl", "opengles2", "vulkan", "gpu" };
+  for (const auto& renderer_name : PREFERRED_RENDERERS) {
+    renderer = SDL_CreateRenderer(window, renderer_name);
+    if (renderer != nullptr) {
+      break;
+    }
+  }
+  if (renderer == nullptr) {
+    renderer = SDL_CreateRenderer(window, nullptr);
+    if (renderer == nullptr) {
+      SDL_DestroyWindow(window);
+      panic(std::format("SDL_CreateRenderer failed: {}", SDL_GetError()));
+    }
   }
   syslog::Note("Using renderer: {}", SDL_GetRendererName(renderer));
 
@@ -119,7 +135,7 @@ void Display::render(const ImageFrame& frame) {
   if (show_timestamp_) {
     // set font color
     static constexpr auto COLOR = std::array<Uint8, 4>{ 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE };
-    if (!SDL_SetRenderDrawColor(renderer, COLOR.at(0), COLOR.at(1), COLOR.at(2), COLOR.at(3))) {
+    if (not SDL_SetRenderDrawColor(renderer, COLOR.at(0), COLOR.at(1), COLOR.at(2), COLOR.at(3))) {
       syslog::Warn("Failed to set font color: {}", SDL_GetError());
     }
 
