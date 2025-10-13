@@ -4,25 +4,11 @@
 
 #pragma once
 
-#include <concepts>
-#include <cstdint>
-#include <format>
-#include <sstream>
-#include <string>
-#include <vector>
-
+#include "grape/conio/string_streamable.h"
 #include "grape/exception.h"
 #include "grape/utils/utils.h"
 
 namespace grape::conio {
-
-//=================================================================================================
-/// Types that are convertable to and from a string
-template <typename T>
-concept StringStreamable = requires(std::string str, T value) {
-  std::istringstream{ str } >> value;
-  std::ostringstream{ str } << value;
-};
 
 //=================================================================================================
 /// Container for command line arguments of an application. Created by ProgramDescription.
@@ -136,9 +122,14 @@ auto ProgramDescription::declareOption(const std::string& key, const std::string
 template <StringStreamable T>
 auto ProgramDescription::declareOption(const std::string& key, const std::string& brief,
                                        const T& default_value) -> ProgramDescription& {
+  const auto to_string = [](const auto& val) {
+    std::ostringstream oss;
+    oss << val;
+    return oss.str();
+  };
   options_.emplace_back(ProgramOptions::Option{ .key = key,
                                                 .brief = brief,
-                                                .value = std::format("{}", default_value),
+                                                .value = to_string(default_value),
                                                 .type = utils::getTypeName<T>(),
                                                 .is_required = false,
                                                 .is_specified = false });

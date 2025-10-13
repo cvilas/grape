@@ -107,4 +107,56 @@ TEST_CASE("Ensures 'help' is always available", "[program_options]") {
   REQUIRE(args.hasOption("help"));
 }
 
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Parses vector of integers from comma-separated string", "[program_options]") {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  const char* argv[] = { "--int_list=1,2,3,4,5" };
+  const auto argc = 1;
+  const auto args = ProgramDescription("vector parsing test")
+                        .declareOption<std::vector<int>>("int_list", "A list of integers")
+                        .parse(argc, argv);
+  // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+
+  const auto vec = args.getOption<std::vector<int>>("int_list");
+  REQUIRE(vec.size() == 5);
+  REQUIRE(vec[0] == 1);
+  REQUIRE(vec[1] == 2);
+  REQUIRE(vec[2] == 3);
+  REQUIRE(vec[3] == 4);
+  REQUIRE(vec[4] == 5);
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Parses vector of strings from comma-separated string", "[program_options]") {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  const char* argv[] = { "--str_list=apple,banana,cherry" };
+  const auto argc = 1;
+  const auto args = ProgramDescription("string vector parsing test")
+                        .declareOption<std::vector<std::string>>("str_list", "A list of strings")
+                        .parse(argc, argv);
+  // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+
+  const auto vec = args.getOption<std::vector<std::string>>("str_list");
+  REQUIRE(vec.size() == 3);
+  REQUIRE(vec[0] == "apple");
+  REQUIRE(vec[1] == "banana");
+  REQUIRE(vec[2] == "cherry");
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Uses default vector value when optional vector argument is unspecified",
+          "[program_options]") {
+  const std::vector<int> default_values = { 100, 200, 300 };
+  const auto args =
+      ProgramDescription("vector default test")
+          .declareOption<std::vector<int>>("int_list", "A list with default", default_values)
+          .parse(0, nullptr);
+
+  const auto vec = args.getOption<std::vector<int>>("int_list");
+  REQUIRE(vec.size() == 3);
+  REQUIRE(vec[0] == 100);
+  REQUIRE(vec[1] == 200);
+  REQUIRE(vec[2] == 300);
+}
+
 }  // namespace
