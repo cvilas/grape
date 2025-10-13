@@ -9,8 +9,8 @@ declare_module(
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
-set(SOURCES README.md src/program_options.cpp src/conio.cpp include/grape/conio/program_options.h
-            include/grape/conio/conio.h)
+set(SOURCES README.md src/program_options.cpp src/conio.cpp include/grape/conio/string_streamable.h
+            include/grape/conio/program_options.h include/grape/conio/conio.h)
 
 # library target
 define_module_library(
