@@ -79,7 +79,8 @@ function(define_module_pybinding)
   add_custom_command(
     TARGET ${PY_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PY_MODULE_NAME}> ${PY_BINDINGS_DIR}/
-    COMMAND ${Python_EXECUTABLE} -m build --wheel --no-isolation --outdir ${PY_WHEELS_DIR}
+    COMMAND ${Python_EXECUTABLE} -m build --wheel --no-isolation --outdir ${PY_WHEELS_DIR} > 
+    ${CMAKE_CURRENT_BINARY_DIR}/wheel_build.log 2>&1 || (cat ${CMAKE_CURRENT_BINARY_DIR}/wheel_build.log && exit 1)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Building Python package (wheel) for ${PY_MODULE_NAME}")
     
