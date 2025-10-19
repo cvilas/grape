@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <format>
+#include <optional>
 
 namespace grape {
 
@@ -22,13 +23,22 @@ struct EgoClock {
   using TimePoint = std::chrono::time_point<EgoClock, Duration>;
   static constexpr bool IS_STEADY = false;
 
-  /// Wait for master (driver) to initialise this clock
+  /// Wait for master (driver) and initialise clock
+  /// @param clock_name Unique identifier for clock source
   /// @param timeout How long to wait for
-  /// @return true if clock was initialsed, false on timeout
-  [[nodiscard]] static auto waitForMaster(const std::chrono::milliseconds& timeout) -> bool;
+  /// @return An initialised clock, or nothing if timed out waiting for master clock signal
+  [[nodiscard]] static auto create(const std::string& clock_name,
+                                   const std::chrono::milliseconds& timeout)
+      -> std::optional<EgoClock>;
 
   /// @return Current timestamp
-  [[nodiscard]] static auto now() -> EgoClock::TimePoint;
+  [[nodiscard]] auto now() -> EgoClock::TimePoint;
+
+  /// sleep until a given time point
+  void sleepUntil(const EgoClock::TimePoint& tp);
+
+  /// sleep for a given duration
+  void sleepFor(const EgoClock::Duration& dt);
 
   /// @return nanoseconds since clock epoch, given time point
   [[nodiscard]] static constexpr auto toNanos(const EgoClock::TimePoint& tp) -> std::int64_t {
@@ -41,13 +51,18 @@ struct EgoClock {
     const auto dur = std::chrono::duration_cast<Duration>(std::chrono::nanoseconds(nanos));
     return EgoClock::TimePoint(dur);
   }
+
+  ~EgoClock();
+  EgoClock(EgoClock&&) noexcept;
+  EgoClock(const EgoClock&) = delete;
+  auto operator=(const EgoClock&) = delete;
+  auto operator=(EgoClock&&) = delete;
+
+private:
+  explicit EgoClock(const std::string& system_name);
+  class Impl;
+  std::unique_ptr<Impl> impl_{ nullptr };
 };
-
-/// sleep until a given time point
-void sleepUntil(const EgoClock::TimePoint& tp);
-
-/// sleep for a given duration
-void sleepFor(const EgoClock::Duration& dt);
 
 }  // namespace grape
 

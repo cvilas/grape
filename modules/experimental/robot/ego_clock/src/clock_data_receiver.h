@@ -8,9 +8,7 @@
 #include <atomic>
 
 #include "clock_data.h"
-#include "grape/ego_clock.h"
 #include "grape/ipc/subscriber.h"
-#include "grape/wall_clock.h"
 
 namespace grape::ego_clock {
 
@@ -18,7 +16,7 @@ namespace grape::ego_clock {
 /// Receives clock ticks from ego clock driver
 class ClockDataReceiver {
 public:
-  ClockDataReceiver();
+  explicit ClockDataReceiver(const std::string& clock_name);
   [[nodiscard]] auto transform() const -> std::optional<ClockTransform>;
 
 private:
