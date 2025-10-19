@@ -4,13 +4,13 @@
 
 - [ ] [picam](../modules/rpi/picam/README.md)  
 - [ ] [halow](../modules/rpi/halow/README.md) 
-- [ ] 4G LTE/5G
-- [ ] [ahrs](../modules/rpi/ahrs/README.md)
-- [ ] CANOpen
-- [ ] [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
 - [ ] Real-time time-series plotting using implot (redesign from scratch again)
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
+- [ ] [ahrs](../modules/rpi/ahrs/README.md)
+- [ ] CANOpen
+- [ ] [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
+
 
 ## QRTS
 
@@ -92,7 +92,6 @@ Create a qrts subtree, recreate QRTS libraries, relive 2001
 
 ## References
 
-- [cactus-rt](https://github.com/cactusdynamics/cactus-rt/)
 - [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
 - [glaze](https://github.com/stephenberry/glaze) for JSON serialisation and reflection
 - C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)

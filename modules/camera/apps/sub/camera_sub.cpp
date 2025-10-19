@@ -230,8 +230,9 @@ auto main(int argc, char* argv[]) -> int {
     }
 
     // Parse command line arguments
+    const auto default_topic = grape::utils::getHostName() + "/camera";
     const auto args = grape::conio::ProgramDescription("Camera viewer application")
-                          .declareOption<std::string>("topic", "image stream topic")
+                          .declareOption<std::string>("topic", "image stream topic", default_topic)
                           .parse(argc, const_cast<const char**>(argv));
 
     const auto topic = args.getOption<std::string>("topic");
