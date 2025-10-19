@@ -2,7 +2,7 @@
 # Copyright (C) 2023 GRAPE Contributors
 # =================================================================================================
 
-declare_module(NAME ipc2 DEPENDS_ON_MODULES "base" DEPENDS_ON_EXTERNAL_PROJECTS "zenohc;zenohcxx")
+#declare_module(NAME ipc2 DEPENDS_ON_MODULES "base" DEPENDS_ON_EXTERNAL_PROJECTS "zenohc;zenohcxx")
 
 find_package(zenohc ${ZENOHC_VERSION_REQUIRED} REQUIRED)
 find_package(zenohcxx ${ZENOHCXX_VERSION_REQUIRED} REQUIRED)
