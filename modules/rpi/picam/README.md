@@ -43,14 +43,13 @@
   systemctl --user --now enable wireplumber pipewire
   ```
 
-## Additional notes
+## Roadmap
 
-## The plan
-- Follow steps exactly as in https://github.com/NEX108/RaspberryPi5-Ubuntu24-CameraModule3 and update docs above
-- Create `Camera` class modelled after [libcamera-cpp-demo](https://github.com/edward-ardu/libcamera-cpp-demo)
-- Configure to capture in RGB24 format. Then provide `grape::camera::ImageFrame` in a callback, just like `grape::camera::Camera`
-- Build the rest of the pipeline using `grape::camera` components
+- [x] Create `PiCamera` class to match `grape::camera::Camera` interface
+- [x] Test on actual Raspberry Pi hardware
+- [x] Recreate camera/camera_pub pipeline using `grape::camera` components
+- [ ] Improve performance (max framerate and max resolution to match `rpicam-vid`)
 
 ## References
 
-- https://github.com/NEX108/RaspberryPi5-Ubuntu24-CameraModule3
+- <https://github.com/NEX108/RaspberryPi5-Ubuntu24-CameraModule3>

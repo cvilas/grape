@@ -5,7 +5,9 @@
 declare_module(
   NAME picam
   DEPENDS_ON_MODULES "camera"
-  DEPENDS_ON_EXTERNAL_PROJECTS "")
+  DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
+
+find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 
 set(LIBCAMERA_VERSION_REQUIRED "0.5")
 find_package(PkgConfig REQUIRED)
@@ -22,8 +24,8 @@ message(
 # Extract path to libcamera library
 set(LIBCAMERA_SO_PATH "libcamera_not_found")
 foreach(LIB ${LIBCAMERA_LINK_LIBRARIES})
-  string(FIND "${LIB}" "libcamera.so" FOUND_POS)
-  if(NOT ${FOUND_POS} EQUAL -1)
+  string(FIND "${LIB}" "libcamera.so" FOUND_LIB)
+  if(NOT ${FOUND_LIB} EQUAL -1)
     set(LIBCAMERA_SO_PATH "${LIB}")
     break()
   endif()
@@ -53,5 +55,13 @@ if(NOT LIBCAMERA_STDLIB STREQUAL STDLIB_PATTERN)
   return()
 endif()
 
-add_subdirectory(hello)
-add_subdirectory(list)
+set(SOURCES include/grape/picam/pi_camera.h src/pi_camera.cpp)
+
+define_module_library(
+  NAME picamera
+  SOURCES ${SOURCES}
+  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                       $<INSTALL_INTERFACE:include>
+  PUBLIC_LINK_LIBS "grape::camera;PkgConfig::LIBCAMERA")
+
+add_subdirectory(apps)

@@ -6,12 +6,11 @@ Facilities to support deterministic real-time execution of tasks
 
 ## TODO
 
-- [ ] Document how to configure Raspberry Pi5 for realtime applications
-  - [ ] Document how to allocate specified CPU cores to run Linux.
-  - [ ] Document how to allocate specified CPU cores to run my processes and threads.
-  - [ ] Reference: [Low latency Ubuntu](https://ubuntu.com/blog/real-time-kernel-tuning)
-  - [ ] Reference: https://manuel.bernhardt.io/posts/2023-11-16-core-pinning/
-- [ ] Implement shared memory interface
+- [ ] Understand RT Linux deeply
+  - Take notes on every howto guide in [realtime ubuntu](https://documentation.ubuntu.com/real-time/latest/)
+  - [Document](../../rpi/docs/realtime.md) how to configure Raspberry Pi5 for realtime applications
+  - Document how to allocate specified CPU cores to run Linux.
+  - Document how to allocate specified CPU cores to run my processes and threads.
 - [ ] Implement single producer multi-consumer queue using heap and shared memory
 - [ ] Refactor multi-producer single-consumer queue
   - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
