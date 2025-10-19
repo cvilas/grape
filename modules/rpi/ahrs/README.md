@@ -11,3 +11,9 @@ SUBSYSTEM=="input", ENV{LIBINPUT_DEVICE_GROUP}=="*:rpi-sense-joy", GROUP="plugde
 SUBSYSTEM=="graphics", ENV{ID_PATH}=="*-rpi-sense-fb", GROUP="plugdev", MODE="0660"
 ```
 - Apply rules: `sudo udevadm control --reload-rules && sudo udevadm trigger`
+
+## TODO
+
+- [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
+- [ ] constexpr matrix and quaternions operations to support AHRS implementation
+- [ ] 3D viewing and signal plotting (SDL3, imgui, implot)

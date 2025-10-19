@@ -43,13 +43,15 @@
   systemctl --user --now enable wireplumber pipewire
   ```
 
-## Additional notes
+## TODO
 
-## The plan
-- Follow steps exactly as in https://github.com/NEX108/RaspberryPi5-Ubuntu24-CameraModule3 and update docs above
-- Create `Camera` class modelled after [libcamera-cpp-demo](https://github.com/edward-ardu/libcamera-cpp-demo)
-- Configure to capture in RGB24 format. Then provide `grape::camera::ImageFrame` in a callback, just like `grape::camera::Camera`
-- Build the rest of the pipeline using `grape::camera` components
+- [ ] Make camera work with libcamera (pi fork) on Ubuntu 24.04. Document it
+  - Resource 1: https://www.collabora.com/news-and-blog/blog/2020/09/11/integrating-libcamera-into-pipewire/
+  - Resource 2: https://github.com/NEX108/RaspberryPi5-Ubuntu24-CameraModule3
+- [ ] Create `Camera` class modelled after [libcamera-cpp-demo](https://github.com/edward-ardu/libcamera-cpp-demo)
+  - Configure to capture in RGB24 format. Then provide `grape::camera::ImageFrame` in a callback, just like `grape::camera::Camera`
+- [ ] Recreate camera/camera_pub pipeline using `grape::camera` components
+
 
 ## References
 
