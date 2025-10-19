@@ -30,5 +30,9 @@ mimics the behaviour of WallClock.
 
 ## TODO
 
-- [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`)  
-- [ ] `EgoClock::waitForMaster` should exit on signal
+- [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`) 
+- [ ] Consider a cheap factory `createEgoClock(master_wait_duration) -> std::optional<EgoClock>`
+  - Eliminates the need to call `EgoClock::waitForMaster()` 
+  - Eliminates exceptions in clock functions
+  - Solves the problem that `EgoClock::waitForMaster` blocks and does not exit on signal
+  - Makes it easier for `EgoClock` to satisfy requirements of [_TrivalClock_](https://en.cppreference.com/w/cpp/named_req/TrivialClock.html)

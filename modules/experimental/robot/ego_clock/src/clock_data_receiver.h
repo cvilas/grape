@@ -8,9 +8,7 @@
 #include <atomic>
 
 #include "clock_data.h"
-#include "grape/ego_clock.h"
 #include "grape/ipc/subscriber.h"
-#include "grape/wall_clock.h"
 
 namespace grape::ego_clock {
 
