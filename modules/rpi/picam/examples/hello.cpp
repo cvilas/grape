@@ -116,7 +116,7 @@ auto main() -> int {
     for (auto const& cam : cameras) {
       const auto& props = cam->properties();
       const auto& model = props.get(libcamera::properties::Model);
-      std::println("{} ({})", (model ? *model : "NoName"), cam->id());
+      std::println("Camera: {} ({})", (model ? *model : "NoName"), cam->id());
     }
 
     // Pick the first camera
@@ -168,7 +168,9 @@ auto main() -> int {
     // A Camera produces a CameraConfigration based on a set of intended roles for each Stream the
     // application requires.
     auto config = camera->generateConfiguration({ libcamera::StreamRole::Viewfinder });
-
+    for (const auto& stream : *config) {
+      std::println("\t{}", stream.toString());
+    }
     // The CameraConfiguration contains a StreamConfiguration instance for each StreamRole requested
     // by the application, provided the Camera can support all of them.
     //
@@ -185,10 +187,12 @@ auto main() -> int {
     // To validate the modified parameter, the CameraConfiguration should be validated -before- it
     // gets applied to the Camera. This will adjust the modified parameters to a valid configuration
     // which is as close as possible to the one requested.
-    constexpr auto WIDTH = 640U;
-    constexpr auto HEIGHT = 480U;
+    constexpr auto WIDTH = 2028U;
+    constexpr auto HEIGHT = 1520U;
+    constexpr auto PIXEL_FMT_NV12 = 0x3231564E;  // https://fourcc.org/yuv.php
     stream_config.size.width = WIDTH;
     stream_config.size.height = HEIGHT;
+    stream_config.pixelFormat = libcamera::PixelFormat(PIXEL_FMT_NV12);
     config->validate();
     std::println("Validated viewfinder configuration is: {}", stream_config.toString());
 

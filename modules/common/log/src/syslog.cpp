@@ -21,7 +21,7 @@ namespace grape::syslog {
 //-------------------------------------------------------------------------------------------------
 void init(log::Config&& config) {
   auto succeeded = false;
-  std::call_once(s_init_flag, [&succeeded, &config]() {
+  std::call_once(s_init_flag, [&]() {
     s_logger.emplace(std::move(config));
     succeeded = true;
   });

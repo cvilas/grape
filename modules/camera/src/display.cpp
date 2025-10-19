@@ -117,6 +117,8 @@ void Display::render(const ImageFrame& frame) {
     }
   }
 
+  syslog::Debug("stride: {}, width: {}, height: {}", header.pitch, header.width, header.height);
+
   if (not SDL_RenderClear(renderer)) {
     syslog::Warn("Failed to clear screen: {}", SDL_GetError());
   }
