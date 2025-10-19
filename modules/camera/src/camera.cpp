@@ -82,7 +82,7 @@ void Camera::Impl::openCamera(SDL_CameraID id) {
 }
 
 //-------------------------------------------------------------------------------------------------
-Camera::Camera(Callback callback, const std::string& name_hint)
+Camera::Camera(Callback&& callback, const std::string& name_hint)
   : impl_(std::make_unique<Impl>()), callback_(std::move(callback)) {
   syslog::Info("Available camera drivers: {}", enumerateCameraDrivers());
   syslog::Info("Using camera driver: {}", SDL_GetCurrentCameraDriver());
