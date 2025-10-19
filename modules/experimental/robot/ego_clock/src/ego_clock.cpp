@@ -2,12 +2,15 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
+#include "grape/ego_clock.h"
+
 #include <chrono>
 #include <mutex>
 #include <thread>
 
 #include "clock_data_receiver.h"
 #include "grape/exception.h"
+#include "grape/wall_clock.h"
 
 namespace {
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
@@ -27,8 +30,8 @@ auto clockReceiver() -> grape::ego_clock::ClockDataReceiver& {
   }
   s_receiver.emplace();
 
-  // Receiver depends on static global state held by the IPC library. Ensure we exi before IPC
-  // shared library is unloaded or we may exit with a segfault referencing IPC state during exit.
+  // IPC library holds global state that the receiver depends on. Ensure we exit before IPC
+  // shared library is unloaded or we may segfault referencing IPC state.
   std::call_once(s_register_cleanup_flag, []() { (void)std::atexit(cleanup); });
   return *s_receiver;  // NOLINT(bugprone-unchecked-optional-access)
 }
