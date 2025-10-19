@@ -13,16 +13,17 @@
 
 namespace {
 //-------------------------------------------------------------------------------------------------
-void masterClock(const std::stop_token& st) {
+void masterClock(const std::stop_token& st, const std::string& clock_name) {
   try {
     std::println("\nMaster clock start");
     static constexpr auto EGO_TICK_PERIOD = std::chrono::milliseconds(10);
     static constexpr auto WALL_TICK_PERIOD = std::chrono::milliseconds(100);
-    static constexpr auto CONFIG = grape::EgoClockDriver::Config{
+    const auto config = grape::EgoClockDriver::Config{
+      .clock_name = clock_name,
       .broadcast_interval = 20U,  // Broadcast clock sync every 20 ticks (1 second)
       .calibration_window = 40U   // Use 40 samples for clock fit
     };
-    auto driver = grape::EgoClockDriver(CONFIG);
+    auto driver = grape::EgoClockDriver(config);
     auto ego_time = grape::EgoClock::TimePoint{};
     while (not st.stop_requested()) {
       const auto wall_time = grape::WallClock::now();
@@ -53,13 +54,16 @@ auto main() -> int {
     // initialise IPC, because clocks communicate over it
     grape::ipc::init({});
 
+    static constexpr auto CLOCK_NAME = "example_clock";
+
     // create and run master clock
-    const auto master = std::jthread(masterClock);
+    const auto master = std::jthread(masterClock, CLOCK_NAME);
 
     // wait for master clock to initialise ego clock
     std::println("\nWaiting for clock to initialise");
     static constexpr auto MASTER_WAIT_TIME = std::chrono::seconds(10);
-    if (not grape::EgoClock::waitForMaster(MASTER_WAIT_TIME)) {
+    auto ego_clock = grape::EgoClock::create(CLOCK_NAME, MASTER_WAIT_TIME);
+    if (not ego_clock) {
       std::println("No master clock");
       return EXIT_FAILURE;
     }
@@ -67,10 +71,10 @@ auto main() -> int {
     // run process loop using ego clock
     static constexpr auto LOOP_PERIOD = std::chrono::milliseconds(100);
     while (!s_exit) {
-      const auto ego_now = grape::EgoClock::now();
+      const auto ego_now = ego_clock->now();
       const auto wall_now = grape::WallClock::now();
       std::println("Time now: Ego: {}, Wall: {}", ego_now, wall_now);
-      grape::sleepUntil(ego_now + LOOP_PERIOD);
+      ego_clock->sleepUntil(ego_now + LOOP_PERIOD);
     }
     return EXIT_SUCCESS;
   } catch (...) {

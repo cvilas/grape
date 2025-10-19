@@ -2,36 +2,16 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
+#include "grape/ego_clock.h"
+
 #include <chrono>
-#include <mutex>
 #include <thread>
 
 #include "clock_data_receiver.h"
-#include "grape/exception.h"
+#include "grape/log/syslog.h"
+#include "grape/wall_clock.h"
 
 namespace {
-// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-std::once_flag s_register_cleanup_flag;
-std::optional<grape::ego_clock::ClockDataReceiver> s_receiver{ std::nullopt };
-// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
-
-//-------------------------------------------------------------------------------------------------
-void cleanup() {
-  s_receiver.reset();
-}
-
-//-------------------------------------------------------------------------------------------------
-auto clockReceiver() -> grape::ego_clock::ClockDataReceiver& {
-  if (s_receiver) {
-    return *s_receiver;
-  }
-  s_receiver.emplace();
-
-  // Receiver depends on static global state held by the IPC library. Ensure we exi before IPC
-  // shared library is unloaded or we may exit with a segfault referencing IPC state during exit.
-  std::call_once(s_register_cleanup_flag, []() { (void)std::atexit(cleanup); });
-  return *s_receiver;  // NOLINT(bugprone-unchecked-optional-access)
-}
 
 //-------------------------------------------------------------------------------------------------
 constexpr auto toWallTime(const grape::ego_clock::ClockTransform& tf,
@@ -57,42 +37,71 @@ constexpr auto toWallDuration(const grape::ego_clock::ClockTransform& tf,
 
 namespace grape {
 
+//=================================================================================================
+class EgoClock::Impl {
+public:
+  explicit Impl(const std::string& clock_name) : receiver_(clock_name) {
+  }
+  auto receiver() -> grape::ego_clock::ClockDataReceiver& {
+    return receiver_;
+  }
+
+private:
+  grape::ego_clock::ClockDataReceiver receiver_;
+};
+
 //-------------------------------------------------------------------------------------------------
-auto EgoClock::waitForMaster(const std::chrono::milliseconds& timeout) -> bool {
+EgoClock::EgoClock(const std::string& system_name) : impl_(std::make_unique<Impl>(system_name)) {
+}
+
+//-------------------------------------------------------------------------------------------------
+EgoClock::~EgoClock() = default;
+
+//-------------------------------------------------------------------------------------------------
+EgoClock::EgoClock(EgoClock&&) noexcept = default;
+
+//-------------------------------------------------------------------------------------------------
+auto EgoClock::create(const std::string& clock_name, const std::chrono::milliseconds& timeout)
+    -> std::optional<EgoClock> {
   const auto until = WallClock::now() + timeout;
   static constexpr auto LOOP_WAIT = std::chrono::milliseconds(1);
-  const auto& receiver = clockReceiver();
-  while (not receiver.transform() and (WallClock::now() < until)) {
+  auto clock = EgoClock(clock_name);
+  while (not clock.impl_->receiver().transform() and (WallClock::now() < until)) {
     std::this_thread::sleep_for(LOOP_WAIT);
   }
-  return receiver.transform().has_value();
+  return clock.impl_->receiver().transform().has_value() ?
+             std::optional<EgoClock>(std::move(clock)) :
+             std::nullopt;
 }
 
 //-------------------------------------------------------------------------------------------------
 auto EgoClock::now() -> EgoClock::TimePoint {
-  const auto tf = clockReceiver().transform();
-  if (not tf) {
-    panic("No master clock signal");
+  const auto tf = impl_->receiver().transform();
+  if (tf) {
+    return toEgoTime(*tf, WallClock::now());
   }
-  return toEgoTime(tf.value(), WallClock::now());
+  syslog::Error("No master clock (unexpected)");
+  return EgoClock::TimePoint{};
 }
 
 //-------------------------------------------------------------------------------------------------
-void sleepFor(const EgoClock::Duration& dt) {
-  const auto tf = clockReceiver().transform();
-  if (not tf) {
-    panic("No master clock signal");
+void EgoClock::sleepFor(const EgoClock::Duration& dt) {
+  const auto tf = impl_->receiver().transform();
+  if (tf) {
+    std::this_thread::sleep_for(toWallDuration(*tf, dt));
+  } else {
+    syslog::Error("No master clock (unexpected)");
   }
-  std::this_thread::sleep_for(toWallDuration(tf.value(), dt));
 }
 
 //-------------------------------------------------------------------------------------------------
-void sleepUntil(const EgoClock::TimePoint& tp) {
-  const auto tf = clockReceiver().transform();
-  if (not tf) {
-    panic("No master clock signal");
+void EgoClock::sleepUntil(const EgoClock::TimePoint& tp) {
+  const auto tf = impl_->receiver().transform();
+  if (tf) {
+    std::this_thread::sleep_until(toWallTime(*tf, tp));
+  } else {
+    syslog::Error("No master clock (unexpected)");
   }
-  std::this_thread::sleep_until(toWallTime(tf.value(), tp));
 }
 
 }  // namespace grape

@@ -4,7 +4,6 @@
 
 #include <array>
 #include <random>
-#include <vector>
 
 #include <benchmark/benchmark.h>
 

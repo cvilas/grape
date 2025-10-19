@@ -12,9 +12,9 @@
 namespace grape::ego_clock {
 
 //-------------------------------------------------------------------------------------------------
-ClockDataReceiver::ClockDataReceiver()
+ClockDataReceiver::ClockDataReceiver(const std::string& clock_name)
   : tick_sub_(
-        ClockTopic(), [this](const auto& data, const auto& info) { onTick(data, info); },
+        ClockTopic(clock_name), [this](const auto& data, const auto& info) { onTick(data, info); },
         [this](const auto& match) { onMatch(match); }) {
 }
 

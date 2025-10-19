@@ -71,22 +71,22 @@ TEST_CASE("EgoClock operation with master clock", "[ego_clock]") {
 
   grape::ipc::init({});  // Easy to forget. Clocks depend on IPC
 
-  // Without master running, all operations throw or fail
-  REQUIRE_FALSE(grape::EgoClock::waitForMaster(10ms));
-  REQUIRE_THROWS_AS(grape::EgoClock::now(), grape::Exception);
-  REQUIRE_THROWS_AS(grape::sleepFor(10ms), grape::Exception);
-  REQUIRE_THROWS_AS(grape::sleepUntil(grape::EgoClock::fromNanos(1000000000LL)), grape::Exception);
+  static constexpr auto TEST_CLOCK_NAME = "test_clock";
+
+  // Without master clock won't initialise
+  REQUIRE_FALSE(grape::EgoClock::create(TEST_CLOCK_NAME, 10ms));
 
   // Create a master clock driver
-  const auto master_clock = [](const std::stop_token& st) {
+  const auto master_clock = [](const std::stop_token& st, const std::string& clock_name) {
     try {
       static constexpr auto EGO_TICK_PERIOD = 10ms;
       static constexpr auto WALL_TICK_PERIOD = 100ms;
-      static constexpr auto CONFIG = grape::EgoClockDriver::Config{
+      const auto config = grape::EgoClockDriver::Config{
+        .clock_name = clock_name,
         .broadcast_interval = 2U,  // Broadcast every other tick for fast initialisation
         .calibration_window = 2U   // Minimal window for testing
       };
-      auto driver = grape::EgoClockDriver(CONFIG);
+      auto driver = grape::EgoClockDriver(config);
       auto ego_time = grape::EgoClock::TimePoint{};
       while (not st.stop_requested()) {
         const auto wall_time = grape::WallClock::now();
@@ -99,21 +99,26 @@ TEST_CASE("EgoClock operation with master clock", "[ego_clock]") {
     }
   };
 
-  auto master_clock_thread = std::jthread(master_clock);
-  REQUIRE(grape::EgoClock::waitForMaster(2s));
+  auto master_clock_thread = std::jthread(master_clock, TEST_CLOCK_NAME);
+  auto maybe_clock = grape::EgoClock::create(TEST_CLOCK_NAME, 2000ms);
+  REQUIRE(maybe_clock);
 
-  // now() returns valid time when master is present"
-  REQUIRE_NOTHROW(grape::EgoClock::now());
-  const auto tp1 = grape::EgoClock::now();
+  // NOLINTBEGIN(bugprone-unchecked-optional-access)
+
+  // now() returns valid time when master is present
+  const auto tp1 = maybe_clock->now();
   std::this_thread::sleep_for(5ms);
-  const auto tp2 = grape::EgoClock::now();
+  const auto tp2 = maybe_clock->now();
   REQUIRE(tp2 > tp1);
 
   // sleepFor works correctly with master clock
   const auto sleep_duration = 20ms;
-  const auto start_time = grape::EgoClock::now();
-  REQUIRE_NOTHROW(grape::sleepFor(sleep_duration));
-  const auto end_time = grape::EgoClock::now();
+  const auto start_time = maybe_clock->now();
+  maybe_clock->sleepFor(sleep_duration);
+  const auto end_time = maybe_clock->now();
+
+  // NOLINTEND(bugprone-unchecked-optional-access)
+
   const auto elapsed = end_time - start_time;
   const auto tolerance = 3ms;
   const auto min_expected = sleep_duration - tolerance;

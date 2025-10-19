@@ -30,5 +30,7 @@ mimics the behaviour of WallClock.
 
 ## TODO
 
-- [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`)  
-- [ ] `EgoClock::waitForMaster` should exit on signal
+- [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`) 
+- [ ] Improve performance
+  - [ ] Benchmark `EgoClock::now()` against `WallClock::now()`
+  - [ ] Integrate `ClockReceiver` functionality directly into `EgoClock`

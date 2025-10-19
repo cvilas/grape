@@ -22,7 +22,7 @@ struct EgoClockDriver::Impl {
 EgoClockDriver::Impl::Impl(const Config& config)
   : broadcast_interval(config.broadcast_interval)
   , line_fitter(config.calibration_window)
-  , tick_pub(ipc::Publisher(ego_clock::ClockTopic())) {
+  , tick_pub(ipc::Publisher(ego_clock::ClockTopic(config.clock_name))) {
   if (broadcast_interval == 0U) {
     panic("Broadcast interval must be greater than 0 ticks");
   }

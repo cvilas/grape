@@ -39,15 +39,20 @@ constexpr auto toString(const ClockTransform& tf) -> std::string {
 }
 
 //=================================================================================================
-struct ClockTopic {
+class ClockTopic {
 public:
   using DataType = ClockTransform;
   static constexpr auto TOPIC_SUFFIX = "/clock";
   static constexpr auto QOS = ipc::QoS::BestEffort;
   static constexpr auto SERDES_BUFFER_SIZE = 2 * sizeof(ClockTransform);
-  [[nodiscard]] static auto topicName() -> std::string {
-    return TOPIC_SUFFIX;
+  explicit ClockTopic(const std::string& clock_name) : topic_name_(clock_name + TOPIC_SUFFIX) {
   }
+  [[nodiscard]] auto topicName() const -> const std::string& {
+    return topic_name_;
+  }
+
+private:
+  std::string topic_name_;
 };
 
 }  // namespace grape::ego_clock
