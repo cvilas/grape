@@ -92,7 +92,7 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
       -DSDL_EXAMPLES=OFF)
     ExternalProject_Add(
       SDL3
-      URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL-release-${SDL3_VERSION_REQUIRED}.tar.gz
+      URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL-preview-${SDL3_VERSION_REQUIRED}.tar.gz
       CMAKE_ARGS ${SDL3_CMAKE_ARGS})
   endif()
 endif()
