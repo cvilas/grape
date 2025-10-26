@@ -12,7 +12,11 @@ import time
 import random
 import threading
 import sys
+import faulthandler
 from typing import List, Optional
+
+# Enable fault handler to get backtraces on segfaults
+faulthandler.enable()
 
 try:
     import grape_ipc_py as ipc
@@ -100,6 +104,8 @@ def main():
         return 1
     except Exception as e:
         print(f"FAILURE: Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
         return 1
 
 if __name__ == "__main__":
