@@ -4,8 +4,8 @@
 
 - [ ] [picam](../modules/rpi/picam/README.md)  
 - [ ] [halow](../modules/rpi/halow/README.md) 
+- [ ] 4G LTE/5G
 - [ ] [ahrs](../modules/rpi/ahrs/README.md)
-- [ ] EtherCAT on CM5
 - [ ] CANOpen
 - [ ] [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
 - [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
@@ -30,6 +30,8 @@ Create a qrts subtree, recreate QRTS libraries, relive 2001
 - [ ] Telemetry: position, attritude, battery, camera
 - [ ] FPV control
 - [ ] Dashboard view
+- [ ] Dead reckoning
+- [ ] Guidance (autonomous path planning)
 
 ## Libraries
 

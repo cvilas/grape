@@ -7,15 +7,14 @@ Facilities to support deterministic real-time execution of tasks
 ## TODO
 
 - [ ] Implement shared memory
-  - memory alignment helpers (for dma, simd, cache line)
   - example programs
   - unit tests
   - benchmarks
-- [ ] Document how to configure Raspberry Pi5 for realtime applications
-  - [ ] Document how to allocate specified CPU cores to run Linux.
-  - [ ] Document how to allocate specified CPU cores to run my processes and threads.
-  - [ ] Reference: [Low latency Ubuntu](https://ubuntu.com/blog/real-time-kernel-tuning)
-  - [ ] Reference: https://manuel.bernhardt.io/posts/2023-11-16-core-pinning/
+- [ ] Understand RT Linux deeply
+  - Execute every tutorial and howto guide in [realtime ubuntu](https://documentation.ubuntu.com/real-time/latest/)
+  - Document how to configure Raspberry Pi5 for realtime applications
+  - Document how to allocate specified CPU cores to run Linux.
+  - Document how to allocate specified CPU cores to run my processes and threads.
 - [ ] Implement single producer multi-consumer queue using heap and shared memory
 - [ ] Refactor multi-producer single-consumer queue
   - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
@@ -118,12 +117,10 @@ Facilities such as a watchdog to monitor the health of the real-time task thread
 
 ## References
 
-- Canonical's [Real-time Ubuntu](https://ubuntu.com/real-time) page describes how to configure Ubuntu with preemptible kernel. 
-  - [Whitepaper](./media/2023-11-29-ubuntu-rtl-whitepaper.pdf)
-  - [Technical deep dive](https://ubuntu.com/blog/real-time-kernel-technical)
-  - [Tuning](https://ubuntu.com/blog/real-time-kernel-tuning)
-- Some implementation details here are inspired by John Ogness' talk, [A Checklist for Writing Linux Real-Time Applications](docs/media/2020-10-26-john-ogness-rt-checklist.pdf) at Embedded Liux Conference Europe 2020 and a subsequent [commentary](https://lwn.net/Articles/837019/) on it. 
-- Timur Doumler's talks on the topic of low-latency are usually good. Here are a few: 
+- [Real-time Ubuntu](https://ubuntu.com/real-time)  
+- [Realtime Linux Project](https://wiki.linuxfoundation.org/realtime/start)
+- [Linux for CNC](https://www.linuxcnc.org/)
+- [A Checklist for Writing Linux Real-Time Applications](docs/media/2020-10-26-john-ogness-rt-checklist.pdf) and [commentary](https://lwn.net/Articles/837019/)
+- Timur Doumler's talks on low-latency:
   - [Real-time programming with the C++ standard library](https://youtu.be/Tof5pRedskI)
   - What is low latency C++: [Part 1](https://youtu.be/EzmNeAhWqVs), [Part 2](https://youtu.be/5uIsadq-nyk)
-- And see [Realtime Linux Project](https://wiki.linuxfoundation.org/realtime/start) for additional resources
