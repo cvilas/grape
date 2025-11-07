@@ -45,6 +45,11 @@ endmacro()
 # External projects follow
 # -------------------------------------------------------------------------------------------------
 
+if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
+  list(APPEND EXTERNAL_PROJECTS_LIST ftxui)
+endif()
+
+
 # -------------------------------------------------------------------------------------------------
 # FTXUI
 if(ftxui IN_LIST EXTERNAL_PROJECTS_LIST)
@@ -109,7 +114,7 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
     set(ECAL_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS} 
         -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/submodule_dependencies.cmake 
         -DECAL_USE_CURL=OFF 
-        -DECAL_USE_FTXUI=OFF 
+        -DECAL_USE_FTXUI=ON 
         -DECAL_USE_HDF5=OFF 
         -DECAL_USE_QT=OFF 
         -DECAL_USE_CAPNPROTO=OFF 
@@ -117,10 +122,10 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
         -DECAL_USE_NPCAP=OFF 
         -DBUILD_TESTING=OFF
         -DECAL_BUILD_DOCS=OFF 
-        -DECAL_BUILD_APPS=OFF 
+        -DECAL_BUILD_APPS=ON 
         -DECAL_BUILD_SAMPLES=OFF 
         -DECAL_BUILD_TESTS=OFF 
-        -DECAL_BUILD_TIMEPLUGINS=OFF 
+        -DECAL_BUILD_TIMEPLUGINS=ON
         -DECAL_BUILD_C_BINDING=OFF 
         -DECAL_BUILD_CSHARP_BINDING=OFF 
         -DECAL_BUILD_PY_BINDING=OFF 
@@ -135,17 +140,19 @@ if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
         -DECAL_THIRDPARTY_BUILD_ASIO=ON 
         -DECAL_THIRDPARTY_BUILD_CURL=OFF 
         -DECAL_THIRDPARTY_BUILD_FINEFTP=OFF 
+        -DECAL_THIRDPARTY_BUILD_FTXUI=OFF
         -DECAL_THIRDPARTY_BUILD_RECYCLE=ON 
-        -DECAL_THIRDPARTY_BUILD_SPDLOG=OFF 
+        -DECAL_THIRDPARTY_BUILD_SPDLOG=ON 
         -DECAL_THIRDPARTY_BUILD_TCLAP=ON 
-        -DECAL_THIRDPARTY_BUILD_TINYXML2=OFF 
+        -DECAL_THIRDPARTY_BUILD_TINYXML2=ON 
         -DCMAKE_POLICY_VERSION_MINIMUM=3.5 
         -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF)
 
     ExternalProject_Add(
       eCAL
       URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/ecal-fat-source-${ECAL_VERSION_REQUIRED}.tar.gz
-      CMAKE_ARGS ${ECAL_CMAKE_ARGS})
+      CMAKE_ARGS ${ECAL_CMAKE_ARGS}
+      DEPENDS ftxui)
   endif()
 endif()
 
