@@ -13,34 +13,34 @@ namespace grape::locomotion {
 class AlternateCommandTopic {
 public:
   using DataType = locomotion::Command;
-  static constexpr auto TOPIC_SUFFIX = "/locomotion/command/alternate";
   static constexpr auto QOS = ipc::QoS::BestEffort;
   static constexpr auto SERDES_BUFFER_SIZE = 128U;
-  explicit AlternateCommandTopic(std::string robot_name) : robot_name_(std::move(robot_name)) {
+  explicit AlternateCommandTopic(const std::string& robot_name)
+    : topic_name_(robot_name + "/locomotion/command/alternate") {
   }
-  [[nodiscard]] auto topicName() const -> std::string {
-    return robot_name_ + TOPIC_SUFFIX;
+  [[nodiscard]] auto topicName() const -> const std::string& {
+    return topic_name_;
   }
 
 private:
-  std::string robot_name_;
+  std::string topic_name_;
 };
 
 /// Topic on which the locomotion service publishes the status of the robot's locomotion system.
 class ArbiterStatusTopic {
 public:
   using DataType = locomotion::ArbiterStatus;
-  static constexpr auto TOPIC_SUFFIX = "/locomotion/arbiter/status";
   static constexpr auto QOS = ipc::QoS::BestEffort;
   static constexpr auto SERDES_BUFFER_SIZE = 128U;
-  explicit ArbiterStatusTopic(std::string robot_name) : robot_name_(std::move(robot_name)) {
+  explicit ArbiterStatusTopic(const std::string& robot_name)
+    : topic_name_(robot_name + "/locomotion/arbiter/status") {
   }
-  [[nodiscard]] auto topicName() const -> std::string {
-    return robot_name_ + TOPIC_SUFFIX;
+  [[nodiscard]] auto topicName() const -> const std::string& {
+    return topic_name_;
   }
 
 private:
-  std::string robot_name_;
+  std::string topic_name_;
 };
 
 }  // namespace grape::locomotion
