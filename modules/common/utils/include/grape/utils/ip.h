@@ -30,7 +30,4 @@ struct [[nodiscard]] IPAddress {
 /// @return string representation of an IP address
 [[nodiscard]] auto toString(const IPAddress& addr) -> std::string;
 
-/// @return host name
-[[nodiscard]] auto getHostName() -> std::string;
-
 }  // namespace grape::utils

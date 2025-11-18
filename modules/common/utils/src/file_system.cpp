@@ -6,6 +6,8 @@
 
 #include <array>
 #include <climits>  // for PATH_MAX
+#include <cstdlib>  // for getenv
+#include <fstream>
 
 #include <pwd.h>
 #include <sys/types.h>  // for getpwuid
@@ -32,6 +34,38 @@ auto readProgramPath() -> std::filesystem::path {
 }  // namespace
 
 namespace grape::utils {
+
+//-------------------------------------------------------------------------------------------------
+auto getHostName() -> std::string {
+  static const auto host_name = [] -> std::string {
+    auto name = std::array<char, HOST_NAME_MAX>{};
+    std::ignore = ::gethostname(name.data(), name.size());
+    return { name.data() };
+  }();  // cache result
+  return host_name;
+}
+
+//-------------------------------------------------------------------------------------------------
+auto getSystemName() -> std::string {
+  static const auto system_name = [] -> std::string {
+    // NOLINTNEXTLINE(concurrency-mt-unsafe)
+    if (const char* env_name = std::getenv("SYSTEM_NAME"); env_name != nullptr) {
+      return { env_name };
+    }
+    const auto system_name_file = resolveFilePath("system_name");
+    if (system_name_file.has_value()) {
+      // Read the first line from the file
+      if (auto file = std::ifstream(system_name_file.value()); file.is_open()) {
+        std::string name;
+        if (std::getline(file, name) && !name.empty()) {
+          return name;
+        }
+      }
+    }
+    return getHostName();
+  }();  // cache result
+  return system_name;
+}
 
 //-------------------------------------------------------------------------------------------------
 auto getProgramPath() -> std::filesystem::path {

@@ -6,7 +6,6 @@
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <unistd.h>
 
 #ifndef HOST_NAME_MAX
 #ifdef _POSIX_HOST_NAME_MAX
@@ -16,25 +15,7 @@
 #endif
 #endif
 
-namespace {
-
-//-------------------------------------------------------------------------------------------------
-auto readHostName() -> std::string {
-  auto name = std::array<char, HOST_NAME_MAX>{};
-  std::ignore = ::gethostname(name.data(), name.size());
-  return { name.data() };
-}
-
-}  // namespace
-
 namespace grape::utils {
-
-//-------------------------------------------------------------------------------------------------
-auto getHostName() -> std::string {
-  // cache the result for subsequent calls
-  static const auto host_name = readHostName();
-  return host_name;
-}
 
 //-------------------------------------------------------------------------------------------------
 auto IPAddress::fromString(const std::string& ip_str) -> std::optional<IPAddress> {
