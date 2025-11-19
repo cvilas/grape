@@ -49,8 +49,8 @@ auto main(int argc, const char* argv[]) -> int {
 
     const auto robot_name = args.getOption<std::string>("robot");
 
-    auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
-    grape::ipc::init(std::move(ipc_config));
+    const auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
+    grape::ipc::init(ipc_config);
 
     // Create a dummy robot platform and hook command arbitrator to it
     auto robot = DummyRobot(robot_name);

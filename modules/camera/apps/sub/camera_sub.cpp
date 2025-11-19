@@ -198,9 +198,8 @@ void setupLogging() {
 
 //-------------------------------------------------------------------------------------------------
 void setupIpc() {
-  auto ipc_config = grape::ipc::Config{};
-  ipc_config.scope = grape::ipc::Config::Scope::Network;
-  grape::ipc::init(std::move(ipc_config));
+  const auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
+  grape::ipc::init(ipc_config);
 }
 
 //-------------------------------------------------------------------------------------------------

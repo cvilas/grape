@@ -61,8 +61,8 @@ auto TeleopEmulator::isServiceDetected() const -> bool {
 //=================================================================================================
 TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
   static constexpr auto* ROBOT_NAME = "test_robot";
-  auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Host };
-  grape::ipc::init(std::move(ipc_config));
+  const auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Host };
+  grape::ipc::init(ipc_config);
   auto received_cmds = std::vector<grape::locomotion::Command>{};
   const auto robot_cb = [&received_cmds](const auto& cmd) { received_cmds.push_back(cmd); };
   auto test_service = grape::locomotion::Arbiter(ROBOT_NAME, robot_cb);

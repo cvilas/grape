@@ -104,8 +104,8 @@ auto main(int argc, const char* argv[]) -> int {
     static constexpr auto MAX_TURN_SPEED = 30.F * static_cast<float>(std::numbers::pi) / 180.F;
     static constexpr auto SPEED_STEP = 0.1F;
 
-    auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
-    grape::ipc::init(std::move(ipc_config));
+    const auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
+    grape::ipc::init(ipc_config);
 
     auto state = State{};
     auto teleoperator = grape::locomotion::TeleopClient(

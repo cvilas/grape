@@ -4,7 +4,8 @@
 
 #include "grape/ipc/session.h"
 
-#include <optional>
+#include <atomic>
+#include <cstdlib>
 
 #include <ecal/config/configuration.h>
 #include <ecal/core.h>
@@ -13,49 +14,36 @@
 
 namespace {
 
-struct Manager {
-  explicit Manager(grape::ipc::Config&& config) {
-    auto grape_config = std::move(config);
-    auto ecal_config = eCAL::Init::Configuration();
-    switch (grape_config.scope) {
-      case grape::ipc::Config::Scope::Host:
-        ecal_config.communication_mode = eCAL::eCommunicationMode::local;
-        break;
-      case grape::ipc::Config::Scope::Network:
-        ecal_config.communication_mode = eCAL::eCommunicationMode::network;
-        break;
-    }
-    eCAL::Initialize(ecal_config, grape_config.name);
-  }
-
-  ~Manager() {
-    eCAL::Finalize();
-  }
-
-  Manager(Manager const&) = delete;
-  Manager(Manager&&) = delete;
-  void operator=(Manager const&) = delete;
-  void operator=(Manager&&) = delete;
-};
-
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-std::optional<Manager> s_manager = std::nullopt;
+std::atomic<bool> s_initialized = false;
 
 }  // namespace
 
 namespace grape::ipc {
 
 //-------------------------------------------------------------------------------------------------
-void init(Config&& config) {
-  if (s_manager.has_value()) {
+void init(const Config& config) {
+  bool expected = false;
+  if (not s_initialized.compare_exchange_strong(expected, true)) {
     panic("Already initialised");
   }
-  s_manager.emplace(std::move(config));
+
+  auto ecal_config = eCAL::Init::Configuration();
+  switch (config.scope) {
+    case Config::Scope::Host:
+      ecal_config.communication_mode = eCAL::eCommunicationMode::local;
+      break;
+    case Config::Scope::Network:
+      ecal_config.communication_mode = eCAL::eCommunicationMode::network;
+      break;
+  }
+  eCAL::Initialize(ecal_config, config.name);
+  std::ignore = std::atexit([]() { eCAL::Finalize(); });
 }
 
 //-------------------------------------------------------------------------------------------------
 auto ok() -> bool {
-  if (not s_manager) {
+  if (not s_initialized) {
     panic("Not initialised. Call init() first.");
   }
   return eCAL::Ok();

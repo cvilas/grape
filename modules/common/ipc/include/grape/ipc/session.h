@@ -10,7 +10,7 @@ namespace grape::ipc {
 
 /// Initialise IPC session for the process
 /// @param config Process IPC configuration
-void init(Config&& config);
+void init(const Config& config);
 
 /// @return true if session state is nominal and error-free
 [[nodiscard]] auto ok() -> bool;
