@@ -20,10 +20,9 @@ namespace {
 
 //=================================================================================================
 TEST_CASE("Basic pub-sub in network scope works", "[ipc]") {
-  auto config = grape::ipc::Config{};
-  config.scope = grape::ipc::Config::Scope::Network;
+  const auto config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
+  grape::ipc::init(config);
 
-  grape::ipc::init(std::move(config));
   const auto topic =
       std::format("pub_sub_test_{}", grape::WallClock::now().time_since_epoch().count());
 

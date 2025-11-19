@@ -20,8 +20,8 @@ auto main(int argc, const char* argv[]) -> int {
                           .parse(argc, argv);
     const auto robot_name = args.getOption<std::string>("robot");
 
-    auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
-    grape::ipc::init(std::move(ipc_config));
+    const auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
+    grape::ipc::init(ipc_config);
 
     const auto on_teleop_status = [](const auto& status) {
       struct Visitor {

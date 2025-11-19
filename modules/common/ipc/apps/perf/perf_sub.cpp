@@ -79,9 +79,8 @@ auto main(int argc, const char* argv[]) -> int {
       return EXIT_FAILURE;
     }
 
-    auto config = grape::ipc::Config{};
-    config.scope = grape::ipc::Config::Scope::Network;
-    grape::ipc::init(std::move(config));
+    const auto config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
+    grape::ipc::init(config);
 
     Statistics stats;
 

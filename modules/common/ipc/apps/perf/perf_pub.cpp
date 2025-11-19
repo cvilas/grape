@@ -41,9 +41,8 @@ auto main(int argc, const char* argv[]) -> int {
     const auto payload = std::vector<std::byte>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 
-    auto config = grape::ipc::Config{};
-    config.scope = grape::ipc::Config::Scope::Network;
-    grape::ipc::init(std::move(config));
+    const auto config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
+    grape::ipc::init(config);
 
     auto pub = grape::ipc::RawPublisher(grape::ipc::ex::perf::TOPIC);
     std::println("Press CTRL-C to quit");
