@@ -1,6 +1,23 @@
 # Roadmap
 
-Application driven development roadmap, with Raspberry Pi as the target hardware platform for deployment
+## Pi
+
+- [ ] [picam](../modules/rpi/picam/README.md)  
+- [ ] [halow](../modules/rpi/halow/README.md) 
+- [ ] 4G LTE/5G
+- [ ] [ahrs](../modules/rpi/ahrs/README.md)
+- [ ] CANOpen
+- [ ] [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
+- [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
+- [ ] Real-time time-series plotting using implot (redesign from scratch again)
+- [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
+
+## QRTS
+
+Create a qrts subtree, recreate QRTS libraries, relive 2001
+
+- [ ] qmotor
+- [ ] rp
 
 ## Towards a Rover
 
@@ -8,13 +25,16 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
 - [x] Implement transactional teleop interface.  
 - [x] Implement SDL3-based camera streamer
 - [x] Implement system clock
-- [ ] Implement [picam](../modules/rpi/picam/README.md)  
-  - [ ] Make camera pipeline recognise pi5 camera (libcamera (pi fork) + pipewire on Ubuntu 24.04)
-  - [ ] Document how to build and run pi camera publishing service  
-- [ ] AHRS using [sense hat](https://www.raspberrypi.com/products/sense-hat/)
-  - [ ] Coordinate-frame aware linear algebra [refx](https://github.com/mosaico-labs/refx), [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
-  - [ ] constexpr matrix and quaternions operations to support AHRS implementation
-  - [ ] 3D viewing and signal plotting (SDL3, imgui, implot)
+- [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
+- [ ] Localiser
+- [ ] Telemetry: position, attritude, battery, camera
+- [ ] FPV control
+- [ ] Dashboard view
+- [ ] Dead reckoning
+- [ ] Guidance (autonomous path planning)
+
+## Libraries
+
 - [ ] DSP functions
   - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
   - [ ] Delay line
@@ -32,23 +52,10 @@ Application driven development roadmap, with Raspberry Pi as the target hardware
   - [ ] Extend to support asset loading using assimp
   - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
   - [ ] Design a text-based scenegraph description format using our scripting engine
-- [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
-- [ ] Real-time time-series plotting using implot (redesign from scratch again)
-- [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
-- [ ] Propose client-server messaging interface for robot on-board network 
 - [ ] Host monitoring micro-service
   - [ ] Implement library to read CPU, memory, disk usage, network utilisation, temperatures
   - [ ] Add systemd services support in GBS
   - [ ] Implement the ability to install monitoring micro-service using cpack
-  - [ ] IPC: Implement means to isolate IPC to a set of hosts [#129]
-  - [ ] IPC: Implement zero-copy read and write [#132]
-- [ ] Integrate [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
-- [ ] Rover
-  - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
-  - [ ] Implement CANOpen interface for Linux
-  - [ ] Monitoring tools: position tracker, battery monitor, topic_echo
-  - [ ] Steam Deck as operator controller: joystick teleop, FPV and mission control
-  - [ ] Record and playback time-series multi-modal data
 - [ ] CI updates (See TODO in [README](../.github/workflows/README.md))
 - [ ] Support C++26
   - [ ] Auto serdes using [variadic structured bindings](https://youtu.be/qIDFyhtUMnQ)
