@@ -83,9 +83,7 @@ Instructions to run a persistent, self-hosted GitHub Actions runner using Docker
 - If you change the repository or token, re-run the registration step.
 - To remove all docker images, containers, volumes and configs by brute force
   ```sh
-  sudo systemctl stop docker
-  sudo rm -rf /var/lib/docker
-  sudo systemctl start docker
+  docker compose down -v --rmi all
   ```
 
 ## References
