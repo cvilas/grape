@@ -4,27 +4,16 @@
 
 #include "grape/ipc/session.h"
 
-#include <atomic>
-#include <cstdlib>
-
 #include <ecal/config/configuration.h>
 #include <ecal/core.h>
 
 #include "grape/exception.h"
 
-namespace {
-
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-std::atomic<bool> s_initialized = false;
-
-}  // namespace
-
 namespace grape::ipc {
 
 //-------------------------------------------------------------------------------------------------
 void init(const Config& config) {
-  bool expected = false;
-  if (not s_initialized.compare_exchange_strong(expected, true)) {
+  if (eCAL::Ok()) {
     panic("Already initialised");
   }
 
@@ -43,9 +32,6 @@ void init(const Config& config) {
 
 //-------------------------------------------------------------------------------------------------
 auto ok() -> bool {
-  if (not s_initialized) {
-    panic("Not initialised. Call init() first.");
-  }
   return eCAL::Ok();
 }
 
