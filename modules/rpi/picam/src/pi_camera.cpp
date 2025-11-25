@@ -20,7 +20,7 @@
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
 
-namespace grape::picam {
+namespace grape::camera {
 
 namespace {
 //-------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ auto toSDLPixelFormat(const libcamera::PixelFormat& fmt) -> SDL_PixelFormat {
 
 //-------------------------------------------------------------------------------------------------
 struct PiCamera::Impl {
-  PiCamera::Callback* callback_ptr = nullptr;
+  PiCamera::Callback callback{ nullptr };
 
   // Core libcamera objects
   std::unique_ptr<libcamera::CameraManager> camera_manager;
@@ -64,7 +64,7 @@ struct PiCamera::Impl {
 
   // Setup methods
   void setupCamera(const std::string& name_hint);
-  void configureStream();
+  void configureStream(const ImageSize& image_size);
   void allocateBuffers();
   void createRequests();
   void startCapture();
@@ -113,36 +113,42 @@ void PiCamera::Impl::setupCamera(const std::string& name_hint) {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::configureStream() {
+void PiCamera::Impl::configureStream(const ImageSize& image_size) {
   config = camera->generateConfiguration({ libcamera::StreamRole::Viewfinder });
   if ((not config) || config->empty()) {
     panic("Failed to generate camera configuration");
   }
   libcamera::StreamConfiguration& stream_config = config->at(0);
 
-  syslog::Info("Supported formats:");
+  syslog::Debug("Supported formats:");
   for (const auto& fmt : stream_config.formats().pixelformats()) {
     const auto& sizes = stream_config.formats().sizes(fmt);
     for (const auto& size : sizes) {
-      syslog::Info("  {}x{}, {}", size.width, size.height, fmt.toString());
+      syslog::Debug("  {}x{}, {}", size.width, size.height, fmt.toString());
     }
   }
   // specify desired formats in order of preference and let the camera select one
-  const auto desired_formats = { libcamera::formats::NV12, libcamera::formats::MJPEG,
-                                 libcamera::formats::YUYV };
+  // @note: NV12 seems to be broken on the pi
+  const auto desired_formats = { libcamera::formats::MJPEG, libcamera::formats::YUYV };
   for (const auto& fmt : desired_formats) {
     const auto& sizes = stream_config.formats().sizes(fmt);
     if (not sizes.empty()) {
       stream_config.pixelFormat = fmt;
+      // Find size closest to target resolution by minimizing total pixel difference
       auto best_size = sizes[0];
+      auto best_score = std::numeric_limits<int>::max();
       for (const auto& size : sizes) {
-        if (size.width * size.height > best_size.width * best_size.height) {
+        const auto score =
+            std::abs(static_cast<int>(size.width) - static_cast<int>(image_size.width)) +
+            std::abs(static_cast<int>(size.height) - static_cast<int>(image_size.height));
+        if (score < best_score) {
+          best_score = score;
           best_size = size;
         }
       }
       stream_config.size = best_size;
-      syslog::Info("Requesting format: {}x{}, {}", best_size.width, best_size.height,
-                   fmt.toString());
+      syslog::Info("Closet match to target resolution({}x{}): {}x{}, {}", image_size.width,
+                   image_size.height, best_size.width, best_size.height, fmt.toString());
       break;
     }
   }
@@ -259,11 +265,11 @@ void PiCamera::Impl::processRequest(libcamera::Request* request) {
 }
 
 //-------------------------------------------------------------------------------------------------
-PiCamera::PiCamera(Callback&& callback, const std::string& name_hint)
-  : impl_(std::make_unique<Impl>()), callback_(std::move(callback)) {
-  impl_->callback_ptr = &callback_;
-  impl_->setupCamera(name_hint);
-  impl_->configureStream();
+PiCamera::PiCamera(const Config& config, Callback&& image_callback)
+  : impl_(std::make_unique<Impl>()) {
+  impl_->callback = std::move(image_callback);
+  impl_->setupCamera(config.camera_name_hint);
+  impl_->configureStream(config.image_size);
   impl_->allocateBuffers();
   impl_->createRequests();
   impl_->startCapture();
@@ -292,14 +298,13 @@ PiCamera::~PiCamera() {
 
 //-------------------------------------------------------------------------------------------------
 void PiCamera::acquire() {
-  // Get latest frame atomically
+  // Get latest frame
   libcamera::Request* request = impl_->latest_request.exchange(nullptr, std::memory_order_acquire);
   if (request == nullptr) {
     return;  // No frame available
   }
 
   if (request->status() != libcamera::Request::RequestComplete) {
-    // Requeue request and return
     request->reuse(libcamera::Request::ReuseBuffers);
     impl_->queueRequest(request);
     return;
@@ -314,10 +319,7 @@ void PiCamera::acquire() {
     return;
   }
 
-  // Get timestamp
   const auto timestamp = WallClock::now();
-
-  // Get stream configuration for frame info
   const auto& stream_config = impl_->config->at(0);
 
   // Map buffer data
@@ -334,28 +336,26 @@ void PiCamera::acquire() {
   }
 
   // Create ImageFrame with actual pixel format from camera
-  const auto frame =
-      camera::ImageFrame{ .header = { .pitch = pitch,
-                                      .width = static_cast<std::uint32_t>(stream_config.size.width),
-                                      .height =
-                                          static_cast<std::uint32_t>(stream_config.size.height),
-                                      .format = sdl_format,
-                                      .timestamp = timestamp },
-                          .pixels = { static_cast<std::byte*>(data), length } };
-  static std::once_flag log_flag;
-  std::call_once(log_flag, [&]() {
-    syslog::Note("Capturing at {}x{}, {} -> SDL format {}", frame.header.width, frame.header.height,
-                 stream_config.pixelFormat.toString(), SDL_GetPixelFormatName(sdl_format));
-  });
+  const auto frame = camera::ImageFrame{
+    //
+    .header = { .timestamp = timestamp,
+                .pitch = pitch,
+                .width = static_cast<std::uint16_t>(stream_config.size.width),
+                .height = static_cast<std::uint16_t>(stream_config.size.height),
+                .format = sdl_format },
+    .pixels = { static_cast<std::byte*>(data), length }
+  };
 
-  syslog::Debug("stride: {}, width: {}, height: {}", pitch, stream_config.size.width,
+  syslog::Debug("Image stride: {}, width: {}, height: {}", pitch, stream_config.size.width,
                 stream_config.size.height);
 
-  callback_(frame);
+  if (impl_->callback != nullptr) {
+    impl_->callback(frame);
+  }
 
   // Requeue the request for continuous capture
   request->reuse(libcamera::Request::ReuseBuffers);
   impl_->queueRequest(request);
 }
 
-}  // namespace grape::picam
+}  // namespace grape::camera

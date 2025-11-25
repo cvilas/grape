@@ -33,7 +33,6 @@ public:
   void update();
   void saveImage();
   void toggleTimestamp();
-  [[nodiscard]] auto latency() const -> WallClock::Duration;
 
 private:
   void onReceivedSample(const ipc::Sample& sample);
@@ -172,11 +171,6 @@ void Subscriber::toggleTimestamp() {
   display_.showTimestamp(en_ts);
 }
 
-//-------------------------------------------------------------------------------------------------
-auto Subscriber::latency() const -> WallClock::Duration {
-  return display_.latency();
-}
-
 }  // namespace grape::camera
 
 namespace {
@@ -189,10 +183,10 @@ struct LogFormatter {
 };
 
 //-------------------------------------------------------------------------------------------------
-void setupLogging() {
+void setupLogging(grape::log::Severity sev) {
   auto log_config = grape::log::Config{};
   log_config.sink = std::make_shared<grape::log::ConsoleSink<LogFormatter>>();
-  log_config.threshold = grape::log::Severity::Info;
+  log_config.threshold = sev;
   grape::syslog::init(std::move(log_config));
 }
 
@@ -220,20 +214,25 @@ void setupSignalHandling() {
 //-------------------------------------------------------------------------------------------------
 auto main(int argc, char* argv[]) -> int {
   try {
+    // Parse command line arguments
+    const auto default_topic = grape::utils::getHostName() + "/camera";
+    const auto args = grape::conio::ProgramDescription("Camera viewer application")
+                          .declareOption<std::string>("topic", "image stream topic", default_topic)
+                          .declareOption<std::string>("log_level", "Log severity level", "Info")
+                          .parse(argc, const_cast<const char**>(argv));
+
+    const auto& maybe_log_level =
+        grape::enums::cast<grape::log::Severity>(args.getOption<std::string>("log_level"));
+    const auto log_level = maybe_log_level ? maybe_log_level.value() : grape::log::Severity::Debug;
+
     setupSignalHandling();
-    setupLogging();
+    setupLogging(log_level);
     setupIpc();
 
     if (not SDL_Init(SDL_INIT_VIDEO)) {
       grape::syslog::Critical("SDL_Init failed: {}", SDL_GetError());
       return EXIT_FAILURE;
     }
-
-    // Parse command line arguments
-    const auto default_topic = grape::utils::getHostName() + "/camera";
-    const auto args = grape::conio::ProgramDescription("Camera viewer application")
-                          .declareOption<std::string>("topic", "image stream topic", default_topic)
-                          .parse(argc, const_cast<const char**>(argv));
 
     const auto topic = args.getOption<std::string>("topic");
     grape::syslog::Note("Subscribing to images on topic: '{}'", topic);
@@ -242,8 +241,6 @@ auto main(int argc, char* argv[]) -> int {
 
     // Main event loop
     SDL_Event event;
-    auto last_stats_ts = std::chrono::steady_clock::now();
-
     while (not s_exit) {
       while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
@@ -259,19 +256,8 @@ auto main(int argc, char* argv[]) -> int {
           }
         }
       }
-
       subscriber.update();
-
-      // Periodically report stats
-      const auto now = std::chrono::steady_clock::now();
-      static constexpr auto STATS_REPORT_PERIOD = std::chrono::seconds(10);
-      const auto dt = now - last_stats_ts;
-      if (dt > STATS_REPORT_PERIOD) {
-        last_stats_ts = now;
-        grape::syslog::Info("Avg. latency={}", subscriber.latency());
-      }
     }
-
     SDL_Quit();
     grape::syslog::Info("Quit!");
     return EXIT_SUCCESS;

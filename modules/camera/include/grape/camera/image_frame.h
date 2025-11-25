@@ -16,21 +16,19 @@ namespace grape::camera {
 /// Single image frame data
 struct ImageFrame {
   struct Header {
+    WallClock::TimePoint timestamp;  //!< Acquistion timestamp
     std::uint32_t pitch{};           //!< Bytes per row of pixels
-    std::uint32_t width{};           //!< Width of the image in pixels
-    std::uint32_t height{};          //!< Height of the image in pixels (number of rows)
+    std::uint16_t width{};           //!< Width of the image in pixels
+    std::uint16_t height{};          //!< Height of the image in pixels (number of rows)
     std::uint32_t format{};          //!< driver backend-specific pixel format
-    WallClock::TimePoint timestamp;  //!< image acquistion timestamp
   };
   Header header;
   std::span<std::byte> pixels;  //!< pixel data
 };
 
 /// @return true if image dimensions and format matches
-constexpr auto matchesFormat(const ImageFrame::Header& hdr1, const ImageFrame::Header& hdr2)
-    -> bool {
-  return std::tie(hdr1.width, hdr1.height, hdr1.format) ==
-         std::tie(hdr2.width, hdr2.height, hdr2.format);
+constexpr auto matchesFormat(const ImageFrame::Header& hd1, const ImageFrame::Header& hd2) -> bool {
+  return std::tie(hd1.width, hd1.height, hd1.format) == std::tie(hd2.width, hd2.height, hd2.format);
 }
 
 /// Save an image frame to a file

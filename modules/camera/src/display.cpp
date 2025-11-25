@@ -8,35 +8,11 @@
 
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
-#include "grape/statistics/sliding_mean.h"
 
 namespace grape::camera {
 
 //=================================================================================================
-// Sliding mean calculator
-class Meanie {
-public:
-  void append(float value) {
-    mean_.store(stats_.append(value, reset_.exchange(false, std::memory_order_relaxed)).mean,
-                std::memory_order_relaxed);
-  }
-  void reset() {
-    reset_.store(true, std::memory_order_relaxed);
-  }
-  [[nodiscard]] auto mean() const -> float {
-    return mean_.load(std::memory_order_relaxed);
-  }
-
-private:
-  static constexpr auto STATS_WINDOW = 600U;
-  std::atomic_bool reset_;
-  std::atomic<float> mean_;
-  statistics::SlidingMean<float, STATS_WINDOW> stats_;
-};
-
-//=================================================================================================
 struct Display::Impl {
-  Meanie latency_accum;
   std::unique_ptr<SDL_Window, void (*)(SDL_Window*)> window{ nullptr, SDL_DestroyWindow };
   std::unique_ptr<SDL_Renderer, void (*)(SDL_Renderer*)> renderer{ nullptr, SDL_DestroyRenderer };
   std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)> texture{ nullptr, SDL_DestroyTexture };
@@ -171,16 +147,7 @@ void Display::render(const ImageFrame& frame) {
   if (not SDL_RenderPresent(renderer)) {
     syslog::Warn("Failed to present image: {}", SDL_GetError());
   }
-  const auto dt = now - header.timestamp;
-  impl_->latency_accum.append(std::chrono::duration_cast<std::chrono::duration<float>>(dt).count());
-}
-
-//-------------------------------------------------------------------------------------------------
-auto Display::latency() const -> WallClock::Duration {
-  const auto mean_latency = impl_->latency_accum.mean();
-  impl_->latency_accum.reset();
-  return std::chrono::duration_cast<WallClock::Duration>(
-      std::chrono::duration<float>(mean_latency));
+  syslog::Debug("Latency: {}", now - header.timestamp);
 }
 
 }  // namespace grape::camera

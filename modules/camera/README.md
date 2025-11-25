@@ -11,8 +11,7 @@ Cross platform camera support
 
 ## TODO
 
-- [ ] Integrate statistics accumulator in each processor (camera, formatter, compressor) instead of in `camera_pub` and `camera_sub`
-- [ ] Introduce lockless ring buffer between compressor and publisher (main thread)
-- [ ] Experimentally determine and then document how to improve network performance
-  - [ ] Set UDP buffer sizes as required in eCAL config (ecal.yaml)
-  - [ ] Increase system socket buffer sizes in /etc/sysctl.conf (net.core.rmem_max/wmem_max/rmem_default/wmem_default)
+- [ ] Define custom `ImageSize`, `PixelFormat` (as uint32_t fourcc codes), `ImageSpec`
+- [ ] Integrate `ImageSpec` into `ImageFrame`
+- [ ] Harmonise `Camera` and `PiCamera` interfaces and behaviours
+- [ ] In `camera_pub`, introduce lockless ring buffer between compressor and publisher (main thread)
