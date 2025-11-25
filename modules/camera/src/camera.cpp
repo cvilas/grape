@@ -9,9 +9,36 @@
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
 #include "grape/utils/format_ranges.h"
-#include "helpers.h"
 
 namespace {
+
+//-------------------------------------------------------------------------------------------------
+auto calcPixelBufferSize(const SDL_Surface* surf) -> int {
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+#endif
+  switch (surf->format) {
+    case SDL_PIXELFORMAT_NV12:
+      [[fallthrough]];
+    case SDL_PIXELFORMAT_YV12:
+      return (surf->w * surf->h * 3) / 2;
+    case SDL_PIXELFORMAT_YUY2:
+      return surf->w * surf->h * 2;
+    case SDL_PIXELFORMAT_MJPG:
+      return surf->w * surf->h;  // TODO(Vilas): likely incorrect. Should be surf->pitch per docs
+    case SDL_PIXELFORMAT_RGB24:
+      return surf->h * surf->pitch;
+    default:
+      grape::syslog::Error("Unsupported format {}. Using defaults",
+                           SDL_GetPixelFormatName(surf->format));
+      return surf->h * surf->pitch;  // safe default
+  }
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+}
+
 //-------------------------------------------------------------------------------------------------
 auto enumerateCameraDrivers() -> std::vector<std::string> {
   const auto num_drivers = SDL_GetNumCameraDrivers();
@@ -48,6 +75,7 @@ namespace grape::camera {
 struct Camera::Impl {
   void openCamera(SDL_CameraID id);
   std::unique_ptr<SDL_Camera, void (*)(SDL_Camera*)> camera{ nullptr, SDL_CloseCamera };
+  Camera::Callback callback;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -82,8 +110,8 @@ void Camera::Impl::openCamera(SDL_CameraID id) {
 }
 
 //-------------------------------------------------------------------------------------------------
-Camera::Camera(Callback&& callback, const std::string& name_hint)
-  : impl_(std::make_unique<Impl>()), callback_(std::move(callback)) {
+Camera::Camera(const Config& config, Callback&& image_callback) : impl_(std::make_unique<Impl>()) {
+  impl_->callback = std::move(image_callback);
   syslog::Info("Available camera drivers: {}", enumerateCameraDrivers());
   syslog::Info("Using camera driver: {}", SDL_GetCurrentCameraDriver());
 
@@ -96,22 +124,22 @@ Camera::Camera(Callback&& callback, const std::string& name_hint)
     panic(std::format("No cameras enumerated: {}", SDL_GetError()));
   }
 
+  syslog::Info("Found {} camera{}", camera_count, camera_count > 1 ? "s" : "");
   auto chosen_camera_index = std::numeric_limits<std::size_t>::max();
   auto chosen_camera_name = std::string{};
-  syslog::Info("Found {} camera{}", camera_count, camera_count > 1 ? "s" : "");
   for (auto i = 0U; std::cmp_less(i, camera_count); ++i) {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const auto id = cameras_ids.get()[i];
     const auto camera_name = std::string(SDL_GetCameraName(id));
     syslog::Info("[{}] {}", i, camera_name);
     printCameraSpecs(id);
-    if (camera_name.find(name_hint) != std::string::npos) {
+    if (camera_name.find(config.camera_name_hint) != std::string::npos) {
       chosen_camera_index = i;
       chosen_camera_name = camera_name;
     }
   }
   if (chosen_camera_index == std::numeric_limits<std::size_t>::max()) {
-    syslog::Warn("No camera found matching '{}'. Will open default camera", name_hint);
+    syslog::Warn("No camera matching '{}'. Will open default camera", config.camera_name_hint);
     chosen_camera_index = 0U;
   }
 
@@ -146,17 +174,17 @@ void Camera::acquire() {
 
   static const auto data_size = calcPixelBufferSize(sdl_frame);
   const auto frame = grape::camera::ImageFrame{
-    .header = { .pitch = static_cast<std::uint32_t>(sdl_frame->pitch),
-                .width = static_cast<std::uint32_t>(sdl_frame->w),
-                .height = static_cast<std::uint32_t>(sdl_frame->h),
-                .format = static_cast<std::uint32_t>(sdl_frame->format),
-                .timestamp = now },
+    .header = { .timestamp = now,
+                .pitch = static_cast<std::uint32_t>(sdl_frame->pitch),
+                .width = static_cast<std::uint16_t>(sdl_frame->w),
+                .height = static_cast<std::uint16_t>(sdl_frame->h),
+                .format = static_cast<std::uint32_t>(sdl_frame->format) },
     .pixels = { static_cast<std::byte*>(sdl_frame->pixels), static_cast<std::size_t>(data_size) }
   };
 
   syslog::Debug("stride: {}, width: {}, height: {}", sdl_frame->pitch, sdl_frame->w, sdl_frame->h);
 
-  callback_(frame);
+  impl_->callback(frame);
 
   SDL_ReleaseCameraFrame(impl_->camera.get(), sdl_frame);
 }

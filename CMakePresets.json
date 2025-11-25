@@ -16,7 +16,7 @@
       }
     },
     {
-      "name": "clang",
+      "name": "llvm",
       "inherits": "base",
       "description": "Configure all modules with clang toolchain",
       "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake"

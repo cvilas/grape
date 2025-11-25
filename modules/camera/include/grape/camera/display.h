@@ -22,9 +22,6 @@ public:
   /// Enable/disable timestamp display
   void showTimestamp(bool en);
 
-  /// @return average image display latency
-  [[nodiscard]] auto latency() const -> WallClock::Duration;
-
   Display();
   ~Display();
   Display(const Display&) = delete;
