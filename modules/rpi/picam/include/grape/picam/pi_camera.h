@@ -9,8 +9,9 @@
 #include <string>
 
 #include "grape/camera/image_frame.h"
+#include "grape/camera/image_spec.h"
 
-namespace grape::picam {
+namespace grape::camera {
 
 //=================================================================================================
 /// Camera image capture interface using libcamera
@@ -18,13 +19,22 @@ class PiCamera {
 public:
   using Callback = std::function<void(const camera::ImageFrame& frame)>;
 
-  /// Initialise a camera
-  /// @param callback Callback to be invoked when a new image frame is available
-  /// @param name_hint User-provided hint for camera to open by specifying a part of its name. If
-  /// not specified, the first enumerated camera is chosen
-  explicit PiCamera(Callback&& callback, const std::string& name_hint = "");
+  struct Config {
+    static constexpr auto DEFAULT_IMAGE_SIZE = ImageSize{ .width = 1920U, .height = 1080U };
 
-  /// Acquire an image. Trigger callback (set in the constructor) when an image becomes available
+    /// Camera name. Partial name (hint) is supported. If unspecified, choose first camera
+    std::string camera_name_hint;
+
+    /// Target resolution (pixels). Camera will select closest matching resolution
+    ImageSize image_size{ DEFAULT_IMAGE_SIZE };
+  };
+
+  /// Initialise a camera
+  /// @param config Camera capture configuration
+  /// @param image_callback Callback to trigger on image capture
+  PiCamera(const Config& config, Callback&& image_callback);
+
+  /// Acquire an image. Trigger callback when an image becomes available
   void acquire();
 
   ~PiCamera();
@@ -36,6 +46,5 @@ public:
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
-  Callback callback_;
 };
-}  // namespace grape::picam
+}  // namespace grape::camera

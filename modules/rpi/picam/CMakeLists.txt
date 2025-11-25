@@ -65,3 +65,4 @@ define_module_library(
   PUBLIC_LINK_LIBS "grape::camera;PkgConfig::LIBCAMERA")
 
 add_subdirectory(apps)
+add_subdirectory(examples)
