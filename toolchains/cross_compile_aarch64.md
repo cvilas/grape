@@ -5,10 +5,6 @@
 - No python bindings support. This is too complex for little gain
 - No rpi_camera support
 
-## TODO
-
-- [ ] Add x-build to X86 CI
-
 ## Overview
 
 The build system supports cross-compiling for `aarch64-linux-gnu` from an x86-64 host 

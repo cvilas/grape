@@ -12,9 +12,10 @@
 - [x] [Clock](../modules/common/clock/README.md)
 - [x] [Picam](../modules/rpi/camera/README.md)  
 - [x] [Pisense](../modules/rpi/sense_hat/README.md)
+- [ ] [Plot](../modules/experimental/plot/README.md)
+- [ ] Application note on writing applications. Data sources write to spmcq. Data processors read from spmcq. Data recorders use mpscq/mpmcq to read sources and log them directly into drake file
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
 - [ ] [Linalg](../modules/experimental/linalg/README.md)
-- [ ] [Plot](../modules/experimental/plot/README.md)
 - [ ] Basic OpenGL scenegraph
   - [ ] Clean up experimental implementation in scratch/scenegraph/copilot
   - [ ] Build scenegraph using data-oriented design
