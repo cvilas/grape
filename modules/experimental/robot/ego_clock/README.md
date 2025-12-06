@@ -31,6 +31,4 @@ mimics the behaviour of WallClock.
 ## TODO
 
 - [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`) 
-- [x] Benchmark `EgoClock::now()` against `WallClock::now()`. 
-- [ ] Improve performance of `EgoClock::now()` to match `WallClock::now()`.
-- [ ] Integrate `ClockReceiver` functionality directly into `EgoClock`
+- [ ] Improve benchmark performance of `EgoClock::now()` to match `WallClock::now()`.
