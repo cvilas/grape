@@ -48,6 +48,9 @@
   - [ ] Design a text-based scenegraph description format using our scripting engine
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] [Data recording](../modules/experimental/drake/README.md)
+- [ ] Multimodal telemetry 
+  - 1xaudio, 2x1080p30 video, 1x bidirectional data channel (teleop), 3x unidirectional data channel for structured & unstructured data
+  - WebRTC with SFU, authentication for teleop
 - [ ] DSP functions
   - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
   - [ ] Delay line
