@@ -16,6 +16,7 @@ Provide more details on the functionality, API usage, etc
 
 ## TODO
 
+- Refine and integrate [concept](../concept/README.md) with this README
 - Refactor imgui and implot out as a separate static-only library. Make it usable in other modules
 - Implement pub (Controller) and sub (Monitor)
 - Incorporate changes to PoC.
@@ -34,7 +35,6 @@ Provide more details on the functionality, API usage, etc
   - Implement signal show/hide button
   - Implement 'freeze' for each graph
   - Redesign to accommodate monitors and data writers (mcap) simultaneously
-- Choose archival data format: CSV, [MCAP](https://github.com/foxglove/mcap/tree/main/cpp), [PlotJuggler](https://github.com/facontidavide/PlotJuggler)
 - Implement data archive reader and writer
 - Implement Monitor application
   - Server connection window

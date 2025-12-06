@@ -30,5 +30,6 @@ mimics the behaviour of WallClock.
 
 ## TODO
 
+- [ ] Futex based implementation that does not depend on ipc
 - [ ] Tools to analyse curve-fit quality and to fine tune parameters
 - [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`) 
