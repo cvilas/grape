@@ -1,4 +1,4 @@
-# Real-time Ubuntu on Raspberry Pi 5
+# Configuring Real-time Ubuntu
 
 ## Brief
 
@@ -46,7 +46,8 @@ Reference: How-to guides at <https://documentation.ubuntu.com/real-time/latest/>
 - Verify the parameters passed to the kernel at boot time 
   ```bash
   $ cat /proc/cmdline
-  reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe  smsc95xx.macaddr=88:A2:9E:04:F4:F1 vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 multipath=off dwc_otg.lpm_enable=0 console=tty1 root=LABEL=writable rootfstype=ext4 rootwait fixrtc cfg80211.ieee80211_regdom=GB irqaffinity=0,1 nohz=on nohz_full=2,3 isolcpus=2,3 rcu_nocbs=2,3 rcu_nocb_poll  ```
+  reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe  smsc95xx.macaddr=88:A2:9E:04:F4:F1 vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 multipath=off dwc_otg.lpm_enable=0 console=tty1 root=LABEL=writable rootfstype=ext4 rootwait fixrtc cfg80211.ieee80211_regdom=GB kthread_cpus=0,1 irqaffinity=0,1 nohz=on nohz_full=2,3 isolcpus=2,3 rcu_nocbs=2,3 rcu_nocb_poll
+  ```
 
 ## Monitoring
 
@@ -57,6 +58,12 @@ Reference: How-to guides at <https://documentation.ubuntu.com/real-time/latest/>
 - Check if an application is running on the designated CPU cores: `ps -eo psr,tid,pid,comm,%cpu,priority,nice -T | grep <PID>`
 - Snapshot for current processes and their system resource usage: `ps -A --format psr,tid,pid,comm,%cpu,priority,nice -T | sort --general-numeric-sort | grep irq`
 - Generate system resource statistics: `dstat`
+
+#### A note on `top` and process priority
+
+`top` displays process priority in the 'PR' column in the range [-100, 39]. Lower PR mean higher process priority. PR is calculated as follows:
+- For regular processes: PR = 20 + NI (NI is 'nice' in the range [-20, 19]. Pnemonic: lower NI => process is less 'nice' => takes higher priority over other processes).
+- For real time processes: PR = -1 - rt_priority (rt_priority range: [1, 99])
 
 ## Further tuning
 
