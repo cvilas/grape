@@ -83,8 +83,8 @@ TEST_CASE("EgoClock operation with master clock", "[ego_clock]") {
       static constexpr auto WALL_TICK_PERIOD = 100ms;
       const auto config = grape::EgoClockDriver::Config{
         .clock_name = clock_name,
-        .broadcast_interval = 2U,  // Broadcast every other tick for fast initialisation
-        .calibration_window = 2U   // Minimal window for testing
+        .broadcast_interval = std::chrono::milliseconds(EGO_TICK_PERIOD * 2),
+        .calibration_window = 2U  // Minimal window for testing
       };
       auto driver = grape::EgoClockDriver(config);
       auto ego_time = grape::EgoClock::TimePoint{};

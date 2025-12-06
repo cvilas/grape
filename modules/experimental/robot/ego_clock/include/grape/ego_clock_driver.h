@@ -19,8 +19,8 @@ namespace grape {
 class EgoClockDriver {
 public:
   struct Config {
-    std::string clock_name;                //!< Uniquely identifies clock source
-    std::size_t broadcast_interval{ 2U };  //!< Number of ticks per system-wide clock sync
+    std::string clock_name;                    //!< Uniquely identifies clock source
+    WallClock::Duration broadcast_interval{};  //!< Interval between system-wide clock sync tx
     std::size_t calibration_window{ 2U };  //!< Number of tick samples used to evaluate clock fit
   };
 

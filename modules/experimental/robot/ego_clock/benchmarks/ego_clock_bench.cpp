@@ -21,11 +21,10 @@ void masterClock(const std::stop_token& st, const std::string& clock_name) {
     std::println("Master clock start");
     static constexpr auto EGO_TICK_PERIOD = std::chrono::milliseconds(10);
     static constexpr auto WALL_TICK_PERIOD = std::chrono::milliseconds(100);
-    const auto config = grape::EgoClockDriver::Config{
-      .clock_name = clock_name,
-      .broadcast_interval = 10U,  // Broadcast clock sync every 20 ticks (1 second)
-      .calibration_window = 40U   // Use 40 samples for clock fit
-    };
+    const auto config =
+        grape::EgoClockDriver::Config{ .clock_name = clock_name,
+                                       .broadcast_interval = std::chrono::milliseconds(1000),
+                                       .calibration_window = 40U };
     auto driver = grape::EgoClockDriver(config);
     auto ego_time = grape::EgoClock::TimePoint{};
     while (not st.stop_requested()) {
