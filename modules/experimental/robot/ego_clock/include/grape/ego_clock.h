@@ -10,6 +10,10 @@
 
 namespace grape {
 
+namespace ego_clock {
+class ClockDataReceiver;
+}
+
 //=================================================================================================
 /// Plant internal process clock
 ///
@@ -32,13 +36,13 @@ struct EgoClock {
       -> std::optional<EgoClock>;
 
   /// @return Current timestamp
-  [[nodiscard]] auto now() -> EgoClock::TimePoint;
+  [[nodiscard]] auto now() const noexcept -> EgoClock::TimePoint;
 
   /// sleep until a given time point
-  void sleepUntil(const EgoClock::TimePoint& tp);
+  void sleepUntil(const EgoClock::TimePoint& tp) const;
 
   /// sleep for a given duration
-  void sleepFor(const EgoClock::Duration& dt);
+  void sleepFor(const EgoClock::Duration& dt) const;
 
   /// @return nanoseconds since clock epoch, given time point
   [[nodiscard]] static constexpr auto toNanos(const EgoClock::TimePoint& tp) -> std::int64_t {
@@ -60,8 +64,7 @@ struct EgoClock {
 
 private:
   explicit EgoClock(const std::string& system_name);
-  class Impl;
-  std::unique_ptr<Impl> impl_{ nullptr };
+  std::unique_ptr<ego_clock::ClockDataReceiver> rx_{ nullptr };
 };
 
 }  // namespace grape

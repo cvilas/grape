@@ -4,6 +4,8 @@
 
 #include "grape/ego_clock_driver.h"
 
+#include <cmath>
+
 #include "clock_data.h"
 #include "grape/ipc/publisher.h"
 #include "grape/log/syslog.h"

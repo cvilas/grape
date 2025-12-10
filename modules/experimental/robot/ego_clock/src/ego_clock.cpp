@@ -37,21 +37,9 @@ constexpr auto toWallDuration(const grape::ego_clock::ClockTransform& tf,
 
 namespace grape {
 
-//=================================================================================================
-class EgoClock::Impl {
-public:
-  explicit Impl(const std::string& clock_name) : receiver_(clock_name) {
-  }
-  auto receiver() -> grape::ego_clock::ClockDataReceiver& {
-    return receiver_;
-  }
-
-private:
-  grape::ego_clock::ClockDataReceiver receiver_;
-};
-
 //-------------------------------------------------------------------------------------------------
-EgoClock::EgoClock(const std::string& system_name) : impl_(std::make_unique<Impl>(system_name)) {
+EgoClock::EgoClock(const std::string& system_name)
+  : rx_(std::make_unique<ego_clock::ClockDataReceiver>(system_name)) {
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -66,42 +54,25 @@ auto EgoClock::create(const std::string& clock_name, const std::chrono::millisec
   const auto until = WallClock::now() + timeout;
   static constexpr auto LOOP_WAIT = std::chrono::milliseconds(1);
   auto clock = EgoClock(clock_name);
-  while (not clock.impl_->receiver().transform() and (WallClock::now() < until)) {
+  while (not clock.rx_->isInit() and (WallClock::now() < until)) {
     std::this_thread::sleep_for(LOOP_WAIT);
   }
-  return clock.impl_->receiver().transform().has_value() ?
-             std::optional<EgoClock>(std::move(clock)) :
-             std::nullopt;
+  return clock.rx_->isInit() ? std::optional<EgoClock>(std::move(clock)) : std::nullopt;
 }
 
 //-------------------------------------------------------------------------------------------------
-auto EgoClock::now() -> EgoClock::TimePoint {
-  const auto tf = impl_->receiver().transform();
-  if (tf) {
-    return toEgoTime(*tf, WallClock::now());
-  }
-  syslog::Error("No master clock (unexpected)");
-  return EgoClock::TimePoint{};
+auto EgoClock::now() const noexcept -> EgoClock::TimePoint {
+  return toEgoTime(rx_->transform(), WallClock::now());
 }
 
 //-------------------------------------------------------------------------------------------------
-void EgoClock::sleepFor(const EgoClock::Duration& dt) {
-  const auto tf = impl_->receiver().transform();
-  if (tf) {
-    std::this_thread::sleep_for(toWallDuration(*tf, dt));
-  } else {
-    syslog::Error("No master clock (unexpected)");
-  }
+void EgoClock::sleepFor(const EgoClock::Duration& dt) const {
+  std::this_thread::sleep_for(toWallDuration(rx_->transform(), dt));
 }
 
 //-------------------------------------------------------------------------------------------------
-void EgoClock::sleepUntil(const EgoClock::TimePoint& tp) {
-  const auto tf = impl_->receiver().transform();
-  if (tf) {
-    std::this_thread::sleep_until(toWallTime(*tf, tp));
-  } else {
-    syslog::Error("No master clock (unexpected)");
-  }
+void EgoClock::sleepUntil(const EgoClock::TimePoint& tp) const {
+  std::this_thread::sleep_until(toWallTime(rx_->transform(), tp));
 }
 
 }  // namespace grape
