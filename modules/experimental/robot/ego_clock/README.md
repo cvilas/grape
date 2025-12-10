@@ -31,4 +31,3 @@ mimics the behaviour of WallClock.
 ## TODO
 
 - [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`) 
-- [ ] Improve benchmark performance of `EgoClock::now()` to match `WallClock::now()`.

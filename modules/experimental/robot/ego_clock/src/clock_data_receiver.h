@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <array>
 #include <atomic>
 
 #include "clock_data.h"
@@ -17,7 +16,8 @@ namespace grape::ego_clock {
 class ClockDataReceiver {
 public:
   explicit ClockDataReceiver(const std::string& clock_name);
-  [[nodiscard]] auto transform() const -> std::optional<ClockTransform>;
+  [[nodiscard]] auto isInit() const -> bool;
+  [[nodiscard]] auto transform() -> ClockTransform;
 
 private:
   void onMatch(const ipc::Match& match);
@@ -25,9 +25,8 @@ private:
               const ipc::SampleInfo& info);
 
   std::atomic<std::size_t> num_masters_{ 0U };
-  std::array<ClockTransform, 2> buffers_;
-  std::atomic<int> readable_index_{ -1 };  // -1 = no data, 0/1 = valid buffer index
-  std::size_t writable_index_{ 0 };        // Only writer modifies this
+  std::atomic<std::uint64_t> seq_{ 0U };
+  ClockTransform transform_;
   ipc::Subscriber<ClockTopic> tick_sub_;
 };
 

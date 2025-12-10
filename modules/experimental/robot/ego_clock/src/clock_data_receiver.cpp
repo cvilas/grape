@@ -4,7 +4,6 @@
 
 #include "clock_data_receiver.h"
 
-#include <cmath>
 #include <thread>
 
 #include "grape/log/syslog.h"
@@ -19,12 +18,25 @@ ClockDataReceiver::ClockDataReceiver(const std::string& clock_name)
 }
 
 //-------------------------------------------------------------------------------------------------
-auto ClockDataReceiver::transform() const -> std::optional<ClockTransform> {
-  const auto idx = readable_index_.load(std::memory_order_acquire);
-  if (idx < 0) {
-    return std::nullopt;
+auto ClockDataReceiver::transform() -> ClockTransform {
+  ClockTransform tf;
+  while (true) {
+    // Avoid torn reads: retry if writer is active (odd or changed seq)
+    const auto seq_before = seq_.load(std::memory_order_relaxed);
+    tf = transform_;
+    const auto seq_after = seq_.load(std::memory_order_acquire);
+    if ((seq_before == seq_after) and ((seq_before & 1U) == 0U)) {
+      break;
+    }
+    std::this_thread::yield();
   }
-  return buffers_.at(static_cast<std::size_t>(idx));
+  return tf;
+}
+
+//-------------------------------------------------------------------------------------------------
+auto ClockDataReceiver::isInit() const -> bool {
+  const auto seq = seq_.load(std::memory_order_acquire);
+  return (seq != 0U) && ((seq & 1U) == 0U);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -38,9 +50,9 @@ void ClockDataReceiver::onTick(const std::expected<ClockTransform, ipc::Error>& 
     syslog::Error("Error receiving clock data: {}", toString(maybe_data.error()));
     return;
   }
-  buffers_.at(writable_index_) = maybe_data.value();
-  readable_index_.store(static_cast<int>(writable_index_), std::memory_order_release);
-  writable_index_ = (1 - writable_index_);  // swap writable buffer
+  seq_.fetch_add(1, std::memory_order_relaxed);  // Begin write (odd count)
+  transform_ = maybe_data.value();
+  seq_.fetch_add(1, std::memory_order_release);  // End write (even count)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -59,10 +71,8 @@ void ClockDataReceiver::onMatch(const ipc::Match& match) {
                toString(match.remote_entity), num_masters_.load());
 
   if (num_masters_ > 1U) {
-    readable_index_.store(-1, std::memory_order_release);  // Invalidate data
     syslog::Error("Multiple clock drivers detected ({})", num_masters_.load());
   } else if (num_masters_ == 0U) {
-    readable_index_.store(-1, std::memory_order_release);  // Invalidate data
     syslog::Error("No clock driver available");
   }
 }

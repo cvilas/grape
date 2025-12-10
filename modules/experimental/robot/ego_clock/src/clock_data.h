@@ -16,7 +16,7 @@ namespace grape::ego_clock {
 /// Data for fitting correspondance between ego-clock and wall-clock
 /// wall_clock_ns = scale * ego_clock_ns + offset
 struct ClockTransform {
-  double scale{ 0. };
+  double scale{ 1. };
   double offset{ 0. };
   double rmse{ 0. };
 };
