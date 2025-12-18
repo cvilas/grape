@@ -35,8 +35,8 @@ auto ClockDataReceiver::transform() -> ClockTransform {
 
 //-------------------------------------------------------------------------------------------------
 auto ClockDataReceiver::isInit() const -> bool {
-  const auto seq = seq_.load(std::memory_order_acquire);
-  return (seq != 0U) && ((seq & 1U) == 0U);
+  const auto seq = seq_.load(std::memory_order_relaxed);
+  return (seq != 0U) and ((seq & 1U) == 0U);
 }
 
 //-------------------------------------------------------------------------------------------------
