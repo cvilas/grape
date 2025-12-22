@@ -6,17 +6,17 @@ Facilities to support deterministic real-time execution of tasks
 
 ## TODO
 
-- [ ] Understand RT Linux deeply
-  - Take notes on every howto guide in [realtime ubuntu](https://documentation.ubuntu.com/real-time/latest/)
-  - [Document](../../rpi/docs/realtime.md) how to configure Raspberry Pi5 for realtime applications
-  - Document how to allocate specified CPU cores to run Linux.
-  - Document how to allocate specified CPU cores to run my processes and threads.
 - [ ] Implement single producer multi-consumer queue using heap and shared memory
 - [ ] Refactor multi-producer single-consumer queue
   - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
   - Rename it for clarity
 - [ ] Refactor thread class out of realtime and put it in 'grape'
   - Insert logging to capture timer overruns in the loop
+- [ ] Application note on how to design the architecture of a realtime loop 
+  - Passing data across RT/non-RT boundary using shm
+  - Notion of ticks and timestamps
+- [ ] Integrate [document](../../rpi/docs/realtime.md) on how to configure Raspberry Pi5 for realtime applications
+- [ ] Create similar document on how to configure a PC for realtime Ubuntu
 
 ## Real-time tasks
 
