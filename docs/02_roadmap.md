@@ -2,18 +2,18 @@
 
 ## Manipulator
 
-- [ ] Build [kit](https://github.com/TheRobotStudio/SO-ARM100)
+- [ ] Build [LeRobot SO-ARM101 kit](https://github.com/TheRobotStudio/SO-ARM100)
 - [ ] Set up [LeRobot](https://huggingface.co/docs/lerobot/index)
 - [ ] Learn to pick and place
 
 ## Walker
 
+- [ ] Build [XGO-Mini kit](https://shop.elecfreaks.com/products/elecfreaks-cm4-xgo-mini-robot-dog-kit-for-raspberry-pi)
 - [x] Implement joystick interface for Linux
 - [x] Implement transactional teleop interface.  
 - [x] Implement SDL3-based camera streamer
 - [x] [picam](../modules/rpi/picam/README.md)  
 - [x] Implement system clock
-- [ ] Build kit
 - [ ] RL walk in MuJoCo
 - [ ] RL walk in reality
 
