@@ -10,5 +10,4 @@ TEST_CASE("[Test]", "[linalg]") {
   WARN("No tests implemented");
 }
 
-
-} // namespace 
+}  // namespace

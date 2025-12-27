@@ -4,15 +4,14 @@
 
 #pragma once
 
-#include <type_traits>
 #include <array>
+#include <type_traits>
 
 template <typename Scaler, std::size_t NumRows, std::size_t NumColumns>
   requires std::is_arithmetic_v<Scaler>
 class Matrix {
 public:
-  constexpr Matrix(const Scaler& initial_value = {})
-    : storage_(initial_value) {
+  constexpr Matrix(const Scaler& initial_value = {}) : storage_(initial_value) {
   }
   constexpr auto operator[](std::size_t row, std::size_t col) -> T& {
     return storage_[row * NumColumns + col];
