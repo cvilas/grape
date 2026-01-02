@@ -161,7 +161,7 @@ auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-auto readIndex(lua_State* state, const int table_ref, const size_t index)
+auto readIndex(lua_State* state, const int table_ref, const std::size_t index)
     -> std::expected<T, ConfigTable::Error> {
   // read table into stack and check its a table, not a value-type
   const auto object_type = lua_rawgeti(state, LUA_REGISTRYINDEX, table_ref);

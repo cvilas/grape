@@ -18,6 +18,7 @@ namespace grape::utils {
 /// constexpr auto truncated = truncate(str, start_token, end_token);
 /// std::cout << truncated << '\n';
 /// @endcode
+// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 constexpr auto truncate(std::string_view str, std::string_view start_token,
                         std::string_view end_token = std::string_view("")) -> std::string_view {
   const auto start_pos = str.find(start_token);
@@ -25,6 +26,7 @@ constexpr auto truncate(std::string_view str, std::string_view start_token,
   return (start_pos != std::string_view::npos) ? str.substr(start_pos, end_pos - start_pos) :
                                                  str.substr(0, end_pos);
 }
+// NOLINTEND(bugprone-easily-swappable-parameters)
 
 /// Transforms C++ ABI identifiers (eg: RTTI symbols) to names used in the source code
 [[nodiscard]] auto demangle(const char* mangled_name) -> std::string;
