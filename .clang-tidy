@@ -22,7 +22,6 @@
 # Enable rule sets. Some checks are turned off because they are flagged by multiple rule-sets
 Checks: '-*,
         bugprone-*,
-        -bugprone-easily-swappable-parameters,
         cert-*,
         concurrency-*,
         cppcoreguidelines-*,
@@ -43,6 +42,7 @@ Checks: '-*,
         -performance-move-const-arg,     # duplicates hicpp-move-const-arg,
         readability-*,
         -readability-magic-numbers,      # duplicates cppcoreguidelines-avoid-magic-numbers,
+        -readability-uppercase-literal-suffix, # duplicates hicpp-uppercase-literal-suffix,
         '
 
 # Upgrade warnings to errors
