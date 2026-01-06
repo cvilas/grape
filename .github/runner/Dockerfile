@@ -12,7 +12,7 @@ RUN apt-get update && \
 WORKDIR /home/runner
 
 # Install GitHub Actions runner (update version as needed)
-ENV RUNNER_VERSION=2.327.1
+ENV RUNNER_VERSION=2.330.0
 ENV RUNNER_ARCH=${ARCH}
 ENV RUNNER_TARBALL=actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz
 
