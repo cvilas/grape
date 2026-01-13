@@ -10,3 +10,4 @@ define_module_example(
   PRIVATE_LINK_LIBS benchmark::benchmark)
 define_module_example(NAME string_example SOURCES string_example.cpp)
 define_module_example(NAME error_example SOURCES error_example.cpp)
+define_module_example(NAME wall_timer_example SOURCES wall_timer_example.cpp)
