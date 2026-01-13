@@ -68,23 +68,23 @@ jobs:
           restore-keys: |
             grape-${{ runner.arch }}-${{ runner.os }}-cache
 
-      - name: Configure (clang)
-        run: cmake --preset clang -DLINTER_WARNING_IS_ERROR=ON
+      - name: Configure (llvm)
+        run: cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON
       
       - name: Check formatting
         run: |
-          cmake --build build/clang --target format
+          cmake --build build/llvm --target format
           if ! git diff --exit-code --quiet; then
             echo "::error::Following files are incorrectly formatted"
             git status
             exit 1
           fi
 
-      - name: Build (clang)
-        run: cmake --build build/clang --target all examples tests
+      - name: Build (llvm)
+        run: cmake --build build/llvm --target all examples tests
       
-      - name: Run unit tests (clang)
-        run: cmake --build build/clang --target check
+      - name: Run unit tests (llvm)
+        run: cmake --build build/llvm --target check
 
       - name: Configure (gcc)
         run: cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF
