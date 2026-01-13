@@ -11,5 +11,8 @@ sudo apt-get install -y \
   net-tools iw iftop htop nvtop patch evtest
 
 # Install support libraries for 3D graphics and GUIs
-sudo apt-get install -y \
-  libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxkbcommon-dev libwayland-dev wayland-protocols
+sudo apt-get install -y libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev \
+libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev \
+libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+
