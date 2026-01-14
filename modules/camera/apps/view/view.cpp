@@ -130,18 +130,14 @@ auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
       return SDL_APP_FAILURE;
     }
 
-    // Parse command line arguments
     const auto args = grape::conio::ProgramDescription("Camera viewer application")
                           .declareOption<std::string>("hint", "Part of camera name to match", "")
                           .parse(argc, const_cast<const char**>(argv));
 
     const auto camera_name_hint = args.getOption<std::string>("hint");
 
-    auto app = std::make_unique<Application>(camera_name_hint);
+    static auto app = std::make_unique<Application>(camera_name_hint);
     *appstate = app.get();
-
-    // Transfer ownership to static storage for automatic cleanup on exit
-    static auto app_holder = std::move(app);
 
     return SDL_APP_CONTINUE;
   } catch (...) {
@@ -164,5 +160,4 @@ auto SDL_AppEvent(void* appstate, SDL_Event* event) -> SDL_AppResult {
 
 //-------------------------------------------------------------------------------------------------
 void SDL_AppQuit(void* /*appstate*/, SDL_AppResult /*result*/) {
-  // Cleanup is handled automatically by the static app_holder destructor
 }
