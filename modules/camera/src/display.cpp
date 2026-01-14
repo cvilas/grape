@@ -39,7 +39,7 @@ Display::Display() : impl_(std::make_unique<Impl>()) {
   }
 
   // Choose an available renderer in order of preferance, otherwise fallback to a default
-  static constexpr auto PREFERRED_RENDERERS = { "opengl", "opengles2", "vulkan", "gpu" };
+  static constexpr auto PREFERRED_RENDERERS = { "gpu", "opengl", "opengles2" };
   for (const auto& renderer_name : PREFERRED_RENDERERS) {
     renderer = SDL_CreateRenderer(window, renderer_name);
     if (renderer != nullptr) {
