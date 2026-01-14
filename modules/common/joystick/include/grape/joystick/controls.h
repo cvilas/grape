@@ -42,6 +42,7 @@ enum class ControlId : std::uint8_t {
   AxisHat3X,
   AxisHat3Y,
 
+  KeyEnter,
   KeyUp,
   KeyLeft,
   KeyRight,

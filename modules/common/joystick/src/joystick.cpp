@@ -102,6 +102,7 @@ private:
     case ABS_HAT3X          : return ControlId::AxisHat3X ;
     case ABS_HAT3Y          : return ControlId::AxisHat3Y ;
           
+    case KEY_ENTER          : return ControlId::KeyEnter ;
     case KEY_UP             : return ControlId::KeyUp ;
     case KEY_LEFT           : return ControlId::KeyLeft ;
     case KEY_RIGHT          : return ControlId::KeyRight ;
