@@ -3,7 +3,7 @@
 # =================================================================================================
 
 declare_module(
-  NAME picam
+  NAME rpi_camera
   DEPENDS_ON_MODULES "camera"
   DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
 
@@ -55,10 +55,10 @@ if(NOT LIBCAMERA_STDLIB STREQUAL STDLIB_PATTERN)
   return()
 endif()
 
-set(SOURCES include/grape/picam/pi_camera.h src/pi_camera.cpp)
+set(SOURCES include/grape/rpi/camera.h src/camera.cpp)
 
 define_module_library(
-  NAME picamera
+  NAME rpi_camera
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                        $<INSTALL_INTERFACE:include>

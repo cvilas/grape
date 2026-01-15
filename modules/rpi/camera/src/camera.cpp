@@ -2,7 +2,7 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#include "grape/picam/pi_camera.h"
+#include "grape/rpi/camera.h"
 
 #include <atomic>
 #include <mutex>
@@ -20,7 +20,7 @@
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
 
-namespace grape::camera {
+namespace grape::rpi {
 
 namespace {
 //-------------------------------------------------------------------------------------------------
@@ -45,8 +45,8 @@ auto toSDLPixelFormat(const libcamera::PixelFormat& fmt) -> SDL_PixelFormat {
 }  // namespace
 
 //-------------------------------------------------------------------------------------------------
-struct PiCamera::Impl {
-  PiCamera::Callback callback{ nullptr };
+struct Camera::Impl {
+  Camera::Callback callback{ nullptr };
 
   // Core libcamera objects
   std::unique_ptr<libcamera::CameraManager> camera_manager;
@@ -64,7 +64,7 @@ struct PiCamera::Impl {
 
   // Setup methods
   void setupCamera(const std::string& name_hint);
-  void configureStream(const ImageSize& image_size);
+  void configureStream(const camera::ImageSize& image_size);
   void allocateBuffers();
   void createRequests();
   void startCapture();
@@ -76,7 +76,7 @@ struct PiCamera::Impl {
 };
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::setupCamera(const std::string& name_hint) {
+void Camera::Impl::setupCamera(const std::string& name_hint) {
   camera_manager = std::make_unique<libcamera::CameraManager>();
   if (camera_manager->start() != 0) {
     panic("Failed to start camera manager");
@@ -113,7 +113,7 @@ void PiCamera::Impl::setupCamera(const std::string& name_hint) {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::configureStream(const ImageSize& image_size) {
+void Camera::Impl::configureStream(const camera::ImageSize& image_size) {
   config = camera->generateConfiguration({ libcamera::StreamRole::Viewfinder });
   if ((not config) || config->empty()) {
     panic("Failed to generate camera configuration");
@@ -176,7 +176,7 @@ void PiCamera::Impl::configureStream(const ImageSize& image_size) {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::allocateBuffers() {
+void Camera::Impl::allocateBuffers() {
   allocator = std::make_unique<libcamera::FrameBufferAllocator>(camera);
 
   const int ret = allocator->allocate(stream);
@@ -188,7 +188,7 @@ void PiCamera::Impl::allocateBuffers() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::createRequests() {
+void Camera::Impl::createRequests() {
   const auto& stream_buffers = allocator->buffers(stream);
 
   for (const auto& buffer : stream_buffers) {
@@ -216,9 +216,9 @@ void PiCamera::Impl::createRequests() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::startCapture() {
+void Camera::Impl::startCapture() {
   // Connect request completion handler
-  camera->requestCompleted.connect(this, &PiCamera::Impl::requestComplete);
+  camera->requestCompleted.connect(this, &Camera::Impl::requestComplete);
 
   // Start camera
   if (camera->start() != 0) {
@@ -238,7 +238,7 @@ void PiCamera::Impl::startCapture() {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto PiCamera::Impl::queueRequest(libcamera::Request* request) -> int {
+auto Camera::Impl::queueRequest(libcamera::Request* request) -> int {
   if (!camera_started.load(std::memory_order_acquire)) {
     return -1;
   }
@@ -246,7 +246,7 @@ auto PiCamera::Impl::queueRequest(libcamera::Request* request) -> int {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::requestComplete(libcamera::Request* request) {
+void Camera::Impl::requestComplete(libcamera::Request* request) {
   if (request->status() == libcamera::Request::RequestCancelled) {
     return;
   }
@@ -254,7 +254,7 @@ void PiCamera::Impl::requestComplete(libcamera::Request* request) {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::Impl::processRequest(libcamera::Request* request) {
+void Camera::Impl::processRequest(libcamera::Request* request) {
   // Store latest frame, discarding previous if not consumed
   auto* old = latest_request.exchange(request, std::memory_order_release);
   // If there was an unconsumed frame, requeue it immediately
@@ -265,8 +265,7 @@ void PiCamera::Impl::processRequest(libcamera::Request* request) {
 }
 
 //-------------------------------------------------------------------------------------------------
-PiCamera::PiCamera(const Config& config, Callback&& image_callback)
-  : impl_(std::make_unique<Impl>()) {
+Camera::Camera(const Config& config, Callback&& image_callback) : impl_(std::make_unique<Impl>()) {
   impl_->callback = std::move(image_callback);
   impl_->setupCamera(config.camera_name_hint);
   impl_->configureStream(config.image_size);
@@ -276,12 +275,12 @@ PiCamera::PiCamera(const Config& config, Callback&& image_callback)
 }
 
 //-------------------------------------------------------------------------------------------------
-PiCamera::~PiCamera() {
+Camera::~Camera() {
   if (impl_->camera) {
     if (impl_->camera_started.exchange(false, std::memory_order_acq_rel)) {
       impl_->camera->stop();
     }
-    impl_->camera->requestCompleted.disconnect(impl_.get(), &PiCamera::Impl::requestComplete);
+    impl_->camera->requestCompleted.disconnect(impl_.get(), &Camera::Impl::requestComplete);
     impl_->camera->release();
   }
 
@@ -297,7 +296,7 @@ PiCamera::~PiCamera() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void PiCamera::acquire() {
+void Camera::acquire() {
   // Get latest frame
   libcamera::Request* request = impl_->latest_request.exchange(nullptr, std::memory_order_acquire);
   if (request == nullptr) {
@@ -358,4 +357,4 @@ void PiCamera::acquire() {
   impl_->queueRequest(request);
 }
 
-}  // namespace grape::camera
+}  // namespace grape::rpi

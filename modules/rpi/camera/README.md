@@ -45,11 +45,11 @@
 
 ## Roadmap
 
-- [x] Create `PiCamera` class to match `grape::camera::Camera` interface
+- [x] Create `Camera` class to match `grape::camera::Camera` interface
 - [x] Test on Raspberry Pi camera module 3
 - [x] Recreate camera_pub pipeline
 - [x] Make MJPEG capture work
-- [ ] Harmonise `camera_pub` and `picam_pub`
+- [ ] Harmonise `camera_pub` and `rpi_camera_pub`
   - single common config file
   - remove code duplication
 - [ ] Improve frame rate at full resolution to match `rpicam-vid`
