@@ -160,7 +160,7 @@ auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
 }
 
 //-------------------------------------------------------------------------------------------------
-template <typename T>
+template <typename T>  // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 auto readIndex(lua_State* state, const int table_ref, const std::size_t index)
     -> std::expected<T, ConfigTable::Error> {
   // read table into stack and check its a table, not a value-type
