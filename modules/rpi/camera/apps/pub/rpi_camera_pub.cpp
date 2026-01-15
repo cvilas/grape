@@ -11,14 +11,14 @@
 #include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/session.h"
 #include "grape/log/syslog.h"
-#include "grape/picam/pi_camera.h"
+#include "grape/rpi/camera.h"
 #include "grape/script/script.h"
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using libcamera to acquire, compress and publish camera frames.
 //-------------------------------------------------------------------------------------------------
 
-namespace grape::camera {
+namespace grape::rpi::camera {
 
 //=================================================================================================
 /// Encapsulates processing pipeline:
@@ -26,7 +26,7 @@ namespace grape::camera {
 class Publisher {
 public:
   struct Config {
-    PiCamera::Config camera_config;
+    Camera::Config camera_config;
     std::string pub_topic{ "/picam" };
     std::uint16_t compression_speed{ 1 };
     static auto init(const grape::script::ConfigTable& table) -> Config;
@@ -36,13 +36,14 @@ public:
   void update();
 
 private:
-  void onCapturedFrame(const camera::ImageFrame& frame);
-  void onCompressedFrame(std::span<const std::byte> bytes, const camera::Compressor::Stats& stats);
+  void onCapturedFrame(const grape::camera::ImageFrame& frame);
+  void onCompressedFrame(std::span<const std::byte> bytes,
+                         const grape::camera::Compressor::Stats& stats);
   void onSubscriberMatch(const ipc::Match& match);
 
   ipc::RawPublisher publisher_;
-  camera::Compressor compressor_;
-  std::unique_ptr<PiCamera> capture_;
+  grape::camera::Compressor compressor_;
+  std::unique_ptr<rpi::Camera> capture_;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -50,13 +51,13 @@ Publisher::Publisher(const Config& cfg)
   : publisher_(cfg.pub_topic, [this](const auto& match) { onSubscriberMatch(match); })
   , compressor_(cfg.compression_speed,
                 [this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
-  , capture_(std::make_unique<PiCamera>(cfg.camera_config,
-                                        [this](const auto& frame) { onCapturedFrame(frame); })) {
+  , capture_(std::make_unique<rpi::Camera>(cfg.camera_config,
+                                           [this](const auto& frame) { onCapturedFrame(frame); })) {
   syslog::Note("Publishing images on topic: '{}'", cfg.pub_topic);
 }
 
 //-------------------------------------------------------------------------------------------------
-void Publisher::onCapturedFrame(const camera::ImageFrame& frame) {
+void Publisher::onCapturedFrame(const grape::camera::ImageFrame& frame) {
   if (not compressor_.compress(frame)) {
     syslog::Error("Compression failed!");
   }
@@ -64,7 +65,7 @@ void Publisher::onCapturedFrame(const camera::ImageFrame& frame) {
 
 //-------------------------------------------------------------------------------------------------
 void Publisher::onCompressedFrame(std::span<const std::byte> bytes,
-                                  const camera::Compressor::Stats& stats) {
+                                  const grape::camera::Compressor::Stats& stats) {
   const auto pub_result = publisher_.publish(bytes);
   if (not pub_result) {
     syslog::Error("Publish failed: {}", toString(pub_result.error()));
@@ -104,7 +105,7 @@ auto Publisher::Config::init(const script::ConfigTable& table) -> Publisher::Con
   };
 }
 
-}  // namespace grape::camera
+}  // namespace grape::rpi::camera
 
 namespace {
 //-------------------------------------------------------------------------------------------------
@@ -148,8 +149,8 @@ auto main(int argc, char* argv[]) -> int {
   try {
     // Parse command line arguments
     const auto args =
-        grape::conio::ProgramDescription("PiCamera publisher application")
-            .declareOption<std::string>("config", "Configuration file", "picam_pub/config.lua")
+        grape::conio::ProgramDescription("Raspberry-pi camera publisher application")
+            .declareOption<std::string>("config", "Configuration file", "rpi_camera_pub/config.lua")
             .declareOption<std::string>("log_level", "Log severity level", "Info")
             .parse(argc, const_cast<const char**>(argv));
 
@@ -169,9 +170,9 @@ auto main(int argc, char* argv[]) -> int {
     }
     grape::syslog::Note("Using config file '{}'", config_file_path.value().string());
     const auto config_script = grape::script::ConfigScript(config_file_path.value());
-    const auto config = grape::camera::Publisher::Config::init(config_script.table());
+    const auto config = grape::rpi::camera::Publisher::Config::init(config_script.table());
 
-    auto publisher = std::make_unique<grape::camera::Publisher>(config);
+    auto publisher = std::make_unique<grape::rpi::camera::Publisher>(config);
     while (not s_exit) {
       publisher->update();
     }

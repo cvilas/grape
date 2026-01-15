@@ -1,5 +1,5 @@
 --[[
-PiCamera image publisher configuration
+Raspberry-pi camera image publisher configuration
 ]]
 
 local hostname = os.getenv("HOST") or ""
