@@ -6,11 +6,19 @@
 # Set up facilities for python nanobind
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 FetchContent_Declare(
+  robin-map
+  URL ${CMAKE_SOURCE_DIR}/external/sources/robin-map-${ROBIN_MAP_VERSION_REQUIRED}.tar.gz
+  EXCLUDE_FROM_ALL
+  SYSTEM)
+FetchContent_MakeAvailable(robin-map)
+FetchContent_Declare(
   nanobind
   URL ${CMAKE_SOURCE_DIR}/external/sources/nanobind-${NANOBIND_VERSION_REQUIRED}.tar.gz
   EXCLUDE_FROM_ALL
-  SYSTEM)
+  SYSTEM
+  DEPENDS robin-map)
 set(NB_TEST OFF CACHE INTERNAL "")
+set(NB_USE_SUBMODULE_DEPS OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(nanobind)
 
 # Where all the Python wheels go
