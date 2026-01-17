@@ -49,6 +49,8 @@ write_basic_package_version_file(
   VERSION ${VERSION}
   COMPATIBILITY AnyNewerVersion)
 
+set_property(GLOBAL PROPERTY INSTALL_PARALLEL ON)
+
 install(
   FILES
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/${CMAKE_PROJECT_NAME}/${CMAKE_PROJECT_NAME}-config.cmake
