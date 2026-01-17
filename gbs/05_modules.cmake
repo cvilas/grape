@@ -780,6 +780,7 @@ endif(NOT CMAKE_CROSSCOMPILING)
 
 #=================================================================================================
 # Set up facilities for google benchmark framework
+set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
   benchmark
   URL ${CMAKE_SOURCE_DIR}/external/sources/benchmark-${BENCHMARK_VERSION_REQUIRED}.tar.gz
