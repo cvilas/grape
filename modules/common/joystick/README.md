@@ -13,3 +13,8 @@ Linux joystick and gamepad interface
 ## Limitations
 
 - No method to set axis deadzone and fuzz
+
+## Troubleshooting
+
+- Run `evtest` to detect all event devices. 
+- Run `ls -l /dev/input/by-path` to list all detected event devices 
