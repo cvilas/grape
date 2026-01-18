@@ -188,8 +188,7 @@ namespace grape::joystick {
 
 //-------------------------------------------------------------------------------------------------
 auto enumerate() -> std::vector<std::filesystem::path> {
-  static constexpr auto EVDEV_DIR = "/dev/input/by-path/";  // location of evdev devices
-  static constexpr auto JSDEV_TOKEN = "event-joystick";     // joystick device identifier
+  static constexpr auto EVDEV_DIR = "/dev/input/by-path/";
 
   constexpr auto MAX_EXPECTED_JOYSTICKS = 5U;
   auto devices = std::vector<std::filesystem::path>();
@@ -197,7 +196,9 @@ auto enumerate() -> std::vector<std::filesystem::path> {
 
   for (const auto& entry : std::filesystem::directory_iterator(EVDEV_DIR)) {
     const auto& path = entry.path();
-    if (path.string().ends_with(JSDEV_TOKEN)) {
+    const auto path_str = path.string();
+    if (path_str.find("joystick") != std::string::npos &&
+        path_str.find("event") != std::string::npos) {
       devices.push_back(path);
     }
   }
