@@ -4,9 +4,7 @@
 
 #include "grape/ego_clock_driver.h"
 
-#include <cmath>
-
-#include "clock_data.h"
+#include "clock_topic.h"
 #include "grape/ipc/publisher.h"
 #include "grape/log/syslog.h"
 #include "line_fitter.h"
@@ -16,6 +14,7 @@ struct EgoClockDriver::Impl {
   explicit Impl(const Config& config);
   WallClock::Duration broadcast_interval{};
   WallClock::TimePoint last_broadcast_time;
+  ego_clock::ClockTransform last_fit;
   ego_clock::LineFitter line_fitter;
   ipc::Publisher<ego_clock::ClockTopic> tick_pub;
 };
@@ -56,10 +55,22 @@ void EgoClockDriver::tick(const EgoClock::TimePoint& ego_time,
   const auto tf = ego_clock::ClockTransform{ .scale = fit->slope,
                                              .offset = fit->intercept,
                                              .rmse = std::round(std::sqrt(fit->mse)) };
-  syslog::Info("Clock fit: {}", toString(tf));
   if (not impl_->tick_pub.publish(tf)) {
     syslog::Error("Failed to publish clock tick");
   }
+
+  // Check against last fit
+  if (impl_->last_fit.rmse > 0.) {
+    const auto prev_fit = ego_clock::toWallTime(impl_->last_fit, ego_time);
+    const auto now_fit = ego_clock::toWallTime(tf, ego_time);
+    const auto delta_fit = now_fit - prev_fit;
+    static constexpr auto THRESHOLD = WallClock::Duration(std::chrono::milliseconds(1));
+    if (delta_fit > THRESHOLD) {
+      syslog::Info("Clock fit: {}", toString(tf));
+      syslog::Warn("Deviation from last fit (={}) crosses threshold (={})", delta_fit, THRESHOLD);
+    }
+  }
+  impl_->last_fit = tf;
 }
 
 }  // namespace grape
