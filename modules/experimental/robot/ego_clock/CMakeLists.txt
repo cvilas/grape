@@ -9,12 +9,13 @@ declare_module(
 
 # library sources
 set(SOURCES
-    src/line_fitter.h
-    src/clock_data.h
-    src/clock_data_receiver.h
     src/clock_data_receiver.cpp
-    src/ego_clock.cpp
+    src/clock_data_receiver.h
+    src/clock_topic.h
+    src/clock_transform.h
     src/ego_clock_driver.cpp
+    src/ego_clock.cpp
+    src/line_fitter.h
     README.md
     include/grape/ego_clock_driver.h
     include/grape/ego_clock.h)

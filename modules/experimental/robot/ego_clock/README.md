@@ -30,4 +30,5 @@ mimics the behaviour of WallClock.
 
 ## TODO
 
+- [ ] Tools to analyse curve-fit quality and to fine tune parameters
 - [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`) 

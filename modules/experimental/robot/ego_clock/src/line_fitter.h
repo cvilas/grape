@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <cmath>
 #include <numeric>
 #include <optional>
 #include <vector>
@@ -90,13 +91,13 @@ inline auto LineFitter::fit() const -> std::optional<FitParams> {
           samples_.end();
   const auto [sum_x, sum_y, sum_xx, sum_xy] = std::transform_reduce(
       samples_.begin(), samples_end, std::tuple{ 0.0, 0.0, 0.0, 0.0 }, sum, componentise);
-  const auto denom = (num_samples * sum_xx) - (sum_x * sum_x);
-  const auto slope = ((num_samples * sum_xy) - (sum_x * sum_y)) / denom;
-  const auto intercept = (sum_y - (slope * sum_x)) / num_samples;
+  const auto denom = std::fma(sum_x, -sum_x, num_samples * sum_xx);
+  const auto slope = std::fma(sum_x, -sum_y, num_samples * sum_xy) / denom;
+  const auto intercept = std::fma(slope, -sum_x, sum_y) / num_samples;
 
   // Compute mean-squared-error
   const auto error_squared = [slope, intercept](const auto& sample) {
-    const auto predicted_y = (slope * sample.x) + intercept;
+    const auto predicted_y = std::fma(slope, sample.x, intercept);
     const auto error = sample.y - predicted_y;
     return error * error;
   };
@@ -142,14 +143,14 @@ inline auto LineFitter::fit() const -> std::optional<FitParams> {
   }
 
   const auto num_samples = static_cast<double>((write_index_ < buf_size) ? write_index_ : buf_size);
-  const auto denom = (num_samples * sum_xx) - (sum_x * sum_x);
-  const auto slope = ((num_samples * sum_xy) - (sum_x * sum_y)) / denom;
-  const auto intercept = (sum_y - (slope * sum_x)) / num_samples;
+  const auto denom = std::fma(sum_x, -sum_x, num_samples * sum_xx);
+  const auto slope = std::fma(sum_x, -sum_y, num_samples * sum_xy) / denom;
+  const auto intercept = std::fma(slope, -sum_x, sum_y) / num_samples;
 
   // Compute mean-squared-error using standard for loop
   double sum_error_squared = 0.0;
   for (const auto& sample : std::span{ samples_.begin(), samples_end }) {
-    const auto predicted_y = (slope * sample.x) + intercept;
+    const auto predicted_y = std::fma(slope, sample.x, intercept);
     const auto error = sample.y - predicted_y;
     sum_error_squared += error * error;
   }
