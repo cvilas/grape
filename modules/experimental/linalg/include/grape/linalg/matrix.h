@@ -62,6 +62,7 @@ constexpr auto identity() -> Matrix<order, order, Scalar> {
 template <typename Scalar>
 constexpr auto cross(const Vector<3, Scalar>& va, const Vector<3, Scalar>& vb)
     -> Vector<3, Scalar> {
+      // use kahan's approach: https://pharr.org/matt/blog/2019/11/03/difference-of-floats
   return Vector<3, Scalar>{ 1, 2, 3 };
 }
 
