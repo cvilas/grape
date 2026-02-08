@@ -147,7 +147,7 @@ void Camera::Impl::configureStream(const camera::ImageSize& image_size) {
         }
       }
       stream_config.size = best_size;
-      syslog::Info("Closet match to target resolution({}x{}): {}x{}, {}", image_size.width,
+      syslog::Info("Closest match to target resolution({}x{}): {}x{}, {}", image_size.width,
                    image_size.height, best_size.width, best_size.height, fmt.toString());
       break;
     }
