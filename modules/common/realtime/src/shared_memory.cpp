@@ -5,6 +5,7 @@
 #include "grape/realtime/shared_memory.h"
 
 #include <system_error>
+#include <utility>
 
 #include <fcntl.h>     // for O_* constants
 #include <sys/mman.h>  // for mmap
@@ -144,16 +145,14 @@ SharedMemory::~SharedMemory() {
 }
 
 //-------------------------------------------------------------------------------------------------
-SharedMemory::SharedMemory(SharedMemory&& other) noexcept : data_(other.data_) {
-  other.data_ = {};
+SharedMemory::SharedMemory(SharedMemory&& other) noexcept : data_(std::exchange(other.data_, {})) {
 }
 
 //-------------------------------------------------------------------------------------------------
 auto SharedMemory::operator=(SharedMemory&& other) noexcept -> SharedMemory& {
   if (this != &other) {
     close();  // Clean up current state
-    data_ = other.data_;
-    other.data_ = {};
+    data_ = std::exchange(other.data_, {});
   }
   return *this;
 }
