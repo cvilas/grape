@@ -4,6 +4,8 @@
 
 #include "grape/script/script.h"
 
+#include <utility>
+
 #include "lua.hpp"
 
 namespace grape::script {
@@ -221,11 +223,8 @@ ConfigTable::ConfigTable(std::shared_ptr<lua_State> lua_state, int lua_table_ref
 //-------------------------------------------------------------------------------------------------
 ConfigTable::ConfigTable(ConfigTable&& other) noexcept
   : lua_state_(std::move(other.lua_state_))
-  , lua_table_ref_(other.lua_table_ref_)
-  , size_(other.size_) {
-  // reset internal data to flag moved object does not own resources anymore
-  other.lua_table_ref_ = 0;
-  other.size_ = 0;
+  , lua_table_ref_(std::exchange(other.lua_table_ref_, 0))
+  , size_(std::exchange(other.size_, 0)) {
 }
 
 //-------------------------------------------------------------------------------------------------
