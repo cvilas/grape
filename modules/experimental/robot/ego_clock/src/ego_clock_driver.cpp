@@ -48,7 +48,7 @@ void EgoClockDriver::tick(const EgoClock::TimePoint& ego_time,
 
   const auto fit = impl_->line_fitter.fit();
   if (not fit) {
-    syslog::Error("Failed to fit clock");
+    syslog::Note("No WallClock/EgoClock correlation available yet");
     return;
   }
 
