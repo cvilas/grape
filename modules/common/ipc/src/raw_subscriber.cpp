@@ -94,11 +94,7 @@ RawSubscriber::RawSubscriber(const std::string& topic, QoS qos,
 }
 
 //-------------------------------------------------------------------------------------------------
-RawSubscriber::~RawSubscriber() {
-  if (impl_ != nullptr) {
-    impl_->RemoveReceiveCallback();
-  }
-}
+RawSubscriber::~RawSubscriber() = default;
 
 //-------------------------------------------------------------------------------------------------
 RawSubscriber::RawSubscriber(RawSubscriber&&) noexcept = default;
