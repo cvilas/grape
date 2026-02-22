@@ -27,13 +27,25 @@ struct WallClock {
 
   /// @return nanoseconds since clock epoch, given time point
   [[nodiscard]] static constexpr auto toNanos(const WallClock::TimePoint& tp) -> std::int64_t {
-    const auto ns = std::chrono::duration_cast<Duration>(tp.time_since_epoch());
+    const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch());
     return static_cast<std::int64_t>(ns.count());
   }
 
   /// @return time point given nanoseconds since clock epoch
   [[nodiscard]] static constexpr auto fromNanos(std::int64_t nanos) -> WallClock::TimePoint {
     const auto dur = std::chrono::duration_cast<Duration>(std::chrono::nanoseconds(nanos));
+    return WallClock::TimePoint(dur);
+  }
+
+  /// @return microseconds since clock epoch, given time point
+  [[nodiscard]] static constexpr auto toMicros(const WallClock::TimePoint& tp) -> std::int64_t {
+    const auto us = std::chrono::duration_cast<std::chrono::microseconds>(tp.time_since_epoch());
+    return static_cast<std::int64_t>(us.count());
+  }
+
+  /// @return time point given microseconds since clock epoch
+  [[nodiscard]] static constexpr auto fromMicros(std::int64_t micros) -> WallClock::TimePoint {
+    const auto dur = std::chrono::duration_cast<Duration>(std::chrono::microseconds(micros));
     return WallClock::TimePoint(dur);
   }
 };
