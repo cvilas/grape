@@ -83,10 +83,9 @@ RawSubscriber::RawSubscriber(const std::string& topic, QoS qos,
   impl_->SetReceiveCallback([moved_data_cb = std::move(data_cb)](
                                 const eCAL::STopicId& id, const eCAL::SDataTypeInformation&,
                                 const eCAL::SReceiveCallbackData& data) -> void {
-    const auto tp = WallClock::TimePoint(WallClock::Duration{ data.send_timestamp });
     if (moved_data_cb != nullptr) {
       moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
-                      .info = { .publish_time = tp,
+                      .info = { .publish_time = WallClock::fromMicros(data.send_timestamp),
                                 .publisher = { .host = id.topic_id.host_name,
                                                .id = id.topic_id.entity_id } } });
     }

@@ -78,8 +78,7 @@ RawPublisher::RawPublisher(RawPublisher&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
 auto RawPublisher::publish(std::span<const std::byte> bytes) const -> std::expected<void, Error> {
-  const auto now = WallClock::now().time_since_epoch().count();
-  if (not impl_->Send(bytes.data(), bytes.size(), now)) {
+  if (not impl_->Send(bytes.data(), bytes.size(), WallClock::toMicros(WallClock::now()))) {
     if (impl_->GetSubscriberCount() > 0U) {
       return std::unexpected{ Error::PublishFailed };
     }
