@@ -1,70 +1,67 @@
 # Roadmap
 
-## Pi
+## Manipulator
 
-- [ ] [picam](../modules/rpi/picam/README.md)  
-- [ ] [halow](../modules/rpi/halow/README.md) 
-- [ ] [Prepare Pi for realtime control](../modules/common/realtime/README.md) 
-- [ ] Real-time time-series plotting using implot (redesign from scratch again)
-- [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
-- [ ] [ahrs](../modules/rpi/ahrs/README.md)
-- [ ] CANOpen
-- [ ] [radar](https://shop.pimoroni.com/products/dream-hat-plus-radar?variant=55529907290491)
+- [ ] Build [LeRobot SO-ARM101 kit](https://github.com/TheRobotStudio/SO-ARM100)
+- [ ] Set up [LeRobot](https://huggingface.co/docs/lerobot/index)
+- [ ] Learn to pick and place
 
+## Walker
 
-## QRTS
+- [ ] Build [XGO-Mini kit](https://shop.elecfreaks.com/products/elecfreaks-cm4-xgo-mini-robot-dog-kit-for-raspberry-pi)
+- [ ] RL walk in MuJoCo
+- [ ] RL walk in reality
 
-Create a qrts subtree, recreate QRTS libraries, relive 2001
+## Rover
 
-- [ ] qmotor
-- [ ] rp
-
-## Towards a Rover
-
-- [x] Implement joystick interface for Linux
-- [x] Implement transactional teleop interface.  
-- [x] Implement SDL3-based camera streamer
-- [x] Implement system clock
 - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
-- [ ] Localiser
-- [ ] Telemetry: position, attritude, battery, camera
-- [ ] FPV control
-- [ ] Dashboard view
-- [ ] Dead reckoning
-- [ ] Guidance (autonomous path planning)
+- [ ] Implement Localiser (GPS + AHRS)
+- [ ] Integrate long-distance comm link
+- [ ] Implement telemetry: position, attitude, battery, camera
+- [ ] Implement FPV control
+- [ ] Implement dashboard view 
 
 ## Libraries
 
+- [x] [Console IO](../modules/common/conio/README.md)
+- [x] [Scripting](../modules/common/script/README.md)
+- [x] [Logging](../modules/common/log/README.md)
+- [x] [Serialisation](../modules/common/serdes/README.md)
+- [x] [IPC](../modules/common/ipc/README.md)
+- [x] [Joystick](../modules/common/joystick/README.md) interface
+- [x] [Teleop](../modules/experimental/robot/locomotion/teleop/README.md) interface.  
+- [x] [Camera](../modules/camera/README.md) streamer
+- [x] [Picam](../modules/rpi/camera/README.md)  
+- [x] [Clock](../modules/experimental/robot/ego_clock/README.md)
+- [ ] [Pisense](../modules/rpi/sense_hat/README.md)
+- [ ] [AHRS](../modules/experimental/ahrs/README.md)
+- [ ] Basic OpenGL scenegraph
+  - [ ] Clean up experimental implementation in scratch/scenegraph/copilot
+  - [ ] Build scenegraph using data-oriented design
+  - [ ] Extend to support asset loading using assimp
+  - [ ] Design a text-based scenegraph description format using our scripting engine
+- [ ] [Linalg](../modules/experimental/linalg/README.md)
+- [ ] [Plot](../modules/experimental/plot/README.md)
+- [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
+- [ ] [Data recording](../modules/experimental/drake/README.md)
 - [ ] DSP functions
   - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
   - [ ] Delay line
-  - [ ] Low pass filter
+  - [ ] Butterworth LPF
+  - [ ] Exponential LPF
   - [ ] Differentiator
   - [ ] Integrator
   - [ ] Velocity observer
-- [ ] Implement simple SDL3 plot (See scratch/plot_tests/sdlplot.cpp) 
-- [ ] Implement 3D scenegraph libraries using SDL, OpenGL, Khronos libs
-  - [ ] Review `Getting Started` section of OpenGL [book](https://learnopengl.com/)
-  - [ ] Review my experimental implementations in scratch/scenegraph/copilot
-  - [ ] Build version 1: Traditional scenegraph using class hierarchy
-  - [ ] Study [Flecs and ECS](https://github.com/SanderMertens/flecs)
-  - [ ] Build version 2: Modern scenegraph using ECS approach
-  - [ ] Extend to support asset loading using assimp
-  - [ ] Study [Anki](https://github.com/godlikepanos/anki-3d-engine) which uses Lua for scenegraph
-  - [ ] Design a text-based scenegraph description format using our scripting engine
-- [ ] Host monitoring micro-service
-  - [ ] Implement library to read CPU, memory, disk usage, network utilisation, temperatures
-  - [ ] Add systemd services support in GBS
-  - [ ] Implement the ability to install monitoring micro-service using cpack
+- [ ] CANOpen
 - [ ] CI updates (See TODO in [README](../.github/workflows/README.md))
 - [ ] Support C++26
   - [ ] Auto serdes using [variadic structured bindings](https://youtu.be/qIDFyhtUMnQ)
+  - [ ] Plotting serialised topic data directly as `grape_plot --topics="/some/topic/name","/another/topic/name"`
   - [ ] Cross language [binding](https://godbolt.org/z/bYPcjMd9q) to functions for scripting
   - [ ] Automatic differentiation using reflection
   - [ ] Message dispatch using [pattern matching](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf)
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
-  - [ ] linear algebra using std::mdspan and c++26 linalg 
   - [ ] Study [Catch23](https://github.com/philsquared/Catch23) when it is still simple, and replace Catch2
 - [ ] IPC: Fix ipc in MacOS
   - [ ] `grape_ipc_perf_pub`/`sub`
@@ -78,8 +75,9 @@ Create a qrts subtree, recreate QRTS libraries, relive 2001
     using senders and receivers ([std::execution](https://en.cppreference.com/w/cpp/execution)). 
   - Polymorphic resource allocators (see `std::pmr` namespace) and how to use them in embedded systems
   - [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
-- Robot model/kinematics/Visualisation. (Goal: Single model description format for kinematic calculations and scenegraph visualisation)
-  - Auto generated robot kinematics from model
+- Robot model/kinematics/Visualisation.
+  - High performance IK using [IK-Geo](https://alexanderelias.com/ur5-ik/)
+  - Auto generated robot kinematics from model (single model format for kinematics and visualisation)
     - [Talk](https://youtu.be/CwN0I8yUqok?feature=shared)
     - [Code](https://github.com/pac48/fast_robot_kinematics)
 - Transition to Vulkan from OpenGL
@@ -93,12 +91,7 @@ Create a qrts subtree, recreate QRTS libraries, relive 2001
 ## References
 
 - [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
-- [glaze](https://github.com/stephenberry/glaze) for JSON serialisation and reflection
-- C++23 features: [cppcon](https://youtu.be/Cttb8vMuq-Y), [cpp weekly](https://youtu.be/N2HG___9QFI)
-- C++20 features: <https://youtu.be/N1gOSgZy7h4>
 - Practical [C++26 Reflection](https://youtu.be/cqQ7v6xdZRw)
-- Clean code: <https://youtu.be/9ch7tZN4jeI>
-- [How to start a modern C++ project - Mikhail Svetkin - Meeting C++ 2023](https://youtu.be/UI_QayAb9U0)
 - [VULKAN: From 2D to 3D // C++ 3D Multiplayer Game From Scratch // LIVE TUTORIAL](https://youtu.be/hSL9dCjwoCU)
 - [3D graphics programming](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
 - [LLVm's realtime safety revolution](https://youtu.be/b_hd5FAv1dw)
