@@ -20,32 +20,18 @@ The i2c interface on the Pi must be configured for 400kHz
 dtparam=i2c_arm=on,i2c_arm_baudrate=400000
 ```
 
-See [developer notes](./docs/developer_notes.md) for additional information
+## Developer notes
+
+- [IMU](./docs/developer_notes_imu.md)
+- [Display](./docs/developer_notes_fb.md)
 
 ## Roadmap
 
 - [x] Support humidity sensor
 - [x] Support pressure sensor interface
 - [x] Support inertial sensor interface
-- [ ] Support framebuffer for LED matrix
+- [x] Support framebuffer for LED matrix
 - [ ] Report IMU data in SI units
-
-## Troubleshooting
-
-- Framebuffer devices
-  ```bash
-  # list framebuffer devices
-  cat /proc/fb
-
-  # show properties
-  fbset -i -fb /dev/fb0
-
-  # show sysfs attributes  
-  cat /sys/class/graphics/fb0/name
-  cat /sys/class/graphics/fb0/modes
-  cat /sys/class/graphics/fb0/virtual_size
-  cat /sys/class/graphics/fb0/bits_per_pixel
-  ```
 
 ## References
 
