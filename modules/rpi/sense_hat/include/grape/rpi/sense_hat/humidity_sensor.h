@@ -29,7 +29,7 @@ public:
   };
 
   explicit HumiditySensor(const Config& config);
-  [[nodiscard]] auto read() -> std::expected<Measurement, Error>;
+  [[nodiscard]] auto read() const -> std::expected<Measurement, Error>;
 
   ~HumiditySensor();
   HumiditySensor(const HumiditySensor&) = delete;

@@ -58,7 +58,7 @@ PressureSensor::PressureSensor(const Config& config) {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto PressureSensor::read() -> std::expected<Measurement, Error> {
+auto PressureSensor::read() const -> std::expected<Measurement, Error> {
   // Poll STATUS_REG until both P_DA and T_DA are set
   static constexpr auto POLL_TIMEOUT = std::chrono::milliseconds(100);
   static constexpr auto POLL_INTERVAL = std::chrono::milliseconds(5);

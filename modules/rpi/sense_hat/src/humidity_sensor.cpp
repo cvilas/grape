@@ -99,7 +99,7 @@ HumiditySensor::HumiditySensor(const Config& config) {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto HumiditySensor::read() -> std::expected<Measurement, Error> {
+auto HumiditySensor::read() const -> std::expected<Measurement, Error> {
   // Poll STATUS_REG until both H_DA and T_DA are set
   static constexpr auto POLL_TIMEOUT = std::chrono::milliseconds(200);
   static constexpr auto POLL_INTERVAL = std::chrono::milliseconds(10);

@@ -42,7 +42,7 @@ public:
   };
 
   explicit InertialSensor(const Config& config);
-  [[nodiscard]] auto read() -> std::expected<ImuSample, Error>;
+  [[nodiscard]] auto read() const -> std::expected<ImuSample, Error>;
 
   ~InertialSensor();
   InertialSensor(const InertialSensor&) = delete;
