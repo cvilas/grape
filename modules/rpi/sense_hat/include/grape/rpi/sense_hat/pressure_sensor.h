@@ -29,7 +29,7 @@ public:
   };
 
   explicit PressureSensor(const Config& config);
-  [[nodiscard]] auto read() -> std::expected<Measurement, Error>;
+  [[nodiscard]] auto read() const -> std::expected<Measurement, Error>;
 
   ~PressureSensor();
   PressureSensor(const PressureSensor&) = delete;

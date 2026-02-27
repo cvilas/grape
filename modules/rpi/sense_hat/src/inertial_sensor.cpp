@@ -127,7 +127,7 @@ InertialSensor::InertialSensor(const Config& config) {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto InertialSensor::read() -> std::expected<ImuSample, Error> {
+auto InertialSensor::read() const -> std::expected<ImuSample, Error> {
   ImuSample sample{};
   sample.timestamp = WallClock::now();
 
