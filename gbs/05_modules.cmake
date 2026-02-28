@@ -66,7 +66,7 @@ function(enumerate_modules)
   set(_MODULES_ENUMERATE_FLAG
       ON
       CACHE INTERNAL "Enumeration of modules in progress")
-  message(STATUS "Enumerating ${PROJID} modules")
+  message(STATUS "Enumerating modules")
   foreach(module IN LISTS module_paths)
     if(NOT ${module} STREQUAL ${CMAKE_CURRENT_LIST_FILE}) # avoid recursion
       message(VERBOSE "  Parsing ${module}")
