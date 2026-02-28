@@ -9,7 +9,6 @@
 #include <string>
 
 #include "grape/camera/image_frame.h"
-#include "grape/camera/image_spec.h"
 
 namespace grape::camera {
 

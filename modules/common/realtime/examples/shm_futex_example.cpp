@@ -5,7 +5,6 @@
 #include <atomic>
 #include <climits>
 #include <csignal>
-#include <new>
 #include <print>
 #include <system_error>
 #include <thread>

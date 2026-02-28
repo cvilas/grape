@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <format>
+
 #include "grape/conio/string_streamable.h"
 #include "grape/exception.h"
 #include "grape/utils/utils.h"

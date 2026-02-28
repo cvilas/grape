@@ -2,7 +2,6 @@
 // Copyright (C) 2026 GRAPE Contributors
 //=================================================================================================
 
-#include <cmath>
 #include <csignal>
 #include <print>
 

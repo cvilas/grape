@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <compare>
 #include <cstdint>
 
 namespace grape::camera {

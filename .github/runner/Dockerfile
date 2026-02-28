@@ -1,6 +1,6 @@
 # Dockerfile for GitHub Actions self-hosted runner
 
-FROM ubuntu:24.04
+FROM ubuntu:latest
 
 ARG ARCH=x64 # CPU architecture (x64, arm64)
 
