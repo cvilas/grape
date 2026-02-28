@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <limits>
 #include <mutex>
-#include <print>
 #include <shared_mutex>
 
 #include <SDL3/SDL.h>

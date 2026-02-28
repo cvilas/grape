@@ -4,8 +4,6 @@
 
 #define SDL_MAIN_USE_CALLBACKS 1  // NOLINT(cppcoreguidelines-macro-usage)
 
-#include <cmath>
-
 #include <SDL3/SDL_main.h>
 
 #include "grape/camera/camera.h"
@@ -13,7 +11,6 @@
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
-#include "grape/wall_clock.h"
 
 //-------------------------------------------------------------------------------------------------
 // Demonstrates using SDL3 camera API to acquire and show camera frames.

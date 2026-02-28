@@ -6,7 +6,6 @@
 #include <print>
 
 #include "grape/utils/enums.h"
-#include "grape/utils/format_ranges.h"
 
 //=================================================================================================
 // Example program demonstrates usage of facilities for static reflection of enums
