@@ -10,7 +10,6 @@
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/realtime/schedule.h"
-#include "grape/utils/format_ranges.h"
 
 //=================================================================================================
 /// Utility to run any application with a user specified priority and CPU affinity

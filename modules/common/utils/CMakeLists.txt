@@ -22,7 +22,6 @@ set(SOURCES
     include/grape/utils/detail/enums_detail.h
     include/grape/utils/enums.h
     include/grape/utils/file_system.h
-    include/grape/utils/format_ranges.h
     include/grape/utils/ip.h
     include/grape/utils/stacktrace.h
     include/grape/utils/utils.h

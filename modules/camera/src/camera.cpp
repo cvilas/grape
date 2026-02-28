@@ -8,7 +8,6 @@
 
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
-#include "grape/utils/format_ranges.h"
 
 namespace {
 

@@ -2,10 +2,10 @@
 // Copyright (C) 2026 GRAPE Contributors
 //=================================================================================================
 
+#include <atomic>
 #include <csignal>
 #include <cstddef>
 #include <print>
-#include <thread>
 
 #include "grape/exception.h"
 #include "grape/ipc/publisher.h"

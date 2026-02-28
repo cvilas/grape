@@ -4,7 +4,6 @@
 
 #include <csignal>
 #include <cstring>
-#include <mutex>
 
 #include <SDL3/SDL.h>
 

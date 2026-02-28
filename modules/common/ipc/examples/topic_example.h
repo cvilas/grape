@@ -6,6 +6,8 @@
 
 #include <string>
 
+#include "grape/ipc/qos.h"
+
 namespace grape::ipc::ex {
 struct ExampleTopicAttributes {
   using DataType = std::string;

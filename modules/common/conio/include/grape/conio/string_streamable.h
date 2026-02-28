@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <concepts>
-#include <format>
 #include <sstream>
 #include <vector>
 
