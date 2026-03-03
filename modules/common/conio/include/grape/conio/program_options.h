@@ -84,8 +84,8 @@ public:
   /// @param default_value Default value to use if the option is not specified on the command line
   /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
-  auto declareOption(const std::string& key, const std::string& brief, const T& default_value)
-      -> ProgramDescription&;
+  auto declareOption(const std::string& key, const std::string& brief,
+                     const T& default_value) -> ProgramDescription&;
 
   /// @brief Parses and returns command line options at runtime.
   /// @param argc Number of arguments on the command line
@@ -109,8 +109,8 @@ constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-auto ProgramDescription::declareOption(const std::string& key, const std::string& brief)
-    -> ProgramDescription& {
+auto ProgramDescription::declareOption(const std::string& key,
+                                       const std::string& brief) -> ProgramDescription& {
   options_.emplace_back(ProgramOptions::Option{ .key = key,
                                                 .brief = brief,
                                                 .value = "",

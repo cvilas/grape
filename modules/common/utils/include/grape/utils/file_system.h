@@ -43,7 +43,7 @@ namespace grape::utils {
 /// Search in standard locations to resolve absolute path to a file.
 /// @param file_name Name of the file to search, which could be absolute or relative path
 /// @return Absolute path to the file, if found
-[[nodiscard]] auto resolveFilePath(const std::filesystem::path& file_name)
-    -> std::optional<std::filesystem::path>;
+[[nodiscard]] auto
+resolveFilePath(const std::filesystem::path& file_name) -> std::optional<std::filesystem::path>;
 
 }  // namespace grape::utils

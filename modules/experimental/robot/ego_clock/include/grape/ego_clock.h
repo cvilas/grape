@@ -31,9 +31,9 @@ struct EgoClock {
   /// @param clock_name Unique identifier for clock source
   /// @param timeout How long to wait for
   /// @return An initialised clock, or nothing if timed out waiting for master clock signal
-  [[nodiscard]] static auto create(const std::string& clock_name,
-                                   const std::chrono::milliseconds& timeout)
-      -> std::optional<EgoClock>;
+  [[nodiscard]] static auto
+  create(const std::string& clock_name,
+         const std::chrono::milliseconds& timeout) -> std::optional<EgoClock>;
 
   /// @return Current timestamp
   [[nodiscard]] auto now() const noexcept -> EgoClock::TimePoint;
