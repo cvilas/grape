@@ -8,10 +8,11 @@
 
 #include <benchmark/benchmark.h>
 
-#include "grape/ego_clock.h"
-#include "grape/ego_clock_driver.h"
+#include "grape/ego_clock2.h"
+#include "grape/ego_clock2_driver.h"
 #include "grape/exception.h"
 #include "grape/ipc/session.h"
+#include "grape/wall_clock.h"
 
 namespace {
 
@@ -21,15 +22,12 @@ void masterClock(const std::stop_token& st, const std::string& clock_name) {
     std::println("Master clock start");
     static constexpr auto EGO_TICK_PERIOD = std::chrono::milliseconds(10);
     static constexpr auto WALL_TICK_PERIOD = std::chrono::milliseconds(100);
-    const auto config =
-        grape::EgoClockDriver::Config{ .clock_name = clock_name,
-                                       .broadcast_interval = std::chrono::milliseconds(1000),
-                                       .calibration_window = 40U };
-    auto driver = grape::EgoClockDriver(config);
-    auto ego_time = grape::EgoClock::TimePoint{};
+    const auto config = grape::EgoClock2Driver::Config{ .clock_name = clock_name };
+    auto driver = grape::EgoClock2Driver(config);
+    auto ego_time = grape::EgoClock2::TimePoint{};
     while (not st.stop_requested()) {
       const auto wall_time = grape::WallClock::now();
-      driver.tick(ego_time, wall_time);
+      driver.tick(ego_time);
       std::this_thread::sleep_until(wall_time + WALL_TICK_PERIOD);
       ego_time += EGO_TICK_PERIOD;
     }
@@ -40,8 +38,8 @@ void masterClock(const std::stop_token& st, const std::string& clock_name) {
 }
 
 //-------------------------------------------------------------------------------------------------
-// Benchmark EgoClock::now()
-void bmEgoClockNow(benchmark::State& state) {
+// Benchmark EgoClock2::now()
+void bmEgoClock2Now(benchmark::State& state) {
   static auto is_ipc_init = false;
   if (not is_ipc_init) {
     grape::ipc::init({});
@@ -53,7 +51,7 @@ void bmEgoClockNow(benchmark::State& state) {
 
   auto master = std::jthread(masterClock, clock_name);
   static constexpr auto MASTER_WAIT_TIME = std::chrono::seconds(10);
-  auto ego_clock = grape::EgoClock::create(clock_name, MASTER_WAIT_TIME);
+  auto ego_clock = grape::EgoClock2::create(clock_name, MASTER_WAIT_TIME);
   if (not ego_clock) {
     std::println("No master clock");
     return;
@@ -67,7 +65,7 @@ void bmEgoClockNow(benchmark::State& state) {
   master.request_stop();
   state.SetItemsProcessed(state.iterations());
 }
-BENCHMARK(bmEgoClockNow)->Unit(benchmark::kNanosecond);
+BENCHMARK(bmEgoClock2Now)->Unit(benchmark::kNanosecond);
 
 //-------------------------------------------------------------------------------------------------
 // Benchmark WallClock::now() for comparison
