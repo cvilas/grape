@@ -42,8 +42,8 @@ inline void EgoClock2Signal::post(std::int64_t value) {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto EgoClock2Signal::wait(std::int64_t expected,
-                                  std::chrono::milliseconds timeout) const -> bool {
+inline auto EgoClock2Signal::wait(std::int64_t expected, std::chrono::milliseconds timeout) const
+    -> bool {
   const auto sec = std::chrono::duration_cast<std::chrono::seconds>(timeout);
   const auto nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(timeout - sec);
   const auto ts = timespec{ .tv_sec = sec.count(), .tv_nsec = nsec.count() };

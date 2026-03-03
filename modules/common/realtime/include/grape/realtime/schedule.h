@@ -25,8 +25,8 @@ namespace grape::realtime {
 /// @param cpus List of CPU indices, starting at 0
 /// @param pid Linux specific thread ID, typically returned by gettid() (0=calling thread)
 /// @return nothing on success, error information on failure
-[[nodiscard]] auto setCpuAffinity(std::span<const unsigned int> cpus,
-                                  pid_t pid = 0) -> std::expected<void, Error>;
+[[nodiscard]] auto setCpuAffinity(std::span<const unsigned int> cpus, pid_t pid = 0)
+    -> std::expected<void, Error>;
 
 /// Thread scheduling parameters
 struct Schedule {

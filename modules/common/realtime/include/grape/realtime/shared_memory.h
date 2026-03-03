@@ -45,8 +45,8 @@ public:
   /// @param size The number of bytes to allocate in the shared region.
   /// @param access Requested access rights.
   /// @return A memory segment mapped to process address space on success, else error.
-  [[nodiscard]] static auto create(const std::string& name, std::size_t size,
-                                   Access access) -> std::expected<SharedMemory, Error>;
+  [[nodiscard]] static auto create(const std::string& name, std::size_t size, Access access)
+      -> std::expected<SharedMemory, Error>;
 
   /// Open a pre-existing shared memory region and map it to caller's process address space.
   /// @note Call data() to access mapped memory region.
@@ -54,8 +54,8 @@ public:
   /// @param name Identifying name for the shared memory.
   /// @param access Requested access rights.
   /// @return A memory segment mapped to process address space on success, else error.
-  [[nodiscard]] static auto open(const std::string& name,
-                                 Access access) -> std::expected<SharedMemory, Error>;
+  [[nodiscard]] static auto open(const std::string& name, Access access)
+      -> std::expected<SharedMemory, Error>;
 
   /// @return Raw access to shared memory segment
   /// @note Caller is responsible for safe synchronous access from multiple processes/threads.

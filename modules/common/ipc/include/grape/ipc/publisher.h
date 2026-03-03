@@ -18,8 +18,8 @@ template <TopicAttributes Topic>
 class Publisher : public RawPublisher {
 public:
   explicit Publisher(const Topic& topic_attr, MatchCallback&& match_cb = nullptr);
-  [[nodiscard]] auto
-  publish(const typename Topic::DataType& data) const -> std::expected<void, Error>;
+  [[nodiscard]] auto publish(const typename Topic::DataType& data) const
+      -> std::expected<void, Error>;
 };
 
 //-------------------------------------------------------------------------------------------------

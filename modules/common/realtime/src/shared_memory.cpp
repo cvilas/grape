@@ -37,8 +37,8 @@ auto SharedMemory::remove(const std::string& name) -> std::expected<void, Error>
 }
 
 //-------------------------------------------------------------------------------------------------
-auto SharedMemory::create(const std::string& name, std::size_t size,
-                          Access access) -> std::expected<SharedMemory, Error> {
+auto SharedMemory::create(const std::string& name, std::size_t size, Access access)
+    -> std::expected<SharedMemory, Error> {
   // Flags to specify shm file creation behaviour:
   // - O_CREAT: create shm path if it does not exist
   // - O_EXCL: raise error if shm path already exists before creation
@@ -67,7 +67,7 @@ auto SharedMemory::create(const std::string& name, std::size_t size,
   }
 
   // note the size we actually got
-  struct stat stats {};
+  struct stat stats{};
   if (::fstat(fd, &stats) == -1) {
     const auto err = std::error_code(errno, std::system_category());
     return std::unexpected(Error{ "(fstat) ", err.message() });
@@ -95,8 +95,8 @@ auto SharedMemory::create(const std::string& name, std::size_t size,
 }
 
 //-------------------------------------------------------------------------------------------------
-auto SharedMemory::open(const std::string& name,
-                        Access access) -> std::expected<SharedMemory, Error> {
+auto SharedMemory::open(const std::string& name, Access access)
+    -> std::expected<SharedMemory, Error> {
   // Open existing shared memory object
   const auto oflag = ((access == Access::ReadWrite) ? O_RDWR : O_RDONLY);
   static constexpr auto MODE = 0;  // unused
@@ -107,7 +107,7 @@ auto SharedMemory::open(const std::string& name,
   }
 
   // read size of the shared memory object
-  struct stat stats {};
+  struct stat stats{};
   if (::fstat(fd, &stats) == -1) {
     const auto err = std::error_code(errno, std::system_category());
     return std::unexpected(Error{ "(fstat) ", err.message() });

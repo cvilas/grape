@@ -28,9 +28,9 @@ struct EgoClock2 {
   /// @param clock_name Shared memory name for the clock source (must start with '/')
   /// @param timeout How long to wait for the first clock tick
   /// @return An initialised clock, or nothing if timed out waiting for driver
-  [[nodiscard]] static auto
-  create(const std::string& clock_name,
-         const std::chrono::milliseconds& timeout) -> std::optional<EgoClock2>;
+  [[nodiscard]] static auto create(const std::string& clock_name,
+                                   const std::chrono::milliseconds& timeout)
+      -> std::optional<EgoClock2>;
 
   /// @return Most recently posted clock value
   [[nodiscard]] auto now() const noexcept -> EgoClock2::TimePoint;

@@ -24,8 +24,8 @@ EgoClock::~EgoClock() = default;
 EgoClock::EgoClock(EgoClock&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
-auto EgoClock::create(const std::string& clock_name,
-                      const std::chrono::milliseconds& timeout) -> std::optional<EgoClock> {
+auto EgoClock::create(const std::string& clock_name, const std::chrono::milliseconds& timeout)
+    -> std::optional<EgoClock> {
   const auto until = WallClock::now() + timeout;
   static constexpr auto LOOP_WAIT = std::chrono::milliseconds(1);
   auto clock = EgoClock(clock_name);

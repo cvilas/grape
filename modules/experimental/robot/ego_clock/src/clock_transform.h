@@ -27,22 +27,22 @@ constexpr auto toString(const ClockTransform& tf) -> std::string {
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toWallTime(const ClockTransform& tf,
-                          const EgoClock::TimePoint& tp) -> WallClock::TimePoint {
+constexpr auto toWallTime(const ClockTransform& tf, const EgoClock::TimePoint& tp)
+    -> WallClock::TimePoint {
   const auto ns = std::fma(tf.scale, static_cast<double>(EgoClock::toNanos(tp)), tf.offset);
   return grape::WallClock::fromNanos(static_cast<std::int64_t>(ns));
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toEgoTime(const ClockTransform& tf,
-                         const WallClock::TimePoint& tp) -> EgoClock::TimePoint {
+constexpr auto toEgoTime(const ClockTransform& tf, const WallClock::TimePoint& tp)
+    -> EgoClock::TimePoint {
   const auto ns = (static_cast<double>(WallClock::toNanos(tp)) - tf.offset) / tf.scale;
   return grape::EgoClock::fromNanos(static_cast<std::int64_t>(ns));
 }
 
 //-------------------------------------------------------------------------------------------------
-constexpr auto toWallDuration(const ClockTransform& tf,
-                              const EgoClock::Duration& dur) -> WallClock::Duration {
+constexpr auto toWallDuration(const ClockTransform& tf, const EgoClock::Duration& dur)
+    -> WallClock::Duration {
   return std::chrono::duration_cast<WallClock::Duration>(dur * tf.scale);
 }
 

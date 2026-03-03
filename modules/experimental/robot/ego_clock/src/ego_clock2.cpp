@@ -35,8 +35,8 @@ EgoClock2::~EgoClock2() = default;
 EgoClock2::EgoClock2(EgoClock2&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
-auto EgoClock2::create(const std::string& clock_name,
-                       const std::chrono::milliseconds& timeout) -> std::optional<EgoClock2> {
+auto EgoClock2::create(const std::string& clock_name, const std::chrono::milliseconds& timeout)
+    -> std::optional<EgoClock2> {
   using Shm = realtime::SharedMemory;
   const auto end = std::chrono::steady_clock::now() + timeout;
   static constexpr auto POLL_INTERVAL = std::chrono::milliseconds(1);
