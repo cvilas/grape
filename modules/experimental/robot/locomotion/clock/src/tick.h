@@ -33,15 +33,16 @@ constexpr auto SHM_SIZE = sizeof(Tick);
 
 //=================================================================================================
 // Shared memory where the tick resides
-auto initShm(const std::string& id, realtime::SharedMemory::Access access) -> std::optional<Shm> {
+inline auto initShm(const std::string& id, realtime::SharedMemory::Access access)
+    -> std::optional<realtime::SharedMemory> {
   // Try to create shared memory. If that fails, try to open. If that fails, give up
   const auto shm_name = id + SHM_NAME_SUFFIX;
-  auto maybe_shm = realtime::SharedMemory::create(id, SHM_SIZE, access);
+  auto maybe_shm = realtime::SharedMemory::create(shm_name, SHM_SIZE, access);
   const auto shm_created = maybe_shm.has_value();
   if (not shm_created) {
     syslog::Note("Creating shared memory for ticks did not succeed: {}",
                  maybe_shm.error().message());
-    maybe_shm = realtime::SharedMemory::open(id, access);
+    maybe_shm = realtime::SharedMemory::open(shm_name, access);
     if (not maybe_shm) {
       syslog::Note("Opening shared memory for ticks did not succeed: {}",
                    maybe_shm.error().message());

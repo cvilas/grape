@@ -11,9 +11,7 @@
 namespace grape {
 
 //-------------------------------------------------------------------------------------------------
-struct ClockDriver::Impl {
-  realtime::SharedMemory shm;
-};
+struct ClockDriver::Impl : realtime::SharedMemory {};
 
 //-------------------------------------------------------------------------------------------------
 ClockDriver::ClockDriver(const Config& config) {
@@ -30,7 +28,7 @@ ClockDriver::~ClockDriver() = default;
 //-------------------------------------------------------------------------------------------------
 void ClockDriver::tick(const FollowerClock::TimePoint& tp) {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  auto* tick = reinterpret_cast<clock::Tick*>(impl_->shm.data().data());
+  auto* tick = reinterpret_cast<clock::Tick*>(impl_->data().data());
   tick->post(FollowerClock::toNanos(tp));
 }
 
