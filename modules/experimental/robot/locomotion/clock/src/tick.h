@@ -28,7 +28,7 @@ struct Tick {
   [[nodiscard]] auto wait(std::int64_t expected, std::chrono::milliseconds timeout) const -> bool;
 };
 
-constexpr auto SHM_NAME_SUFFIX = "/tick";
+constexpr auto SHM_NAME_SUFFIX = "_tick";
 constexpr auto SHM_SIZE = sizeof(Tick);
 
 //=================================================================================================
@@ -36,7 +36,7 @@ constexpr auto SHM_SIZE = sizeof(Tick);
 inline auto initShm(const std::string& id, realtime::SharedMemory::Access access)
     -> std::optional<realtime::SharedMemory> {
   // Try to create shared memory. If that fails, try to open. If that fails, give up
-  const auto shm_name = id + SHM_NAME_SUFFIX;
+  const auto shm_name = "/" + id + SHM_NAME_SUFFIX;
   auto maybe_shm = realtime::SharedMemory::create(shm_name, SHM_SIZE, access);
   const auto shm_created = maybe_shm.has_value();
   if (not shm_created) {

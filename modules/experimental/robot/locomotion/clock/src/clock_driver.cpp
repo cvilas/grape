@@ -17,9 +17,10 @@ struct ClockDriver::Impl : realtime::SharedMemory {};
 ClockDriver::ClockDriver(const Config& config) {
   auto maybe_shm =
       clock::initShm(config.clock_name, grape::realtime::SharedMemory::Access::ReadWrite);
-  if (maybe_shm) {
-    impl_ = std::make_unique<Impl>(std::move(maybe_shm.value()));
+  if (not maybe_shm) {
+    throw std::runtime_error("Unable to create");
   }
+  impl_ = std::make_unique<Impl>(std::move(maybe_shm.value()));
 }
 
 //-------------------------------------------------------------------------------------------------
