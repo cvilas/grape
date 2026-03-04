@@ -30,5 +30,13 @@ mimics the behaviour of WallClock.
 
 ## TODO
 
+- [ ] Create futex based implementation
+  - [ ] Multiple runs of the example should work
+  - [ ] Clean up shared memory after use
+  - [ ] Pipe error messages correctly during creation
+  - [ ] Ensure example can exit immediately on signal
+- [ ] Unit tests
+- [ ] Examples
+- [ ] Clean up documentation
 - [ ] Tools to analyse curve-fit quality and to fine tune parameters
 - [ ] `EgoClock` reports stale clock transforms (include `valid_until` field in `ClockTransform`) 
