@@ -2,89 +2,82 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#include "grape/ego_clock2.h"
+#include "grape/follower_clock.h"
 
 #include <thread>
 
-#include "ego_clock2_signal.h"
-#include "grape/realtime/shared_memory.h"
+#include "tick.h"
 
 namespace grape {
 
 //-------------------------------------------------------------------------------------------------
-struct EgoClock2::Impl {
-  explicit Impl(realtime::SharedMemory&& shm_in);
+struct FollowerClock::Impl {
   realtime::SharedMemory shm;
-  const ego_clock::EgoClock2Signal* signal{ nullptr };
 };
 
 //-------------------------------------------------------------------------------------------------
-EgoClock2::Impl::Impl(realtime::SharedMemory&& shm_in) : shm(std::move(shm_in)) {
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  signal = reinterpret_cast<const ego_clock::EgoClock2Signal*>(shm.data().data());
-}
+FollowerClock::~FollowerClock() = default;
 
 //-------------------------------------------------------------------------------------------------
-EgoClock2::EgoClock2(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {
-}
+FollowerClock::FollowerClock(FollowerClock&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
-EgoClock2::~EgoClock2() = default;
-
-//-------------------------------------------------------------------------------------------------
-EgoClock2::EgoClock2(EgoClock2&&) noexcept = default;
-
-//-------------------------------------------------------------------------------------------------
-auto EgoClock2::create(const std::string& clock_name, const std::chrono::milliseconds& timeout)
-    -> std::optional<EgoClock2> {
-  using Shm = realtime::SharedMemory;
+auto FollowerClock::create(const std::string& clock_name, const std::chrono::milliseconds& timeout)
+    -> std::optional<FollowerClock> {
   const auto end = std::chrono::steady_clock::now() + timeout;
   static constexpr auto POLL_INTERVAL = std::chrono::milliseconds(1);
 
-  // Wait for the shared memory to be created by the driver
-  auto maybe_shm = Shm::open(clock_name, Shm::Access::ReadOnly);
+  auto maybe_shm = clock::initShm(clock_name, grape::realtime::SharedMemory::Access::ReadOnly);
   while (not maybe_shm) {
     if (std::chrono::steady_clock::now() >= end) {
       return std::nullopt;
     }
     std::this_thread::sleep_for(POLL_INTERVAL);
-    maybe_shm = Shm::open(clock_name, Shm::Access::ReadOnly);
+    maybe_shm = clock::initShm(clock_name, grape::realtime::SharedMemory::Access::ReadOnly);
   }
+  auto impl_ = std::make_unique<Impl>(std::move(maybe_shm.value()));
 
-  auto impl = std::make_unique<Impl>(std::move(maybe_shm.value()));
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* tick = reinterpret_cast<clock::Tick*>(impl_->shm.data().data());
 
   // Wait for the first tick (nanos > 0)
-  while (impl->signal->get() == 0) {
+  while (tick->get() == 0) {
     const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
         end - std::chrono::steady_clock::now());
     if (remaining.count() <= 0) {
       return std::nullopt;
     }
-    std::ignore = impl->signal->wait(0, remaining);
+    std::ignore = tick->wait(0, remaining);
   }
 
-  return EgoClock2(std::move(impl));
+  return FollowerClock(std::move(impl_));
 }
 
 //-------------------------------------------------------------------------------------------------
-auto EgoClock2::now() const noexcept -> EgoClock2::TimePoint {
-  return EgoClock2::fromNanos(impl_->signal->get());
+auto FollowerClock::now() const noexcept -> FollowerClock::TimePoint {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* tick = reinterpret_cast<clock::Tick*>(impl_->shm.data().data());
+  return FollowerClock::fromNanos(tick->get());
 }
 
 //-------------------------------------------------------------------------------------------------
-void EgoClock2::sleepUntil(const EgoClock2::TimePoint& tp) const {
+void FollowerClock::sleepUntil(const FollowerClock::TimePoint& tp) const {
   // Block on futex ticks until the ego clock reaches the target time.
   // TICK_WAIT_TIMEOUT guards against indefinite blocking if the driver stops posting ticks.
+
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* tick = reinterpret_cast<clock::Tick*>(impl_->shm.data().data());
+
   static constexpr auto TICK_WAIT_TIMEOUT = std::chrono::milliseconds(100);
-  auto current_nanos = impl_->signal->get();
-  while (EgoClock2::fromNanos(current_nanos) < tp) {
-    std::ignore = impl_->signal->wait(current_nanos, TICK_WAIT_TIMEOUT);
-    current_nanos = impl_->signal->get();
+  auto current_nanos = tick->get();
+  while (FollowerClock::fromNanos(current_nanos) < tp) {
+    std::ignore = tick->wait(current_nanos, TICK_WAIT_TIMEOUT);
+    current_nanos = tick->get();
   }
 }
 
 //-------------------------------------------------------------------------------------------------
-void EgoClock2::sleepFor(const EgoClock2::Duration& dt) const {
+void FollowerClock::sleepFor(const FollowerClock::Duration& dt) const {
   sleepUntil(now() + dt);
 }
 
