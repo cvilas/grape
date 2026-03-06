@@ -115,7 +115,7 @@ if(LIST_OF_SANITIZERS)
 endif()
 
 # Set whether to enable inter-procedural optimisation
-option(ENABLE_IPO "Enable interprocedural optimization" ON)
+option(ENABLE_IPO "Enable interprocedural optimization" OFF)
 if(ENABLE_IPO)
   include(CheckIPOSupported)
   check_ipo_supported(RESULT is_ipo_supported OUTPUT output)
