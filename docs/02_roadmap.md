@@ -32,7 +32,7 @@
 - [x] [Teleop](../modules/experimental/robot/locomotion/teleop/README.md) interface.  
 - [x] [Camera](../modules/camera/README.md) streamer
 - [x] [Picam](../modules/rpi/camera/README.md)  
-- [x] [Clock](../modules/experimental/robot/ego_clock/README.md)
+- [x] [Clock](../modules/common/clock/README.md)
 - [ ] [Pisense](../modules/rpi/sense_hat/README.md)
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
 - [ ] Basic OpenGL scenegraph

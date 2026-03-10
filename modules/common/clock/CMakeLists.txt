@@ -1,29 +1,20 @@
 # =================================================================================================
-# Copyright (C) 2025 GRAPE Contributors
+# Copyright (C) 2026 GRAPE Contributors
 # =================================================================================================
 
 declare_module(
-  NAME ego_clock
-  DEPENDS_ON_MODULES "ipc;log"
+  NAME clock
+  DEPENDS_ON_MODULES "realtime"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
-set(SOURCES
-    src/clock_data_receiver.cpp
-    src/clock_data_receiver.h
-    src/clock_topic.h
-    src/clock_transform.h
-    src/ego_clock_driver.cpp
-    src/ego_clock.cpp
-    src/line_fitter.h
-    README.md
-    include/grape/ego_clock_driver.h
-    include/grape/ego_clock.h)
+set(SOURCES src/tick.h src/clock_broadcaster.cpp src/follower_clock.cpp README.md
+            include/grape/clock/follower_clock.h include/grape/clock/clock_broadcaster.h)
 
 # library target
 define_module_library(
   NAME ego_clock
-  PUBLIC_LINK_LIBS "grape::ipc;grape::log"
+  PUBLIC_LINK_LIBS "grape::realtime"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
   PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -34,4 +25,3 @@ define_module_library(
 # Subprojects
 add_subdirectory(tests)
 add_subdirectory(examples)
-add_subdirectory(benchmarks)
