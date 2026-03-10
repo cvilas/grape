@@ -57,14 +57,14 @@ auto main() -> int {
     }
 
     // create task configurator
-    auto task_config = grape::realtime::Thread::Config();
+    auto rt_task = grape::realtime::Thread::Config();
 
     // set task thread identifier
-    task_config.name = "rt_task";
+    rt_task.name = "rt_task";
 
     // set task update interval
     static constexpr auto PROCESS_INTERVAL = std::chrono::microseconds(1000);
-    task_config.interval = PROCESS_INTERVAL;
+    rt_task.interval = PROCESS_INTERVAL;
 
     // Define CPU cores to allocate to non-rt and rt threads. These should be non-intersecting sets
     static constexpr auto CPUS_RT = { 2U };
@@ -79,7 +79,7 @@ auto main() -> int {
     }
 
     // set task thread to run on a specific CPU with real-time scheduling policy
-    task_config.setup = []() -> bool {
+    rt_task.setup = []() -> bool {
       std::println("Setup started");
       const auto is_task_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
       if (not is_task_cpu_set) {
@@ -103,7 +103,7 @@ auto main() -> int {
     Profiler profiler;
 
     // set the periodic process function for the task thread
-    task_config.process = [&profiler]() -> bool {
+    rt_task.process = [&profiler]() -> bool {
       const auto tp = grape::realtime::Thread::ProcessClock::now();
       static auto last_tp = tp;
       const auto dt = std::chrono::duration<double>(tp - last_tp).count();
@@ -118,10 +118,10 @@ auto main() -> int {
     };
 
     // set the clean up function for the task thread
-    task_config.teardown = []() -> void { std::println("\nTeardown"); };
+    rt_task.teardown = []() -> void { std::println("\nTeardown"); };
 
     // off we go. start the task
-    auto task = grape::realtime::Thread(std::move(task_config));
+    auto task = grape::realtime::Thread(std::move(rt_task));
     task.start();
 
     // main thread continues to handle regular tasks such as event handling
