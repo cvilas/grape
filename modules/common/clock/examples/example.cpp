@@ -16,16 +16,16 @@ namespace {
 void masterClock(const std::stop_token& st, const std::string& clock_name) {
   try {
     std::println("\nMaster clock start");
-    static constexpr auto EGO_TICK_PERIOD = std::chrono::milliseconds(10);
+    static constexpr auto MASTER_TICK_PERIOD = std::chrono::milliseconds(10);
     static constexpr auto WALL_TICK_PERIOD = std::chrono::milliseconds(100);
     const auto config = grape::clock::ClockBroadcaster::Config{ .name = clock_name };
     auto driver = grape::clock::ClockBroadcaster(config);
-    auto ego_time = grape::clock::FollowerClock::TimePoint{};
+    auto ts = grape::clock::FollowerClock::TimePoint{};
     while (not st.stop_requested()) {
       const auto wall_time = grape::WallClock::now();
-      driver.post(ego_time);
+      driver.post(ts);
       std::this_thread::sleep_until(wall_time + WALL_TICK_PERIOD);
-      ego_time += EGO_TICK_PERIOD;
+      ts += MASTER_TICK_PERIOD;
     }
 
     std::println("\nMaster clock exit");

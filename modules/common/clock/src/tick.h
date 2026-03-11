@@ -51,7 +51,7 @@ struct ShmTick : realtime::SharedMemory {
 
   static constexpr auto TICK_SIZE = sizeof(Tick);
 
-  static auto shmName(const std::string& id) {
+  static auto shmName(const std::string& id) -> std::string {
     static constexpr std::string_view TICK_SHM_NAME_SUFFIX = "_tick";
     return "/" + id + TICK_SHM_NAME_SUFFIX;
   }
@@ -70,7 +70,7 @@ struct ShmTick : realtime::SharedMemory {
     return std::move(maybe_shm.value());
   }
 
-  static auto cleanup(const std::string& id) {
+  static void cleanup(const std::string& id) {
     std::ignore = realtime::SharedMemory::remove(shmName(id));
   }
 
