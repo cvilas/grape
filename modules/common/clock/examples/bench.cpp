@@ -10,7 +10,6 @@
 namespace {
 
 //-------------------------------------------------------------------------------------------------
-// Benchmark EgoClock2::now()
 void bmFollowerClockNow(benchmark::State& state) {
   const auto* const clock_name = "bm_clock";
 
@@ -26,7 +25,6 @@ void bmFollowerClockNow(benchmark::State& state) {
 BENCHMARK(bmFollowerClockNow)->Unit(benchmark::kNanosecond);
 
 //-------------------------------------------------------------------------------------------------
-// Benchmark WallClock::now() for comparison
 void bmWallClockNow(benchmark::State& state) {
   for (auto unused : state) {
     (void)unused;

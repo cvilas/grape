@@ -3,7 +3,7 @@
 # =================================================================================================
 
 declare_module(
-  NAME clock
+  NAME follower_clock
   DEPENDS_ON_MODULES "realtime"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
@@ -13,7 +13,7 @@ set(SOURCES src/tick.h src/clock_broadcaster.cpp src/follower_clock.cpp README.m
 
 # library target
 define_module_library(
-  NAME ego_clock
+  NAME follower_clock
   PUBLIC_LINK_LIBS "grape::realtime"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}

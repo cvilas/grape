@@ -60,7 +60,7 @@ struct FollowerClock {
   FollowerClock(FollowerClock&&) noexcept = default;
   FollowerClock(const FollowerClock&) = delete;
   auto operator=(const FollowerClock&) = delete;
-  auto operator=(FollowerClock&&) -> FollowerClock& = default;
+  auto operator=(FollowerClock&&) noexcept -> FollowerClock& = default;
 
 private:
   struct Impl;
@@ -80,14 +80,10 @@ struct std::formatter<grape::clock::FollowerClock::TimePoint> {
 
   static auto format(const grape::clock::FollowerClock::TimePoint& tp, std::format_context& ctx) {
     const auto total_ns = grape::clock::FollowerClock::toNanos(tp);
-    const auto hours = total_ns / (60LL * 60LL * 1'000'000'000LL);
-    const auto remainder_after_hours = total_ns % (60LL * 60LL * 1'000'000'000LL);
-    const auto minutes = remainder_after_hours / (60LL * 1'000'000'000LL);
-    const auto remainder_after_minutes = remainder_after_hours % (60LL * 1'000'000'000LL);
-    const auto seconds = remainder_after_minutes / 1'000'000'000LL;
-    const auto nanoseconds = remainder_after_minutes % 1'000'000'000LL;
-    return std::format_to(ctx.out(), "{:06}:{:02}:{:02}.{:09}", hours, minutes, seconds,
-                          nanoseconds);
+    const auto dur = std::chrono::nanoseconds(total_ns);
+    const auto hms = std::chrono::hh_mm_ss(dur);
+    return std::format_to(ctx.out(), "{:06}:{:02}:{:02}.{:09}", hms.hours().count(),
+                          hms.minutes().count(), hms.seconds().count(), hms.subseconds().count());
   }
 };
 // NOLINTEND(cert-dcl58-cpp)
