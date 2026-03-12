@@ -18,9 +18,11 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
 auto parseVec3(std::span<const std::uint8_t, 6> buf) -> Vec3<std::int16_t> {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-  return { .x = static_cast<std::int16_t>(toUint16(buf[1], buf[0])),
-           .y = static_cast<std::int16_t>(toUint16(buf[3], buf[2])),
-           .z = static_cast<std::int16_t>(toUint16(buf[5], buf[4])) };
+  return {
+    .x = static_cast<std::int16_t>(toUint16(buf.at(1), buf.at(0))),
+    .y = static_cast<std::int16_t>(toUint16(buf.at(3), buf.at(2))),
+    .z = static_cast<std::int16_t>(toUint16(buf.at(5), buf.at(4))),
+  };
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 }  // namespace

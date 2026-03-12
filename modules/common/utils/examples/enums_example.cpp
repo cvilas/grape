@@ -10,9 +10,11 @@
 //=================================================================================================
 // Example program demonstrates usage of facilities for static reflection of enums
 //=================================================================================================
-
+namespace {
 /// An example enumeration
 enum class Color : std::int8_t { Red = -2, Green, Blue, Black, White };
+
+}  // namespace
 
 /// Specialisation for the enumeration. Necessary if the enumeration values are not in the default
 /// range [Range::DEFAULT_MIN, Range::DEFAULT_MAX]

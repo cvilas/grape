@@ -94,8 +94,10 @@ void Arbiter::watchdogLoop(const std::stop_token& stop_token) {
 void Arbiter::publishStatus() const {
   const auto avg_latency = std::chrono::duration_cast<WallClock::Duration>(
       std::chrono::duration<float>(cmd_latency_.load()));
-  const auto status = ArbiterStatus{ .alt_controller_id = alt_controller_id_.load(),
-                                     .alt_command_latency = avg_latency };
+  const auto status = ArbiterStatus{
+    .alt_controller_id = alt_controller_id_.load(),
+    .alt_command_latency = avg_latency,
+  };
   const auto pub_result = status_pub_.publish(status);
   if (not pub_result) {
     syslog::Error("Error publishing status: {}", toString(pub_result.error()));

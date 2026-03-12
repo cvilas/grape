@@ -25,6 +25,7 @@
 // Paired with example: perf_pub.cpp
 //=================================================================================================
 
+namespace {
 //=================================================================================================
 /// Encapsulates data and model for statistics calculations
 struct Statistics {
@@ -64,6 +65,7 @@ void Statistics::add(const grape::WallClock::TimePoint& ts, const grape::ipc::Sa
   aggregate_bytes += sample.data.size_bytes();
   aggregate_latency += (ts - sample.info.publish_time);
 }
+}  // namespace
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {

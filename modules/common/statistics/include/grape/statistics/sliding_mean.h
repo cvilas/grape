@@ -53,7 +53,7 @@ constexpr auto SlidingMean<T, N>::append(const T& value, bool reset) -> SlidingM
   //
 
   if (count_ < N) {
-    buffer_[head_] = value;  // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+    buffer_.at(head_) = value;
     ++count_;
 
     // mean: m(k) = m(k-1) + { x(k) - m(k-1) } / k
@@ -63,7 +63,7 @@ constexpr auto SlidingMean<T, N>::append(const T& value, bool reset) -> SlidingM
     mean_ += delta / static_cast<T>(count_);
     scaled_variance_ += delta * (value - mean_);
   } else {
-    auto& buf_head = buffer_[head_];  // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+    auto& buf_head = buffer_.at(head_);
     const auto stale_value = buf_head;
     buf_head = value;
 

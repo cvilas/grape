@@ -22,10 +22,11 @@ auto main(int argc, const char* argv[]) -> int {
   using Deserialiser = grape::serdes::Deserialiser<InStream>;
 
   try {
-    const auto pose =
-        PoseStamped{ .nanoseconds = grape::WallClock::toNanos(grape::WallClock::now()),
-                     .position = { .x = 0.01, .y = 2.0, .z = 10.0 },
-                     .orientation = { .x = 0.01, .y = 0.03, .z = 0.1, .w = 1 } };
+    const auto pose = PoseStamped{
+      .nanoseconds = grape::WallClock::toNanos(grape::WallClock::now()),
+      .position = { .x = 0.01, .y = 2.0, .z = 10.0 },
+      .orientation = { .x = 0.01, .y = 0.03, .z = 0.1, .w = 1 },
+    };
 
     // serialise
     auto ostream = OutStream();

@@ -70,7 +70,7 @@ auto toImGuiDataType(grape::probe::TypeId id) -> ImGuiDataType {
 }  // namespace
 
 namespace grape::probe::detail {
-
+namespace {
 //=================================================================================================
 // Buffers signal data frames
 class ScrollingBuffer {
@@ -138,7 +138,7 @@ ScrollingBuffer::ScrollingBuffer(std::size_t length,
     if (signal_info.role == grape::probe::Signal::Role::Timestamp) {
       timestamp_offset_in_frame_ = frame_size_;
     }
-    signal_offsets_in_frame_[signal_number] = frame_size_;
+    signal_offsets_in_frame_.at(signal_number) = frame_size_;
     frame_size_ += grape::probe::length(signal_info.type) * signal_info.num_elements;
   }
   if (timestamp_offset_in_frame_ == std::numeric_limits<std::size_t>::max()) {
@@ -239,7 +239,7 @@ Controllables::Controllables(const std::vector<grape::probe::Signal>& signals_in
 auto Controllables::items() -> std::vector<Item>& {
   return items_;
 }
-
+}  // namespace
 }  // namespace grape::probe::detail
 
 namespace {

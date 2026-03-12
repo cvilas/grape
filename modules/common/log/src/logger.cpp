@@ -81,11 +81,13 @@ void Logger::flush() noexcept {
       const auto delta_missed_logs = missed_logs - backend_->missed_logs;
       backend_->missed_logs = missed_logs;
       if (config_.sink != nullptr) {
-        config_.sink->write({ .timestamp{ WallClock::now() },                      //
-                              .location{ std::source_location::current() },        //
-                              .logger_name{ config_.logger_name.c_str() },         //
-                              .message{ "{} records missed", delta_missed_logs },  //
-                              .severity = Severity::Warn });
+        config_.sink->write({
+            .timestamp{ WallClock::now() },                      //
+            .location{ std::source_location::current() },        //
+            .logger_name{ config_.logger_name.c_str() },         //
+            .message{ "{} records missed", delta_missed_logs },  //
+            .severity = Severity::Warn,
+        });
       }
     }
   } catch (...) {

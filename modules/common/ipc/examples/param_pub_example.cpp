@@ -12,12 +12,14 @@
 #include "grape/ipc/session.h"
 #include "topic_example.h"
 
+namespace {
+
 //=================================================================================================
 // A 'parameter publisher' that publishes constant data whenever a new subscriber is matched
 template <grape::ipc::TopicAttributes Topic>
 class ParameterPublisher {
 public:
-  ParameterPublisher(const Topic& topic_attr, typename Topic::DataType parameters)
+  ParameterPublisher(const Topic& topic_attr, Topic::DataType parameters)
     : parameters_(std::move(parameters))
     , publisher_(topic_attr, [this](const auto& match) { onMatch(match); }) {
   }
@@ -31,11 +33,9 @@ private:
     }
   }
 
-  typename Topic::DataType parameters_;
+  Topic::DataType parameters_;
   grape::ipc::Publisher<Topic> publisher_;
 };
-
-namespace {
 
 //-------------------------------------------------------------------------------------------------
 std::atomic_flag s_exit = false;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)

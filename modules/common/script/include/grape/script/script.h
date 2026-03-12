@@ -57,8 +57,8 @@ private:
 class ConfigTable {
 public:
   enum class Error : std::uint8_t {
-    NotFound,   //!< Key or index not found
-    Unparsable  //!< Value could not be converted into user requested data type
+    NotFound,    //!< Key or index not found
+    Unparsable,  //!< Value could not be converted into user requested data type
   };
 
   /// @brief Reads a key-value pair from the table

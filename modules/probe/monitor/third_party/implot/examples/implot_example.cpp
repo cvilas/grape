@@ -14,6 +14,7 @@
 #include "imgui.h"
 #include "implot.h"
 
+namespace {
 //=================================================================================================
 // Implot demo example.
 class ImplotExample {
@@ -32,21 +33,6 @@ private:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
 };
-
-//=================================================================================================
-auto main() -> int {
-  try {
-    ImplotExample ex;
-    ex.run();
-  } catch (const std::exception& ex) {
-    std::ignore = std::fputs(ex.what(), stderr);
-    return EXIT_FAILURE;
-  } catch (...) {
-    std::ignore = std::fputs("Exception\n", stderr);
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
-}
 
 //-------------------------------------------------------------------------------------------------
 ImplotExample::ImplotExample() {
@@ -153,15 +139,9 @@ public:
     if (data_.size() < max_size_) {
       data_.push_back(ImVec2(x_val, y_val));
     } else {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
       data_[offset_] = ImVec2(x_val, y_val);
       offset_ = (offset_ + 1) % max_size_;
-    }
-  }
-
-  void erase() {
-    if (not data_.empty()) {
-      data_.shrink(0);
-      offset_ = 0;
     }
   }
 
@@ -204,11 +184,29 @@ void ImplotExample::demoRealtimePlot() {
     ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5F);
     const auto& mx = mxbf.data();
     const auto& my = mybf.data();
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     ImPlot::PlotLine("Mouse X", &mx[0].x, &mx[0].y, mx.size(), 0, mxbf.offset(), 2 * sizeof(float));
     ImPlot::PlotLine("Mouse Y", &my[0].x, &my[0].y, my.size(), 0, mybf.offset(), 2 * sizeof(float));
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     ImPlot::EndPlot();
   }
   ImGui::Text("FPS: %.1f", static_cast<double>(io.Framerate));
   ImGui::End();
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,cppcoreguidelines-pro-type-vararg)
+}
+}  // namespace
+
+//=================================================================================================
+auto main() -> int {
+  try {
+    ImplotExample ex;
+    ex.run();
+  } catch (const std::exception& ex) {
+    std::ignore = std::fputs(ex.what(), stderr);
+    return EXIT_FAILURE;
+  } catch (...) {
+    std::ignore = std::fputs("Exception\n", stderr);
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }

@@ -38,12 +38,14 @@ auto I2CBus::write(DevAddr dev_addr, RegAddr reg, std::span<const std::uint8_t> 
     return std::unexpected(Error{ std::format("Data too long ({}>{})", data_sz, MAX_DATA_LEN) });
   }
   auto buf = std::array<std::uint8_t, MAX_DATA_LEN + 1>{};
-  buf[0] = static_cast<std::uint8_t>(reg);
+  buf.at(0) = static_cast<std::uint8_t>(reg);
   std::ranges::copy(data, std::next(buf.begin()));
-  auto msg = i2c_msg{ .addr = static_cast<std::uint16_t>(dev_addr),
-                      .flags = 0,
-                      .len = static_cast<std::uint16_t>(1U + data_sz),
-                      .buf = buf.data() };
+  auto msg = i2c_msg{
+    .addr = static_cast<std::uint16_t>(dev_addr),
+    .flags = 0,
+    .len = static_cast<std::uint16_t>(1U + data_sz),
+    .buf = buf.data(),
+  };
   auto rdwr = i2c_rdwr_ioctl_data{ .msgs = &msg, .nmsgs = 1 };
   if (::ioctl(fd_, I2C_RDWR, &rdwr) < 0) {  // NOLINT(cppcoreguidelines-pro-type-vararg)
     const auto err = std::error_code(errno, std::generic_category());
@@ -62,11 +64,18 @@ auto I2CBus::read(DevAddr dev_addr, RegAddr reg, std::span<std::uint8_t> data) c
   }
   auto reg_buf = static_cast<std::uint8_t>(reg);
   auto msgs = std::array<struct i2c_msg, 2>{};
-  msgs[0] = { .addr = static_cast<std::uint16_t>(dev_addr), .flags = 0, .len = 1, .buf = &reg_buf };
-  msgs[1] = { .addr = static_cast<std::uint16_t>(dev_addr),
-              .flags = I2C_M_RD,
-              .len = static_cast<std::uint16_t>(data_sz),
-              .buf = data.data() };
+  msgs.at(0) = {
+    .addr = static_cast<std::uint16_t>(dev_addr),
+    .flags = 0,
+    .len = 1,
+    .buf = &reg_buf,
+  };
+  msgs.at(1) = {
+    .addr = static_cast<std::uint16_t>(dev_addr),
+    .flags = I2C_M_RD,
+    .len = static_cast<std::uint16_t>(data_sz),
+    .buf = data.data(),
+  };
   auto rdwr = i2c_rdwr_ioctl_data{ .msgs = msgs.data(), .nmsgs = 2 };
   if (::ioctl(fd_, I2C_RDWR, &rdwr) < 0) {  // NOLINT(cppcoreguidelines-pro-type-vararg)
     const auto err = std::error_code(errno, std::generic_category());

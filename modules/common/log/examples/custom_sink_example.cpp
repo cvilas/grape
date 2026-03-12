@@ -7,6 +7,7 @@
 #include "grape/exception.h"
 #include "grape/log/logger.h"
 
+namespace {
 //=================================================================================================
 // Custom log sink implementation
 struct CustomSink : public grape::log::Sink {
@@ -14,6 +15,7 @@ struct CustomSink : public grape::log::Sink {
     std::println("[{}] {}", rec.timestamp, rec.message.cStr());
   }
 };
+}  // namespace
 
 //=================================================================================================
 // Demonstrates how to redirect logs to a custom output stream in a custom format

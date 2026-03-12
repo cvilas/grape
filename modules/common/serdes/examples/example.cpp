@@ -79,9 +79,11 @@ auto main(int argc, const char* argv[]) -> int {
   (void)argc;
   (void)argv;
   try {
-    const auto state = State{ .name = "example_state",
-                              .timestamp = 1234.567890,
-                              .position = std::array<double, 3>{ 1.0, 2.0, 3.0 } };
+    const auto state = State{
+      .name = "example_state",
+      .timestamp = 1234.567890,
+      .position = std::array<double, 3>{ 1.0, 2.0, 3.0 },
+    };
 
     // serialise
     auto ostream = OutStream();
@@ -118,10 +120,11 @@ auto main(int argc, const char* argv[]) -> int {
 
     // compare
     std::println("Original state: name={}, timestamp={}, position=[{}, {}, {}]", state.name,
-                 state.timestamp, state.position[0], state.position[1], state.position[2]);
+                 state.timestamp, state.position.at(0), state.position.at(1), state.position.at(2));
 
     std::println("Deserialized state: name={}, timestamp={}, position=[{}, {}, {}]", state2.name,
-                 state2.timestamp, state2.position[0], state2.position[1], state2.position[2]);
+                 state2.timestamp, state2.position.at(0), state2.position.at(1),
+                 state2.position.at(2));
 
     return EXIT_SUCCESS;
   } catch (const std::exception& ex) {

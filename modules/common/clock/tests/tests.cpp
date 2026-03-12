@@ -72,8 +72,8 @@ TEST_CASE("FollowerClock clock properties", "[clock]") {
   static_assert(std::is_same_v<Duration::period, std::nano>);
   static_assert(std::is_same_v<Duration::rep, std::int64_t>);
 
-  static_assert(std::is_same_v<typename TimePoint::clock, grape::clock::FollowerClock>);
-  static_assert(std::is_same_v<typename TimePoint::duration, Duration>);
+  static_assert(std::is_same_v<TimePoint::clock, grape::clock::FollowerClock>);
+  static_assert(std::is_same_v<TimePoint::duration, Duration>);
 }
 
 //-------------------------------------------------------------------------------------------------

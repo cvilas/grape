@@ -36,8 +36,8 @@ TEST_CASE("Construction from constexpr string", "[FixedString]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Construction from const buffer", "[FixedString]") {
   using FixedString24 = grape::FixedString<23>;
-  constexpr std::array<char, 24> BUFFER{ 'H', 'e', 'l', 'l', 'o', ' ', 'W',
-                                         'o', 'r', 'l', 'd', '!', '\0' };
+  constexpr auto BUFFER =
+      std::array<char, 24>{ 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!', '\0' };
 
   constexpr FixedString24 STR(BUFFER.data());
 

@@ -11,7 +11,7 @@
 
 namespace grape::ipc::py {
 
-void bindSubscriber(nanobind::module_& module) {
+void bindSubscriber(const nanobind::module_& module) {
   // Bind SampleInfo struct
   nanobind::class_<SampleInfo>(module, "SampleInfo")
       .def_ro("publish_time", &SampleInfo::publish_time, "The time the data was published")

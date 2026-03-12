@@ -22,7 +22,11 @@ ClockBroadcaster::ClockBroadcaster(Config config)
 
 //-------------------------------------------------------------------------------------------------
 ClockBroadcaster::~ClockBroadcaster() {
-  ShmTick::cleanup(config_.name);
+  try {
+    ShmTick::cleanup(config_.name);
+  } catch (...) {
+    grape::Exception::print();
+  }
 }
 
 //-------------------------------------------------------------------------------------------------

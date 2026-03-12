@@ -72,10 +72,14 @@ Controller::Controller(PinConfig&& pins, const BufferConfig& buffer_config, Rece
   : pins_{ std::move(pins) }
   , controllables_(pins_.sort())
   , receiver_(std::move(receiver))
-  , snaps_({ .frame_length = calcSnapFrameSize(pins_.signals()),
-             .num_frames = buffer_config.snap_buffer_capacity })
-  , pending_syncs_({ .frame_length = calcSyncFrameSize(pins_.signals()),
-                     .num_frames = buffer_config.sync_buffer_capacity }) {
+  , snaps_({
+        .frame_length = calcSnapFrameSize(pins_.signals()),
+        .num_frames = buffer_config.snap_buffer_capacity,
+    })
+  , pending_syncs_({
+        .frame_length = calcSyncFrameSize(pins_.signals()),
+        .num_frames = buffer_config.sync_buffer_capacity,
+    }) {
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -174,7 +178,7 @@ auto Controller::qset(const std::string& name, std::span<const std::byte> value)
       return;
     }
     std::memcpy(buffer.data(), &offset, offset_size);
-    std::memcpy(&buffer[offset_size], value.data(), value_size);
+    std::memcpy(&buffer.at(offset_size), value.data(), value_size);
   };
 
   if (not pending_syncs_.visitToWrite(writer)) {

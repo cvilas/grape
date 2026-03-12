@@ -10,7 +10,7 @@
 
 namespace grape::ipc::py {
 
-void bindPublisher(nanobind::module_& module) {
+void bindPublisher(const nanobind::module_& module) {
   nanobind::class_<RawPublisher>(module, "RawPublisher")
       .def(nanobind::init<const std::string&, MatchCallback&&>(), nanobind::arg("topic"),
            nanobind::arg("match_cb") = nullptr,

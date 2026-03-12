@@ -9,7 +9,7 @@
 
 namespace grape::ipc::py {
 
-void bindConfig(nanobind::module_& module) {
+void bindConfig(const nanobind::module_& module) {
   nanobind::enum_<Config::Scope>(module, "Scope")
       .value("Host", Config::Scope::Host)
       .value("Network", Config::Scope::Network)

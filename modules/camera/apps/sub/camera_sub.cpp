@@ -23,6 +23,7 @@
 
 namespace grape::camera {
 
+namespace {
 //=================================================================================================
 /// Encapsulates processing pipeline: [subscribe] -> [decompress] -> [display]
 class Subscriber {
@@ -84,7 +85,7 @@ void Subscriber::onReceivedSample(const ipc::Sample& sample) {
       return;
     }
     std::memcpy(frame.data(), &sample_len, SAMPLE_SIZE_OFFSET);
-    std::memcpy(&frame[SAMPLE_SIZE_OFFSET], sample.data.data(), sample_len);
+    std::memcpy(&frame.at(SAMPLE_SIZE_OFFSET), sample.data.data(), sample_len);
   };
 
   // Copy sample into FIFO
@@ -169,7 +170,7 @@ void Subscriber::toggleTimestamp() {
   en_ts = !en_ts;
   display_.showTimestamp(en_ts);
 }
-
+}  // namespace
 }  // namespace grape::camera
 
 namespace {

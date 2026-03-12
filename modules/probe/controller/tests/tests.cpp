@@ -47,7 +47,7 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
   // configure the capture buffers
   static constexpr auto BUFFER_CONFIG = grape::probe::BufferConfig{
     .snap_buffer_capacity = 3UZ,  //
-    .sync_buffer_capacity = 2UZ   //
+    .sync_buffer_capacity = 2UZ,  //
   };
 
   // create the probe controller

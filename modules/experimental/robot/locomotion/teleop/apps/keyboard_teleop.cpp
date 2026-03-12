@@ -66,8 +66,13 @@ auto toStatusUi(const std::string& robot_name, bool en, State state)
                   error_msg :
                   ftxui::text(std::format("Last Error: {}", state.last_error_msg)) |
                       ftxui::color(ftxui::Color::YellowLight);
-  return { ftxui::hbox({ ftxui::text("Robot: "), ftxui::text(robot_name) | ftxui::bold,
-                         service_status, client_status, latency_text }),
+  return { ftxui::hbox({
+               ftxui::text("Robot: "),
+               ftxui::text(robot_name) | ftxui::bold,
+               service_status,
+               client_status,
+               latency_text,
+           }),
            error_msg };
 }
 
@@ -177,27 +182,32 @@ auto main(int argc, const char* argv[]) -> int {
     // Main UI renderer
     auto main_component = ftxui::Renderer([&] {
       const auto [status_ui, error_ui] = toStatusUi(robot_name, teleop_enable, state);
-      const auto cmd_ui =
-          ftxui::hbox({ ftxui::text(toString(move_cmd)) |
-                        ftxui::color(cmd_error ? ftxui::Color::Red : ftxui::Color::White) });
-      return ftxui::vbox({ ftxui::text("Keyboard Teleop") | ftxui::bold | ftxui::center,  //
-                           ftxui::separator(),                                            //
-                           status_ui,                                                     //
-                           ftxui::separator(),                                            //
-                           ftxui::text("Controls:") | ftxui::bold,                        //
-                           ftxui::text("  SPACE - Enable/Disable Teleop"),                //
-                           ftxui::text("  +/-   - Speed step up/down"),                   //
-                           ftxui::text("  ↑/↓   - Forward/Backward"),                     //
-                           ftxui::text("  ←/→   - Lateral Left/Right"),                   //
-                           ftxui::text("  </>   - Rotate Left/Right"),
-                           ftxui::text("  ESC   - Exit"),          //
-                           ftxui::separator(),                     //
-                           ftxui::text("Command:") | ftxui::bold,  //
-                           ftxui::hbox({ ftxui::text("Step Speed: "),
-                                         ftxui::text(std::format("{}", speed_scale)) }),  //
-                           cmd_ui,                                                        //
-                           ftxui::separator(),                                            //
-                           error_ui }) |
+      const auto cmd_ui = ftxui::hbox({
+          ftxui::text(toString(move_cmd)) |
+              ftxui::color(cmd_error ? ftxui::Color::Red : ftxui::Color::White),
+      });
+      return ftxui::vbox({
+                 ftxui::text("Keyboard Teleop") | ftxui::bold | ftxui::center,  //
+                 ftxui::separator(),                                            //
+                 status_ui,                                                     //
+                 ftxui::separator(),                                            //
+                 ftxui::text("Controls:") | ftxui::bold,                        //
+                 ftxui::text("  SPACE - Enable/Disable Teleop"),                //
+                 ftxui::text("  +/-   - Speed step up/down"),                   //
+                 ftxui::text("  ↑/↓   - Forward/Backward"),                     //
+                 ftxui::text("  ←/→   - Lateral Left/Right"),                   //
+                 ftxui::text("  </>   - Rotate Left/Right"),
+                 ftxui::text("  ESC   - Exit"),          //
+                 ftxui::separator(),                     //
+                 ftxui::text("Command:") | ftxui::bold,  //
+                 ftxui::hbox({
+                     ftxui::text("Step Speed: "),
+                     ftxui::text(std::format("{}", speed_scale)),
+                 }),                  //
+                 cmd_ui,              //
+                 ftxui::separator(),  //
+                 error_ui,
+             }) |
              ftxui::border;
     });
 

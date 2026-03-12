@@ -24,6 +24,7 @@
 
 namespace grape::camera {
 
+namespace {
 //=================================================================================================
 /// Encapsulates processing pipeline:
 /// [capture] -> [compress] -> [publish]
@@ -96,14 +97,14 @@ void Publisher::update() {
 
 //-------------------------------------------------------------------------------------------------
 auto Publisher::Config::init(const script::ConfigTable& table) -> Publisher::Config {
-  return Config{ //
-                 .camera_name = table.readOrThrow<std::string>("camera_name"),
-                 .pub_topic = table.readOrThrow<std::string>("pub_topic"),
-                 .compression_speed =
-                     static_cast<std::uint16_t>(table.readOrThrow<int>("compression_speed"))
+  return Config{
+    //
+    .camera_name = table.readOrThrow<std::string>("camera_name"),
+    .pub_topic = table.readOrThrow<std::string>("pub_topic"),
+    .compression_speed = static_cast<std::uint16_t>(table.readOrThrow<int>("compression_speed")),
   };
 }
-
+}  // namespace
 }  // namespace grape::camera
 
 namespace {

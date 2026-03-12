@@ -38,7 +38,7 @@ void showRainbow(Display& display) {
     Display::transform(RGB888{ .r = 0, .g = 255, .b = 0 }),      // Green
     Display::transform(RGB888{ .r = 255, .g = 255, .b = 0 }),    // Yellow
     Display::transform(RGB888{ .r = 255, .g = 165, .b = 0 }),    // Orange
-    Display::transform(RGB888{ .r = 255, .g = 0, .b = 0 })       // Red
+    Display::transform(RGB888{ .r = 255, .g = 0, .b = 0 }),      // Red
   };
 
   for (std::uint8_t row = 0; row < Display::HEIGHT; ++row) {
