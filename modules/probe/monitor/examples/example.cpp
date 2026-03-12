@@ -34,7 +34,7 @@ auto main() -> int {
     // configure the capture buffers
     static constexpr auto BUFFER_CONFIG = grape::probe::BufferConfig{
       .snap_buffer_capacity = 100U,  //
-      .sync_buffer_capacity = 10U    //
+      .sync_buffer_capacity = 10U,   //
     };
 
     // create the probe controller

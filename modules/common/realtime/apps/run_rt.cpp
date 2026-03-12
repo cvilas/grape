@@ -57,7 +57,7 @@ auto main(int argc, char* argv[]) -> int {
     std::println("Executing application: {}", app);
     auto app_argv = std::array<const char*, 4>{ "/bin/sh", "-c", app.c_str(), nullptr };
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
-    execvp(app_argv[0], const_cast<char* const*>(app_argv.data()));
+    execvp(app_argv.at(0), const_cast<char* const*>(app_argv.data()));
 
     // If execvp returns, it means there was an error
     std::println("Application failed: {}", std::strerror(errno));  // NOLINT(concurrency-mt-unsafe)

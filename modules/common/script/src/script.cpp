@@ -149,8 +149,11 @@ auto readLeaf(lua_State* state) -> std::expected<T, ConfigTable::Error> {
   // table
   else if constexpr (std::is_same_v<T, ConfigTableDetail>) {
     const auto result = ((object_type == LUA_TTABLE) ?
-                             std::expected<T, ConfigTable::Error>{ ConfigTableDetail{
-                                 .table_reference = luaL_ref(state, LUA_REGISTRYINDEX) } } :
+                             std::expected<T, ConfigTable::Error>{
+                                 ConfigTableDetail{
+                                     .table_reference = luaL_ref(state, LUA_REGISTRYINDEX),
+                                 },
+                             } :
                              std::unexpected(ConfigTable::Error::Unparsable));
     clearLuaStack(state);
     return result;

@@ -4,19 +4,18 @@
 # Usage: ./install_llvm.sh
 # This script is intended to be run with root privileges.
 
-# Exit on error
 set -e
 
-# Supported LLVM version
-LLVM_VERSION=21 
+LLVM_VERSION=22
 
-# Download
-wget https://apt.llvm.org/llvm.sh
-wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo apt-get install -y wget gnupg lsb-release software-properties-common
 
-# Install
-chmod +x llvm.sh
-sudo ./llvm.sh $LLVM_VERSION
+wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+
+CODENAME=$(lsb_release -cs)
+sudo add-apt-repository "deb http://apt.llvm.org/${CODENAME}/ llvm-toolchain-${CODENAME}-${LLVM_VERSION} main"
+
+sudo apt-get update
 
 sudo apt-get install -y \
   clang-$LLVM_VERSION clang-tidy-$LLVM_VERSION clang-format-$LLVM_VERSION \
@@ -36,6 +35,3 @@ sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang
 sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-$LLVM_VERSION $PRIORITY
 sudo update-alternatives --install /usr/bin/lld lld /usr/bin/lld-$LLVM_VERSION $PRIORITY
 sudo update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-$LLVM_VERSION $PRIORITY
-
-# Clean up downloaded files
-rm -f llvm.sh

@@ -34,7 +34,7 @@ consteval auto extractEnumeratorName() -> std::string_view {
 #error "Unsupported compiler. Use GCC or Clang"
 #endif
   const auto temp_args_list = func_name.substr(func_name.find(start_token) + start_token.size());
-  if (temp_args_list.starts_with("(")) {
+  if (temp_args_list.starts_with('(')) {
     return "";
   }
 

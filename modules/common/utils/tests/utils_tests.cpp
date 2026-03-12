@@ -7,7 +7,7 @@
 
 namespace my_ns {
 template <typename T>
-struct CustomType {};
+struct CustomType {};  // NOLINT(misc-use-internal-linkage)
 }  // namespace my_ns
 
 namespace {

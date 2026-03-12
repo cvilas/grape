@@ -99,24 +99,28 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
-  options_.emplace_back(ProgramOptions::Option{ .key = ProgramOptions::HELP_KEY,
-                                                .brief = brief,
-                                                .value = "",
-                                                .type = utils::getTypeName<std::string>(),
-                                                .is_required = false,
-                                                .is_specified = false });
+  options_.emplace_back(ProgramOptions::Option{
+      .key = ProgramOptions::HELP_KEY,
+      .brief = brief,
+      .value = "",
+      .type = utils::getTypeName<std::string>(),
+      .is_required = false,
+      .is_specified = false,
+  });
 }
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
 auto ProgramDescription::declareOption(const std::string& key, const std::string& brief)
     -> ProgramDescription& {
-  options_.emplace_back(ProgramOptions::Option{ .key = key,
-                                                .brief = brief,
-                                                .value = "",
-                                                .type = utils::getTypeName<T>(),
-                                                .is_required = true,
-                                                .is_specified = false });
+  options_.emplace_back(ProgramOptions::Option{
+      .key = key,
+      .brief = brief,
+      .value = "",
+      .type = utils::getTypeName<T>(),
+      .is_required = true,
+      .is_specified = false,
+  });
   return *this;
 }
 
@@ -129,12 +133,14 @@ auto ProgramDescription::declareOption(const std::string& key, const std::string
     oss << val;
     return oss.str();
   };
-  options_.emplace_back(ProgramOptions::Option{ .key = key,
-                                                .brief = brief,
-                                                .value = to_string(default_value),
-                                                .type = utils::getTypeName<T>(),
-                                                .is_required = false,
-                                                .is_specified = false });
+  options_.emplace_back(ProgramOptions::Option{
+      .key = key,
+      .brief = brief,
+      .value = to_string(default_value),
+      .type = utils::getTypeName<T>(),
+      .is_required = false,
+      .is_specified = false,
+  });
   return *this;
 }
 

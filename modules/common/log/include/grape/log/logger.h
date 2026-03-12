@@ -36,11 +36,13 @@ public:
   template <typename... Args>
   void log(Severity severity, const std::source_location& location,
            const std::format_string<Args...> fmt, Args&&... args) {
-    log({ .timestamp{ WallClock::now() },                  //
-          .location{ location },                           //
-          .logger_name{ /* filled by backend thread */ },  //
-          .message{ fmt, std::forward<Args>(args)... },    //
-          .severity{ severity } });
+    log({
+        .timestamp{ WallClock::now() },                  //
+        .location{ location },                           //
+        .logger_name{ /* filled by backend thread */ },  //
+        .message{ fmt, std::forward<Args>(args)... },    //
+        .severity{ severity },
+    });
   }
 
   /// @return Total number of logs that were missed due to queue overflow

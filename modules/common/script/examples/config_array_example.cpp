@@ -15,6 +15,7 @@
 // - configuring C++ arrays from lua arrays
 //=================================================================================================
 
+namespace {
 // defines a 3 d.o.f position on a plane
 struct Pose {
   void configure(const grape::script::ConfigTable& table);
@@ -36,6 +37,7 @@ struct RobotCluster {
   std::string name;
   std::vector<Robot> members;
 };
+}  // namespace
 
 // configuration for a cluster of robots (standard Lua script)
 static constexpr std::string_view CONFIG = R"(

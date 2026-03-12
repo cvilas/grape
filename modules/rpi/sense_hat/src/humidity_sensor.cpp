@@ -73,20 +73,21 @@ HumiditySensor::HumiditySensor(const Config& config) {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
   // Parse calibration
-  impl_->cal.h0_rh = static_cast<float>(calib[0]) / 2.F;
-  impl_->cal.h1_rh = static_cast<float>(calib[1]) / 2.F;
+  impl_->cal.h0_rh = static_cast<float>(calib.at(0)) / 2.F;
+  impl_->cal.h1_rh = static_cast<float>(calib.at(1)) / 2.F;
 
   // T0/T1 degC: 10-bit values split across calib[2]/calib[3] (low 8 bits) and calib[5] (MSBs)
-  const auto t0_degc_x8 = toUint16(calib[5] & 0x03U, calib[2]);
-  const auto t1_degc_x8 = toUint16(static_cast<std::uint8_t>(calib[5] >> 2U) & 0x03U, calib[3]);
+  const auto t0_degc_x8 = toUint16(calib.at(5) & 0x03U, calib.at(2));
+  const auto t1_degc_x8 =
+      toUint16(static_cast<std::uint8_t>(calib.at(5) >> 2U) & 0x03U, calib.at(3));
   impl_->cal.t0_degc = static_cast<float>(t0_degc_x8) / 8.F;
   impl_->cal.t1_degc = static_cast<float>(t1_degc_x8) / 8.F;
 
   // ADC output at calibration reference points (signed 16-bit)
-  impl_->cal.h0_t0_out = static_cast<std::int16_t>(toUint16(calib[7], calib[6]));
-  impl_->cal.h1_t0_out = static_cast<std::int16_t>(toUint16(calib[11], calib[10]));
-  impl_->cal.t0_out = static_cast<std::int16_t>(toUint16(calib[13], calib[12]));
-  impl_->cal.t1_out = static_cast<std::int16_t>(toUint16(calib[15], calib[14]));
+  impl_->cal.h0_t0_out = static_cast<std::int16_t>(toUint16(calib.at(7), calib.at(6)));
+  impl_->cal.h1_t0_out = static_cast<std::int16_t>(toUint16(calib.at(11), calib.at(10)));
+  impl_->cal.t0_out = static_cast<std::int16_t>(toUint16(calib.at(13), calib.at(12)));
+  impl_->cal.t1_out = static_cast<std::int16_t>(toUint16(calib.at(15), calib.at(14)));
 
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
@@ -138,8 +139,8 @@ auto HumiditySensor::read() const -> std::expected<Measurement, Error> {
     return std::unexpected(rc.error());
   }
 
-  const auto hum_raw = static_cast<std::int16_t>(toUint16(hum_buf[1], hum_buf[0]));
-  const auto temp_raw = static_cast<std::int16_t>(toUint16(temp_buf[1], temp_buf[0]));
+  const auto hum_raw = static_cast<std::int16_t>(toUint16(hum_buf.at(1), hum_buf.at(0)));
+  const auto temp_raw = static_cast<std::int16_t>(toUint16(temp_buf.at(1), temp_buf.at(0)));
 
   // Linear interpolation using calibration reference points
   // Reference: ST Technical Note TN1218
@@ -151,9 +152,11 @@ auto HumiditySensor::read() const -> std::expected<Measurement, Error> {
       cal.t0_degc + ((cal.t1_degc - cal.t0_degc) * static_cast<float>(temp_raw - cal.t0_out) /
                      static_cast<float>(cal.t1_out - cal.t0_out));
 
-  return Measurement{ .timestamp = std::chrono::system_clock::now(),
-                      .relative_humidity_percent = humidity,
-                      .temperature_celsius = temperature };
+  return Measurement{
+    .timestamp = std::chrono::system_clock::now(),
+    .relative_humidity_percent = humidity,
+    .temperature_celsius = temperature,
+  };
 }
 
 }  // namespace grape::rpi::sense_hat

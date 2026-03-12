@@ -11,12 +11,14 @@
 // Example shows how to configure fields in a custom data structure from a script
 //=================================================================================================
 
+namespace {
 // An example data structure that is configurable
 struct PersonnelRecord {
   void configure(const grape::script::ConfigTable& table);
   unsigned int age{ 0 };
   std::string name;
 };
+}  // namespace
 
 // example configuration script for PersonnelRecord (standard Lua script)
 static constexpr std::string_view CONFIG = R"(

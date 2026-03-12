@@ -18,8 +18,7 @@ template <TopicAttributes Topic>
 class Publisher : public RawPublisher {
 public:
   explicit Publisher(const Topic& topic_attr, MatchCallback&& match_cb = nullptr);
-  [[nodiscard]] auto publish(const typename Topic::DataType& data) const
-      -> std::expected<void, Error>;
+  [[nodiscard]] auto publish(const Topic::DataType& data) const -> std::expected<void, Error>;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -30,8 +29,7 @@ Publisher<Topic>::Publisher(const Topic& topic_attr, MatchCallback&& match_cb)
 
 //-------------------------------------------------------------------------------------------------
 template <TopicAttributes Topic>
-auto Publisher<Topic>::publish(const typename Topic::DataType& data) const
-    -> std::expected<void, Error> {
+auto Publisher<Topic>::publish(const Topic::DataType& data) const -> std::expected<void, Error> {
   auto stream = serdes::OutStream<Topic::SERDES_BUFFER_SIZE>{};
   auto ser = serdes::Serialiser(stream);
   if (not ser.pack(data)) {

@@ -32,15 +32,15 @@ auto executeAndCapture(const std::filesystem::path& program,
 
   const auto pid = fork();
   if (pid == -1) {
-    close(pipe_fd[READ_END]);
-    close(pipe_fd[WRITE_END]);
+    close(pipe_fd.at(READ_END));
+    close(pipe_fd.at(WRITE_END));
     return {};
   }
 
   if (pid == 0) {  // Child process
-    close(pipe_fd[READ_END]);
-    dup2(pipe_fd[WRITE_END], STDOUT_FILENO);
-    close(pipe_fd[WRITE_END]);
+    close(pipe_fd.at(READ_END));
+    dup2(pipe_fd.at(WRITE_END), STDOUT_FILENO);
+    close(pipe_fd.at(WRITE_END));
 
     // Set environment variables
     for (const auto& [key, value] : env_vars) {
@@ -53,17 +53,17 @@ auto executeAndCapture(const std::filesystem::path& program,
   }
 
   // Parent process
-  close(pipe_fd[WRITE_END]);
+  close(pipe_fd.at(WRITE_END));
 
   static constexpr auto RESULT_BUF_LENGTH = 256UL;
   auto result = std::string{};
   auto buffer = std::array<char, RESULT_BUF_LENGTH>{};
   ssize_t bytes_read = 0;
-  while ((bytes_read = read(pipe_fd[READ_END], buffer.data(), buffer.size())) > 0) {
+  while ((bytes_read = read(pipe_fd.at(READ_END), buffer.data(), buffer.size())) > 0) {
     result.append(buffer.data(), static_cast<size_t>(bytes_read));
   }
 
-  close(pipe_fd[READ_END]);
+  close(pipe_fd.at(READ_END));
   waitpid(pid, nullptr, 0);
 
   if (!result.empty() && result.back() == '\n') {

@@ -96,9 +96,9 @@ auto getSearchPaths() -> const std::vector<std::filesystem::path>& {
       home_path / ("." + app_name),         //
       ("/etc/opt/" + app_name),             //
       app_path / ("../share/" + app_name),  //
-      home_path / (".grape"),               //
-      ("/etc/opt/grape"),                   //
-      app_path / ("../share/grape")         //
+      home_path / ".grape",                 //
+      "/etc/opt/grape",                     //
+      app_path / "../share/grape",          //
     };
   }();
   return paths;

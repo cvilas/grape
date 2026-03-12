@@ -18,7 +18,7 @@ enum class [[nodiscard]] Severity : std::uint8_t {
   Warn,      //!< For conditions within but approaching limits of operating envelope.
   Note,      //!< For significant events that may or may not be unusual.
   Info,      //!< For general informational messages.
-  Debug      //!< For debugging information.
+  Debug,     //!< For debugging information.
 };
 
 /// @return String representation of Severity

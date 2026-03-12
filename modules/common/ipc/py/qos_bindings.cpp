@@ -7,7 +7,7 @@
 
 namespace grape::ipc::py {
 
-void bindQoS(nanobind::module_& module) {
+void bindQoS(const nanobind::module_& module) {
   nanobind::enum_<QoS>(module, "QoS")
       .value("BestEffort", QoS::BestEffort)
       .value("Reliable", QoS::Reliable)

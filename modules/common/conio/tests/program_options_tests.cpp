@@ -119,11 +119,11 @@ TEST_CASE("Parses vector of integers from comma-separated string", "[program_opt
 
   const auto vec = args.getOption<std::vector<int>>("int_list");
   REQUIRE(vec.size() == 5);
-  REQUIRE(vec[0] == 1);
-  REQUIRE(vec[1] == 2);
-  REQUIRE(vec[2] == 3);
-  REQUIRE(vec[3] == 4);
-  REQUIRE(vec[4] == 5);
+  REQUIRE(vec.at(0) == 1);
+  REQUIRE(vec.at(1) == 2);
+  REQUIRE(vec.at(2) == 3);
+  REQUIRE(vec.at(3) == 4);
+  REQUIRE(vec.at(4) == 5);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -138,9 +138,9 @@ TEST_CASE("Parses vector of strings from comma-separated string", "[program_opti
 
   const auto vec = args.getOption<std::vector<std::string>>("str_list");
   REQUIRE(vec.size() == 3);
-  REQUIRE(vec[0] == "apple");
-  REQUIRE(vec[1] == "banana");
-  REQUIRE(vec[2] == "cherry");
+  REQUIRE(vec.at(0) == "apple");
+  REQUIRE(vec.at(1) == "banana");
+  REQUIRE(vec.at(2) == "cherry");
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -154,9 +154,9 @@ TEST_CASE("Uses default vector value when optional vector argument is unspecifie
 
   const auto vec = args.getOption<std::vector<int>>("int_list");
   REQUIRE(vec.size() == 3);
-  REQUIRE(vec[0] == 100);
-  REQUIRE(vec[1] == 200);
-  REQUIRE(vec[2] == 300);
+  REQUIRE(vec.at(0) == 100);
+  REQUIRE(vec.at(1) == 200);
+  REQUIRE(vec.at(2) == 300);
 }
 
 }  // namespace

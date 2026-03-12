@@ -197,8 +197,7 @@ auto enumerate() -> std::vector<std::filesystem::path> {
   for (const auto& entry : std::filesystem::directory_iterator(EVDEV_DIR)) {
     const auto& path = entry.path();
     const auto path_str = path.string();
-    if (path_str.find("joystick") != std::string::npos &&
-        path_str.find("event") != std::string::npos) {
+    if (path_str.contains("joystick") && path_str.contains("event")) {
       devices.push_back(path);
     }
   }
@@ -231,12 +230,14 @@ auto readDeviceInfo(const std::filesystem::path& path) -> std::expected<DeviceIn
     return std::unexpected{ std::format("Cannot get device ID: {}", err.message()) };
   }
 
-  return DeviceInfo{ .name = name.data(),
-                     .path = path,
-                     .bus_type = native_device_id.bustype,
-                     .vendor_id = native_device_id.vendor,
-                     .product_id = native_device_id.product,
-                     .hw_version = native_device_id.version };
+  return DeviceInfo{
+    .name = name.data(),
+    .path = path,
+    .bus_type = native_device_id.bustype,
+    .vendor_id = native_device_id.vendor,
+    .product_id = native_device_id.product,
+    .hw_version = native_device_id.version,
+  };
 }
 
 //=================================================================================================
@@ -286,8 +287,10 @@ auto Joystick::open(const std::filesystem::path& device_path) const -> bool {
   impl_->device_fd = ::open(device_path.c_str(), O_RDONLY | O_NONBLOCK);
   if (impl_->device_fd < 0) {
     const auto err = std::error_code(errno, std::system_category());
-    impl_->callback(ErrorEvent{ .timestamp = WallClock::now(),
-                                .message = std::format("Cannot open device: {}", err.message()) });
+    impl_->callback(ErrorEvent{
+        .timestamp = WallClock::now(),
+        .message = std::format("Cannot open device: {}", err.message()),
+    });
     return false;
   }
 
@@ -296,9 +299,10 @@ auto Joystick::open(const std::filesystem::path& device_path) const -> bool {
   if (::ioctl(impl_->device_fd, EVIOCGRAB, 1) < 0) {
     const auto err = std::error_code(errno, std::system_category());
     close();
-    impl_->callback(
-        ErrorEvent{ .timestamp = tp,
-                    .message = std::format("Cannot get exclusive access: {}", err.message()) });
+    impl_->callback(ErrorEvent{
+        .timestamp = tp,
+        .message = std::format("Cannot get exclusive access: {}", err.message()),
+    });
     return false;
   }
 
@@ -307,7 +311,9 @@ auto Joystick::open(const std::filesystem::path& device_path) const -> bool {
     const auto err = std::error_code(errno, std::system_category());
     close();
     impl_->callback(ErrorEvent{
-        .timestamp = tp, .message = std::format("Cannot initialise epoll: {}", err.message()) });
+        .timestamp = tp,
+        .message = std::format("Cannot initialise epoll: {}", err.message()),
+    });
     return false;
   }
 
@@ -318,7 +324,9 @@ auto Joystick::open(const std::filesystem::path& device_path) const -> bool {
     const auto err = std::error_code(errno, std::system_category());
     close();
     impl_->callback(ErrorEvent{
-        .timestamp = tp, .message = std::format("Cannot configure epoll: {}", err.message()) });
+        .timestamp = tp,
+        .message = std::format("Cannot configure epoll: {}", err.message()),
+    });
     return false;
   }
   impl_->callback(ConnectionEvent{ .timestamp = tp, .is_connected = true });
@@ -355,8 +363,10 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
   const auto nfds = epoll_wait(impl_->epoll_fd, &ev, 1, static_cast<int>(timeout.count()));
   if (nfds < 0) {
     const auto err = std::error_code(errno, std::system_category());
-    impl_->callback(ErrorEvent{ .timestamp = WallClock::now(),
-                                .message = std::format("epoll_wait: {}", err.message()) });
+    impl_->callback(ErrorEvent{
+        .timestamp = WallClock::now(),
+        .message = std::format("epoll_wait: {}", err.message()),
+    });
     return false;
   }
 
@@ -380,8 +390,10 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
       if (errno == EAGAIN) {
         return true;  // No more events to read
       }
-      impl_->callback(ErrorEvent{ .timestamp = WallClock::now(),
-                                  .message = std::format("Read failed: {}", err.message()) });
+      impl_->callback(ErrorEvent{
+          .timestamp = WallClock::now(),
+          .message = std::format("Read failed: {}", err.message()),
+      });
       return false;
     }
     if (std::cmp_less(bytes_read, EVENT_SZ)) {
@@ -405,14 +417,18 @@ auto Joystick::process(std::chrono::milliseconds timeout) const -> bool {
     }
     if (iev.type == EV_ABS) {
       const auto control_id = toControlId(iev.code);
-      impl_->callback(AxisEvent{ .timestamp = toTimePoint(iev.time),
-                                 .id = control_id,
-                                 .value = impl_->normalise(control_id, iev.value) });
+      impl_->callback(AxisEvent{
+          .timestamp = toTimePoint(iev.time),
+          .id = control_id,
+          .value = impl_->normalise(control_id, iev.value),
+      });
     }
     if (iev.type == EV_KEY) {
-      impl_->callback(ButtonEvent{ .timestamp = toTimePoint(iev.time),
-                                   .id = toControlId(iev.code),
-                                   .pressed = (iev.value != 0) });
+      impl_->callback(ButtonEvent{
+          .timestamp = toTimePoint(iev.time),
+          .id = toControlId(iev.code),
+          .pressed = (iev.value != 0),
+      });
     }
   }
 
@@ -429,7 +445,9 @@ auto Joystick::readState() const -> bool {
   if (::ioctl(impl_->device_fd, EVIOCGBIT(EV_KEY, KEY_MAX), keys_map.data()) < 0) {
     const auto err = std::error_code(errno, std::system_category());
     impl_->callback(ErrorEvent{
-        .timestamp = tp, .message = std::format("Unable to read button map: {}", err.message()) });
+        .timestamp = tp,
+        .message = std::format("Unable to read button map: {}", err.message()),
+    });
     return false;
   }
 
@@ -439,7 +457,9 @@ auto Joystick::readState() const -> bool {
   if (::ioctl(impl_->device_fd, EVIOCGKEY(keys_state.length()), keys_state.data()) < 0) {
     const auto err = std::error_code(errno, std::system_category());
     impl_->callback(ErrorEvent{
-        .timestamp = tp, .message = std::format("Unable to read buttons: {}", err.message()) });
+        .timestamp = tp,
+        .message = std::format("Unable to read buttons: {}", err.message()),
+    });
     return false;
   }
 
@@ -459,7 +479,9 @@ auto Joystick::readState() const -> bool {
   if (::ioctl(impl_->device_fd, EVIOCGBIT(EV_ABS, ABS_MAX), axes_map.data()) < 0) {
     const auto err = std::error_code(errno, std::system_category());
     impl_->callback(ErrorEvent{
-        .timestamp = tp, .message = std::format("Unable to read axes map: {}", err.message()) });
+        .timestamp = tp,
+        .message = std::format("Unable to read axes map: {}", err.message()),
+    });
     return false;
   }
 
@@ -473,20 +495,25 @@ auto Joystick::readState() const -> bool {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     if (::ioctl(impl_->device_fd, EVIOCGABS(code), &absinfo) < 0) {
       const auto err = std::error_code(errno, std::system_category());
-      impl_->callback(ErrorEvent{ .timestamp = tp,
-                                  .message = std::format("Unable to read axis '{}': {}",
-                                                         toString(control_id), err.message()) });
+      impl_->callback(ErrorEvent{
+          .timestamp = tp,
+          .message =
+              std::format("Unable to read axis '{}': {}", toString(control_id), err.message()),
+      });
       return false;
     }
     const auto range = absinfo.maximum - absinfo.minimum;
     impl_->range[control_id] = {
       // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
       .center = static_cast<float>(absinfo.maximum + absinfo.minimum) / 2.F,
-      .scale = (range != 0) ? (2.F / static_cast<float>(range)) : 0.F
+      .scale = (range != 0) ? (2.F / static_cast<float>(range)) : 0.F,
       // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     };
     impl_->callback(AxisEvent{
-        .timestamp = tp, .id = control_id, .value = impl_->normalise(control_id, absinfo.value) });
+        .timestamp = tp,
+        .id = control_id,
+        .value = impl_->normalise(control_id, absinfo.value),
+    });
   }
   return true;
 }

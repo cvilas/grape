@@ -15,8 +15,10 @@ namespace {
 void bmFifoWrite(benchmark::State& state) {
   using Fifo = grape::FIFOBuffer;
   const auto data_size = static_cast<std::size_t>(state.range(0));
-  const auto config = Fifo::Config{ .frame_length = data_size,
-                                    .num_frames = static_cast<std::size_t>(state.max_iterations) };
+  const auto config = Fifo::Config{
+    .frame_length = data_size,
+    .num_frames = static_cast<std::size_t>(state.max_iterations),
+  };
   auto fifo = grape::FIFOBuffer(config);
 
   std::vector<std::byte> data(data_size);
@@ -38,8 +40,10 @@ void bmFifoWrite(benchmark::State& state) {
 void bmFifoRead(benchmark::State& state) {
   using Fifo = grape::FIFOBuffer;
   const auto data_size = static_cast<std::size_t>(state.range(0));
-  const auto config = Fifo::Config{ .frame_length = data_size,
-                                    .num_frames = static_cast<std::size_t>(state.max_iterations) };
+  const auto config = Fifo::Config{
+    .frame_length = data_size,
+    .num_frames = static_cast<std::size_t>(state.max_iterations),
+  };
   auto fifo = grape::FIFOBuffer(config);
 
   std::vector<std::byte> data(data_size);

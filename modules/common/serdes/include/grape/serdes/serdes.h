@@ -162,7 +162,7 @@ public:
           };
         };
 
-        ((table[Is] = make_unpacker.template operator()<Is>()), ...);
+        ((table.at(Is) = make_unpacker.template operator()<Is>()), ...);
       }(std::make_index_sequence<sizeof...(Types)>{});
 
       return std::move(table);
@@ -170,7 +170,7 @@ public:
 
     // unpack the type at index idx in the variant
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-    if (not DISPATCH_TABLE[idx](this, &value)) {
+    if (not DISPATCH_TABLE.at(idx)(this, &value)) {
       stream_.rewind(sizeof(std::size_t));
       return false;
     }

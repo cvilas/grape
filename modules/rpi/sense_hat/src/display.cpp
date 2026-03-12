@@ -41,7 +41,7 @@ auto findSenseHatFramebuffer() -> std::filesystem::path {
 
     auto name = std::string{};
     std::getline(fs, name);
-    if (name.find(FB_NAME) != std::string::npos) {
+    if (name.contains(FB_NAME)) {
       return std::filesystem::path("/dev") / fb_name;
     }
   }
@@ -83,7 +83,7 @@ void Display::clear() {
 
 //-------------------------------------------------------------------------------------------------
 void Display::set(const Coordinate& coord, const RGB565& color) {
-  get()[(coord.y * WIDTH) + coord.x] = color;
+  get().at((coord.y * WIDTH) + coord.x) = color;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ void Display::set(std::span<const RGB565, NUM_PIXELS> colors) {
 
 //-------------------------------------------------------------------------------------------------
 auto Display::get(const Coordinate& coord) const -> RGB565 {
-  return get()[(coord.y * WIDTH) + coord.x];
+  return get().at((coord.y * WIDTH) + coord.x);
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -100,13 +100,15 @@ auto PressureSensor::read() const -> std::expected<Measurement, Error> {
   // Decode: pressure is 24-bit unsigned, temperature is 16-bit signed
   // Reference: ST Technical Note TN1228
   const auto pressure_raw =
-      static_cast<std::int32_t>(toUint32(0, press_buf[2], press_buf[1], press_buf[0]));
-  const auto temp_raw = static_cast<std::int16_t>(toUint16(temp_buf[1], temp_buf[0]));
+      static_cast<std::int32_t>(toUint32(0, press_buf.at(2), press_buf.at(1), press_buf.at(0)));
+  const auto temp_raw = static_cast<std::int16_t>(toUint16(temp_buf.at(1), temp_buf.at(0)));
 
-  return Measurement{ .timestamp = std::chrono::system_clock::now(),
-                      .pressure_hpa = static_cast<float>(pressure_raw) * lps25h::PRESSURE_SCALE,
-                      .temperature_celsius = lps25h::TEMP_OFFSET +
-                                             (static_cast<float>(temp_raw) * lps25h::TEMP_SCALE) };
+  return Measurement{
+    .timestamp = std::chrono::system_clock::now(),
+    .pressure_hpa = static_cast<float>(pressure_raw) * lps25h::PRESSURE_SCALE,
+    .temperature_celsius =
+        lps25h::TEMP_OFFSET + (static_cast<float>(temp_raw) * lps25h::TEMP_SCALE),
+  };
 }
 
 }  // namespace grape::rpi::sense_hat

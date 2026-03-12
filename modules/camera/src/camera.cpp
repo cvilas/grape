@@ -87,7 +87,7 @@ void Camera::Impl::openCamera(SDL_CameraID id) {
   }
   const auto specs_view = std::span{ specs, static_cast<std::size_t>(count) };
   auto best_score = 0;
-  auto best_spec = *specs_view[0];
+  auto best_spec = *specs_view.at(0);
   for (const auto* sp : specs_view) {
     const auto fps = sp->framerate_numerator / sp->framerate_denominator;
     const auto score = sp->width * fps;  // choose the highest horizontal resolution and frames/sec
@@ -132,7 +132,7 @@ Camera::Camera(const Config& config, Callback&& image_callback) : impl_(std::mak
     const auto camera_name = std::string(SDL_GetCameraName(id));
     syslog::Info("[{}] {}", i, camera_name);
     printCameraSpecs(id);
-    if (camera_name.find(config.camera_name_hint) != std::string::npos) {
+    if (camera_name.contains(config.camera_name_hint)) {
       chosen_camera_index = i;
       chosen_camera_name = camera_name;
     }
@@ -177,8 +177,8 @@ void Camera::acquire() {
                 .pitch = static_cast<std::uint32_t>(sdl_frame->pitch),
                 .width = static_cast<std::uint16_t>(sdl_frame->w),
                 .height = static_cast<std::uint16_t>(sdl_frame->h),
-                .format = static_cast<std::uint32_t>(sdl_frame->format) },
-    .pixels = { static_cast<std::byte*>(sdl_frame->pixels), static_cast<std::size_t>(data_size) }
+                .format = static_cast<std::uint32_t>(sdl_frame->format), },
+    .pixels = { static_cast<std::byte*>(sdl_frame->pixels), static_cast<std::size_t>(data_size) },
   };
 
   syslog::Debug("stride: {}, width: {}, height: {}", sdl_frame->pitch, sdl_frame->w, sdl_frame->h);

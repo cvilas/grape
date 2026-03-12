@@ -29,7 +29,7 @@ struct EntityId {
 struct Match {
   enum class Status : std::uint8_t {
     Unmatched,  //!< a previously matched remote endpoint is no longer available
-    Matched     //!< matched a new remote endpoint
+    Matched,    //!< matched a new remote endpoint
   };
   EntityId remote_entity;  //!< Remote endpoint identifier
   Status status{};

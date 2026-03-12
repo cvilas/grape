@@ -24,7 +24,7 @@ struct TestTopicAttributes {
   static constexpr auto QOS = grape::ipc::QoS::BestEffort;
   static constexpr auto SERDES_BUFFER_SIZE = 1024U;
   static auto topicName() -> std::string {
-    return "typed_pub_sub_test";
+    return { std::string("typed_pub_sub_test") };
   }
 };
 

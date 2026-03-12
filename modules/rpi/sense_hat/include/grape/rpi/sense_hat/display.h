@@ -40,8 +40,10 @@ public:
 
   static constexpr auto transform(const RGB888& color) -> RGB565 {
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,hicpp-signed-bitwise)
-    return RGB565{ .value = static_cast<std::uint16_t>(((color.r >> 3U) << 11U) |
-                                                       ((color.g >> 2U) << 5U) | (color.b >> 3U)) };
+    return RGB565{
+      .value = static_cast<std::uint16_t>(((color.r >> 3U) << 11U) | ((color.g >> 2U) << 5U) |
+                                          (color.b >> 3U)),
+    };
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,hicpp-signed-bitwise)
   }
 

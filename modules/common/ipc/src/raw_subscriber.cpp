@@ -23,13 +23,13 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallba
       return;
     case eCAL::eSubscriberEvent::connected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
-                                    .id = topic_id.topic_id.entity_id },
-                 .status = grape::ipc::Match::Status::Matched });
+                                    .id = topic_id.topic_id.entity_id, },
+                 .status = grape::ipc::Match::Status::Matched, });
       return;
     case eCAL::eSubscriberEvent::disconnected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
-                                    .id = topic_id.topic_id.entity_id },
-                 .status = grape::ipc::Match::Status::Unmatched });
+                                    .id = topic_id.topic_id.entity_id, },
+                 .status = grape::ipc::Match::Status::Unmatched, });
       return;
   }
 }
@@ -86,8 +86,10 @@ RawSubscriber::RawSubscriber(const std::string& topic, QoS qos,
     if (moved_data_cb != nullptr) {
       moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
                       .info = { .publish_time = WallClock::fromMicros(data.send_timestamp),
-                                .publisher = { .host = id.topic_id.host_name,
-                                               .id = id.topic_id.entity_id } } });
+                                .publisher = {
+                                    .host = id.topic_id.host_name,
+                                    .id = id.topic_id.entity_id,
+                                }, }, });
     }
   });
 }

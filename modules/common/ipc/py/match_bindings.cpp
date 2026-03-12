@@ -7,7 +7,7 @@
 
 namespace grape::ipc::py {
 
-void bindMatch(nanobind::module_& module) {
+void bindMatch(const nanobind::module_& module) {
   nanobind::class_<EntityId>(module, "EntityId")
       .def(nanobind::init<>())
       .def_rw("host", &EntityId::host)

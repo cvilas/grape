@@ -7,10 +7,10 @@
 #include <nanobind/nanobind.h>
 
 namespace grape::ipc::py {
-void bindConfig(nanobind::module_& module);
+void bindConfig(const nanobind::module_& module);
 void bindSession(nanobind::module_& module);
-void bindMatch(nanobind::module_& module);
-void bindQoS(nanobind::module_& module);
-void bindPublisher(nanobind::module_& module);
-void bindSubscriber(nanobind::module_& module);
+void bindMatch(const nanobind::module_& module);
+void bindQoS(const nanobind::module_& module);
+void bindPublisher(const nanobind::module_& module);
+void bindSubscriber(const nanobind::module_& module);
 }  // namespace grape::ipc::py

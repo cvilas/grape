@@ -24,13 +24,13 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallba
       return;
     case eCAL::ePublisherEvent::connected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
-                                    .id = topic_id.topic_id.entity_id },
-                 .status = grape::ipc::Match::Status::Matched });
+                                    .id = topic_id.topic_id.entity_id, },
+                 .status = grape::ipc::Match::Status::Matched, });
       return;
     case eCAL::ePublisherEvent::disconnected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
-                                    .id = topic_id.topic_id.entity_id },
-                 .status = grape::ipc::Match::Status::Unmatched });
+                                    .id = topic_id.topic_id.entity_id, },
+                 .status = grape::ipc::Match::Status::Unmatched, });
       return;
   }
 }
