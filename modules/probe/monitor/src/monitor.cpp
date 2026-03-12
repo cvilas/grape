@@ -70,7 +70,7 @@ auto toImGuiDataType(grape::probe::TypeId id) -> ImGuiDataType {
 }  // namespace
 
 namespace grape::probe::detail {
-namespace {
+
 //=================================================================================================
 // Buffers signal data frames
 class ScrollingBuffer {
@@ -239,7 +239,6 @@ Controllables::Controllables(const std::vector<grape::probe::Signal>& signals_in
 auto Controllables::items() -> std::vector<Item>& {
   return items_;
 }
-}  // namespace
 }  // namespace grape::probe::detail
 
 namespace {
