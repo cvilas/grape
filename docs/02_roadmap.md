@@ -28,20 +28,24 @@
 - [x] [Logging](../modules/common/log/README.md)
 - [x] [Serialisation](../modules/common/serdes/README.md)
 - [x] [IPC](../modules/common/ipc/README.md)
-- [x] [Joystick](../modules/common/joystick/README.md) interface
-- [x] [Teleop](../modules/experimental/robot/locomotion/teleop/README.md) interface.  
-- [x] [Camera](../modules/camera/README.md) streamer
+- [x] [Joystick](../modules/common/joystick/README.md)
+- [x] [Teleop](../modules/experimental/robot/locomotion/teleop/README.md)  
+- [x] [Camera](../modules/camera/README.md)
 - [x] [Picam](../modules/rpi/camera/README.md)  
 - [x] [Clock](../modules/common/clock/README.md)
-- [ ] [Pisense](../modules/rpi/sense_hat/README.md)
+- [x] [Pisense](../modules/rpi/sense_hat/README.md)
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
+- [ ] Ring buffers
+    - [ ] SPMC ring buffer
+    - [ ] MPSC ring buffer
+    - [ ] Optimise the [ring buffer](https://rigtorp.se/ringbuffer/)
+- [ ] [Linalg](../modules/experimental/linalg/README.md)
+- [ ] [Plot](../modules/experimental/plot/README.md)
 - [ ] Basic OpenGL scenegraph
   - [ ] Clean up experimental implementation in scratch/scenegraph/copilot
   - [ ] Build scenegraph using data-oriented design
   - [ ] Extend to support asset loading using assimp
   - [ ] Design a text-based scenegraph description format using our scripting engine
-- [ ] [Linalg](../modules/experimental/linalg/README.md)
-- [ ] [Plot](../modules/experimental/plot/README.md)
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] [Data recording](../modules/experimental/drake/README.md)
 - [ ] DSP functions
@@ -63,10 +67,6 @@
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
   - [ ] Study [Catch23](https://github.com/philsquared/Catch23) when it is still simple, and replace Catch2
-- [ ] IPC: Fix ipc in MacOS
-  - [ ] `grape_ipc_perf_pub`/`sub`
-  - [ ] `grape_camera_pub`/`sub`
-- [ ] Optimise the [ring buffer](https://rigtorp.se/ringbuffer/)
 
 ## Study
 
@@ -80,18 +80,10 @@
   - Auto generated robot kinematics from model (single model format for kinematics and visualisation)
     - [Talk](https://youtu.be/CwN0I8yUqok?feature=shared)
     - [Code](https://github.com/pac48/fast_robot_kinematics)
-- Transition to Vulkan from OpenGL
-  - [3D graphics programming](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
-  - [Vulkan 3D game engine from scratch](https://youtu.be/hSL9dCjwoCU)
-  - [Vulkan in 30 minutes](https://renderdoc.org/vulkan-in-30-minutes.html)
-  - [Vulkan Tutorial](https://vulkan-tutorial.com/)
-  - [Vulkan guide](https://vkguide.dev/)
-  - Roadmap to reimplement scenegraph in Vulkan
 
 ## References
 
 - [MuJoCo tutorials](https://pab47.github.io/mujoco.html)
 - Practical [C++26 Reflection](https://youtu.be/cqQ7v6xdZRw)
-- [VULKAN: From 2D to 3D // C++ 3D Multiplayer Game From Scratch // LIVE TUTORIAL](https://youtu.be/hSL9dCjwoCU)
 - [3D graphics programming](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
 - [LLVm's realtime safety revolution](https://youtu.be/b_hd5FAv1dw)
