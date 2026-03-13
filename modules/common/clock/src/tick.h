@@ -41,6 +41,7 @@ public:
 
 private:
   alignas(std::int64_t) std::atomic<std::int64_t> nanos_{ 0 };
+  static_assert(sizeof(nanos_) == sizeof(int64_t));
 };
 
 //=================================================================================================
@@ -94,10 +95,8 @@ inline void Tick::post(std::int64_t value) {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
   const auto result = syscall(SYS_futex, &nanos_, FUTEX_WAKE, INT_MAX, nullptr, nullptr, 0);
   if (result == -1) {
-    // Note: As per man pages EINVAL is the only possibility due to inconsistent use of this futex.
-    // But this cannot happen here.
     const auto err = std::error_code(errno, std::system_category());
-    panic<Exception>("(futex_wake) " + err.message());
+    panic<Exception>("(futex_wake) " + err.message());  // EINVAL possible but improbable
   }
 }
 
@@ -108,12 +107,10 @@ inline auto Tick::wait(std::int64_t expected_value, std::chrono::milliseconds ti
   const auto nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(timeout - sec);
   const auto ts = timespec{ .tv_sec = sec.count(), .tv_nsec = nsec.count() };
 
-  // Futex operates on 32-bit values and we use it only to detect change. Implicit assumptions:
-  // - Consequent ticks passed to `post()` does not differ exactly by 2^32 (~4.29 sec)
+  // Use the lower 32 bits as futex to signal change. Implicit assumptions:
+  // - Consequent ticks passed to post() do not differ exactly by 2^32 (~4.29 sec)
   // - CPU is little-endian (X86_64, Aarch64)
-
   static_assert(std::endian::native == std::endian::little);
-  static_assert(sizeof(nanos_) == sizeof(int64_t));
 
   const auto fut_val = static_cast<std::uint32_t>(expected_value);
 

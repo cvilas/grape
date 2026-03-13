@@ -89,13 +89,13 @@ void Camera::Impl::setupCamera(const std::string& name_hint) {
   syslog::Info("Found {} camera{}", cameras.size(), cameras.size() > 1 ? "s" : "");
 
   std::string camera_name;
-  camera = cameras[0];
+  camera = cameras.at(0);
   for (const auto& cam : cameras) {
     const auto& props = cam->properties();
     const auto& model = props.get(libcamera::properties::Model);
     const auto& id = cam->id();
     syslog::Note("{}\t({})", (model ? *model : "NoName"), id);
-    if (model && !name_hint.empty() && (model->find(name_hint) != std::string::npos)) {
+    if (model and (not name_hint.empty()) and model->contains(name_hint)) {
       camera = cam;
       camera_name = *model;
     }
@@ -135,7 +135,7 @@ void Camera::Impl::configureStream(const camera::ImageSize& image_size) {
     if (not sizes.empty()) {
       stream_config.pixelFormat = fmt;
       // Find size closest to target resolution by minimizing total pixel difference
-      auto best_size = sizes[0];
+      auto best_size = sizes.at(0);
       auto best_score = std::numeric_limits<int>::max();
       for (const auto& size : sizes) {
         const auto score =
@@ -322,9 +322,11 @@ void Camera::acquire() {
   const auto& stream_config = impl_->config->at(0);
 
   // Map buffer data
+  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
   const auto& plane = buffer->planes()[0];
   const auto& meta = buffer->metadata().planes()[0];
-  void* data = impl_->mapped_buffers[plane.fd.get()].first;
+  // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+  void* data = impl_->mapped_buffers.at(plane.fd.get()).first;
   const auto length = std::min(meta.bytesused, plane.length);
 
   // Map libcamera pixel format to SDL format

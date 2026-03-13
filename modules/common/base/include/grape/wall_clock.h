@@ -54,7 +54,7 @@ struct WallClock {
 
 //=================================================================================================
 // Specializes std::formatter for grape::WallClock::Duration
-// NOLINTBEGIN(cert-dcl58-cpp)
+// NOLINTBEGIN(cert-dcl58-cpp,bugprone-std-namespace-modification)
 template <>
 struct std::formatter<grape::WallClock::Duration> : std::formatter<std::int64_t> {
   auto format(const grape::WallClock::Duration& dt, std::format_context& ctx) const {
@@ -62,4 +62,4 @@ struct std::formatter<grape::WallClock::Duration> : std::formatter<std::int64_t>
     return std::format_to(it, "ns");
   }
 };
-// NOLINTEND(cert-dcl58-cpp)
+// NOLINTEND(cert-dcl58-cpp,bugprone-std-namespace-modification)
