@@ -25,12 +25,14 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallba
     case eCAL::ePublisherEvent::connected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
                                     .id = topic_id.topic_id.entity_id, },
-                 .status = grape::ipc::Match::Status::Matched, });
+                 .status = grape::ipc::Match::Status::Matched,
+                .topic = { .name = topic_id.topic_name, .type_name = event_data.subscriber_datatype.name }, });
       return;
     case eCAL::ePublisherEvent::disconnected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
                                     .id = topic_id.topic_id.entity_id, },
-                 .status = grape::ipc::Match::Status::Unmatched, });
+                 .status = grape::ipc::Match::Status::Unmatched,
+                .topic = { .name = topic_id.topic_name, .type_name = event_data.subscriber_datatype.name }, });
       return;
   }
 }
@@ -49,14 +51,14 @@ auto createConfig() -> eCAL::Publisher::Configuration {
 namespace grape::ipc {
 
 struct RawPublisher::Impl : public eCAL::CPublisher {
-  Impl(const std::string& topic_name, const eCAL::PubEventCallbackT& event_cb,
-       const eCAL::Publisher::Configuration& config)
-    : eCAL::CPublisher(topic_name, eCAL::SDataTypeInformation(), event_cb, config) {
+  Impl(const std::string& topic_name, const eCAL::SDataTypeInformation& type_info,
+       const eCAL::PubEventCallbackT& event_cb, const eCAL::Publisher::Configuration& config)
+    : eCAL::CPublisher(topic_name, type_info, event_cb, config) {
   }
 };
 
 //-------------------------------------------------------------------------------------------------
-RawPublisher::RawPublisher(const std::string& topic, MatchCallback&& match_cb) {
+RawPublisher::RawPublisher(const Topic& topic, MatchCallback&& match_cb) {
   if (not ok()) {
     panic("Not initialised");
   }
@@ -67,7 +69,9 @@ RawPublisher::RawPublisher(const std::string& topic, MatchCallback&& match_cb) {
       raiseMatchEvent(topic_id, event_data, moved_match_cb);
     }
   };
-  impl_ = std::make_unique<RawPublisher::Impl>(topic, event_cb, createConfig());
+  const auto type_info =
+      eCAL::SDataTypeInformation{ .name = topic.type_name, .encoding = "grape", .descriptor = "" };
+  impl_ = std::make_unique<RawPublisher::Impl>(topic.name, type_info, event_cb, createConfig());
 }
 
 //-------------------------------------------------------------------------------------------------

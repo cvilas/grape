@@ -24,12 +24,14 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallba
     case eCAL::eSubscriberEvent::connected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
                                     .id = topic_id.topic_id.entity_id, },
-                 .status = grape::ipc::Match::Status::Matched, });
+                 .status = grape::ipc::Match::Status::Matched, 
+                .topic = { .name = topic_id.topic_name, .type_name = event_data.publisher_datatype.name }, });
       return;
     case eCAL::eSubscriberEvent::disconnected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
                                     .id = topic_id.topic_id.entity_id, },
-                 .status = grape::ipc::Match::Status::Unmatched, });
+                 .status = grape::ipc::Match::Status::Unmatched, 
+                .topic = { .name = topic_id.topic_name, .type_name = event_data.publisher_datatype.name }, });
       return;
   }
 }
@@ -57,15 +59,15 @@ auto createConfig(grape::ipc::QoS qos) -> eCAL::Subscriber::Configuration {
 namespace grape::ipc {
 
 struct RawSubscriber::Impl : public eCAL::CSubscriber {
-  Impl(const std::string& topic_name, const eCAL::SubEventCallbackT& event_cb,
-       const eCAL::Subscriber::Configuration& config)
-    : eCAL::CSubscriber(topic_name, eCAL::SDataTypeInformation(), event_cb, config) {
+  Impl(const std::string& topic_name, const eCAL::SDataTypeInformation& type_info,
+       const eCAL::SubEventCallbackT& event_cb, const eCAL::Subscriber::Configuration& config)
+    : eCAL::CSubscriber(topic_name, type_info, event_cb, config) {
   }
 };
 
 //-------------------------------------------------------------------------------------------------
-RawSubscriber::RawSubscriber(const std::string& topic, QoS qos,
-                             RawSubscriber::DataCallback&& data_cb, MatchCallback&& match_cb) {
+RawSubscriber::RawSubscriber(const Topic& topic, QoS qos, RawSubscriber::DataCallback&& data_cb,
+                             MatchCallback&& match_cb) {
   if (not ok()) {
     panic("Not initialised");
   }
@@ -78,20 +80,33 @@ RawSubscriber::RawSubscriber(const std::string& topic, QoS qos,
     }
   };
 
-  impl_ = std::make_unique<RawSubscriber::Impl>(topic, event_cb, createConfig(qos));
+  const auto type_info =
+      eCAL::SDataTypeInformation{ .name = topic.type_name, .encoding = "grape", .descriptor = "" };
+  impl_ = std::make_unique<RawSubscriber::Impl>(topic.name, type_info, event_cb, createConfig(qos));
 
   impl_->SetReceiveCallback([moved_data_cb = std::move(data_cb)](
-                                const eCAL::STopicId& id, const eCAL::SDataTypeInformation&,
+                                const eCAL::STopicId& tid, const eCAL::SDataTypeInformation& tinfo,
                                 const eCAL::SReceiveCallbackData& data) -> void {
     if (moved_data_cb != nullptr) {
       moved_data_cb({ .data = { static_cast<const std::byte*>(data.buffer), data.buffer_size },
                       .info = { .publish_time = WallClock::fromMicros(data.send_timestamp),
                                 .publisher = {
-                                    .host = id.topic_id.host_name,
-                                    .id = id.topic_id.entity_id,
-                                }, }, });
+                                    .host = tid.topic_id.host_name,
+                                    .id = tid.topic_id.entity_id,},
+                                    .type_name = tinfo.name,
+                                }, });
     }
   });
+}
+
+//-------------------------------------------------------------------------------------------------
+RawSubscriber::RawSubscriber(const std::string& topic_name, QoS qos, DataCallback&& data_cb,
+                             MatchCallback&& match_cb)
+  : RawSubscriber(
+        {
+            .name = topic_name,
+        },
+        qos, std::move(data_cb), std::move(match_cb)) {
 }
 
 //-------------------------------------------------------------------------------------------------

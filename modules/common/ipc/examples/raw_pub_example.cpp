@@ -15,7 +15,10 @@
 auto main() -> int {
   try {
     grape::ipc::init(grape::ipc::Config{});
-    const auto* const topic = "hello_world";
+    const auto topic = grape::ipc::Topic{
+      .name = "hello_world",
+      .type_name = "string",
+    };
 
     const auto match_cb = [](const grape::ipc::Match& match) -> void {
       std::println("\n{} (entity: {})", toString(match.status), toString(match.remote_entity));

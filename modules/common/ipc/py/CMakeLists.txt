@@ -9,6 +9,7 @@ define_module_pybinding(
   bindings.h
   bindings.cpp
   config_bindings.cpp
+  topic_bindings.cpp
   match_bindings.cpp
   qos_bindings.cpp
   publisher_bindings.cpp

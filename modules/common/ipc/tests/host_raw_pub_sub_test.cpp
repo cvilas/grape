@@ -20,7 +20,10 @@ namespace {
 //=================================================================================================
 TEST_CASE("Basic pub-sub on large message works in host-only scope", "[ipc]") {
   grape::ipc::init(grape::ipc::Config{});
-  const auto* const topic = "pub_sub_test";
+  const auto topic = grape::ipc::Topic{
+    .name = "pub_sub_test",
+    .type_name = "byte",
+  };
 
   // Create a large payload (eg: 1080p RGB image)
   constexpr auto PAYLOAD_SIZE = 1920U * 1080U * 3;

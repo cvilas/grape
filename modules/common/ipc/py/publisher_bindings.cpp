@@ -12,7 +12,7 @@ namespace grape::ipc::py {
 
 void bindPublisher(const nanobind::module_& module) {
   nanobind::class_<RawPublisher>(module, "RawPublisher")
-      .def(nanobind::init<const std::string&, MatchCallback&&>(), nanobind::arg("topic"),
+      .def(nanobind::init<const Topic&, MatchCallback&&>(), nanobind::arg("topic"),
            nanobind::arg("match_cb") = nullptr,
            "Create a RawPublisher with the specified topic and optional match callback.")
       .def("get_subscriber_count", &RawPublisher::subscriberCount,

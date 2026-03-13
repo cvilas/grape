@@ -19,7 +19,7 @@
 //-------------------------------------------------------------------------------------------------
 
 namespace grape::rpi::camera {
-
+namespace {
 //=================================================================================================
 /// Encapsulates processing pipeline:
 /// [capture] -> [compress] -> [publish]
@@ -48,7 +48,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 Publisher::Publisher(const Config& cfg)
-  : publisher_(cfg.pub_topic, [this](const auto& match) { onSubscriberMatch(match); })
+  : publisher_({ .name = cfg.pub_topic }, [this](const auto& match) { onSubscriberMatch(match); })
   , compressor_(cfg.compression_speed,
                 [this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
   , capture_(std::make_unique<rpi::Camera>(cfg.camera_config,
@@ -104,7 +104,7 @@ auto Publisher::Config::init(const script::ConfigTable& table) -> Publisher::Con
     .compression_speed = static_cast<std::uint16_t>(table.readOrThrow<int>("compression_speed"))
   };
 }
-
+}  // namespace
 }  // namespace grape::rpi::camera
 
 namespace {

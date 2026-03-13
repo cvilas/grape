@@ -74,7 +74,7 @@ auto main(int argc, const char* argv[]) -> int {
         grape::conio::ProgramDescription(
             "Subscribing/reporting end of IPC performance measurement application pair")
             .declareOption<std::string>("qos", "Quality of service [BestEffort|Reliable]")
-            .declareOption<std::string>("topic", "Topic to listen to", grape::ipc::ex::perf::TOPIC)
+            .declareOption<std::string>("topic", "Topic", grape::ipc::ex::perf::topic().name)
             .parse(argc, argv);
     const auto maybe_qos = grape::enums::cast<grape::ipc::QoS>(args.getOption<std::string>("qos"));
     if (not maybe_qos) {
@@ -99,8 +99,13 @@ auto main(int argc, const char* argv[]) -> int {
       }
     };
 
+    const auto match_cb = [](const grape::ipc::Match& match) {
+      std::println("{} '{}' [data type: '{}']", toString(match.status),
+                   toString(match.remote_entity), match.topic.type_name);
+    };
+
     const auto topic = args.getOption<std::string>("topic");
-    auto sub = grape::ipc::RawSubscriber(topic, maybe_qos.value(), data_cb);
+    auto sub = grape::ipc::RawSubscriber(topic, maybe_qos.value(), data_cb, match_cb);
 
     std::println("Press CTRL+C to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);

@@ -27,7 +27,9 @@ def test_basic_pub_sub_large_message():
     ipc.init(ipc.Config())
     
     # Topic name
-    topic = "pub_sub_py_test"
+    topic = ipc.Topic()
+    topic.name = "pub_sub_py_test"
+    topic.type_name = "byte"
     
     # Create a large payload (e.g., 1080p RGB image)
     PAYLOAD_SIZE = 1920 * 1080 * 3

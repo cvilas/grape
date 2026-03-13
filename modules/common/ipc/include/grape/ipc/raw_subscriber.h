@@ -10,6 +10,7 @@
 
 #include "grape/ipc/match.h"
 #include "grape/ipc/qos.h"
+#include "grape/ipc/topic.h"
 #include "grape/wall_clock.h"
 
 namespace grape::ipc {
@@ -19,6 +20,7 @@ namespace grape::ipc {
 struct SampleInfo {
   WallClock::TimePoint publish_time;
   EntityId publisher;
+  std::string type_name;
 };
 
 //=================================================================================================
@@ -40,7 +42,15 @@ public:
   /// @param qos Quality of service desired on this topic
   /// @param data_cb Data processing callback, triggered on every newly received data sample
   /// @param match_cb Match callback, triggered when matched/unmatched with a remote publisher
-  RawSubscriber(const std::string& topic, QoS qos, DataCallback&& data_cb,
+  RawSubscriber(const Topic& topic, QoS qos, DataCallback&& data_cb,
+                MatchCallback&& match_cb = nullptr);
+
+  /// Creates a subscriber with only topic name specified. Data callback must handle types
+  /// @param topic_name Name of the topic on which to listen to for data from matched publishers
+  /// @param qos Quality of service desired on this topic
+  /// @param data_cb Data processing callback, triggered on every newly received data sample
+  /// @param match_cb Match callback, triggered when matched/unmatched with a remote publisher
+  RawSubscriber(const std::string& topic_name, QoS qos, DataCallback&& data_cb,
                 MatchCallback&& match_cb = nullptr);
 
   /// @return The number of publishers currently matched to this subscriber
