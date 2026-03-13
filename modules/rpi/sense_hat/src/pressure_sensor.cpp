@@ -23,9 +23,14 @@ struct PressureSensor::Impl {
 
 //-------------------------------------------------------------------------------------------------
 PressureSensor::~PressureSensor() {
-  if (impl_ != nullptr) {
+  if (impl_ == nullptr) {
+    return;
+  }
+  try {
     std::ignore = impl_->bus.write(lps25h::ADDR, lps25h::CTRL_REG1,
                                    std::array<std::uint8_t, 1>{ lps25h::POWER_DOWN });
+  } catch (...) {
+    grape::Exception::print();
   }
 }
 

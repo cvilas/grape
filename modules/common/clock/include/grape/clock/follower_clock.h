@@ -71,7 +71,7 @@ private:
 
 //=================================================================================================
 // Specializes std::formatter for FollowerClock::TimePoint
-// NOLINTBEGIN(cert-dcl58-cpp)
+// NOLINTBEGIN(cert-dcl58-cpp,bugprone-std-namespace-modification)
 template <>
 struct std::formatter<grape::clock::FollowerClock::TimePoint> {
   static constexpr auto parse(std::format_parse_context& ctx) {
@@ -86,4 +86,4 @@ struct std::formatter<grape::clock::FollowerClock::TimePoint> {
                           hms.minutes().count(), hms.seconds().count(), hms.subseconds().count());
   }
 };
-// NOLINTEND(cert-dcl58-cpp)
+// NOLINTEND(cert-dcl58-cpp,bugprone-std-namespace-modification)

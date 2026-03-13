@@ -38,13 +38,18 @@ struct InertialSensor::Impl {
 
 //-------------------------------------------------------------------------------------------------
 InertialSensor::~InertialSensor() {
-  if (impl_ != nullptr) {
+  if (impl_ == nullptr) {
+    return;
+  }
+  try {
     std::ignore = impl_->bus.write(lsm9ds1::AG_ADDR, lsm9ds1::ag::CTRL_REG1_G,
                                    std::array<std::uint8_t, 1>{ lsm9ds1::ag::ODR_POWER_DOWN });
     std::ignore = impl_->bus.write(lsm9ds1::AG_ADDR, lsm9ds1::ag::CTRL_REG6_XL,
                                    std::array<std::uint8_t, 1>{ lsm9ds1::ag::ODR_POWER_DOWN });
     std::ignore = impl_->bus.write(lsm9ds1::MAG_ADDR, lsm9ds1::mag::CTRL_REG3_M,
                                    std::array<std::uint8_t, 1>{ lsm9ds1::mag::MODE_POWER_DOWN });
+  } catch (...) {
+    grape::Exception::print();
   }
 }
 

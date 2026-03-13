@@ -35,9 +35,14 @@ struct HumiditySensor::Impl {
 
 //-------------------------------------------------------------------------------------------------
 HumiditySensor::~HumiditySensor() {
-  if (impl_ != nullptr) {
+  if (impl_ == nullptr) {
+    return;
+  }
+  try {
     std::ignore = impl_->bus.write(hts221::ADDR, hts221::CTRL_REG1,
                                    std::array<std::uint8_t, 1>{ hts221::POWER_DOWN });
+  } catch (...) {
+    grape::Exception::print();
   }
 }
 

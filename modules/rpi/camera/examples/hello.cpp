@@ -131,7 +131,7 @@ auto main() -> int {
     // similarly 'release' the Camera.
     //
     // Cameras can be obtained by their ID or their index
-    const auto& camera_id = cameras[0]->id();
+    const auto& camera_id = cameras.at(0)->id();
     camera = cm->get(camera_id);
     camera->acquire();
 

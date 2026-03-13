@@ -69,11 +69,11 @@ auto toImGuiDataType(grape::probe::TypeId id) -> ImGuiDataType {
 
 }  // namespace
 
-namespace grape::probe::detail {
+namespace grape::probe {
 
 //=================================================================================================
 // Buffers signal data frames
-class ScrollingBuffer {
+class ScrollingBuffer {  // NOLINT(misc-use-internal-linkage)
 public:
   /// identifies a signal and a specific trace in that signal (if the signal is multivariate)
   struct TraceID {
@@ -205,7 +205,7 @@ auto ScrollingBuffer::timestampDataType() const -> grape::probe::TypeId {
 
 //=================================================================================================
 // Storage for control variable updates
-class Controllables {
+class Controllables {  // NOLINT(misc-use-internal-linkage)
 public:
   struct Item {
     grape::probe::Signal info;
@@ -239,13 +239,14 @@ Controllables::Controllables(const std::vector<grape::probe::Signal>& signals_in
 auto Controllables::items() -> std::vector<Item>& {
   return items_;
 }
-}  // namespace grape::probe::detail
+
+}  // namespace grape::probe
 
 namespace {
 //-------------------------------------------------------------------------------------------------
 auto signalDataGetter(int idx, void* buf) -> ImPlotPoint {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  auto* const buffer = reinterpret_cast<grape::probe::detail::ScrollingBuffer*>(buf);
+  auto* const buffer = reinterpret_cast<grape::probe::ScrollingBuffer*>(buf);
   if (buffer == nullptr) {
     return {};
   }
@@ -280,9 +281,9 @@ struct Monitor::Impl {
   ImPlotContext* implot_ctx{ nullptr };
   Monitor::Sender sender{ nullptr };
   std::shared_mutex signals_lock;
-  std::unique_ptr<detail::ScrollingBuffer> signals_buffer;
+  std::unique_ptr<ScrollingBuffer> signals_buffer;
   std::shared_mutex controllables_lock;
-  std::unique_ptr<detail::Controllables> controllables;
+  std::unique_ptr<Controllables> controllables;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -392,9 +393,9 @@ void Monitor::recv(const std::vector<grape::probe::Signal>& signals,
   const std::unique_lock signals_lock(impl_->signals_lock);
   if (impl_->signals_buffer == nullptr) {
     static constexpr auto BUFFER_MAX_SIZE = 2000U;
-    impl_->signals_buffer = std::make_unique<detail::ScrollingBuffer>(BUFFER_MAX_SIZE, signals);
+    impl_->signals_buffer = std::make_unique<ScrollingBuffer>(BUFFER_MAX_SIZE, signals);
     const std::unique_lock ctrl_lock(impl_->controllables_lock);
-    impl_->controllables = std::make_unique<detail::Controllables>(signals, frame);
+    impl_->controllables = std::make_unique<Controllables>(signals, frame);
   }
   impl_->signals_buffer->addFrame(frame);
 }
