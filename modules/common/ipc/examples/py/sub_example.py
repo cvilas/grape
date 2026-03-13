@@ -32,7 +32,9 @@ def main():
         init(config)
 
         # Define the topic
-        topic = "hello_world"
+        topic = Topic()
+        topic.name = "hello_world"
+        topic.type_name = "string"
 
         # Create the subscriber
         subscriber = RawSubscriber(topic, QoS.BestEffort, data_callback, match_callback)

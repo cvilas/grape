@@ -5,7 +5,7 @@
 #pragma once
 
 #include "grape/ipc/raw_publisher.h"
-#include "grape/ipc/topic_attributes.h"
+#include "grape/ipc/topic.h"
 #include "grape/serdes/serdes.h"
 #include "grape/serdes/stream.h"
 
@@ -14,23 +14,24 @@ namespace grape::ipc {
 //=================================================================================================
 /// Publisher templated on topic attributes
 ///
-template <TopicAttributes Topic>
+template <TopicAttributes TopicAttr>
 class Publisher : public RawPublisher {
 public:
-  explicit Publisher(const Topic& topic_attr, MatchCallback&& match_cb = nullptr);
-  [[nodiscard]] auto publish(const Topic::DataType& data) const -> std::expected<void, Error>;
+  explicit Publisher(const TopicAttr& topic_attr, MatchCallback&& match_cb = nullptr);
+  [[nodiscard]] auto publish(const TopicAttr::DataType& data) const -> std::expected<void, Error>;
 };
 
 //-------------------------------------------------------------------------------------------------
-template <TopicAttributes Topic>
-Publisher<Topic>::Publisher(const Topic& topic_attr, MatchCallback&& match_cb)
-  : RawPublisher(topic_attr.topicName(), std::move(match_cb)) {
+template <TopicAttributes TopicAttr>
+Publisher<TopicAttr>::Publisher(const TopicAttr& topic_attr, MatchCallback&& match_cb)
+  : RawPublisher(toTopic(topic_attr), std::move(match_cb)) {
 }
 
 //-------------------------------------------------------------------------------------------------
-template <TopicAttributes Topic>
-auto Publisher<Topic>::publish(const Topic::DataType& data) const -> std::expected<void, Error> {
-  auto stream = serdes::OutStream<Topic::SERDES_BUFFER_SIZE>{};
+template <TopicAttributes TopicAttr>
+auto Publisher<TopicAttr>::publish(const TopicAttr::DataType& data) const
+    -> std::expected<void, Error> {
+  auto stream = serdes::OutStream<TopicAttr::SERDES_BUFFER_SIZE>{};
   auto ser = serdes::Serialiser(stream);
   if (not ser.pack(data)) {
     return std::unexpected{ Error::SerialisationFailed };

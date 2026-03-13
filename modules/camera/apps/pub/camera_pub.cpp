@@ -52,7 +52,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 Publisher::Publisher(const Config& cfg)
-  : publisher_(cfg.pub_topic, [this](const auto& match) { onSubscriberMatch(match); })
+  : publisher_({ .name = cfg.pub_topic }, [this](const auto& match) { onSubscriberMatch(match); })
   , compressor_(cfg.compression_speed,
                 [this](const auto& frame, const auto& stats) { onCompressedFrame(frame, stats); })
   , capture_(std::make_unique<Camera>(Camera::Config{ .camera_name_hint = cfg.camera_name },

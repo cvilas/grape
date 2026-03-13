@@ -14,8 +14,9 @@ namespace grape::ipc::py {
 void bindSubscriber(const nanobind::module_& module) {
   // Bind SampleInfo struct
   nanobind::class_<SampleInfo>(module, "SampleInfo")
-      .def_ro("publish_time", &SampleInfo::publish_time, "The time the data was published")
-      .def_ro("publisher", &SampleInfo::publisher, "The publisher of the data");
+      .def_ro("publish_time", &SampleInfo::publish_time, "Publication timestamp")
+      .def_ro("publisher", &SampleInfo::publisher, "Publisher ID")
+      .def_ro("type_name", &SampleInfo::type_name, "Data type name");
 
   // Bind the Sample struct
   nanobind::class_<Sample>(module, "Sample")
@@ -29,7 +30,7 @@ void bindSubscriber(const nanobind::module_& module) {
 
   // Bind the RawSubscriber class
   nanobind::class_<RawSubscriber>(module, "RawSubscriber")
-      .def(nanobind::init<const std::string&, QoS, RawSubscriber::DataCallback, MatchCallback>(),
+      .def(nanobind::init<const Topic&, QoS, RawSubscriber::DataCallback, MatchCallback>(),
            nanobind::arg("topic"), nanobind::arg("qos"), nanobind::arg("data_cb"),
            nanobind::arg("match_cb") = nullptr,
            "Create a RawSubscriber with the specified topic, QoS, data callback, and "

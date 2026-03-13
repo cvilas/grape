@@ -9,6 +9,7 @@
 #include <functional>
 #include <string>
 
+#include "grape/ipc/topic.h"
 #include "grape/utils/enums.h"
 
 namespace grape::ipc {
@@ -33,6 +34,7 @@ struct Match {
   };
   EntityId remote_entity;  //!< Remote endpoint identifier
   Status status{};
+  Topic topic{};
 };
 
 [[nodiscard]] constexpr auto toString(Match::Status status) -> std::string_view {

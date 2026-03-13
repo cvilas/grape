@@ -14,7 +14,10 @@
 auto main() -> int {
   try {
     grape::ipc::init(grape::ipc::Config{});
-    const auto* const topic = "hello_world";
+    const auto topic = grape::ipc::Topic{
+      .name = "hello_world",
+      .type_name = "string",
+    };
     const auto from_bytes = [](std::span<const std::byte> bytes) -> std::string {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
       return { reinterpret_cast<const char*>(bytes.data()), bytes.size() };

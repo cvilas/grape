@@ -24,7 +24,9 @@ def main():
         init(config)
 
         # Define the topic
-        topic = "hello_world"
+        topic = Topic()
+        topic.name = "hello_world"
+        topic.type_name = "string"
 
         # Create the publisher
         publisher = RawPublisher(topic, match_callback)

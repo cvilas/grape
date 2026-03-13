@@ -10,6 +10,7 @@
 
 #include "grape/ipc/error.h"
 #include "grape/ipc/match.h"
+#include "grape/ipc/topic.h"
 
 namespace grape::ipc {
 
@@ -21,7 +22,7 @@ public:
   /// Creates a publisher
   /// @param topic Topic on which to publish data
   /// @param match_cb Match callback, triggered on matched/unmatched with a remote subscriber
-  explicit RawPublisher(const std::string& topic, MatchCallback&& match_cb = nullptr);
+  explicit RawPublisher(const Topic& topic, MatchCallback&& match_cb = nullptr);
 
   /// Publish data on topic specified at construction
   /// @return nothing on success, error on failure

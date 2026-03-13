@@ -22,7 +22,7 @@ set(SOURCES
     include/grape/ipc/session.h
     include/grape/ipc/raw_publisher.h
     include/grape/ipc/raw_subscriber.h
-    include/grape/ipc/topic_attributes.h
+    include/grape/ipc/topic.h
     include/grape/ipc/publisher.h
     include/grape/ipc/subscriber.h)
 
