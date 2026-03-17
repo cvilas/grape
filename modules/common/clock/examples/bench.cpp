@@ -4,10 +4,28 @@
 
 #include <benchmark/benchmark.h>
 
+#include "grape/clock/clock_broadcaster.h"
 #include "grape/clock/follower_clock.h"
 #include "grape/wall_clock.h"
 
 namespace {
+
+//-------------------------------------------------------------------------------------------------
+void bmClockBroadcasterPost(benchmark::State& state) {
+  const auto* const clock_name = "bm_clock_broadcaster";
+
+  auto broadcaster = grape::clock::ClockBroadcaster({ .name = clock_name });
+  auto tp = grape::clock::FollowerClock::TimePoint{};
+
+  for (auto unused : state) {
+    (void)unused;
+    broadcaster.post(tp);
+    benchmark::DoNotOptimize(tp);
+  }
+  state.SetItemsProcessed(state.iterations());
+}
+
+BENCHMARK(bmClockBroadcasterPost)->Unit(benchmark::kNanosecond);
 
 //-------------------------------------------------------------------------------------------------
 void bmFollowerClockNow(benchmark::State& state) {
@@ -22,6 +40,7 @@ void bmFollowerClockNow(benchmark::State& state) {
   }
   state.SetItemsProcessed(state.iterations());
 }
+
 BENCHMARK(bmFollowerClockNow)->Unit(benchmark::kNanosecond);
 
 //-------------------------------------------------------------------------------------------------
