@@ -24,7 +24,7 @@ Modules can be fully self-contained, or depend on other modules or external proj
   - If a new feature can't be added to an existing module, just create a new one.
   - All external dependencies and their build configurations are specified in one place, in `external/CMakeLists.txt`
 - Provides isolation between modules. New modules can be developed and tested without breaking the build for anybody else.
-- Automates installing, packaging and uninstalling  
+- Automates installing, packaging and uninstalling
 
 ### How to use
 
@@ -54,7 +54,6 @@ Note that after configuration,
 - `make install` builds and installs library and apps on host
 - `make pack` builds and packages up artifacts for deployment
 - `<install_location>/bin/uninstall.sh` uninstalls everything
-- `cpack` packages up built artifacts for deployment
 
 ## References
 

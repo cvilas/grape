@@ -321,6 +321,7 @@ add_custom_target(examples COMMENT "Build examples")
 #  - A module can have multiple examples
 #
 # Parameters:
+#   NAME        : (string) Name of the example program
 #   SOURCES     : (list) Source files to compile
 #   [PUBLIC_INCLUDE_PATHS] : (list, optional) Publicly included directories. See cmake documentation for 'PUBLIC' keyword in `target_include_directories`
 #   [PRIVATE_INCLUDE_PATHS] : (list, optional) Privately included directories. See cmake documentation for 'PRIVATE' keyword in `target_include_directories`
@@ -374,13 +375,14 @@ endfunction()
 # Function: define_module_app
 #
 # Description:
-#   Define exectuable targets
+#   Define executable targets
 # Note:
 #   - An executable target belongs to the enclosing module
 #   - A module can have multiple executables
 #   - Executables are installed on call to `make install`
 #
 # Parameters:
+#   NAME        : (string) Name of the executable
 #   SOURCES     : (list) Source files to compile
 #   [PUBLIC_INCLUDE_PATHS] : (list, optional) Publicly included directories. See cmake documentation for 'PUBLIC' keyword in `target_include_directories`
 #   [PRIVATE_INCLUDE_PATHS] : (list, optional) Privately included directories. See cmake documentation for 'PRIVATE' keyword in `target_include_directories`
@@ -476,7 +478,9 @@ add_dependencies(check tests) # `check` depends on `tests` target
 #   - Executables are not installed on call to `make install`
 #
 # Parameters:
-#   SOURCES     : (list) Source files to compile
+#   NAME               : (string) Name of the test program
+#   SOURCES            : (list) Source files to compile
+#   [WORKING_DIRECTORY]: (string, optional) Working directory when the test is run
 #   [PUBLIC_INCLUDE_PATHS] : (list, optional) Publicly included directories. See cmake documentation for 'PUBLIC' keyword in `target_include_directories`
 #   [PRIVATE_INCLUDE_PATHS] : (list, optional) Privately included directories. See cmake documentation for 'PRIVATE' keyword in `target_include_directories`
 #   [SYSTEM_PUBLIC_INCLUDE_PATHS] : (list, optional) Publicly included system directories on some platforms. See 'SYSTEM' keyword in `target_include_directories`
@@ -486,7 +490,7 @@ add_dependencies(check tests) # `check` depends on `tests` target
 #
 function(define_module_test)
   set(flags "")
-  set(single_opts NAME COMMAND WORKING_DIRECTORY)
+  set(single_opts NAME WORKING_DIRECTORY)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
       SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
 
