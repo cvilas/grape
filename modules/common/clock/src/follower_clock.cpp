@@ -17,7 +17,7 @@ struct FollowerClock::Impl : ShmTick {
 FollowerClock::~FollowerClock() = default;
 
 //-------------------------------------------------------------------------------------------------
-FollowerClock::FollowerClock(const std::string& source_name)
+FollowerClock::FollowerClock(std::string_view source_name)
   : impl_(std::make_unique<Impl>(
         ShmTick::init(source_name, realtime::SharedMemory::Access::ReadOnly))) {
 }

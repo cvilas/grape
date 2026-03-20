@@ -6,7 +6,7 @@
 
 #include <ranges>
 #include <span>
-#include <string>
+#include <string_view>
 #include <vector>
 
 #include "grape/fifo_buffer.h"
@@ -24,14 +24,14 @@ public:
   /// @param var The reference to the variable
   /// @param role whether monitored for logging-only or logging and control
   template <NumericType T>
-  auto pin(const std::string& name, const T& var, Signal::Role role) -> PinConfig&;
+  auto pin(std::string_view name, const T& var, Signal::Role role) -> PinConfig&;
 
   /// Pin a sequence variable (eg: vector, array) for monitoring
   /// @param name An identifier name for the variable
   /// @param var The reference to the variable
   /// @param role whether monitored for logging-only or logging and control
   template <NumericType T>
-  auto pin(const std::string& name, std::span<const T> var, Signal::Role role) -> PinConfig&;
+  auto pin(std::string_view name, std::span<const T> var, Signal::Role role) -> PinConfig&;
 
   /// @return Reference to internal array of pinned signals
   [[nodiscard]] auto signals() const -> const std::vector<Signal>&;
@@ -102,7 +102,7 @@ public:
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
   template <NumericType T>
-  [[nodiscard]] auto qset(const std::string& name, const T& value) -> Error;
+  [[nodiscard]] auto qset(std::string_view name, const T& value) -> Error;
 
   /// Queue an update for a vector controllable. This will take effect on next call to sync().
   /// @param name Identyfing name of the controllable as set in configuration
@@ -112,7 +112,7 @@ public:
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
   template <NumericType T>
-  [[nodiscard]] auto qset(const std::string& name, std::span<const T> value) -> Error;
+  [[nodiscard]] auto qset(std::string_view name, std::span<const T> value) -> Error;
 
   /// Queue an update for a controllable with data specified in raw bytes. This will take effect on
   /// next call to sync().
@@ -121,7 +121,7 @@ public:
   /// @return Error::None on success, otherwise an error code that identifies the failure
   /// @note Method will fail if we run out of sync buffers. In this case, sync() more frequently to
   /// release buffers
-  [[nodiscard]] auto qset(const std::string& name, std::span<const std::byte> value) -> Error;
+  [[nodiscard]] auto qset(std::string_view name, std::span<const std::byte> value) -> Error;
 
   /// Update control variables to values from calls to qset() since the last call to this method
   /// @note This method should be called at the top of realtime process update step
@@ -137,19 +137,19 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto PinConfig::pin(const std::string& name, const T& var, Signal::Role role) -> PinConfig& {
+auto PinConfig::pin(std::string_view name, const T& var, Signal::Role role) -> PinConfig& {
   return pin<T>(name, { &var, 1 }, role);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto PinConfig::pin(const std::string& name, std::span<const T> var, Signal::Role role)
+auto PinConfig::pin(std::string_view name, std::span<const T> var, Signal::Role role)
     -> PinConfig& {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto addr = reinterpret_cast<std::uintptr_t>(var.data());
 
   signals_.emplace_back(Signal{
-      .name{ name.c_str() },       //
+      .name{ name },               //
       .address = addr,             //
       .num_elements = var.size(),  //
       .type = toTypeId<T>(),       //
@@ -160,13 +160,13 @@ auto PinConfig::pin(const std::string& name, std::span<const T> var, Signal::Rol
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto Controller::qset(const std::string& name, const T& value) -> Error {
+auto Controller::qset(std::string_view name, const T& value) -> Error {
   return qset<T>(name, { &value, 1 });
 }
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto Controller::qset(const std::string& name, std::span<const T> value) -> Error {
+auto Controller::qset(std::string_view name, std::span<const T> value) -> Error {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto* const data_ptr = reinterpret_cast<const std::byte*>(value.data());
   return qset(name, { data_ptr, value.size_bytes() });

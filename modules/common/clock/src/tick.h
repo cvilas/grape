@@ -10,6 +10,7 @@
 #include <climits>
 #include <ctime>
 #include <expected>
+#include <string_view>
 #include <system_error>
 
 #include <linux/futex.h>
@@ -52,12 +53,12 @@ struct ShmTick : realtime::SharedMemory {
 
   static constexpr auto TICK_SIZE = sizeof(Tick);
 
-  static auto shmName(const std::string& id) -> std::string {
+  static auto shmName(std::string_view id) -> std::string {
     static constexpr std::string_view TICK_SHM_NAME_SUFFIX = "_tick";
-    return "/" + id + TICK_SHM_NAME_SUFFIX;
+    return std::format("/{}{}", id, TICK_SHM_NAME_SUFFIX);
   }
 
-  static auto init(const std::string& id, realtime::SharedMemory::Access access)
+  static auto init(std::string_view id, realtime::SharedMemory::Access access)
       -> realtime::SharedMemory {
     // Try to create shared memory. If that fails, try to open. If that fails, give up
     const auto shm_name = shmName(id);
@@ -71,7 +72,7 @@ struct ShmTick : realtime::SharedMemory {
     return std::move(maybe_shm.value());
   }
 
-  static void cleanup(const std::string& id) {
+  static void cleanup(std::string_view id) {
     std::ignore = realtime::SharedMemory::remove(shmName(id));
   }
 

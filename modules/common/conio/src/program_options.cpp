@@ -15,7 +15,7 @@ ProgramOptions::ProgramOptions(std::vector<ProgramOptions::Option>&& options)
 }
 
 //-------------------------------------------------------------------------------------------------
-auto ProgramOptions::hasOption(const std::string& key) const -> bool {
+auto ProgramOptions::hasOption(std::string_view key) const -> bool {
   return (options_.end() !=
           std::ranges::find_if(
               options_, [&key](const auto& opt) noexcept -> bool { return key == opt.key; }));
