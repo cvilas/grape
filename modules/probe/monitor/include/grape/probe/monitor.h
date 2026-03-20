@@ -7,6 +7,7 @@
 #include <functional>
 #include <memory>
 #include <span>
+#include <string_view>
 #include <vector>
 
 #include "grape/probe/signal.h"
@@ -20,7 +21,7 @@ public:
   enum class Error : std::uint8_t { Renderer, SignalNotFound, SizeMismatch };
 
   /// Signature for function to receive log records
-  using Sender = std::function<void(const std::string&, std::span<const std::byte>)>;
+  using Sender = std::function<void(std::string_view, std::span<const std::byte>)>;
 
   Monitor();
   ~Monitor();

@@ -5,6 +5,7 @@
 #pragma once
 
 #include <format>
+#include <string_view>
 
 #include "grape/conio/string_streamable.h"
 #include "grape/exception.h"
@@ -29,13 +30,13 @@ public:
   /// Check whether an option was specified on the command line
   /// @param key The command line option (without the '--').
   /// @return true if option is found
-  [[nodiscard]] auto hasOption(const std::string& key) const -> bool;
+  [[nodiscard]] auto hasOption(std::string_view key) const -> bool;
 
   /// Get the value to a command line option or throw if the option was not specified
   /// @param key The command line option (without the '--').
   /// @return  The value of the specified option.
   template <StringStreamable T>
-  [[nodiscard]] auto getOption(const std::string& key) const -> T;
+  [[nodiscard]] auto getOption(std::string_view key) const -> T;
 
 private:
   friend class ProgramDescription;
@@ -146,7 +147,7 @@ auto ProgramDescription::declareOption(const std::string& key, const std::string
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-auto ProgramOptions::getOption(const std::string& key) const -> T {
+auto ProgramOptions::getOption(std::string_view key) const -> T {
   const auto it = std::find_if(options_.begin(), options_.end(),
                                [&key](const auto& opt) -> bool { return key == opt.key; });
   if (it == options_.end()) {

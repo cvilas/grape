@@ -5,6 +5,7 @@
 #include "grape/probe/monitor.h"
 
 #include <cstdio>
+#include <format>
 #include <limits>
 #include <mutex>
 #include <shared_mutex>
@@ -487,7 +488,7 @@ void Monitor::drawControls() {
 
     if (is_value_changed) {
       if (impl_->sender != nullptr) {
-        impl_->sender(signal_name, item.data);
+        impl_->sender(signal_info.name.str(), item.data);
       }
     }
   }  // each signal

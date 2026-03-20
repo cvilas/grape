@@ -44,7 +44,7 @@ auto main() -> int {
       monitor.recv(signals, data);
     };
     auto probe = grape::probe::Controller(std::move(pin_config), BUFFER_CONFIG, data_sink);
-    monitor.setSender([&probe](const std::string& name, std::span<const std::byte> data) -> void {
+    monitor.setSender([&probe](std::string_view name, std::span<const std::byte> data) -> void {
       const auto ret = probe.qset(name, data);
       if (ret != grape::probe::Controller::Error::None) {
         grape::panic(std::format("{}: {}", name, toString(ret)));

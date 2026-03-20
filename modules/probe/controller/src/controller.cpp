@@ -147,7 +147,7 @@ void Controller::sync() {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Controller::qset(const std::string& name, std::span<const std::byte> value) -> Error {
+auto Controller::qset(std::string_view name, std::span<const std::byte> value) -> Error {
   const auto& signals = pins_.signals();
 
   const auto it = std::ranges::find_if(controllables_, [&name](const auto& sig) noexcept -> bool {

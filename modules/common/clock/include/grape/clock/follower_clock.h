@@ -7,7 +7,7 @@
 #include <chrono>
 #include <format>
 #include <memory>
-#include <string>
+#include <string_view>
 
 namespace grape::clock {
 
@@ -25,7 +25,7 @@ struct FollowerClock {
 
   /// Initialise clock
   /// @param source_name Unique identifier of a clock broadcaster to listen to
-  explicit FollowerClock(const std::string& source_name);
+  explicit FollowerClock(std::string_view source_name);
 
   /// Wait for next tick from the broadcaster, or until timeout.
   /// Use-cases:

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <format>
 #include <string_view>
@@ -37,6 +38,12 @@ public:
   constexpr explicit BasicFixedString(const CharT* str) {
     const auto length = std::min(Traits::length(str), N);
     Traits::copy(data_.data(), str, length);
+    data_.at(length) = '\0';
+  }
+
+  constexpr explicit BasicFixedString(std::basic_string_view<CharT, Traits> sv) {
+    const auto length = std::min(sv.size(), N);
+    std::copy_n(sv.begin(), length, data_.data());
     data_.at(length) = '\0';
   }
 
