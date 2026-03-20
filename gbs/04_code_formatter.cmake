@@ -58,8 +58,8 @@ function(add_clang_format target_name)
     if(sources)
       add_custom_target(
         ${target_name}_clangformat
-        SOURCES ${sources}
-        COMMENT "Format target ${_target}")
+        DEPENDS ${sources}
+        COMMENT "Format target ${target_name}")
       add_dependencies(${target_name} ${target_name}_clangformat)
       add_dependencies(format ${target_name}_clangformat)
     endif()
