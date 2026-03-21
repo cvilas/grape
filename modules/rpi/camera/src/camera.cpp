@@ -338,12 +338,11 @@ void Camera::acquire() {
 
   // Create ImageFrame with actual pixel format from camera
   const auto frame = camera::ImageFrame{
-    //
     .header = { .timestamp = timestamp,
-                .pitch = pitch,
-                .width = static_cast<std::uint16_t>(stream_config.size.width),
-                .height = static_cast<std::uint16_t>(stream_config.size.height),
-                .format = sdl_format },
+                .bytes_pitch = pitch,
+                .image_spec={.size={.width = static_cast<std::uint16_t>(stream_config.size.width),
+                .height = static_cast<std::uint16_t>(stream_config.size.height),},
+                .pixel_format = sdl_format} },
     .pixels = { static_cast<std::byte*>(data), length }
   };
 

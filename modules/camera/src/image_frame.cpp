@@ -14,9 +14,10 @@ namespace grape::camera {
 auto save(const ImageFrame& frame, const std::filesystem::path& fname) -> bool {
   const auto& header = frame.header;
   auto sdl_frame = std::unique_ptr<SDL_Surface, void (*)(SDL_Surface*)>(
-      SDL_CreateSurfaceFrom(static_cast<int>(header.width), static_cast<int>(header.height),
-                            static_cast<SDL_PixelFormat>(header.format), frame.pixels.data(),
-                            static_cast<int>(header.pitch)),
+      SDL_CreateSurfaceFrom(static_cast<int>(header.image_spec.size.width),
+                            static_cast<int>(header.image_spec.size.height),
+                            static_cast<SDL_PixelFormat>(header.image_spec.pixel_format),
+                            frame.pixels.data(), static_cast<int>(header.bytes_pitch)),
       SDL_DestroySurface);
 
   if (sdl_frame == nullptr) {

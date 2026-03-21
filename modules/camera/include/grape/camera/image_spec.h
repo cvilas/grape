@@ -19,7 +19,7 @@ struct ImageSize {
 /// Image capture specification
 struct ImageSpec {
   ImageSize size;
-  std::uint32_t pixel_format;
+  std::uint32_t pixel_format;  //!< driver backend-specific pixel format
   constexpr auto operator<=>(const ImageSpec&) const = default;
 };
 
