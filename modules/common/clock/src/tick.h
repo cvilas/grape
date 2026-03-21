@@ -18,7 +18,7 @@
 #include <unistd.h>
 
 #include "grape/exception.h"
-#include "grape/realtime/shared_memory.h"
+#include "grape/shared_memory.h"
 
 namespace grape::clock {
 
@@ -47,8 +47,8 @@ private:
 
 //=================================================================================================
 // SharedMemory region containing a single Tick
-struct ShmTick : realtime::SharedMemory {
-  explicit ShmTick(realtime::SharedMemory shm) : realtime::SharedMemory(std::move(shm)) {
+struct ShmTick : SharedMemory {
+  explicit ShmTick(SharedMemory shm) : SharedMemory(std::move(shm)) {
   }
 
   static constexpr auto TICK_SIZE = sizeof(Tick);
@@ -58,13 +58,12 @@ struct ShmTick : realtime::SharedMemory {
     return std::format("/{}{}", id, TICK_SHM_NAME_SUFFIX);
   }
 
-  static auto init(std::string_view id, realtime::SharedMemory::Access access)
-      -> realtime::SharedMemory {
+  static auto init(std::string_view id, SharedMemory::Access access) -> SharedMemory {
     // Try to create shared memory. If that fails, try to open. If that fails, give up
     const auto shm_name = shmName(id);
-    auto maybe_shm = realtime::SharedMemory::create(shm_name, TICK_SIZE, access);
+    auto maybe_shm = SharedMemory::create(shm_name, TICK_SIZE, access);
     if (not maybe_shm) {
-      maybe_shm = realtime::SharedMemory::open(shm_name, access);
+      maybe_shm = SharedMemory::open(shm_name, access);
       if (not maybe_shm) {
         panic<Exception>(std::format("(initShm) {}", maybe_shm.error().message()));
       }
@@ -73,7 +72,7 @@ struct ShmTick : realtime::SharedMemory {
   }
 
   static void cleanup(std::string_view id) {
-    std::ignore = realtime::SharedMemory::remove(shmName(id));
+    std::ignore = SharedMemory::remove(shmName(id));
   }
 
   auto tick() -> Tick& {

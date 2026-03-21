@@ -11,3 +11,8 @@ define_module_example(
 define_module_example(NAME string_example SOURCES string_example.cpp)
 define_module_example(NAME error_example SOURCES error_example.cpp)
 define_module_example(NAME wall_timer_example SOURCES wall_timer_example.cpp)
+define_module_example(NAME shm_futex_example SOURCES shm_futex_example.cpp)
+define_module_example(
+  NAME shared_memory_bench
+  SOURCES shared_memory_bench.cpp
+  PRIVATE_LINK_LIBS benchmark::benchmark)

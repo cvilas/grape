@@ -2,7 +2,7 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
-#include "grape/realtime/shared_memory.h"
+#include "grape/shared_memory.h"
 
 #include <system_error>
 #include <utility>
@@ -12,7 +12,7 @@
 #include <sys/stat.h>  // For mode constants
 #include <unistd.h>    // for open/close
 
-namespace grape::realtime {
+namespace grape {
 
 //-------------------------------------------------------------------------------------------------
 auto SharedMemory::exists(const std::string& name) -> bool {
@@ -157,4 +157,4 @@ auto SharedMemory::operator=(SharedMemory&& other) noexcept -> SharedMemory& {
   return *this;
 }
 
-}  // namespace grape::realtime
+}  // namespace grape

@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 #include "grape/exception.h"
-#include "grape/realtime/shared_memory.h"
+#include "grape/shared_memory.h"
 #include "grape/wall_clock.h"
 
 namespace {
@@ -71,7 +71,7 @@ auto Signal::wait(std::int64_t expected, std::chrono::milliseconds timeout) cons
   return true;
 }
 
-using Shm = grape::realtime::SharedMemory;
+using Shm = grape::SharedMemory;
 
 constexpr auto SHM_NAME = "/grape_shm_futex_example";
 constexpr auto SHM_SIZE = sizeof(Signal);
@@ -165,8 +165,8 @@ void consume() {
 // - Consumer waits for data with timeout and processes it
 //
 // Run this program in two terminals:
-// Terminal 1 (producer): grape_realtime_shm_futex_example produce
-// Terminal 2 (consumer): grape_realtime_shm_futex_example consume
+// Terminal 1 (producer): grape_base_shm_futex_example produce
+// Terminal 2 (consumer): grape_base_shm_futex_example consume
 //
 auto main(int argc, char* argv[]) -> int {
   auto args = std::span(argv, static_cast<std::size_t>(argc));

@@ -16,8 +16,7 @@ struct ClockBroadcaster::Impl : ShmTick {
 //-------------------------------------------------------------------------------------------------
 ClockBroadcaster::ClockBroadcaster(Config config)
   : config_(std::move(config))
-  , impl_(std::make_unique<Impl>(
-        ShmTick::init(config_.name, realtime::SharedMemory::Access::ReadWrite))) {
+  , impl_(std::make_unique<Impl>(ShmTick::init(config_.name, SharedMemory::Access::ReadWrite))) {
 }
 
 //-------------------------------------------------------------------------------------------------
