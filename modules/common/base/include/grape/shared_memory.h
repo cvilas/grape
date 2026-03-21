@@ -10,7 +10,7 @@
 
 #include "grape/error.h"
 
-namespace grape::realtime {
+namespace grape {
 
 //=================================================================================================
 /// Creates or maps shared memory accessible across processes
@@ -87,4 +87,4 @@ inline auto SharedMemory::data() const -> std::span<std::byte> {
   return data_;
 }
 
-}  // namespace grape::realtime
+}  // namespace grape

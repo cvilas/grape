@@ -9,11 +9,11 @@
 
 #include <benchmark/benchmark.h>
 
-#include "grape/realtime/shared_memory.h"
+#include "grape/shared_memory.h"
 
 namespace {
 
-using ShMem = grape::realtime::SharedMemory;
+using ShMem = grape::SharedMemory;
 
 constexpr auto SMALL_SIZE = 1024U;     // 1KB
 constexpr auto MEDIUM_SIZE = 65536U;   // 64KB

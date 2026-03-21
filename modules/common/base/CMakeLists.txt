@@ -12,9 +12,11 @@ set(SOURCES
     include/grape/exception.h
     include/grape/fifo_buffer.h
     include/grape/fixed_string.h
+    include/grape/shared_memory.h
     include/grape/wall_clock.h
     include/grape/wall_timer.h
-    src/exception.cpp)
+    src/exception.cpp
+    src/shared_memory.cpp)
 
 define_module_library(
   NAME base

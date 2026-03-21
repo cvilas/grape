@@ -9,11 +9,11 @@
 #include <thread>
 
 #include "catch2/catch_test_macros.hpp"
-#include "grape/realtime/shared_memory.h"
+#include "grape/shared_memory.h"
 
 namespace {
 
-using ShMem = grape::realtime::SharedMemory;
+using ShMem = grape::SharedMemory;
 
 constexpr auto TEST_SHM_SIZE = 1024U;
 
