@@ -8,7 +8,6 @@
 #include <memory>
 #include <span>
 #include <string_view>
-#include <vector>
 
 #include "grape/probe/signal.h"
 #include "grape/utils/enums.h"
@@ -29,7 +28,7 @@ public:
   void run();
 
   // receives a snapshot frame
-  void recv(const std::vector<grape::probe::Signal>& signals, std::span<const std::byte> frame);
+  void recv(std::span<const grape::probe::Signal> signals, std::span<const std::byte> frame);
 
   Monitor(const Monitor&) = delete;
   auto operator=(const Monitor&) = delete;

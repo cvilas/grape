@@ -52,7 +52,7 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
 
   // create the probe controller
   auto num_records = 0UZ;
-  const auto sink = [&num_records](const std::vector<Signal>&, std::span<const std::byte>) -> void {
+  const auto sink = [&num_records](std::span<const Signal>, std::span<const std::byte>) -> void {
     num_records++;
   };
 

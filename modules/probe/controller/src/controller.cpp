@@ -16,7 +16,7 @@ using Signal = grape::probe::Signal;
 
 //-------------------------------------------------------------------------------------------------
 /// Calculates memory size required to capture a snapshot frame
-auto calcSnapFrameSize(const std::vector<Signal>& signals) -> std::size_t {
+auto calcSnapFrameSize(std::span<const Signal> signals) -> std::size_t {
   return std::accumulate(std::begin(signals), std::end(signals), std::size_t{ 0U },
                          [](const std::uint32_t& acc, const Signal& sig) -> std::size_t {
                            return acc + (length(sig.type) * sig.num_elements);
@@ -25,7 +25,7 @@ auto calcSnapFrameSize(const std::vector<Signal>& signals) -> std::size_t {
 
 //-------------------------------------------------------------------------------------------------
 /// Calculates memory size required to store a control value update
-auto calcSyncFrameSize(const std::vector<Signal>& signals) -> std::size_t {
+auto calcSyncFrameSize(std::span<const Signal> signals) -> std::size_t {
   // Frame layout: [offset|data (N bytes)] where
   // - offset : offset into signals array
   // - N     : size in bytes of the largest control variable
@@ -35,9 +35,7 @@ auto calcSyncFrameSize(const std::vector<Signal>& signals) -> std::size_t {
       max_data_size = std::max(max_data_size, length(sig.type) * sig.num_elements);
     }
   }
-  using SignalVectorOffset =
-      std::iterator_traits<std::vector<Signal>::const_iterator>::difference_type;
-  return max_data_size + sizeof(SignalVectorOffset);
+  return max_data_size + sizeof(std::ptrdiff_t);
 }
 
 }  // namespace
@@ -124,12 +122,9 @@ void Controller::flush() {
 
 //-------------------------------------------------------------------------------------------------
 void Controller::sync() {
-  using SignalVectorOffset =
-      std::iterator_traits<std::vector<Signal>::const_iterator>::difference_type;
-
   const auto updater = [&signals = pins_.signals()](std::span<const std::byte> buffer) -> void {
-    const auto offset_size = sizeof(SignalVectorOffset);
-    SignalVectorOffset offset{};
+    const auto offset_size = sizeof(std::ptrdiff_t);
+    std::ptrdiff_t offset{};
     std::memcpy(&offset, buffer.data(), offset_size);
     const auto it = signals.begin() + offset;
     const auto count = it->num_elements * length(it->type);
@@ -165,12 +160,10 @@ auto Controller::qset(std::string_view name, std::span<const std::byte> value) -
   }
 
   // Queue the update as [offset|data]
-  using SignalVectorOffset =
-      std::iterator_traits<std::vector<Signal>::const_iterator>::difference_type;
-  const SignalVectorOffset offset = std::distance(signals.begin(), it);
+  const std::ptrdiff_t offset = std::distance(signals.begin(), it);
   auto buffer_check = Error::None;
   const auto writer = [&offset, &value, &buffer_check](std::span<std::byte> buffer) -> void {
-    const auto offset_size = sizeof(SignalVectorOffset);
+    const auto offset_size = sizeof(std::ptrdiff_t);
     const auto value_size = value.size_bytes();
     if (offset_size + value_size > buffer.size_bytes()) {
       // this should never happen

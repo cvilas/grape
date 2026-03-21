@@ -38,7 +38,7 @@ void print(std::string_view name, std::span<const std::byte> data) {
 
 //-------------------------------------------------------------------------------------------------
 // deserialises record
-void sink(const std::vector<grape::probe::Signal>& signals, std::span<const std::byte> data) {
+void sink(std::span<const grape::probe::Signal> signals, std::span<const std::byte> data) {
   auto offset = 0UL;
   for (const auto& sig : signals) {
     const auto size_bytes = length(sig.type) * sig.num_elements;

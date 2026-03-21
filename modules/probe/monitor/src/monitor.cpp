@@ -85,7 +85,7 @@ public:
   /// Construct buffer
   /// @param length Number of snapshot frames to hold in the buffer
   /// @param signals_info Layout of signals in a snapshot frame
-  ScrollingBuffer(std::size_t length, const std::vector<grape::probe::Signal>& signals_info);
+  ScrollingBuffer(std::size_t length, std::span<const grape::probe::Signal> signals_info);
 
   /// Append snapshot frame to buffer
   void addFrame(std::span<const std::byte> frame);
@@ -130,8 +130,8 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 ScrollingBuffer::ScrollingBuffer(std::size_t length,
-                                 const std::vector<grape::probe::Signal>& signals_info)
-  : length_(length), signals_info_(signals_info) {
+                                 std::span<const grape::probe::Signal> signals_info)
+  : length_(length), signals_info_(signals_info.begin(), signals_info.end()) {
   const auto num_signals = signals_info_.size();
   signal_offsets_in_frame_.resize(num_signals);
   for (auto signal_number = 0U; signal_number < num_signals; ++signal_number) {
@@ -213,7 +213,7 @@ public:
     std::vector<std::byte> data;
   };
 
-  Controllables(const std::vector<grape::probe::Signal>& signals_info,
+  Controllables(std::span<const grape::probe::Signal> signals_info,
                 std::span<const std::byte> frame);
   auto items() -> std::vector<Item>&;
 
@@ -222,7 +222,7 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-Controllables::Controllables(const std::vector<grape::probe::Signal>& signals_info,
+Controllables::Controllables(std::span<const grape::probe::Signal> signals_info,
                              std::span<const std::byte> frame) {
   items_.reserve(signals_info.size());
   auto offset = 0UL;
@@ -389,7 +389,7 @@ void Monitor::run() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Monitor::recv(const std::vector<grape::probe::Signal>& signals,
+void Monitor::recv(std::span<const grape::probe::Signal> signals,
                    std::span<const std::byte> frame) {
   const std::unique_lock signals_lock(impl_->signals_lock);
   if (impl_->signals_buffer == nullptr) {

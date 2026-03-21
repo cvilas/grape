@@ -75,7 +75,7 @@ public:
   };
 
   /// Signature for function to receive log records
-  using Receiver = std::function<void(const std::vector<Signal>&, std::span<const std::byte>)>;
+  using Receiver = std::function<void(std::span<const Signal>, std::span<const std::byte>)>;
 
   /// Create controller
   /// @param pins Pin configuration

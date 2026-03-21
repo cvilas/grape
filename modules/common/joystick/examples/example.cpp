@@ -5,6 +5,7 @@
 #include <atomic>
 #include <csignal>
 #include <print>
+#include <span>
 #include <thread>
 
 #include "grape/exception.h"
@@ -13,7 +14,7 @@
 namespace {
 
 //-------------------------------------------------------------------------------------------------
-void printDeviceInfo(const std::vector<std::filesystem::path>& paths) {
+void printDeviceInfo(std::span<const std::filesystem::path> paths) {
   std::println("Devices available: {}", paths.size());
   for (const auto& path : paths) {
     const auto info = grape::joystick::readDeviceInfo(path);
