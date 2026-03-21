@@ -39,7 +39,7 @@ auto main() -> int {
 
     // create the probe controller
     auto monitor = grape::probe::Monitor();
-    auto data_sink = [&monitor](const std::vector<grape::probe::Signal>& signals,
+    auto data_sink = [&monitor](std::span<const grape::probe::Signal> signals,
                                 std::span<const std::byte> data) -> void {
       monitor.recv(signals, data);
     };
