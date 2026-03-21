@@ -74,11 +74,11 @@ void Display::render(const ImageFrame& frame) {
 
   // initialise texture to render image into
   static auto previous_image_header = ImageFrame::Header{};
-  if (not matchesFormat(previous_image_header, header)) {
+  if (previous_image_header.image_spec != header.image_spec) {
     previous_image_header = header;
-    const auto fmt = static_cast<SDL_PixelFormat>(header.format);
-    const auto iw = static_cast<int>(header.width);
-    const auto ih = static_cast<int>(header.height);
+    const auto fmt = static_cast<SDL_PixelFormat>(header.image_spec.pixel_format);
+    const auto iw = static_cast<int>(header.image_spec.size.width);
+    const auto ih = static_cast<int>(header.image_spec.size.height);
     syslog::Note("Receiving {}x{}, {}", iw, ih, SDL_GetPixelFormatName(fmt));
     impl_->texture.reset(SDL_CreateTexture(renderer, fmt, SDL_TEXTUREACCESS_STREAMING, iw, ih));
     if (impl_->texture == nullptr) {
@@ -93,7 +93,8 @@ void Display::render(const ImageFrame& frame) {
     }
   }
 
-  syslog::Debug("stride: {}, width: {}, height: {}", header.pitch, header.width, header.height);
+  syslog::Debug("stride: {}, width: {}, height: {}", header.bytes_pitch,
+                header.image_spec.size.width, header.image_spec.size.height);
 
   if (not SDL_RenderClear(renderer)) {
     syslog::Warn("Failed to clear screen: {}", SDL_GetError());
@@ -102,7 +103,7 @@ void Display::render(const ImageFrame& frame) {
   // render image into texture
   auto* texture = impl_->texture.get();
   if (not SDL_UpdateTexture(texture, nullptr, frame.pixels.data(),
-                            static_cast<int>(header.pitch))) {
+                            static_cast<int>(header.bytes_pitch))) {
     syslog::Warn("Failed to update texture: {}", SDL_GetError());
   }
   if (not SDL_RenderTexture(renderer, texture, nullptr, nullptr)) {
@@ -123,8 +124,10 @@ void Display::render(const ImageFrame& frame) {
     if (not SDL_GetRenderOutputSize(renderer, &window_w, &window_h)) {
       syslog::Warn("Failed to get window size: {}", SDL_GetError());
     }
-    const auto scale_x = static_cast<float>(window_w) / static_cast<float>(header.width);
-    const auto scale_y = static_cast<float>(window_h) / static_cast<float>(header.height);
+    const auto scale_x =
+        static_cast<float>(window_w) / static_cast<float>(header.image_spec.size.width);
+    const auto scale_y =
+        static_cast<float>(window_h) / static_cast<float>(header.image_spec.size.height);
     const auto ts_scale = 1.F / ((scale_x < scale_y) ? scale_x : scale_y);
 
     // print timestamp

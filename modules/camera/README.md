@@ -11,7 +11,5 @@ Cross platform camera support
 
 ## TODO
 
-- [ ] Define custom `ImageSize`, `PixelFormat` (as uint32_t fourcc codes), `ImageSpec`
-- [ ] Integrate `ImageSpec` into `ImageFrame`
-- [ ] Harmonise `Camera` and `PiCamera` interfaces and behaviours
+- [ ] Define bespoke pixel_format as uint32_t fourcc codes in `ImageSpec`
 - [ ] In `camera_pub`, introduce lockless ring buffer between compressor and publisher (main thread)

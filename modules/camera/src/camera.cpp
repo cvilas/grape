@@ -174,10 +174,10 @@ void Camera::acquire() {
   static const auto data_size = calcPixelBufferSize(sdl_frame);
   const auto frame = grape::camera::ImageFrame{
     .header = { .timestamp = now,
-                .pitch = static_cast<std::uint32_t>(sdl_frame->pitch),
-                .width = static_cast<std::uint16_t>(sdl_frame->w),
-                .height = static_cast<std::uint16_t>(sdl_frame->h),
-                .format = static_cast<std::uint32_t>(sdl_frame->format), },
+                .bytes_pitch = static_cast<std::uint32_t>(sdl_frame->pitch),
+                .image_spec = { .size = { .width = static_cast<std::uint16_t>(sdl_frame->w),
+                                          .height = static_cast<std::uint16_t>(sdl_frame->h) },
+                                .pixel_format = static_cast<std::uint32_t>(sdl_frame->format) }, },
     .pixels = { static_cast<std::byte*>(sdl_frame->pixels), static_cast<std::size_t>(data_size) },
   };
 

@@ -24,14 +24,16 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallba
     case eCAL::eSubscriberEvent::connected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
                                     .id = topic_id.topic_id.entity_id, },
-                 .status = grape::ipc::Match::Status::Matched, 
-                .topic = { .name = topic_id.topic_name, .type_name = event_data.publisher_datatype.name }, });
+                 .status = grape::ipc::Match::Status::Matched,
+                 .topic = { .name = topic_id.topic_name,
+                            .type_name = event_data.publisher_datatype.name } });
       return;
     case eCAL::eSubscriberEvent::disconnected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
                                     .id = topic_id.topic_id.entity_id, },
-                 .status = grape::ipc::Match::Status::Unmatched, 
-                .topic = { .name = topic_id.topic_name, .type_name = event_data.publisher_datatype.name }, });
+                 .status = grape::ipc::Match::Status::Unmatched,
+                 .topic = { .name = topic_id.topic_name,
+                            .type_name = event_data.publisher_datatype.name } });
       return;
   }
 }
