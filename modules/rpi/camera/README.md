@@ -58,4 +58,5 @@
 
 ## References
 
-- <https://github.com/NEX108/RaspberryPi5-Ubuntu24-CameraModule3>
+- [Raspberry Pi Camera Software](https://www.raspberrypi.com/documentation/computers/camera_software.html)
+- [Camera Module 3 on Ubuntu](https://github.com/NEX108/RaspberryPi5-Ubuntu24-CameraModule3)
