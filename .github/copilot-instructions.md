@@ -13,18 +13,17 @@ When deeper context is needed, reference the linked documents directly (e.g. via
 - Follow [CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines); enforce via `.clang-tidy`.
 - Follow coding style defined by [`.clang-format`](https://github.com/cvilas/grape/blob/main/.clang-format) file
 - Prefer the latest C++ standard for language features and performance
+- Prefer functional programming techniques; minimise coupling and dependencies
 - Follow DRY and SOLID principles
 - Follow UNIX philosophy of programs that (a) do one thing and do it well and (b) work well together by composition
 - Use SI units in public interfaces
-- Use good abstractions, low coupling, and clear docs to help both humans *and* Copilot generate better code
-
-- Propose code that is **correct by construction** ([full guide](https://github.com/cvilas/guidance/blob/main/process/correct_by_construction.md)):
+- Propose code that is **correct by construction** and therefore, hard to misuse ([full guide](https://github.com/cvilas/guidance/blob/main/process/correct_by_construction.md)):
   - Prefer `const`, `consteval`, `constexpr`; use `enum class` over bare enums or `bool` flags
   - Enforce `const` correctness
   - Use strong/named types to clarify semantics; mark single-argument constructors `explicit`
   - Use `static_assert` for compile-time checks; prefer `switch` with no `default` over `if/else` chains
   - Use RAII everywhere (Constructor Acquires, Destructor Releases)
-  - Use C++26 contracts to protect invariants in code (`contract_assert`, `pre(condition)`, `post(r: condition)`)
+  - Use contracts to protect invariants in code (`contract_assert`, `pre(condition)`, `post(r: condition)`)
 
 ---
 
@@ -40,7 +39,8 @@ Organise code into self-contained **modules** under `modules/`. Each module cont
 - Colocate design docs with code (in `docs/` inside the relevant module)
 - Document *why*, not just *what*; include assumptions, inputs/outputs, failure modes
 - Document all non-obvious APIs with Doxygen; include valid parameter ranges
-- Prefer `md`/`txt` formats; cite algorithm sources
+- Prefer `md`/`txt` formats
+- Cite sources
 - Be succinct. Verbosity hurts readability and maintainability
 
 ---
@@ -50,13 +50,6 @@ Organise code into self-contained **modules** under `modules/`. Each module cont
 Follow the branch-and-merge model ([developer guide](https://github.com/cvilas/guidance/blob/main/process/developer_guide.md)):
 - Branch from `main`; tidy history with `git rebase` before raising a PR
 - Follow [commit message guidelines](https://github.com/cvilas/guidance/blob/main/process/commit_messages.md)
-- All PRs require peer review; see [code review guide](https://github.com/cvilas/guidance/blob/main/process/code_reviews.md)
+- Follow [code review guidelines](https://github.com/cvilas/guidance/blob/main/process/code_reviews.md)
 
 ---
-
-## Third-party dependencies
-
-Use sparingly and with scrutiny. See [third_party.md](https://github.com/cvilas/guidance/blob/main/process/third_party.md).
-
----
-
