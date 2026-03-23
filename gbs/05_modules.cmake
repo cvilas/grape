@@ -462,7 +462,7 @@ add_custom_target(tests COMMENT "Build tests")
 # Adds a custom convenience target to run all tests and generate report on 'make check'
 add_custom_target(
   check
-  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --output-log tests_log.txt --verbose
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --output-log tests_log.txt --verbose --parallel
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMENT "Build and run tests")
 add_dependencies(check tests) # `check` depends on `tests` target
