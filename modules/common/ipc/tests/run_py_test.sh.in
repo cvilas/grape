@@ -32,8 +32,8 @@ fi
 echo "Found wheel: $(basename "${WHEEL_PATH}")"
 
 # Create virtual environment and install wheel
-uv venv --quiet "${VENV_DIR}"
-uv pip install --quiet --python "${VENV_DIR}/bin/python" "${WHEEL_PATH}"
+@UV_EXECUTABLE@ venv --quiet "${VENV_DIR}"
+@UV_EXECUTABLE@ pip install --quiet --python "${VENV_DIR}/bin/python" "${WHEEL_PATH}"
 
 echo "Running test..."
 "${VENV_DIR}/bin/python" "${TEST_SCRIPT}"
