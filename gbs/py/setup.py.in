@@ -1,25 +1,19 @@
-#=================================================================================================
+# =================================================================================================
 # Copyright (C) 2025 GRAPE Contributors
-#=================================================================================================
+# =================================================================================================
+# Minimal setuptools shim. Overrides the distribution class so that setuptools emits a
+# platform-specific (binary) wheel for a pre-built extension module. All package metadata
+# lives in pyproject.toml alongside this file.
 
-from setuptools import setup, find_packages
+from setuptools import setup
 from setuptools.dist import Distribution
 
+
 class BinaryDistribution(Distribution):
-    """Distribution which always forces a binary package"""
+    """Forces a platform-specific wheel even though there are no compiled ext_modules."""
+
     def has_ext_modules(self):
         return True
 
-setup(
-    name="@PY_MODULE_NAME@",
-    version="@VERSION@",
-    description="Python bindings for @MODULE_NAME@",
-    packages=find_packages(),
-    package_data={
-        "@PY_MODULE_NAME@": ["*.so", "*.pyd", "*.dll"],  # Include the binary extension
-    },
-    include_package_data=True,  # Ensure package_data is included
-    distclass=BinaryDistribution,  # Mark as binary distribution
-    python_requires=">=3.6",
-    zip_safe=False,  # Required for extensions
-)
+
+setup(distclass=BinaryDistribution)
