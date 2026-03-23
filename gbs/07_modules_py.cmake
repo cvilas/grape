@@ -5,6 +5,9 @@
 #=================================================================================================
 # Set up facilities for python nanobind
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+find_program(UV_EXECUTABLE uv REQUIRED DOC "uv Python package manager")
+message(STATUS "Found uv: ${UV_EXECUTABLE}")
+
 FetchContent_Declare(
   robin-map
   URL ${CMAKE_SOURCE_DIR}/external/sources/robin-map-${ROBIN_MAP_VERSION_REQUIRED}.tar.gz
@@ -81,15 +84,17 @@ function(define_module_pybinding)
   set(PY_BINDINGS_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PY_MODULE_NAME})
   file(MAKE_DIRECTORY ${PY_BINDINGS_DIR})
   configure_file(${GBS_TEMPLATES_DIR}/py/__init__.py.in ${PY_BINDINGS_DIR}/__init__.py @ONLY)
+  configure_file(${GBS_TEMPLATES_DIR}/py/pyproject.toml.in ${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml @ONLY)
   configure_file(${GBS_TEMPLATES_DIR}/py/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py @ONLY)
 
   # Package module as wheel
   add_custom_command(
     TARGET ${PY_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PY_MODULE_NAME}> ${PY_BINDINGS_DIR}/
-    COMMAND ${Python_EXECUTABLE} -m build --wheel --no-isolation --outdir ${PY_WHEELS_DIR} > 
-    ${CMAKE_CURRENT_BINARY_DIR}/wheel_build.log 2>&1 || (cat ${CMAKE_CURRENT_BINARY_DIR}/wheel_build.log && exit 1)
+    COMMAND ${UV_EXECUTABLE} build --wheel --no-build-isolation --out-dir ${PY_WHEELS_DIR} >
+            ${CMAKE_CURRENT_BINARY_DIR}/wheel_build.log 2>&1 ||
+            (cat ${CMAKE_CURRENT_BINARY_DIR}/wheel_build.log && exit 1)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Building Python package (wheel) for ${PY_MODULE_NAME}")
+    COMMENT "Building Python wheel for ${PY_MODULE_NAME}")
     
 endfunction()
