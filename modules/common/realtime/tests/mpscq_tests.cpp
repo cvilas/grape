@@ -10,7 +10,7 @@
 namespace {
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Basline single producer and single consumer case", "[mpsc_queue]") {
+TEST_CASE("Baseline single producer and single consumer case", "[mpsc_queue]") {
   static constexpr std::size_t CAPACITY = 3;
   grape::realtime::MPSCQueue<int> queue(CAPACITY);
 
