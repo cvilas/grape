@@ -39,7 +39,7 @@ participating hosts and the network infrastructure to enable message passing acr
 
 * To use IPC in Python applications, install the IPC [wheel](https://pythonwheels.com/) as follows
 ```bash
-pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
+uv pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
 ``` 
 * Test by running `examples/pub_example.py` and `examples/sub_example.py`
 
