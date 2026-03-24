@@ -8,7 +8,7 @@
 # configured and built at configuration time.
 # =================================================================================================
 
-cmake_minimum_required(VERSION 3.31.6)
+cmake_minimum_required(VERSION 4.1.1)
 project(grape-external LANGUAGES C CXX)
 
 find_package(Git REQUIRED)
