@@ -572,34 +572,44 @@ function(install_modules)
       VERSION ${VERSION}
       COMPATIBILITY AnyNewerVersion)
     
-    # install config files
+    # install config files (dev component: needed to use the package in downstream CMake projects)
     install(FILES "${config_create_location}/${INSTALL_MODULE_NAME}-config.cmake"
                   "${config_create_location}/${INSTALL_MODULE_NAME}-config-version.cmake"
-            DESTINATION ${config_install_location})
+            DESTINATION ${config_install_location}
+            COMPONENT dev)
 
     # install package targets
     if(DEFINED INSTALL_MODULE_LIB_TARGETS OR DEFINED INSTALL_MODULE_EXE_TARGETS)
       message(VERBOSE "Module \"${module}\" installable targets:")
       message(VERBOSE "  Library targets\t : ${INSTALL_MODULE_LIB_TARGETS}")
       message(VERBOSE "  Executable targets\t : ${INSTALL_MODULE_EXE_TARGETS}")
-      install(TARGETS 
-        ${INSTALL_MODULE_LIB_TARGETS} ${INSTALL_MODULE_EXE_TARGETS}
-        EXPORT ${INSTALL_MODULE_NAME}-targets
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        INCLUDES DESTINATION include)
 
-      # install public header files
-      if(EXISTS ${MODULE_${module}_PATH}/include)
-        install(DIRECTORY ${MODULE_${module}_PATH}/include/ DESTINATION include)
+      # runtime component: shared libraries and executables
+      if(INSTALL_MODULE_EXE_TARGETS)
+        install(TARGETS ${INSTALL_MODULE_EXE_TARGETS}
+          EXPORT ${INSTALL_MODULE_NAME}-targets
+          RUNTIME DESTINATION bin COMPONENT runtime)
+      endif()
+      if(INSTALL_MODULE_LIB_TARGETS)
+        install(TARGETS ${INSTALL_MODULE_LIB_TARGETS}
+          EXPORT ${INSTALL_MODULE_NAME}-targets
+          RUNTIME DESTINATION bin COMPONENT runtime
+          LIBRARY DESTINATION lib COMPONENT runtime
+          ARCHIVE DESTINATION lib COMPONENT dev
+          INCLUDES DESTINATION include)
       endif()
 
-      # export targets
+      # dev component: public header files
+      if(EXISTS ${MODULE_${module}_PATH}/include)
+        install(DIRECTORY ${MODULE_${module}_PATH}/include/ DESTINATION include COMPONENT dev)
+      endif()
+
+      # dev component: export targets (for downstream find_package)
       install(EXPORT ${INSTALL_MODULE_NAME}-targets
         FILE ${INSTALL_MODULE_NAME}-targets.cmake
         NAMESPACE ${CMAKE_PROJECT_NAME}::
-        DESTINATION ${config_install_location})
+        DESTINATION ${config_install_location}
+        COMPONENT dev)
     endif()
     
   endforeach()
@@ -611,6 +621,7 @@ function(install_modules)
   install(
     FILES "${CMAKE_BINARY_DIR}/uninstall.sh"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT runtime
     PERMISSIONS
       OWNER_EXECUTE
       OWNER_READ
@@ -623,8 +634,9 @@ function(install_modules)
   # To support 'uninstall', process and append build manifest and set it to be installed too
   install(
     CODE "string(REPLACE \";\" \"\\n\" MY_CMAKE_INSTALL_MANIFEST_CONTENT \"\$\{CMAKE_INSTALL_MANIFEST_FILES\}\")\n\
-  file(WRITE ${CMAKE_BINARY_DIR}/manifest.txt \"\$\{MY_CMAKE_INSTALL_MANIFEST_CONTENT\}\")")
-  install(FILES "${CMAKE_BINARY_DIR}/manifest.txt" DESTINATION share/${CMAKE_PROJECT_NAME})
+  file(WRITE ${CMAKE_BINARY_DIR}/manifest.txt \"\$\{MY_CMAKE_INSTALL_MANIFEST_CONTENT\}\")"
+    COMPONENT runtime)
+  install(FILES "${CMAKE_BINARY_DIR}/manifest.txt" DESTINATION share/${CMAKE_PROJECT_NAME} COMPONENT runtime)
 
 endfunction()
 

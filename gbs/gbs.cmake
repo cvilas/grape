@@ -84,11 +84,36 @@ if (NOT ${_result} EQUAL 0)
   message(FATAL_ERROR "Error processing ${CMAKE_SOURCE_DIR}/external/CMakeLists.txt: ${_error}")
 endif ()
 
-# Install all artifacts from external projects
-file(GLOB EP_DEPLOY_SUBDIRS RELATIVE ${EP_DEPLOY_DIR} ${EP_DEPLOY_DIR}/*)
-foreach(SUBDIR IN LISTS EP_DEPLOY_SUBDIRS)
-  install(DIRECTORY ${EP_DEPLOY_DIR}/${SUBDIR}/ DESTINATION ${SUBDIR} USE_SOURCE_PERMISSIONS)
+# Install all artifacts from external projects, applying the same runtime/dev component split
+# as for internal modules:
+#   runtime: executables, shared libraries (.so), and data (etc, share, bin)
+#   dev:     headers (include) and static libraries (.a)
+foreach(SUBDIR bin etc share)
+  if(EXISTS ${EP_DEPLOY_DIR}/${SUBDIR})
+    install(DIRECTORY ${EP_DEPLOY_DIR}/${SUBDIR}/ DESTINATION ${SUBDIR}
+            USE_SOURCE_PERMISSIONS COMPONENT runtime)
+  endif()
 endforeach()
+if(EXISTS ${EP_DEPLOY_DIR}/include)
+  install(DIRECTORY ${EP_DEPLOY_DIR}/include/ DESTINATION include
+          USE_SOURCE_PERMISSIONS COMPONENT dev)
+endif()
+if(EXISTS ${EP_DEPLOY_DIR}/lib)
+  # Shared libraries and symlinks -> runtime
+  install(DIRECTORY ${EP_DEPLOY_DIR}/lib/ DESTINATION lib
+          USE_SOURCE_PERMISSIONS COMPONENT runtime
+          FILES_MATCHING
+            PATTERN "*.so"
+            PATTERN "*.so.*"
+            PATTERN "*.dylib")
+  # Static libraries -> dev
+  install(DIRECTORY ${EP_DEPLOY_DIR}/lib/ DESTINATION lib
+          USE_SOURCE_PERMISSIONS COMPONENT dev
+          FILES_MATCHING
+            PATTERN "*.a"
+            PATTERN "cmake/*"
+            PATTERN "pkgconfig/*")
+endif()
 
 list(PREPEND CMAKE_PREFIX_PATH ${EP_DEPLOY_DIR}/)
 if (CMAKE_CROSSCOMPILING)

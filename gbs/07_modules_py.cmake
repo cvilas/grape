@@ -28,7 +28,7 @@ FetchContent_MakeAvailable(nanobind)
 set(PY_WHEELS_DIR ${CMAKE_BINARY_DIR}/share/${CMAKE_PROJECT_NAME}/py/wheels)
 
 # Install rule for wheels 
-install(DIRECTORY ${PY_WHEELS_DIR}/ DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/py/wheels)
+install(DIRECTORY ${PY_WHEELS_DIR}/ DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/py/wheels COMPONENT runtime)
 
 # Delete wheels on 'clean' target
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${PY_WHEELS_DIR})
