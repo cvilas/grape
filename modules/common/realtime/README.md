@@ -51,7 +51,6 @@ Use `grape::Exception` to capture diagnostic information during exit.
 
 ## TODO
 
-- [ ] Implement single producer multi-consumer queue using heap and shared memory
 - [ ] Refactor multi-producer single-consumer queue
   - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
   - Rename it for clarity
