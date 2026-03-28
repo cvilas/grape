@@ -3,9 +3,10 @@
 //=================================================================================================
 
 #include <csignal>
+#include <cstring>
 #include <print>
 
-#include "grape/realtime/mpsc_queue.h"
+#include "grape/fifo_buffer.h"
 #include "grape/realtime/schedule.h"
 #include "grape/realtime/thread.h"
 #include "grape/rpi/sense_hat/inertial_sensor.h"
@@ -41,12 +42,16 @@ auto main() -> int {
       std::println("Unable to set CPU affinity (main): {}", is_main_cpu_set.error().message());
     }
 
-    // A lock-free queue to pass data from IMU reading thread to main thread
-    static constexpr std::size_t QUEUE_CAPACITY = 64;
-    grape::realtime::MPSCQueue<grape::rpi::sense_hat::ImuSample> sample_queue(QUEUE_CAPACITY);
+    // A lock-free buffer to pass data from IMU reading thread to main thread
+    static constexpr auto QUEUE_CAPACITY = 64U;
+    auto sample_buffer = grape::FIFOBuffer(grape::FIFOBuffer::Config{
+        .frame_length = sizeof(grape::rpi::sense_hat::ImuSample),
+        .num_frames = QUEUE_CAPACITY,
+    });
 
     // Create IMU driver instance
-    auto imu = grape::rpi::sense_hat::InertialSensor(grape::rpi::sense_hat::InertialSensor::Config{
+    using IMU = grape::rpi::sense_hat::InertialSensor;
+    auto imu = IMU(IMU::Config{
         .i2c_bus = "/dev/i2c-1",
     });
 
@@ -72,17 +77,21 @@ auto main() -> int {
       return true;
     };
 
-    task_config.process = [&imu, &sample_queue]() -> bool {
+    task_config.process = [&imu, &sample_buffer]() -> bool {
+      // read the IMU
       auto maybe_sample = imu.read();
       if (not maybe_sample) {
         std::println("IMU read failed: {}", maybe_sample.error().message());
         return false;
       }
 
-      // TODO: Run AHRS filter here. We have ~1400 µs remaining budget.
-
-      // Push to queue read by main thread
-      std::ignore = sample_queue.tryPush(std::move(*maybe_sample));  // NOLINT(hicpp-move-const-arg)
+      // Push raw IMU data to buffer read by main thread
+      const auto writer = [&maybe_sample](std::span<std::byte> frame) {
+        std::memcpy(frame.data(), &*maybe_sample, frame.size_bytes());
+      };
+      if (not sample_buffer.visitToWrite(writer)) {
+        std::println("FIFO full");
+      }
 
       return true;
     };
@@ -91,13 +100,17 @@ auto main() -> int {
     auto task = grape::realtime::Thread(std::move(task_config));
     task.start();
 
+    auto sample = grape::rpi::sense_hat::ImuSample{};
+    const auto reader = [&sample](std::span<const std::byte> frame) {
+      std::memcpy(&sample, frame.data(), frame.size_bytes());
+    };
+
     // Main thread just logs data
     std::println("Press ctrl-c to exit\n");
     static constexpr auto LOG_PERIOD = std::chrono::seconds(1);
     auto next_log_time = grape::WallClock::now();
     while (not s_exit.test()) {
-      if (const auto maybe_sample = sample_queue.tryPop()) {
-        const auto& sample = *maybe_sample;
+      if (sample_buffer.visitToRead(reader)) {
         if (sample.timestamp < next_log_time) {
           continue;
         }
