@@ -29,16 +29,12 @@
 - [x] [Serialisation](../modules/common/serdes/README.md)
 - [x] [IPC](../modules/common/ipc/README.md)
 - [x] [Joystick](../modules/common/joystick/README.md)
-- [x] [Teleop](../modules/experimental/robot/locomotion/teleop/README.md)  
 - [x] [Camera](../modules/camera/README.md)
 - [x] [Picam](../modules/rpi/camera/README.md)  
 - [x] [Clock](../modules/common/clock/README.md)
 - [x] [Pisense](../modules/rpi/sense_hat/README.md)
+- [x] SPMC Ring buffers
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
-- [ ] Ring buffers
-    - [ ] SPMC ring buffer
-    - [ ] MPSC ring buffer
-    - [ ] Optimise the [ring buffer](https://rigtorp.se/ringbuffer/)
 - [ ] [Linalg](../modules/experimental/linalg/README.md)
 - [ ] [Plot](../modules/experimental/plot/README.md)
 - [ ] Basic OpenGL scenegraph
@@ -48,6 +44,10 @@
   - [ ] Design a text-based scenegraph description format using our scripting engine
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] [Data recording](../modules/experimental/drake/README.md)
+- [ ] Multimodal telemetry 
+  - 1xaudio, 2x1080p30 video, 1x bidirectional data channel (teleop), 3x unidirectional data channel for structured & unstructured data
+  - WebRTC with SFU, authentication for teleop
+- [x] [Teleop](../modules/experimental/robot/locomotion/teleop/README.md)  
 - [ ] DSP functions
   - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
   - [ ] Delay line
@@ -67,6 +67,7 @@
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
   - [ ] Study [Catch23](https://github.com/philsquared/Catch23) when it is still simple, and replace Catch2
+  - [ ] Optimise the [ring buffers](https://rigtorp.se/ringbuffer/)
 
 ## Study
 
