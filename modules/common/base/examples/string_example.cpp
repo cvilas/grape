@@ -11,8 +11,8 @@
 auto main() -> int {
   try {
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-    using FixedString8 = grape::FixedString<7>;
-    using FixedString64 = grape::FixedString<63>;
+    using FixedString8 = grape::FixedString<8>;
+    using FixedString64 = grape::FixedString<64>;
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
     static constexpr FixedString8 STRING("abcdefghij");  //!< this will get truncated to fit

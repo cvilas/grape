@@ -15,8 +15,8 @@ namespace grape::log {
 
 /// A single log record
 struct [[nodiscard]] Record {
-  static constexpr auto MAX_LOGGER_NAME_LEN = 63U;
-  static constexpr auto MAX_LOG_MESSAGE_LEN = 255U;
+  static constexpr auto MAX_LOGGER_NAME_LEN = 64U;
+  static constexpr auto MAX_LOG_MESSAGE_LEN = 256U;
 
   WallClock::TimePoint timestamp;
   std::source_location location;

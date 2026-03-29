@@ -19,7 +19,8 @@ namespace grape {
 ///
 /// @tparam CharT Character type. Some examples are char, wchar_t, char8_t, char16_t, char32_t
 /// @tparam Traits Traits class for the character type
-/// @tparam N The maximum length of the string excluding the terminating null character
+/// @tparam N Total buffer capacity in characters, including the terminating null character.
+///           For example, N=64 stores at most 63 characters, occupying exactly 64 bytes.
 template <typename CharT, std::size_t N, typename Traits = std::char_traits<CharT>>
 class BasicFixedString {
 public:
@@ -30,19 +31,19 @@ public:
   template <std::size_t M>
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
   consteval explicit BasicFixedString(const CharT (&str)[M]) {
-    const auto length = std::min(M - 1, N);
+    const auto length = std::min(M - 1, N - 1);
     Traits::copy(data_.data(), str, length);
     data_.at(length) = '\0';
   }
 
   constexpr explicit BasicFixedString(const CharT* str) {
-    const auto length = std::min(Traits::length(str), N);
+    const auto length = std::min(Traits::length(str), N - 1);
     Traits::copy(data_.data(), str, length);
     data_.at(length) = '\0';
   }
 
   constexpr explicit BasicFixedString(std::basic_string_view<CharT, Traits> sv) {
-    const auto length = std::min(sv.size(), N);
+    const auto length = std::min(sv.size(), N - 1);
     std::copy_n(sv.begin(), length, data_.data());
     data_.at(length) = '\0';
   }
@@ -52,8 +53,8 @@ public:
   /// @param args Arguments to format
   template <typename... Args>
   explicit BasicFixedString(const std::format_string<Args...> fmt, Args&&... args) {
-    const auto result = std::format_to_n(data_.data(), N, fmt, std::forward<Args>(args)...);
-    data_.at(std::min(N, static_cast<std::size_t>(result.size))) = '\0';
+    const auto result = std::format_to_n(data_.data(), N - 1, fmt, std::forward<Args>(args)...);
+    data_.at(std::min(N - 1, static_cast<std::size_t>(result.size))) = '\0';
   }
 
   [[nodiscard]] constexpr auto cStr() const noexcept -> const CharT* {
@@ -61,10 +62,6 @@ public:
   }
 
   [[nodiscard]] constexpr auto data() const noexcept -> const CharT* {
-    return data_.data();
-  }
-
-  [[nodiscard]] constexpr auto data() noexcept -> CharT* {
     return data_.data();
   }
 
@@ -77,7 +74,7 @@ public:
   }
 
   [[nodiscard]] constexpr auto maxSize() const noexcept {
-    return N;
+    return N - 1;
   }
 
   [[nodiscard]] constexpr auto empty() const noexcept {
@@ -94,7 +91,7 @@ public:
 
   constexpr void append(const CharT* str, std::size_t len) {
     const auto current_length = length();
-    const auto length_to_copy = std::min(len, (N - current_length));
+    const auto length_to_copy = std::min(len, (N - 1 - current_length));
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::copy(str, str + length_to_copy, data_.data() + current_length);
     data_.at(current_length + length_to_copy) = '\0';
@@ -114,8 +111,8 @@ public:
   }
 
 private:
-  static_assert(N > 0, "Container capacity must be valid");
-  std::array<CharT, N + 1> data_{};
+  static_assert(N > 0, "Buffer capacity must include space for the null terminator");
+  std::array<CharT, N> data_{};
 };
 
 template <class CharT, std::size_t N, class Traits = std::char_traits<CharT>>
