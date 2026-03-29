@@ -63,9 +63,11 @@ struct ShmTick : SharedMemory {
     const auto shm_name = shmName(id);
     auto maybe_shm = SharedMemory::create(shm_name, TICK_SIZE, access);
     if (not maybe_shm) {
+      const auto prev_msg = std::string{ maybe_shm.error().message() };
       maybe_shm = SharedMemory::open(shm_name, access);
       if (not maybe_shm) {
-        panic<Exception>(std::format("(initShm) {}", maybe_shm.error().message()));
+        const auto current_msg = maybe_shm.error().message();
+        panic<Exception>(std::format("Shm create: '{}'; open: '{}'", prev_msg, current_msg));
       }
     }
     return std::move(maybe_shm.value());
