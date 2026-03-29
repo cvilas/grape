@@ -26,8 +26,8 @@ namespace grape::spmc_ring_buffer {
 
 /// Buffer configuration options
 struct Config {
-  std::size_t frame_length;  //!< Length of a single frame in bytes
-  std::size_t num_frames;    //!< Number of frames in the buffer
+  std::size_t frame_length{ 1U };  //!< Length of a single frame in bytes
+  std::size_t num_frames{ 1U };    //!< Number of frames in the buffer
 };
 
 /// - only opens and closes buffer
@@ -35,7 +35,7 @@ struct Config {
 class Reader {
 public:
   // should be interruptible
-  [[nodiscard]] static auto waitForWriter(const std::chrono::milliseconds timeout) -> bool;
+  [[nodiscard]] static auto waitForWriter(std::chrono::milliseconds timeout) -> bool;
 
   [[nodiscard]] static auto connect(std::string_view name) -> std::expected<Reader, Error>;
 
@@ -74,14 +74,14 @@ public:
   void visit(const WriterFunc& func);
 
   ~Writer();
-  Writer(Writer&& other) noexcept;
-  auto operator=(Writer&& other) noexcept -> Writer&;
+  Writer(Writer&& other) noexcept = default;
+  auto operator=(Writer&& other) noexcept -> Writer& = default;
   Writer(const Writer&) = delete;
   auto operator=(const Writer&) -> Writer& = delete;
 
 private:
-  Writer();
   struct Impl;
+  explicit Writer(std::unique_ptr<Impl> impl);
   std::unique_ptr<Impl> impl_;
 };
 

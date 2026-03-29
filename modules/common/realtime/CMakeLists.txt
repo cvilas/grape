@@ -10,6 +10,7 @@ declare_module(
 # library sources
 set(SOURCES
     src/schedule.cpp
+    src/spmc_ring_buffer.cpp
     README.md
     include/grape/realtime/mpsc_queue.h
     include/grape/realtime/spmc_ring_buffer.h
