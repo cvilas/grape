@@ -22,7 +22,7 @@ struct Signal {
     Control,    //!< Signal designated for logging _and_ remote control (read and write)
   };
 
-  static constexpr auto MAX_NAME_LENGTH = 63;
+  static constexpr auto MAX_NAME_LENGTH = 64;
 
   FixedString<MAX_NAME_LENGTH> name;  //!< Unique identifier name for the signal
   std::uintptr_t address{ 0 };        //!< Address of the signal in the process address space
