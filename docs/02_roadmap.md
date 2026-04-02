@@ -1,26 +1,5 @@
 # Roadmap
 
-## Manipulator
-
-- [ ] Build [LeRobot SO-ARM101 kit](https://github.com/TheRobotStudio/SO-ARM100)
-- [ ] Set up [LeRobot](https://huggingface.co/docs/lerobot/index)
-- [ ] Learn to pick and place
-
-## Walker
-
-- [ ] Build [XGO-Mini kit](https://shop.elecfreaks.com/products/elecfreaks-cm4-xgo-mini-robot-dog-kit-for-raspberry-pi)
-- [ ] RL walk in MuJoCo
-- [ ] RL walk in reality
-
-## Rover
-
-- [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
-- [ ] Implement Localiser (GPS + AHRS)
-- [ ] Integrate long-distance comm link
-- [ ] Implement telemetry: position, attitude, battery, camera
-- [ ] Implement FPV control
-- [ ] Implement dashboard view 
-
 ## Libraries
 
 - [x] [Console IO](../modules/common/conio/README.md)
@@ -30,10 +9,9 @@
 - [x] [IPC](../modules/common/ipc/README.md)
 - [x] [Joystick](../modules/common/joystick/README.md)
 - [x] [Camera](../modules/camera/README.md)
-- [x] [Picam](../modules/rpi/camera/README.md)  
 - [x] [Clock](../modules/common/clock/README.md)
+- [x] [Picam](../modules/rpi/camera/README.md)  
 - [x] [Pisense](../modules/rpi/sense_hat/README.md)
-- [x] SPMC Ring buffers
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
 - [ ] [Linalg](../modules/experimental/linalg/README.md)
 - [ ] [Plot](../modules/experimental/plot/README.md)
@@ -45,9 +23,8 @@
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] [Data recording](../modules/experimental/drake/README.md)
 - [ ] Multimodal telemetry 
-  - 1xaudio, 2x1080p30 video, 1x bidirectional data channel (teleop), 3x unidirectional data channel for structured & unstructured data
-  - WebRTC with SFU, authentication for teleop
-- [x] [Teleop](../modules/experimental/robot/locomotion/teleop/README.md)  
+  - 1x audio channel, 2x 1080p30 video channel, 1x bidirectional data channel (teleop), 3x unidirectional data channel for structured & unstructured data
+  - WebRTC with SFU, teleop control authentication and arbitration
 - [ ] DSP functions
   - [ ] Implement signal processor [concept](https://concepts.godbolt.org/z/PjGb466cr)
   - [ ] Delay line
@@ -68,6 +45,24 @@
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
   - [ ] Study [Catch23](https://github.com/philsquared/Catch23) when it is still simple, and replace Catch2
   - [ ] Optimise the [ring buffers](https://rigtorp.se/ringbuffer/)
+
+## Applications
+
+- Manipulator
+  - [ ] Build [LeRobot SO-ARM101 kit](https://github.com/TheRobotStudio/SO-ARM100)
+  - [ ] Set up [LeRobot](https://huggingface.co/docs/lerobot/index)
+  - [ ] RL manipulation to pick and place
+-Walker
+  - [ ] Build [XGO-Mini kit](https://shop.elecfreaks.com/products/elecfreaks-cm4-xgo-mini-robot-dog-kit-for-raspberry-pi)
+  - [ ] RL walk in MuJoCo
+  - [ ] RL walk in reality
+- Rover
+  - [ ] Build [DIY kit](https://github.com/nasa-jpl/open-source-rover)
+  - [ ] Implement Localiser (GPS + AHRS)
+  - [ ] Integrate long-distance comm link
+  - [ ] Implement telemetry: position, attitude, battery, camera
+  - [ ] Implement FPV control
+  - [ ] Implement dashboard view 
 
 ## Study
 
