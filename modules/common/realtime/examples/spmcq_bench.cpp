@@ -37,8 +37,9 @@ void bmSpmcqWrite(benchmark::State& state) {
   auto& writer = maybe_writer.value();
 
   std::vector<std::byte> data(data_size);
-  const auto writer_fn = [&data](std::span<std::byte> buffer) -> void {
+  const auto writer_fn = [&data](std::span<std::byte> buffer) -> bool {
     std::memcpy(buffer.data(), data.data(), data.size());
+    return true;
   };
 
   for (auto st : state) {
@@ -69,8 +70,9 @@ void bmSpmcqRead(benchmark::State& state) {
   auto& reader = maybe_reader.value();
 
   std::vector<std::byte> data(data_size);
-  const auto writer_fn = [&data](std::span<std::byte> buffer) -> void {
+  const auto writer_fn = [&data](std::span<std::byte> buffer) -> bool {
     std::memcpy(buffer.data(), data.data(), data.size());
+    return true;
   };
 
   // Pre-fill the ring buffer so the reader always has frames available.
@@ -78,8 +80,9 @@ void bmSpmcqRead(benchmark::State& state) {
     writer.visit(writer_fn);
   }
 
-  const auto reader_fn = [&data](std::span<const std::byte> buffer) -> void {
+  const auto reader_fn = [&data](std::span<const std::byte> buffer) -> bool {
     std::memcpy(data.data(), buffer.data(), buffer.size_bytes());
+    return true;
   };
 
   for (auto st : state) {

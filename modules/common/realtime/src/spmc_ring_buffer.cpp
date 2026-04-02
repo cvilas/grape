@@ -7,7 +7,6 @@
 #include <atomic>
 #include <cerrno>
 #include <format>
-#include <limits>
 #include <memory>
 #include <system_error>
 #include <type_traits>
@@ -51,18 +50,14 @@ auto shmRename(const std::string& from, const std::string& to)
 
 //=================================================================================================
 struct Control {
-  std::uint64_t magic{};
-  std::uint64_t write_count{};
+  std::uint64_t write_count{};  // note: first member to ensure 8-byte alignment for atomic_ref
   grape::spmc_ring_buffer::Config config;
+  std::uint64_t magic{};
   static constexpr auto MAGIC = 0x00465542434D5053U;  //!< "SPMCBUF\0";
 };
 
 static_assert(std::is_trivially_copyable_v<Control>);
-static_assert(alignof(Control) <= alignof(std::max_align_t));
-
-// Control::write_count will be atomically referenced in writer and reader. For this to work:
 static_assert(std::atomic_ref<std::uint64_t>::is_always_lock_free);
-static_assert(alignof(std::uint64_t) >= std::atomic_ref<std::uint64_t>::required_alignment);
 
 }  // namespace
 
@@ -82,22 +77,6 @@ public:
              shm_.data().subspan(sizeof(Control)) };
   }
 
-  [[nodiscard]] auto layout() const -> std::pair<const Control&, std::span<const std::byte>> {
-    // TODO: Replace with std::start_lifetime_as (C++23) when available.
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    return { *reinterpret_cast<const Control*>(shm_.data().data()),
-             shm_.data().subspan(sizeof(Control)) };
-  }
-
-  ~ShmImpl() {
-    shm_.close();
-  }
-
-  ShmImpl(ShmImpl&& other) = delete;
-  auto operator=(ShmImpl&& other) = delete;
-  ShmImpl(const ShmImpl&) = delete;
-  auto operator=(const ShmImpl&) = delete;
-
 private:
   SharedMemory shm_;
 };
@@ -110,13 +89,11 @@ struct Writer::Impl : public ShmImpl {
 
 //-------------------------------------------------------------------------------------------------
 auto Writer::create(std::string_view name, const Config& config) -> std::expected<Writer, Error> {
-  if (config.frame_length == 0 || config.num_frames == 0) {
-    return std::unexpected{ Error{
-        "Invalid configuration. Requires non-zero frame length and num frames" } };
+  if (config.frame_length < Config::MIN_FRAME_LENGTH) {
+    return std::unexpected{ Error{ "Invalid configuration (frame_length)" } };
   }
-  if (config.frame_length > std::numeric_limits<std::size_t>::max() / config.num_frames) {
-    return std::unexpected{ Error{
-        "Invalid configuration. frame_length * num_frames overflows size_t" } };
+  if (config.num_frames < Config::MIN_FRAMES) {
+    return std::unexpected{ Error{ "Invalid configuration (num_frames)" } };
   }
   const auto data_size = config.frame_length * config.num_frames;
 
@@ -130,12 +107,16 @@ auto Writer::create(std::string_view name, const Config& config) -> std::expecte
     return std::unexpected{ maybe_shm.error() };
   }
 
-  // initialise the control region
+  // initialise the control region before constructing Impl so that cached hot data is correct
   auto impl = std::make_unique<Writer::Impl>(std::move(maybe_shm.value()));
-  auto& control = impl->layout().first;
-  control.config = config;
-  control.write_count = 0U;
-  control.magic = Control::MAGIC;
+  auto [ctrl, data] = impl->layout();
+  ctrl.config = config;
+  ctrl.write_count = 0U;
+  ctrl.magic = Control::MAGIC;
+
+  // cache pointers to hot-path data
+  auto* const write_count_ptr = &ctrl.write_count;
+  const auto frames = data;
 
   // rename and make it available for readers
   const auto maybe_rename = shmRename(staging_name, shm_name);
@@ -144,13 +125,13 @@ auto Writer::create(std::string_view name, const Config& config) -> std::expecte
     return std::unexpected{ maybe_rename.error() };
   }
 
-  return Writer{ std::string{ name }, std::move(impl) };
+  return Writer{ std::string{ name }, std::move(impl), config, frames, write_count_ptr };
 }
 
 //-------------------------------------------------------------------------------------------------
 Writer::~Writer() {
   if (impl_ == nullptr) {
-    return;
+    return;  // moved-from state, nothing to clean up
   }
   try {
     std::ignore = SharedMemory::remove(shmName(name_));
@@ -161,19 +142,13 @@ Writer::~Writer() {
 }
 
 //-------------------------------------------------------------------------------------------------
-Writer::Writer(std::string name, std::unique_ptr<Impl> impl)
-  : name_(std::move(name)), impl_{ std::move(impl) } {
-}
-
-//-------------------------------------------------------------------------------------------------
-void Writer::visit(const WriterFunc& func) {
-  auto [ctrl, data] = impl_->layout();
-  const auto frame_len = ctrl.config.frame_length;
-  const auto write_count = std::atomic_ref<std::uint64_t>{ ctrl.write_count };
-  const auto frame_start =
-      (write_count.load(std::memory_order_relaxed) % ctrl.config.num_frames) * frame_len;
-  func(data.subspan(frame_start, frame_len));
-  write_count.fetch_add(1U, std::memory_order_release);
+Writer::Writer(std::string name, std::unique_ptr<Impl> impl, const Config& config,
+               std::span<std::byte> frames, std::uint64_t* write_count_ptr)
+  : name_(std::move(name))
+  , impl_{ std::move(impl) }
+  , config_{ config }
+  , frames_{ frames }
+  , write_count_ptr_{ write_count_ptr } {
 }
 
 //=================================================================================================
@@ -193,62 +168,35 @@ auto Reader::connect(std::string_view name) -> std::expected<Reader, Error> {
     return std::unexpected{ Error{ std::format("'{}' has unexpected size (too small)", name) } };
   }
   auto impl = std::make_unique<Reader::Impl>(std::move(maybe_shm.value()));
-  const auto& [control, data] = impl->layout();
+  const auto& [ctrl, data] = impl->layout();
 
-  if (control.magic != Control::MAGIC) {
+  if (ctrl.magic != Control::MAGIC) {
     return std::unexpected{ Error{ std::format("'{}' has incorrect magic", name) } };
   }
 
-  if (data.size_bytes() != control.config.frame_length * control.config.num_frames) {
+  if (data.size_bytes() != ctrl.config.frame_length * ctrl.config.num_frames) {
     return std::unexpected{ Error{ std::format("'{}' has unexpected data size", name) } };
   }
-  return Reader{ std::move(impl) };
+
+  // cache pointers to hot-path data
+  auto* const write_count_ptr = &ctrl.write_count;
+  const auto frames = data;
+
+  return Reader{ std::move(impl), ctrl.config, frames, write_count_ptr };
 }
 
 //-------------------------------------------------------------------------------------------------
 auto Reader::config() const -> Config {
-  return impl_->layout().first.config;
+  return config_;
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Reader::visit(const ReaderFunc& func) -> Status {
-  const auto& [ctrl, data] = std::as_const(*impl_).layout();
-  const auto capacity = ctrl.config.num_frames;
-  // NOLINTBEGIN(cppcoreguidelines-pro-type-const-cast)
-  const auto write_count_ref =
-      std::atomic_ref<std::uint64_t>{ const_cast<std::uint64_t&>(ctrl.write_count) };
-  // NOLINTEND(cppcoreguidelines-pro-type-const-cast)
-
-  // To read a valid frame, read count should be within the following bounds:
-  // (write_count - capacity) < read_count < write_count
-
-  // if writer lapped reader, fast-forward read count and report dropped frames
-  const auto write_count = write_count_ref.load(std::memory_order_acquire);
-  const auto read_lag = write_count - read_count_;
-  const auto frame_good = ((read_lag < capacity) and (read_count_ < write_count));
-  if (not frame_good) {
-    read_count_ = write_count;
-    return (read_lag == 0UL) ? Status::Empty : Status::Dropped;
-  }
-
-  const auto frame_len = ctrl.config.frame_length;
-  const auto frame_start = ((read_count_ % capacity) * frame_len);
-  func(data.subspan(frame_start, frame_len));
-
-  // if writer lapped reader while processing this frame, invalidate the read
-  std::atomic_thread_fence(std::memory_order_seq_cst);
-  const auto write_count_post_read = write_count_ref.load(std::memory_order_relaxed);
-  const auto post_read_lag = (write_count_post_read - read_count_);
-  if (post_read_lag >= capacity) {
-    read_count_ = write_count_post_read;
-    return Status::Dropped;
-  }
-  read_count_++;
-  return Status::Ok;
-}
-
-//-------------------------------------------------------------------------------------------------
-Reader::Reader(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {
+Reader::Reader(std::unique_ptr<Impl> impl, const Config& config, std::span<const std::byte> frames,
+               const std::uint64_t* write_count_ptr)
+  : impl_{ std::move(impl) }
+  , config_{ config }
+  , frames_{ frames }
+  , write_count_ptr_{ write_count_ptr } {
 }
 
 //-------------------------------------------------------------------------------------------------

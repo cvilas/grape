@@ -40,15 +40,17 @@ auto main() -> int {
       }
 
       // write
-      static constexpr auto UPDATE_PERIOD = std::chrono::milliseconds(100);
+      static constexpr auto WRITE_PERIOD = std::chrono::milliseconds(100);
       std::uint64_t value = 0;
       while (not st.stop_requested()) {
-        buffer->visit([&value](std::span<std::byte> frame) {
+        buffer->visit([&value](std::span<std::byte> frame) -> bool {
           std::memcpy(frame.data(), &value, sizeof(value));
+          return true;
         });
         value++;
-        std::this_thread::sleep_for(UPDATE_PERIOD);
+        std::this_thread::sleep_for(WRITE_PERIOD);
       }
+      std::println("Producer '{}' exit", NAME);
     };
 
     auto consumer_count = std::atomic_int{};
@@ -70,15 +72,17 @@ auto main() -> int {
       }
 
       // read
-      static constexpr auto REST_PERIOD = std::chrono::milliseconds(200);
+      static constexpr auto READ_PERIOD = std::chrono::milliseconds(90);
       while (not st.stop_requested()) {
         std::uint64_t value{};
-        const auto status = buffer->visit([&value](std::span<const std::byte> frame) {
+        const auto status = buffer->visit([&value](std::span<const std::byte> frame) -> bool {
           std::memcpy(&value, frame.data(), frame.size_bytes());
+          return true;
         });
         std::println("consumer {} {} - {:d}", consumer_id, toString(status), value);
-        std::this_thread::sleep_for(REST_PERIOD);
+        std::this_thread::sleep_for(READ_PERIOD);
       }
+      std::println("Consumer '{}/{}' exit", NAME, consumer_id);
     };
 
     const auto t1 = std::jthread(producer);

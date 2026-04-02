@@ -25,15 +25,20 @@ auto uniqueName() -> std::string {
 //-------------------------------------------------------------------------------------------------
 // Helpers to write/read a uint64_t value via the visitor interface.
 void writeValue(Writer& writer, std::uint64_t value) {
-  writer.visit(
-      [&value](std::span<std::byte> frame) { std::memcpy(frame.data(), &value, sizeof(value)); });
+  writer.visit([&value](std::span<std::byte> frame) -> bool {
+    std::memcpy(frame.data(), &value, sizeof(value));
+    return true;
+  });
 }
 
-auto readValue(Reader& reader) -> std::pair<Reader::Status, std::uint64_t> {
+auto readValue(Reader& reader, Reader::Policy policy) -> std::pair<Reader::Status, std::uint64_t> {
   std::uint64_t value{};
-  const auto status = reader.visit([&value](std::span<const std::byte> frame) {
-    std::memcpy(&value, frame.data(), sizeof(value));
-  });
+  const auto status = reader.visit(
+      [&value](std::span<const std::byte> frame) {
+        std::memcpy(&value, frame.data(), sizeof(value));
+        return true;
+      },
+      policy);
   return { status, value };
 }
 
@@ -55,7 +60,7 @@ TEST_CASE("Read from empty buffer returns Empty", "[spmcq]") {
   REQUIRE(maybe_reader);
   auto& reader = maybe_reader.value();
 
-  const auto [status, unused] = readValue(reader);
+  const auto [status, unused] = readValue(reader, Reader::Policy::Next);
   REQUIRE(status == Reader::Status::Empty);
 }
 
@@ -71,7 +76,7 @@ TEST_CASE("Single write and read round-trips data", "[spmcq]") {
 
   static constexpr auto EXPECTED = std::uint64_t{ 0xDEADBEEF };
   writeValue(writer, EXPECTED);
-  const auto [status, value] = readValue(reader);
+  const auto [status, value] = readValue(reader, Reader::Policy::Next);
   REQUIRE(status == Reader::Status::Ok);
   REQUIRE(value == EXPECTED);
 }
@@ -92,13 +97,13 @@ TEST_CASE("Reads are in FIFO order", "[spmcq]") {
   }
 
   for (std::uint64_t i = 0; i < NUM_FRAMES - 1; ++i) {
-    const auto [status, value] = readValue(reader);
+    const auto [status, value] = readValue(reader, Reader::Policy::Next);
     REQUIRE(status == Reader::Status::Ok);
     REQUIRE(value == i);
   }
 
   // Buffer is now drained
-  const auto [status, unused] = readValue(reader);
+  const auto [status, unused] = readValue(reader, Reader::Policy::Next);
   REQUIRE(status == Reader::Status::Empty);
 }
 
@@ -132,7 +137,7 @@ TEST_CASE("Writer lapping reader returns Dropped", "[spmcq]") {
     writeValue(writer, i);
   }
 
-  const auto [status, unused] = readValue(reader);
+  const auto [status, unused] = readValue(reader, Reader::Policy::Next);
   REQUIRE(status == Reader::Status::Dropped);
 }
 
@@ -152,14 +157,14 @@ TEST_CASE("After Dropped, reader is at write_count and reports Empty", "[spmcq]"
   }
 
   // Consume the Dropped status
-  REQUIRE(readValue(reader).first == Reader::Status::Dropped);
+  REQUIRE(readValue(reader, Reader::Policy::Next).first == Reader::Status::Dropped);
   // Reader is now at write_count; no further frames to read
-  REQUIRE(readValue(reader).first == Reader::Status::Empty);
+  REQUIRE(readValue(reader, Reader::Policy::Next).first == Reader::Status::Empty);
 
   // New write is immediately readable
   static constexpr auto NEW_VALUE = std::uint64_t{ 99 };
   writeValue(writer, NEW_VALUE);
-  const auto [status, value] = readValue(reader);
+  const auto [status, value] = readValue(reader, Reader::Policy::Next);
   REQUIRE(status == Reader::Status::Ok);
   REQUIRE(value == NEW_VALUE);
 }
@@ -225,23 +230,23 @@ TEST_CASE("Multiple readers independently track their own read position", "[spmc
   writeValue(writer, 20U);
 
   // Both readers independently read the same two frames in order.
-  const auto [sa1, va1] = readValue(reader_a);
-  const auto [sb1, vb1] = readValue(reader_b);
+  const auto [sa1, va1] = readValue(reader_a, Reader::Policy::Next);
+  const auto [sb1, vb1] = readValue(reader_b, Reader::Policy::Next);
   REQUIRE(sa1 == Reader::Status::Ok);
   REQUIRE(sb1 == Reader::Status::Ok);
   REQUIRE(va1 == 10U);
   REQUIRE(vb1 == 10U);
 
-  const auto [sa2, va2] = readValue(reader_a);
-  const auto [sb2, vb2] = readValue(reader_b);
+  const auto [sa2, va2] = readValue(reader_a, Reader::Policy::Next);
+  const auto [sb2, vb2] = readValue(reader_b, Reader::Policy::Next);
   REQUIRE(sa2 == Reader::Status::Ok);
   REQUIRE(sb2 == Reader::Status::Ok);
   REQUIRE(va2 == 20U);
   REQUIRE(vb2 == 20U);
 
   // Reader A drained, reader B continues from its own position (also drained).
-  REQUIRE(readValue(reader_a).first == Reader::Status::Empty);
-  REQUIRE(readValue(reader_b).first == Reader::Status::Empty);
+  REQUIRE(readValue(reader_a, Reader::Policy::Next).first == Reader::Status::Empty);
+  REQUIRE(readValue(reader_b, Reader::Policy::Next).first == Reader::Status::Empty);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -267,7 +272,7 @@ TEST_CASE("Concurrent writer and reader", "[spmcq]") {
 
   std::uint64_t reads = 0;
   while (reads < NUM_WRITES) {
-    const auto [status, value] = readValue(reader);
+    const auto [status, value] = readValue(reader, Reader::Policy::Next);
     if (status == Reader::Status::Ok) {
       ++reads;
     }
@@ -277,6 +282,73 @@ TEST_CASE("Concurrent writer and reader", "[spmcq]") {
   producer.join();
 }
 
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Writer does not advance if write function returns false", "[spmcq]") {
+  const auto name = uniqueName();
+  auto maybe_writer = Writer::create(name, Config{ .frame_length = 8U, .num_frames = 4U });
+  REQUIRE(maybe_writer);
+  auto& writer = maybe_writer.value();
+  auto maybe_reader = Reader::connect(name);
+  REQUIRE(maybe_reader);
+  auto& reader = maybe_reader.value();
+
+  // Write a valid frame
+  writeValue(writer, 123U);
+  REQUIRE(readValue(reader, Reader::Policy::Next).first == Reader::Status::Ok);
+
+  // Attempt to write a frame but return false to abort; write count should not advance
+  writer.visit([](std::span<std::byte>) { return false; });
+  REQUIRE(readValue(reader, Reader::Policy::Next).first == Reader::Status::Empty);
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Reader does not advance if read function returns false", "[spmcq]") {
+  const auto name = uniqueName();
+  auto maybe_writer = Writer::create(name, Config{ .frame_length = 8U, .num_frames = 4U });
+  REQUIRE(maybe_writer);
+  auto& writer = maybe_writer.value();
+  auto maybe_reader = Reader::connect(name);
+  REQUIRE(maybe_reader);
+  auto& reader = maybe_reader.value();
+
+  // Write a valid frame
+  static constexpr auto TEST_VALUE = std::uint64_t{ 123 };
+  writeValue(writer, TEST_VALUE);
+
+  // Attempt to read a frame but return false to abort; read count should not advance
+  REQUIRE(reader.visit([](std::span<const std::byte>) { return false; }) ==
+          Reader::Status::Canceled);
+
+  // next successful read returns the frame
+  auto [status, value] = readValue(reader, Reader::Policy::Next);
+  REQUIRE(status == Reader::Status::Ok);
+  REQUIRE(value == TEST_VALUE);
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Reader policy Latest skips to latest frame", "[spmcq]") {
+  static constexpr auto NUM_FRAMES = 4UZ;
+  const auto name = uniqueName();
+  auto maybe_writer = Writer::create(name, Config{ .frame_length = 8U, .num_frames = NUM_FRAMES });
+  REQUIRE(maybe_writer);
+  auto& writer = maybe_writer.value();
+  auto maybe_reader = Reader::connect(name);
+  REQUIRE(maybe_reader);
+  auto& reader = maybe_reader.value();
+
+  writeValue(writer, 1UL);
+  writeValue(writer, 2UL);
+  writeValue(writer, 3UL);
+
+  // first read should be 1U, latest read should be 3U
+  const auto [status1, value1] = readValue(reader, Reader::Policy::Next);
+  REQUIRE(status1 == Reader::Status::Ok);
+  REQUIRE(value1 == 1UL);
+
+  const auto [status2, value2] = readValue(reader, Reader::Policy::Latest);
+  REQUIRE(status2 == Reader::Status::Ok);
+  REQUIRE(value2 == 3UL);
+}
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 }  // namespace

@@ -22,6 +22,7 @@
 - Click Save if prompted.
 
 ## TODO
+
 - Track regression from baseline for benchmarks. Fail CI if regression > x%
 - Setup configuration presets for applications, developer and CI builds
 - After PR is merged and newly tagged, build and generate deployment artifacts (tarball)

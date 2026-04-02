@@ -51,9 +51,6 @@ Use `grape::Exception` to capture diagnostic information during exit.
 
 ## TODO
 
-- [ ] Refactor multi-producer single-consumer queue
-  - Compare `MPSCQueue` against `FIFOBuffer`. Remove one. 
-  - Rename it for clarity
 - [ ] Refactor thread class out of realtime and put it in 'grape'
   - Insert logging to capture timer overruns in the loop
 - [ ] Application note on how to design the architecture of a realtime loop 
