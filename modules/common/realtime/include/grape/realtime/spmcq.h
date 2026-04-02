@@ -19,14 +19,15 @@
 /// Single-producer multi-consumer lock-free ring buffer over shared memory.
 ///
 /// - The Writer creates and owns the ring buffer; destroying the Writer destroys the buffer.
-/// - Only a single Writer is allowed at a time. Create fails if a Writer already exists.
-/// - The Writer always succeeds: it overwrites the oldest unread frame when the buffer is full.
+/// - Only a single Writer is allowed at a time. create() fails if a Writer already exists.
+/// - The Writer always succeeds and are not blocked by slow Readers. When the buffer is full, it
+///   wraps around to continue writing from the beginning of the ring buffer.
 /// - Multiple independent Readers are supported, each tracking their own read position.
 /// - Readers can reside in different processes on the same host.
 /// - A Reader that falls too far behind will have frames dropped to catch up.
 //=================================================================================================
 
-namespace grape::spmc_ring_buffer {
+namespace grape::spmcq {
 
 //-------------------------------------------------------------------------------------------------
 /// Buffer configuration options
@@ -35,6 +36,47 @@ struct Config {
   static constexpr auto MIN_FRAMES = 2U;
   std::size_t frame_length{ MIN_FRAME_LENGTH };  //!< Length of a single frame in bytes
   std::size_t num_frames{ MIN_FRAMES };          //!< Number of frames in the buffer
+};
+
+//=================================================================================================
+/// Creates a ring buffer and provides methods to write data to it
+///
+class Writer {
+public:
+  /// Creates ring buffer and returns buffer writer. Method fails if a writer already exists
+  /// @param name A uniquely identifying name for the ring buffer
+  /// @param config Buffer configuration parameters
+  /// @return A writer to write data into buffer, or an error message
+  [[nodiscard]] static auto create(std::string_view name, const Config& config)
+      -> std::expected<Writer, Error>;
+
+  /// Write a frame in-place.
+  ///
+  /// @param fn User-defined callable invoked with a writable view of the frame.
+  ///           Callable function signature: `fn(std::span<std::byte>) -> bool`.
+  ///           Return `false` to abort the write without advancing the write counter.
+  /// @note Must not be called concurrently.
+  /// @note Operation does not block waiting for slow Readers. Therefore, Writer can 'lap' a Reader
+  ///       forcing the Reader to drop frames.
+  template <typename F>
+    requires std::is_invocable_r_v<bool, F, std::span<std::byte>>
+  void visit(F&& fn);
+
+  ~Writer();
+  Writer(Writer&& other) noexcept = default;
+  auto operator=(Writer&& other) noexcept -> Writer& = default;
+  Writer(const Writer&) = delete;
+  auto operator=(const Writer&) -> Writer& = delete;
+
+private:
+  struct Impl;
+  explicit Writer(std::string name, std::unique_ptr<Impl> impl, const Config& config,
+                  std::span<std::byte> frames, std::uint64_t* write_count_ptr);
+  std::string name_;
+  std::unique_ptr<Impl> impl_;
+  Config config_;
+  std::span<std::byte> frames_;
+  std::uint64_t* write_count_ptr_{};
 };
 
 //=================================================================================================
@@ -77,6 +119,7 @@ public:
   /// @param fn User-defined callable invoked with a read-only view of the frame.
   ///           Callbable function signature `fn(std::span<const std::byte>) -> bool`.
   ///           Return `false` to abort the read without advancing the read counter.
+  /// @param policy Policy to apply for reading
   /// @return read status
   /// @note Must not be called concurrently.
   template <typename F>
@@ -98,45 +141,6 @@ private:
   std::span<const std::byte> frames_;
   const std::uint64_t* write_count_ptr_{};
   std::uint64_t read_count_{};
-};
-
-//=================================================================================================
-/// Creates a ring buffer and provides methods to write data to it
-///
-class Writer {
-public:
-  /// Creates ring buffer and returns buffer writer. Method fails if a writer already exists
-  /// @param name A uniquely identifying name for the ring buffer
-  /// @param config Buffer configuration parameters
-  /// @return A writer to write data into buffer, or an error message
-  [[nodiscard]] static auto create(std::string_view name, const Config& config)
-      -> std::expected<Writer, Error>;
-
-  /// Write a frame in-place.
-  ///
-  /// @param fn User-defined callable invoked with a writable view of the frame.
-  ///           Callable function signature: `fn(std::span<std::byte>) -> bool`.
-  ///           Return `false` to abort the write without advancing the write counter.
-  /// @note Must not be called concurrently.
-  template <typename F>
-    requires std::is_invocable_r_v<bool, F, std::span<std::byte>>
-  void visit(F&& fn);
-
-  ~Writer();
-  Writer(Writer&& other) noexcept = default;
-  auto operator=(Writer&& other) noexcept -> Writer& = default;
-  Writer(const Writer&) = delete;
-  auto operator=(const Writer&) -> Writer& = delete;
-
-private:
-  struct Impl;
-  explicit Writer(std::string name, std::unique_ptr<Impl> impl, const Config& config,
-                  std::span<std::byte> frames, std::uint64_t* write_count_ptr);
-  std::string name_;
-  std::unique_ptr<Impl> impl_;
-  Config config_;
-  std::span<std::byte> frames_;
-  std::uint64_t* write_count_ptr_{};
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -198,4 +202,4 @@ template <typename F>
   return enums::name(st);
 }
 
-}  // namespace grape::spmc_ring_buffer
+}  // namespace grape::spmcq

@@ -10,13 +10,13 @@
 
 #include <benchmark/benchmark.h>
 
-#include "grape/realtime/spmc_ring_buffer.h"
+#include "grape/realtime/spmcq.h"
 
 namespace {
 
-using Config = grape::spmc_ring_buffer::Config;
-using Reader = grape::spmc_ring_buffer::Reader;
-using Writer = grape::spmc_ring_buffer::Writer;
+using Config = grape::spmcq::Config;
+using Reader = grape::spmcq::Reader;
+using Writer = grape::spmcq::Writer;
 
 //-------------------------------------------------------------------------------------------------
 auto uniqueShmName() -> std::string {

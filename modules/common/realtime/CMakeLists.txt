@@ -10,10 +10,10 @@ declare_module(
 # library sources
 set(SOURCES
     src/schedule.cpp
-    src/spmc_ring_buffer.cpp
+    src/spmcq.cpp
     README.md
     include/grape/realtime/mpsc_queue.h
-    include/grape/realtime/spmc_ring_buffer.h
+    include/grape/realtime/spmcq.h
     include/grape/realtime/mutex.h
     include/grape/realtime/schedule.h
     include/grape/realtime/thread.h)
