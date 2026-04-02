@@ -9,7 +9,7 @@
 #include <thread>
 
 #include "grape/exception.h"
-#include "grape/realtime/spmc_ring_buffer.h"
+#include "grape/realtime/spmcq.h"
 
 namespace {
 
@@ -32,8 +32,8 @@ auto main() -> int {
 
     const auto producer = [](const std::stop_token& st) {
       // create
-      const auto config = grape::spmc_ring_buffer::Config{ .frame_length = 8U, .num_frames = 10U };
-      auto buffer = grape::spmc_ring_buffer::Writer::create(NAME, config);
+      const auto config = grape::spmcq::Config{ .frame_length = 8U, .num_frames = 10U };
+      auto buffer = grape::spmcq::Writer::create(NAME, config);
       if (not buffer) {
         std::println("'{}' - {}", NAME, buffer.error().message());
         return;
@@ -59,13 +59,13 @@ auto main() -> int {
 
       // wait for writer
       static constexpr auto PRODUCER_WAIT_PERIOD = std::chrono::milliseconds(1000);
-      while (not(st.stop_requested() or grape::spmc_ring_buffer::Reader::exists(NAME))) {
+      while (not(st.stop_requested() or grape::spmcq::Reader::exists(NAME))) {
         std::println("consumer {}: Waiting for producer..", consumer_id);
         std::this_thread::sleep_for(PRODUCER_WAIT_PERIOD);
       }
 
       // connect
-      auto buffer = grape::spmc_ring_buffer::Reader::connect(NAME);
+      auto buffer = grape::spmcq::Reader::connect(NAME);
       if (not buffer) {
         std::println("consumer {}: '{}' - {}", consumer_id, NAME, buffer.error().message());
         return;

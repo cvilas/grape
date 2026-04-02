@@ -2,7 +2,7 @@
 // Copyright (C) 2026 GRAPE Contributors
 //=================================================================================================
 
-#include "grape/realtime/spmc_ring_buffer.h"
+#include "grape/realtime/spmcq.h"
 
 #include <atomic>
 #include <cerrno>
@@ -51,7 +51,7 @@ auto shmRename(const std::string& from, const std::string& to)
 //=================================================================================================
 struct Control {
   std::uint64_t write_count{};  // note: first member to ensure 8-byte alignment for atomic_ref
-  grape::spmc_ring_buffer::Config config;
+  grape::spmcq::Config config;
   std::uint64_t magic{};
   static constexpr auto MAGIC = 0x00465542434D5053U;  //!< "SPMCBUF\0";
 };
@@ -61,7 +61,7 @@ static_assert(std::atomic_ref<std::uint64_t>::is_always_lock_free);
 
 }  // namespace
 
-namespace grape::spmc_ring_buffer {
+namespace grape::spmcq {
 
 //=================================================================================================
 // NOLINTNEXTLINE(misc-use-internal-linkage)
@@ -207,4 +207,4 @@ auto Reader::exists(std::string_view name) -> bool {
   return SharedMemory::exists(shmName(name));
 }
 
-}  // namespace grape::spmc_ring_buffer
+}  // namespace grape::spmcq
