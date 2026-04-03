@@ -6,8 +6,8 @@
 
 #include <atomic>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
-#include <functional>
 #include <span>
 #include <vector>
 
@@ -24,26 +24,22 @@ public:
     std::size_t num_frames;    //!< Number of frames in the buffer
   };
 
-  /// Function signature to write a frame in-place into the buffer
-  using WriterFunc = std::function<void(std::span<std::byte>)>;
-
-  /// Function signature to read a frame in-place from the buffer
-  using ReaderFunc = std::function<void(std::span<const std::byte>)>;
-
   /// Construct a buffer with the specified options
   explicit constexpr FIFOBuffer(const Config& options);
 
   /// Attempt to write a frame in-place without blocking.
-  /// @param func Writing function
+  /// @param func Writing function: `void(std::span<std::byte>)`
   /// @note Can be called concurrently from multiple threads.
   /// @return false if buffer is full and has no more space to write, else true.
-  [[nodiscard]] auto visitToWrite(const WriterFunc& func) -> bool;
+  template <std::invocable<std::span<std::byte>> F>
+  [[nodiscard]] auto visitToWrite(F&& func) -> bool;
 
   /// Attempt to read a frame in-place without blocking.
-  /// @param func Reading function
+  /// @param func Reading function: `void(std::span<const std::byte>)`
   /// @note Should not be called concurrently from multiple threads without mutual exclusion.
   /// @return false if buffer has no more items to read, else true
-  [[nodiscard]] auto visitToRead(const ReaderFunc& func) -> bool;
+  template <std::invocable<std::span<const std::byte>> F>
+  [[nodiscard]] auto visitToRead(F&& func) -> bool;
 
   /// @return The number of items in queue.
   [[nodiscard]] auto count() const noexcept -> std::size_t;
@@ -66,7 +62,8 @@ constexpr FIFOBuffer::FIFOBuffer(const Config& options)
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto FIFOBuffer::visitToWrite(const WriterFunc& func) -> bool {
+template <std::invocable<std::span<std::byte>> F>
+auto FIFOBuffer::visitToWrite(F&& func) -> bool {
   const auto count = count_.fetch_add(1, std::memory_order_acquire);
   if (count >= config_.num_frames) {
     // back off, queue is full
@@ -82,14 +79,15 @@ inline auto FIFOBuffer::visitToWrite(const WriterFunc& func) -> bool {
   // write frame
   const auto frame_offset = head * config_.frame_length;
   const auto frame_start = std::next(std::begin(buffer_), static_cast<std::int64_t>(frame_offset));
-  func(std::span{ frame_start, config_.frame_length });
+  std::forward<F>(func)(std::span{ frame_start, config_.frame_length });
   readability_flag.test_and_set(std::memory_order_release);
 
   return true;
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto FIFOBuffer::visitToRead(const ReaderFunc& func) -> bool {
+template <std::invocable<std::span<const std::byte>> F>
+auto FIFOBuffer::visitToRead(F&& func) -> bool {
   auto& readability_flag = is_readable_.at(tail_);
   if (not readability_flag.test(std::memory_order_acquire)) {
     // A thread could still be writing to this location
@@ -100,7 +98,7 @@ inline auto FIFOBuffer::visitToRead(const ReaderFunc& func) -> bool {
   readability_flag.clear(std::memory_order_release);
   const auto frame_offset = tail_ * config_.frame_length;
   const auto frame_start = std::next(std::begin(buffer_), static_cast<std::int64_t>(frame_offset));
-  func(std::span{ frame_start, config_.frame_length });
+  std::forward<F>(func)(std::span{ frame_start, config_.frame_length });
 
   if (++tail_ >= config_.num_frames) {
     tail_ = 0;
