@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <functional>
 #include <ranges>
 #include <span>
 #include <string_view>
