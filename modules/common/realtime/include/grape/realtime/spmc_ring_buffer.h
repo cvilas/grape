@@ -77,6 +77,7 @@ public:
   /// @param fn User-defined callable invoked with a read-only view of the frame.
   ///           Callbable function signature `fn(std::span<const std::byte>) -> bool`.
   ///           Return `false` to abort the read without advancing the read counter.
+  /// @param policy Policy to apply for reading
   /// @return read status
   /// @note Must not be called concurrently.
   template <typename F>
