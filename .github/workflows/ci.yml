@@ -85,19 +85,19 @@ jobs:
           fi
 
       - name: Build (llvm)
-        run: cmake --build build/llvm --target all examples tests
+        run: cmake --build build/llvm --target all examples tests --parallel
       
       - name: Run unit tests (llvm)
-        run: cmake --build build/llvm --target check
+        run: cmake --build build/llvm --target check --parallel
 
       - name: Configure (gcc)
         run: cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF
       
       - name: Build (gcc)
-        run: cmake --build build/native --target all examples tests -j $(nproc)
+        run: cmake --build build/native --target all examples tests --parallel
       
       - name: Run unit tests (gcc)
-        run: cmake --build build/native --target check
+        run: cmake --build build/native --target check --parallel
 
       - name: Report ccache stats
         run: ccache -s        
