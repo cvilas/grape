@@ -50,11 +50,14 @@ auto shmRename(const std::string& from, const std::string& to)
 
 //=================================================================================================
 struct Control {
-  std::uint64_t write_count{};  // note: first member to ensure 8-byte alignment for atomic_ref
+  std::uint64_t write_count{};
   grape::spmcq::Config config;
   std::uint64_t magic{};
   static constexpr auto MAGIC = 0x00465542434D5053U;  //!< "SPMCBUF\0";
 };
+
+// first member to ensure alignment for atomic_ref
+static_assert(offsetof(Control, write_count) == 0U);
 
 static_assert(std::is_trivially_copyable_v<Control>);
 static_assert(std::atomic_ref<std::uint64_t>::is_always_lock_free);
