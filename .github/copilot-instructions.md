@@ -1,7 +1,7 @@
 # Copilot Instructions for `grape`
 
 - Follow the [README](https://github.com/cvilas/grape/blob/main/README.md) for high-level context for this repo.
-- Canonical coding guidelines live in [`cvilas/guidance`](https://github.com/cvilas/guidance).
+- Canonical coding guidelines live in [`cvilas/guidance`](https://github.com/cvilas/guidance/blob/main/process/developer_guide.md).
 
 This file is a **distilled, actionable summary** for day-to-day use.
 When deeper context is needed, reference the linked documents directly (e.g. via `#file` in Copilot Chat).
