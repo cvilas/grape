@@ -3,47 +3,62 @@
 #=================================================================================================
 
 # Clang cross-compiling toolchain to build for Aarch64 target on X86 host
-# TODO(vilas): Fix this toolchain setup
-# - Libraries for 'target' arch must be provided and their paths specified. Unlike gcc toolchain,
-#   there are apparently no apt installable packages for aarch binaries on x86. Either copy them 
-#   from your target machine or cross-build llvm for the target and provide path to it
-# - I am going farther with static builds than shared builds. With the later, linker finds wrong 
-#   libraries (host rather than target)
+# See cross_compile_aarch64.md for setup instructions
 
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR aarch64)
-set(BUILD_SHARED_LIBS OFF) # TODO(vilas): Linker fails if 'ON'
+set(CMAKE_CROSSCOMPILING TRUE)
 
-# C++ compiler toolchain paths
-set(LLVM_DIR "/usr/lib/llvm-latest") # Note: This path is defined by _our_ llvm install process
-set(LLVM_INCLUDE_DIR "${LLVM_DIR}/include/c++/v1")
-set(LLVM_LIBRARY_DIR "${LLVM_DIR}/lib") # TODO(vilas): should be location of libraries for 'target' arch 
+# Do NOT set CMAKE_SYSROOT: Ubuntu cross packages use absolute paths in their linker scripts
+# (e.g. GROUP(/usr/aarch64-linux-gnu/lib/libm.so.6)); CMAKE_SYSROOT would cause lld to
+# double-prefix those paths. Use CMAKE_FIND_ROOT_PATH for library discovery instead.
 
-# C++ compiler flags
+set(CMAKE_C_COMPILER   clang)
+set(CMAKE_CXX_COMPILER clang++)
+
 set(CROSS_TARGET "aarch64-linux-gnu")
-set(CMAKE_C_COMPILER   "${LLVM_DIR}/bin/clang")
-set(CMAKE_CXX_COMPILER "${LLVM_DIR}/bin/clang++")
-set(CROSS_COMPILE_FLAGS "-target ${CROSS_TARGET} -stdlib=libc++ -I${LLVM_INCLUDE_DIR}")
-set(CMAKE_C_FLAGS_INIT   "${CROSS_COMPILE_FLAGS}" CACHE STRING "Initial C compiler flags")
-set(CMAKE_CXX_FLAGS_INIT "${CROSS_COMPILE_FLAGS}" CACHE STRING "Initial C++ compiler flags")
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld --target=${CROSS_TARGET} -L${LLVM_LIBRARY_DIR} -lc++ -lc++abi" CACHE STRING "Initial linker flags")
+
+# Locate the libc++ headers from clang's own resource directory.
+execute_process(
+  COMMAND clang++ --print-resource-dir
+  OUTPUT_VARIABLE _clang_resource_dir
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+# resource dir is <llvm>/lib/clang/<ver>; headers are at <llvm>/include/c++/v1
+cmake_path(GET _clang_resource_dir PARENT_PATH _clang_lib_clang)
+cmake_path(GET _clang_lib_clang    PARENT_PATH _clang_lib)
+cmake_path(GET _clang_lib          PARENT_PATH _clang_root)
+set(LIBCXX_INCLUDE_DIR "${_clang_root}/include/c++/v1")
+
+# Use the versioned soname directly (-l:libc++.so.1) rather than -lc++ to avoid symlinks to wrong arch.
+set(LIBCXX_LIB_DIR "/usr/lib/aarch64-linux-gnu")
+
+# Tell clang/lld where to find aarch64 GCC CRT objects (crtbeginS.o, libgcc, etc.)
+# Clang searches <prefix>/lib/gcc-cross/<triple>/<ver>/ on Ubuntu/Debian.
+set(GCC_TOOLCHAIN "--gcc-toolchain=/usr")
+
+# -nostdinc++ / -nostdlib++: suppress clang's automatic injection of libc++ headers/libs via full paths into the compiler and linker command lines.
+# Supply everything explicitly using arch-qualified paths.
+set(CMAKE_C_FLAGS_INIT "--target=${CROSS_TARGET} ${GCC_TOOLCHAIN}" CACHE STRING "Initial C compiler flags")
+set(CMAKE_CXX_FLAGS_INIT "--target=${CROSS_TARGET} ${GCC_TOOLCHAIN} -nostdinc++ -isystem ${LIBCXX_INCLUDE_DIR}" CACHE STRING "Initial C++ compiler flags")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld --target=${CROSS_TARGET} ${GCC_TOOLCHAIN} -nostdlib++ ${LIBCXX_LIB_DIR}/libc++.so.1 ${LIBCXX_LIB_DIR}/libc++abi.so.1" CACHE STRING "Initial linker flags")
+set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld --target=${CROSS_TARGET} ${GCC_TOOLCHAIN} -nostdlib++" CACHE STRING "Initial shared linker flags")
 
 # Rust toolchain settings
 set(RUSTC_TRIPLE aarch64-unknown-linux-gnu)
 set(ENV{RUSTFLAGS} "-Clinker=clang -Clink-arg=--target=aarch64-linux-gnu -Car=llvm-ar")
 
-# Uncomment to debug find_package
-#set(CMAKE_FIND_DEBUG_MODE 1)
-
-# Enable static analysis for host build only
+# Disable host-only flags
 set(ENABLE_LINTER OFF)
 set(ENABLE_FORMATTER OFF)
 
-# Look in specific places for all the libraries, and only look there
-list(APPEND CMAKE_FIND_ROOT_PATH "/usr/${CROSS_TARGET};${CMAKE_INSTALL_PREFIX}")
+# Uncomment to debug find_package
+#set(CMAKE_FIND_DEBUG_MODE 1)
+
+# Search sysroot and install prefix; never use host programs
+list(APPEND CMAKE_FIND_ROOT_PATH "/usr/aarch64-linux-gnu" "${CMAKE_INSTALL_PREFIX}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(CMAKE_CROSSCOMPILING_EMULATOR qemu-aarch64-static -L /usr/${CROSS_TARGET})
+set(CMAKE_CROSSCOMPILING_EMULATOR qemu-aarch64-static -L /usr/aarch64-linux-gnu)

@@ -15,3 +15,5 @@ define_module_pybinding(
   publisher_bindings.cpp
   session_bindings.cpp
   subscriber_bindings.cpp)
+
+add_subdirectory(tests)

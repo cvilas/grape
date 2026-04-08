@@ -4,6 +4,18 @@
 
 #=================================================================================================
 # Set up facilities for python nanobind
+if(CMAKE_CROSSCOMPILING)
+  # Python bindings cannot be built for the target.
+  # The macro calls return() which, in CMake macros, returns from the *caller*
+  # (i.e. py/CMakeLists.txt), so add_subdirectory(tests) and any subsequent
+  # calls in that file are also skipped — no per-module guards needed.
+  message(STATUS "Cross-compiling: Python bindings disabled")
+  macro(define_module_pybinding)
+    return()
+  endmacro()
+  return()
+endif()
+
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_program(UV_EXECUTABLE uv REQUIRED DOC "uv Python package manager")
 message(STATUS "Found uv: ${UV_EXECUTABLE}")
