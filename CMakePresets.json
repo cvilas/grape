@@ -26,6 +26,18 @@
       "inherits": "base",
       "description": "Configure all modules with native toolchain",      
       "generator": "Unix Makefiles"
+    },
+    {
+      "name": "llvm-cross",
+      "inherits": "base",
+      "description": "Cross-compile for aarch64 target using clang toolchain",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_clang_aarch64.cmake"
+    },
+    {
+      "name": "gcc-cross",
+      "inherits": "base",
+      "description": "Cross-compile for aarch64 target using GCC toolchain",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_gcc_aarch64.cmake"
     }
   ]
 }

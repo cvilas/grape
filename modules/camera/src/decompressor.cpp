@@ -4,6 +4,7 @@
 
 #include "grape/camera/decompressor.h"
 
+#include <cstring>
 #include <utility>
 
 #include <lz4.h>
