@@ -5,4 +5,3 @@
 .DS_Store
 **/CMakeLists.txt.user
 *-workspace
-modules/common/utils/src/version_impl.h
