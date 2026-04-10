@@ -31,7 +31,7 @@ cmake --build build/gcc-cross
   sudo apt-get update
   ```
 
-- Install gcc and sysroot at `/usr/aarch64-linux-gnu/` (glibc and kernel headers) for aarch64 
+- Install gcc and sysroot (glibc and kernel headers for aarch64) at `/usr/aarch64-linux-gnu/` 
   ```bash
   GCC_VERSION=15
   sudo apt-get install -y gcc-$GCC_VERSION-aarch64-linux-gnu g++-$GCC_VERSION-aarch64-linux-gnu
@@ -48,14 +48,14 @@ cmake --build build/gcc-cross
   sudo apt-get install -y qemu-user-static binfmt-support
   ```
 
-- Install llvm arm64 _runtime_ libraries (_dev_ libraries will overwrite X86 libraries)
+- Install llvm arm64 _runtime_ libraries (_dev_ libraries will overwrite X86 dev libraries and break the system)
   ```bash
   sudo apt-get install -y libc++1:arm64 libc++abi1:arm64
   ```
 
 - Install arm64 system libraries
 
-  SDL3 and other external dependencies require graphics and audio libraries. Install their arm64 multiarch variants:
+  External dependencies require platform graphics libraries. Install their arm64 multiarch variants:
 
   ```bash
   sudo apt-get install -y \
@@ -66,22 +66,13 @@ cmake --build build/gcc-cross
     libcamera-dev:arm64
   ```
 
-## Design decisions and pitfalls
+## Design notes
 
-### Don't set CMAKE_SYSROOT
+- Don't set `CMAKE_SYSROOT`. Instead the toolchain sets `CMAKE_FIND_ROOT_PATH` to 
+  `/usr/aarch64-linux-gnu`, which is the sysroot provided by `gcc-15-aarch64-linux-gnu`. This 
+  avoids gcc and clang from picking up host libraries. The sysroot role is split between 
+  `CMAKE_FIND_ROOT_PATH` (which handles CMake's library/package discovery), and 
+  `--gcc-toolchain=/usr` (which handles CRT object discovery by `lld`).
 
-Instead `CMAKE_FIND_ROOT_PATH` is set to `/usr/aarch64-linux-gnu`, which is the sysroot provided by
-`gcc-15-aarch64-linux-gnu`. Avoids gcc and clang from picking up host libraries
-
-The sysroot role is split between `CMAKE_FIND_ROOT_PATH` (which handles CMake's library/package
-discovery), and `--gcc-toolchain=/usr` (which handles CRT object discovery by `lld`).
-
-### Python bindings
-
-Python bindings built with nanobind target the **host** Python ABI and cannot be
-cross-compiled. `gbs/07_modules_py.cmake` detects `CMAKE_CROSSCOMPILING` and defines
-`define_module_pybinding()` as a macro that calls `return()`. In CMake, `return()` inside a
-macro executes in the **caller's** scope, so the entire `py/CMakeLists.txt` (including
-`add_subdirectory(tests)`) is skipped without needing per-module guards.
 
 
