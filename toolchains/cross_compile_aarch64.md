@@ -1,4 +1,4 @@
-# Cross-compiling for aarch64 with Clang on x86-64
+# Cross-compiling for aarch64 target on x86-64 host
 
 ## Limitations
 
