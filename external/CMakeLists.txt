@@ -46,13 +46,12 @@ endmacro()
 # External projects follow
 # -------------------------------------------------------------------------------------------------
 
+# -------------------------------------------------------------------------------------------------
+# FTXUI
 if(eCAL IN_LIST EXTERNAL_PROJECTS_LIST)
   list(APPEND EXTERNAL_PROJECTS_LIST ftxui)
 endif()
 
-
-# -------------------------------------------------------------------------------------------------
-# FTXUI
 if(ftxui IN_LIST EXTERNAL_PROJECTS_LIST)
   find_package(ftxui ${FTXUI_VERSION_REQUIRED} QUIET)
   if(ftxui_FOUND)
@@ -104,6 +103,57 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
       SDL3
       URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL-release-${SDL3_VERSION_REQUIRED}.tar.gz
       CMAKE_ARGS ${SDL3_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# Freetype
+if(SDL3_ttf IN_LIST EXTERNAL_PROJECTS_LIST)
+  list(APPEND EXTERNAL_PROJECTS_LIST freetype)
+endif()
+
+if(freetype IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(freetype ${FREETYPE_VERSION_REQUIRED} QUIET)
+  if(freetype_FOUND)
+    message(STATUS "freetype: Using version ${freetype_VERSION} from ${freetype_DIR}")
+    add_dummy_target(freetype)
+  else()
+    message(STATUS "freetype: Building ${FREETYPE_VERSION_REQUIRED} from source")
+    string(REPLACE "." "-" FREETYPE_TAG_VERSION "${FREETYPE_VERSION_REQUIRED}")
+    set(FREETYPE_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
+      -DFT_DISABLE_HARFBUZZ=ON
+      -DFT_DISABLE_BZIP2=ON
+      -DFT_DISABLE_PNG=ON
+      -DFT_DISABLE_BROTLI=ON
+      -DFT_DISABLE_ZLIB=ON)
+    ExternalProject_Add(
+      freetype
+      URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/freetype-VER-${FREETYPE_TAG_VERSION}.tar.gz
+      CMAKE_ARGS ${FREETYPE_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# SDL3_ttf
+if(SDL3_ttf IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(SDL3_ttf ${SDL3_TTF_VERSION_REQUIRED} QUIET)
+  if(SDL3_ttf_FOUND)
+    message(STATUS "SDL3_ttf: Using version ${SDL3_ttf_VERSION} from ${SDL3_ttf_DIR}")
+    add_dummy_target(SDL3_ttf)
+  else()
+    message(STATUS "SDL3_ttf: Building ${SDL3_TTF_VERSION_REQUIRED} from source")
+    set(SDL3_TTF_CMAKE_ARGS ${EP_CMAKE_EXTRA_ARGS}
+    -DSDLTTF_HARFBUZZ=OFF
+    -DSDLTTF_PLUTOSVG=OFF
+    -DSDLTTF_RELOCATABLE=ON
+    -DSDLTTF_INSTALL_CPACK=OFF
+    -DSDLTTF_INSTALL_MAN=OFF
+    -DSDLTTF_SAMPLES=OFF)
+    ExternalProject_Add(
+      SDL3_ttf
+      URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL_ttf-release-${SDL3_TTF_VERSION_REQUIRED}.tar.gz
+      CMAKE_ARGS ${SDL3_TTF_CMAKE_ARGS}
+      DEPENDS SDL3 freetype)
   endif()
 endif()
 
