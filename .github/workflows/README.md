@@ -23,8 +23,6 @@
 
 ## TODO
 
-- Track regression from baseline for benchmarks. Fail CI if regression > x%
-- Setup configuration presets for applications, developer and CI builds
-- After PR is merged and newly tagged, build and generate deployment artifacts (tarball)
-- Add a few sanitizer builds 
+- Add cross-builds (presets: `llvm-cross`, `gcc-cross`)
+- Add a few sanitizer builds
 - Separate [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html) build on realtime module 
