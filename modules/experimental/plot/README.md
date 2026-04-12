@@ -2,30 +2,6 @@
 
 Realtime signal plotting
 
-## Roadmap
-
-- [ ] `PlotWindow`, `Plot` and `Trace` interfaces
-- [ ] `plotter` application that parses a config file to plot data from spmcq or ipc subscriber
-  - Config looks like this (lua equivalent)
-  ```
-  Window {
-	Plot{
-		topic,
-		traces = {
-			[name, offset, length, plot_line_type]
-		    [name, offset, length, plot_line_type]
-		}
-	}
-	Plot {
-		topic,
-		traces = {
-			[name, offset, length, plot_line_type]
-		}
-	}
-  }
-  ```
-- [ ] Visualise rpi sense hat IMU data using plotter app
-
 ## Design considerations
 
 - Simple API
@@ -86,3 +62,27 @@ Any `std::chrono::time_point<Clock, Duration>`
 - **Floating point types**: `float`, `double`
 
 See [examples/plottable_example.cpp](examples/plottable_example.cpp) for more examples.
+
+## Roadmap
+
+- [ ] `PlotWindow`, `Plot` and `Trace` interfaces
+- [ ] `plotter` application that parses a config file to plot data from spmcq or ipc subscriber
+  - Config looks like this (lua equivalent)
+  ```
+  Window {
+	Plot{
+		topic,
+		traces = {
+			[name, offset, length, plot_line_type]
+		    [name, offset, length, plot_line_type]
+		}
+	}
+	Plot {
+		topic,
+		traces = {
+			[name, offset, length, plot_line_type]
+		}
+	}
+  }
+  ```
+- [ ] Visualise rpi sense hat IMU data using plotter app
