@@ -32,7 +32,8 @@ set(CLANG_WARNINGS -Weverything
   -Wno-old-style-cast
   -Wfunction-effects # https://clang.llvm.org/docs/FunctionEffectAnalysis.html
   -Wperf-constraint-implies-noexcept
-  -Wno-c2y-extensions) 
+  -Wno-c2y-extensions
+  -Wno-c23-extensions) 
 
 # GCC warnings
 set(GCC_WARNINGS
