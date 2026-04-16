@@ -46,8 +46,11 @@ public:
   /// Creates ring buffer and returns buffer writer. Method fails if a writer already exists
   /// @param name A uniquely identifying name for the ring buffer
   /// @param config Buffer configuration parameters
+  /// @param metadata (Optional) Static user-defined data shared withh readers (e.g. a schema for
+  ///        interpreting the frame data, encoding, etc).
   /// @return A writer to write data into buffer, or an error message
-  [[nodiscard]] static auto create(std::string_view name, const Config& config)
+  [[nodiscard]] static auto create(std::string_view name, const Config& config,
+                                   std::span<const std::byte> metadata = {})
       -> std::expected<Writer, Error>;
 
   /// Write a frame in-place.
@@ -110,6 +113,9 @@ public:
   /// @return buffer configuration parameters
   [[nodiscard]] auto config() const -> Config;
 
+  /// @return static user data associated with the buffer
+  [[nodiscard]] auto metadata() const -> std::span<const std::byte>;
+
   /// Attempt to read the next unread frame in-place.
   ///
   /// If the writer has lapped this reader, the reader drops frames and fast-forwards to latest
@@ -135,9 +141,11 @@ public:
 private:
   struct Impl;
   explicit Reader(std::unique_ptr<Impl> impl, const Config& config,
-                  std::span<const std::byte> frames, const std::uint64_t* write_count_ptr);
+                  std::span<const std::byte> metadata, std::span<const std::byte> frames,
+                  const std::uint64_t* write_count_ptr);
   std::unique_ptr<Impl> impl_;
   Config config_;
+  std::span<const std::byte> metadata_;
   std::span<const std::byte> frames_;
   const std::uint64_t* write_count_ptr_{};
   std::uint64_t read_count_{};
