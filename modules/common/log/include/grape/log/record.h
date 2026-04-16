@@ -5,6 +5,7 @@
 #pragma once
 
 #include <source_location>
+#include <string_view>
 #include <type_traits>
 
 #include "grape/fixed_string.h"
@@ -15,12 +16,11 @@ namespace grape::log {
 
 /// A single log record
 struct [[nodiscard]] Record {
-  static constexpr auto MAX_LOGGER_NAME_LEN = 64U;
   static constexpr auto MAX_LOG_MESSAGE_LEN = 256U;
 
   WallClock::TimePoint timestamp;
   std::source_location location;
-  FixedString<MAX_LOGGER_NAME_LEN> logger_name;
+  std::string_view logger_name;
   FixedString<MAX_LOG_MESSAGE_LEN> message;
   Severity severity{ Severity::Debug };
 };
