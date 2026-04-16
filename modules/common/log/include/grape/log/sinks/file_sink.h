@@ -34,7 +34,7 @@ public:
     fstream_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
   }
 
-  void write(const Record& rec) {
+  void write(const Record& rec) override {
     fstream_ << F::format(rec) << '\n' << std::flush;
   }
 };

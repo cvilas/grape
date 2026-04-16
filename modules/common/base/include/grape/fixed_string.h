@@ -24,9 +24,7 @@ namespace grape {
 template <typename CharT, std::size_t N, typename Traits = std::char_traits<CharT>>
 class BasicFixedString {
 public:
-  constexpr BasicFixedString() noexcept {
-    data_.fill('\0');
-  }
+  constexpr BasicFixedString() noexcept = default;
 
   template <std::size_t M>
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)

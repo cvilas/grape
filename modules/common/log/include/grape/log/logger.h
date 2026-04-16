@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <format>
 #include <source_location>
 #include <stop_token>
@@ -36,13 +37,22 @@ public:
   template <typename... Args>
   void log(Severity severity, const std::source_location& location,
            const std::format_string<Args...> fmt, Args&&... args) {
-    log({
-        .timestamp{ WallClock::now() },                  //
-        .location{ location },                           //
-        .logger_name{ /* filled by backend thread */ },  //
-        .message{ fmt, std::forward<Args>(args)... },    //
-        .severity{ severity },
-    });
+    if (not canLog(severity)) [[unlikely]] {
+      return;
+    }
+    const auto record = Record{
+      .timestamp{ WallClock::now() },                //
+      .location{ location },                         //
+      .logger_name{ config_.logger_name },           //
+      .message{ fmt, std::forward<Args>(args)... },  //
+      .severity{ severity },                         //
+    };
+    const auto writer = [&record](std::span<std::byte> frame) noexcept {
+      std::memcpy(frame.data(), &record, sizeof(Record));
+    };
+    if (not queue_.visitToWrite(writer)) [[unlikely]] {
+      missed_logs_.fetch_add(1, std::memory_order_relaxed);
+    }
   }
 
   /// @return Total number of logs that were missed due to queue overflow
@@ -57,7 +67,6 @@ public:
   void operator=(Logger&&) = delete;
 
 private:
-  void log(const Record& record);
   void sinkLoop(const std::stop_token& st) noexcept;
   void flush() noexcept;
 
@@ -85,8 +94,7 @@ struct Log {
   }
 };
 
-/// CTAD deduction guide for the above template when using defaulted source location
-/// (See https://www.cppstories.com/2021/non-terminal-variadic-args/)
+/// CTAD deduction with defaulted source location
 template <typename... Args>
 Log(Logger& logger, Severity sev, std::format_string<Args...> fmt, Args&&... args) -> Log<Args...>;
 
