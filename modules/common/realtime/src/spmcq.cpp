@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <format>
 #include <memory>
+#include <new>
 #include <system_error>
 #include <type_traits>
 
@@ -48,17 +49,33 @@ auto shmRename(const std::string& from, const std::string& to)
   return {};
 }
 
+//-------------------------------------------------------------------------------------------------
+// Aligns 'n' up to the nearest multiple of 'align'
+[[nodiscard]] constexpr auto alignUp(std::size_t n, std::size_t align) -> std::size_t {
+  return (n + align - 1U) & ~(align - 1U);
+}
+
 //=================================================================================================
+// Memory layout of the shared memory region:
+// [Control | Metadata (optional) | padding (aligns Frames with cache-line) | Frame 0 ... Frame N-1]
+//
+// control_offset = 0
+// metadata_offset = sizeof(Control) [known at compile time]
+// frames_offset = alignUp(metadata_offset + metadata_length, cache_line_size)
+//=================================================================================================
+
+//=================================================================================================
+// Control region. Describes configuration and state of ring buffer
 struct Control {
   std::uint64_t write_count{};
   grape::spmcq::Config config;
+  std::uint64_t metadata_length{};
+  std::uint64_t frames_offset{};
   std::uint64_t magic{};
   static constexpr auto MAGIC = 0x00465542434D5053U;  //!< "SPMCBUF\0";
 };
 
-// first member to ensure alignment for atomic_ref
-static_assert(offsetof(Control, write_count) == 0U);
-
+static_assert(offsetof(Control, write_count) == 0U);  // ensure alignment for atomic_ref
 static_assert(std::is_trivially_copyable_v<Control>);
 static_assert(std::atomic_ref<std::uint64_t>::is_always_lock_free);
 
@@ -67,31 +84,14 @@ static_assert(std::atomic_ref<std::uint64_t>::is_always_lock_free);
 namespace grape::spmcq {
 
 //=================================================================================================
-// NOLINTNEXTLINE(misc-use-internal-linkage)
-class ShmImpl {
-public:
-  explicit ShmImpl(SharedMemory shm) : shm_(std::move(shm)) {
-  }
-
-  [[nodiscard]] auto layout() -> std::pair<Control&, std::span<std::byte>> {
-    // TODO: Replace with std::start_lifetime_as (C++23) when available.
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    return { *reinterpret_cast<Control*>(shm_.data().data()),
-             shm_.data().subspan(sizeof(Control)) };
-  }
-
-private:
-  SharedMemory shm_;
-};
-
-//=================================================================================================
-struct Writer::Impl : public ShmImpl {
-  explicit Impl(SharedMemory shm) : ShmImpl(std::move(shm)) {
+struct Writer::Impl : public SharedMemory {
+  explicit Impl(SharedMemory shm) : SharedMemory(std::move(shm)) {
   }
 };
 
 //-------------------------------------------------------------------------------------------------
-auto Writer::create(std::string_view name, const Config& config) -> std::expected<Writer, Error> {
+auto Writer::create(std::string_view name, const Config& config,
+                    std::span<const std::byte> metadata) -> std::expected<Writer, Error> {
   if (config.frame_length < Config::MIN_FRAME_LENGTH) {
     return std::unexpected{ Error{ "Invalid configuration (frame_length)" } };
   }
@@ -104,22 +104,34 @@ auto Writer::create(std::string_view name, const Config& config) -> std::expecte
   const auto shm_name = shmName(name);
   const auto staging_name = shmStagingName(name);
   std::ignore = SharedMemory::remove(staging_name);  // clean up stale ones from the past
-  const auto shm_len = sizeof(Control) + data_size;
+  const auto control_len = sizeof(Control);
+  const auto metadata_len = metadata.size_bytes();
+  const auto preamble_len = control_len + metadata_len;
+  const auto frames_offset = alignUp(preamble_len, std::hardware_destructive_interference_size);
+  const auto shm_len = frames_offset + data_size;
   auto maybe_shm = SharedMemory::create(staging_name, shm_len, SharedMemory::Access::ReadWrite);
   if (not maybe_shm) {
     return std::unexpected{ maybe_shm.error() };
   }
 
-  // initialise the control region before constructing Impl so that cached hot data is correct
+  // initialise the shared memory region
   auto impl = std::make_unique<Writer::Impl>(std::move(maybe_shm.value()));
-  auto [ctrl, data] = impl->layout();
-  ctrl.config = config;
-  ctrl.write_count = 0U;
-  ctrl.magic = Control::MAGIC;
+  auto shm = impl->data();
+
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* ctrl = reinterpret_cast<Control*>(shm.data());
+  ctrl->config = config;
+  ctrl->write_count = 0U;
+  ctrl->metadata_length = metadata_len;
+  ctrl->frames_offset = frames_offset;
+  ctrl->magic = Control::MAGIC;
+
+  // copy metadata into the buffer immediately after the control block
+  std::ranges::copy(metadata, shm.subspan(control_len).begin());
 
   // cache pointers to hot-path data
-  auto* const write_count_ptr = &ctrl.write_count;
-  const auto frames = data;
+  auto* const write_count_ptr = &ctrl->write_count;
+  const auto frames = shm.subspan(frames_offset);
 
   // rename and make it available for readers
   const auto maybe_rename = shmRename(staging_name, shm_name);
@@ -155,8 +167,8 @@ Writer::Writer(std::string name, std::unique_ptr<Impl> impl, const Config& confi
 }
 
 //=================================================================================================
-struct Reader::Impl : public ShmImpl {
-  explicit Impl(SharedMemory shm) : ShmImpl(std::move(shm)) {
+struct Reader::Impl : public SharedMemory {
+  explicit Impl(SharedMemory shm) : SharedMemory(std::move(shm)) {
   }
 };
 
@@ -170,22 +182,32 @@ auto Reader::connect(std::string_view name) -> std::expected<Reader, Error> {
   if (maybe_shm->data().size_bytes() < sizeof(Control)) {
     return std::unexpected{ Error{ std::format("'{}' has unexpected size (too small)", name) } };
   }
-  auto impl = std::make_unique<Reader::Impl>(std::move(maybe_shm.value()));
-  const auto& [ctrl, data] = impl->layout();
 
-  if (ctrl.magic != Control::MAGIC) {
+  auto impl = std::make_unique<Reader::Impl>(std::move(maybe_shm.value()));
+  auto shm = impl->data();
+
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* ctrl = reinterpret_cast<Control*>(shm.data());
+
+  if (ctrl->magic != Control::MAGIC) {
     return std::unexpected{ Error{ std::format("'{}' has incorrect magic", name) } };
   }
-
-  if (data.size_bytes() != ctrl.config.frame_length * ctrl.config.num_frames) {
+  const auto& config = ctrl->config;
+  const auto expected_size = ctrl->frames_offset + (config.frame_length * config.num_frames);
+  if (shm.size_bytes() != expected_size) {
     return std::unexpected{ Error{ std::format("'{}' has unexpected data size", name) } };
   }
 
-  // cache pointers to hot-path data
-  auto* const write_count_ptr = &ctrl.write_count;
-  const auto frames = data;
+  const auto control_len = sizeof(Control);
+  if (control_len + ctrl->metadata_length > ctrl->frames_offset) {
+    return std::unexpected{ Error{ std::format("'{}' has invalid metadata length", name) } };
+  }
+  const auto metadata = shm.subspan(control_len, ctrl->metadata_length);
 
-  return Reader{ std::move(impl), ctrl.config, frames, write_count_ptr };
+  auto* const write_count_ptr = &ctrl->write_count;
+  const auto frames = shm.subspan(ctrl->frames_offset);
+
+  return Reader{ std::move(impl), config, metadata, frames, write_count_ptr };
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -194,10 +216,18 @@ auto Reader::config() const -> Config {
 }
 
 //-------------------------------------------------------------------------------------------------
-Reader::Reader(std::unique_ptr<Impl> impl, const Config& config, std::span<const std::byte> frames,
+auto Reader::metadata() const -> std::span<const std::byte> {
+  return metadata_;
+}
+
+//-------------------------------------------------------------------------------------------------
+Reader::Reader(std::unique_ptr<Impl> impl, const Config& config,
+               // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+               std::span<const std::byte> metadata, std::span<const std::byte> frames,
                const std::uint64_t* write_count_ptr)
   : impl_{ std::move(impl) }
   , config_{ config }
+  , metadata_{ metadata }
   , frames_{ frames }
   , write_count_ptr_{ write_count_ptr } {
 }
