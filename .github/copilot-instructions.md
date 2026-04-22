@@ -10,7 +10,7 @@ When deeper context is needed, reference the linked documents directly (e.g. via
 
 ## C++ coding rules
 
-- Follow [CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines); enforce via `.clang-tidy`.
+- Follow [CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines); enforce via `.clang-tidy`. Don't ignore linter warnings
 - Follow coding style defined by [`.clang-format`](https://github.com/cvilas/grape/blob/main/.clang-format) file
 - Prefer the latest C++ standard for language features and performance
 - Prefer functional programming techniques; minimise coupling and dependencies
