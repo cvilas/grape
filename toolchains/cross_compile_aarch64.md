@@ -29,7 +29,7 @@ cmake --build build/gcc-cross
 
 - Install gcc and sysroot (glibc and kernel headers for aarch64) at `/usr/aarch64-linux-gnu/` 
   ```bash
-  GCC_VERSION=15
+  GCC_VERSION=16
   sudo apt-get install -y gcc-$GCC_VERSION-aarch64-linux-gnu g++-$GCC_VERSION-aarch64-linux-gnu
 
   PRIORITY=$((${GCC_VERSION%%.*} * 10))

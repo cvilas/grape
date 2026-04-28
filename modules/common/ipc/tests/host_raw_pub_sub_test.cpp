@@ -3,6 +3,7 @@
 //=================================================================================================
 
 #include <algorithm>
+#include <climits>
 #include <random>
 #include <semaphore>
 #include <thread>
