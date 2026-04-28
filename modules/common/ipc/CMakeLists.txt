@@ -38,7 +38,7 @@ define_module_library(
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 
 # Subprojects
-if (NOT CMAKE_CROSSCOMPILING)
+if(NOT CMAKE_CROSSCOMPILING)
   add_subdirectory(py)
 endif()
 add_subdirectory(tests)
