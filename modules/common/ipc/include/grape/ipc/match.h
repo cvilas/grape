@@ -4,26 +4,13 @@
 
 #pragma once
 
-#include <cstdint>
-#include <format>
 #include <functional>
-#include <string>
 
+#include "grape/ipc/entity_id.h"
 #include "grape/ipc/topic.h"
 #include "grape/utils/enums.h"
 
 namespace grape::ipc {
-
-//=================================================================================================
-// Uniquely identifies a pub/sub endpoint
-struct EntityId {
-  std::string host;       //!< Hostname of the remote endpoint
-  std::uint64_t id{ 0 };  //!< Unique identification number
-};
-
-[[nodiscard]] constexpr auto toString(const EntityId& entity) -> std::string {
-  return std::format("{}:{:#x}", entity.host.empty() ? "(unknown host)" : entity.host, entity.id);
-}
 
 //=================================================================================================
 /// Match event between a pub<->sub pair
@@ -43,4 +30,5 @@ struct Match {
 
 /// Function signature for callback on match event
 using MatchCallback = std::function<void(const Match&)>;
+
 }  // namespace grape::ipc

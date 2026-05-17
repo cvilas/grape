@@ -11,10 +11,13 @@ find_package(eCAL ${ECAL_VERSION_REQUIRED} REQUIRED)
 
 # library sources
 set(SOURCES
+    src/discovery.cpp
     src/session.cpp
     src/raw_publisher.cpp
     src/raw_subscriber.cpp
     README.md
+    include/grape/ipc/discovery.h
+    include/grape/ipc/entity_id.h
     include/grape/ipc/error.h
     include/grape/ipc/config.h
     include/grape/ipc/match.h

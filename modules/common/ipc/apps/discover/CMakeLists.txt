@@ -2,5 +2,7 @@
 # Copyright (C) 2025 GRAPE Contributors
 # =================================================================================================
 
-add_subdirectory(discover)
-add_subdirectory(perf)
+define_module_app(
+  NAME ipc_discover
+  SOURCES ipc_discover.cpp
+  PUBLIC_LINK_LIBS grape::conio)
