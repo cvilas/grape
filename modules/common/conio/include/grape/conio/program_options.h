@@ -9,6 +9,7 @@
 
 #include "grape/conio/string_streamable.h"
 #include "grape/exception.h"
+#include "grape/utils/enums.h"
 #include "grape/utils/utils.h"
 
 namespace grape::conio {
@@ -130,9 +131,13 @@ template <StringStreamable T>
 auto ProgramDescription::declareOption(const std::string& key, const std::string& brief,
                                        const T& default_value) -> ProgramDescription& {
   const auto to_string = [](const auto& val) {
-    std::ostringstream oss;
-    oss << val;
-    return oss.str();
+    if constexpr (std::is_enum_v<std::decay_t<decltype(val)>>) {
+      return std::string{ grape::enums::name(val) };
+    } else {
+      std::ostringstream oss;
+      oss << val;
+      return oss.str();
+    }
   };
   options_.emplace_back(ProgramOptions::Option{
       .key = key,
@@ -162,15 +167,20 @@ auto ProgramOptions::getOption(std::string_view key) const -> T {
     // note: since std::istringstream extracts only up to whitespace, this special case is
     // neccessary for parsing strings containing multiple words
     return it->value;
+  } else if constexpr (std::is_enum_v<T>) {
+    const auto opt = grape::enums::cast<T>(it->value);
+    if (not opt.has_value()) {
+      panic(std::format("Unparsable value for option: {}", key));
+    }
+    return *opt;
+  } else {
+    T value;
+    std::istringstream stream(it->value);
+    if (not(stream >> value)) {
+      panic(std::format("Unparsable value for option: {}", key));
+    }
+    return value;
   }
-
-  T value;
-  std::istringstream stream(it->value);
-  if (not(stream >> value)) {
-    panic(std::format("Unparsable value for option: {}", key));
-  }
-
-  return value;
 }
 
 }  // namespace grape::conio

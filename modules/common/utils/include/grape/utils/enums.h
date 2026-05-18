@@ -13,7 +13,10 @@
 
 #pragma once
 
+#include <istream>
 #include <optional>
+#include <ostream>
+#include <string>
 #include <type_traits>
 
 #include "grape/utils/detail/enums_detail.h"
@@ -75,5 +78,28 @@ constexpr auto cast(std::string_view str_name) -> std::optional<Enum> {
     ++ival;
   }
   return std::nullopt;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Output stream operator for enum types using static reflection
+template <typename Enum>
+  requires std::is_enum_v<Enum>
+auto operator<<(std::ostream& os, Enum val) -> std::ostream& {
+  return os << name(val);
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Input stream operator for enum types using static reflection
+template <typename Enum>
+  requires std::is_enum_v<Enum>
+auto operator>>(std::istream& is, Enum& val) -> std::istream& {
+  if (auto str = std::string{}; is >> str) {
+    if (const auto opt = cast<Enum>(str); opt.has_value()) {
+      val = *opt;
+    } else {
+      is.setstate(std::ios::failbit);
+    }
+  }
+  return is;
 }
 }  // namespace grape::enums

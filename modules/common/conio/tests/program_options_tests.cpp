@@ -4,6 +4,10 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "grape/conio/program_options.h"
+#include "grape/utils/enums.h"
+
+// Defined at file scope so it works with Clang
+enum class Speed : std::uint8_t { Slow, Medium, Fast };  // NOLINT(misc-use-internal-linkage)
 
 namespace {
 
@@ -141,6 +145,39 @@ TEST_CASE("Parses vector of strings from comma-separated string", "[program_opti
   REQUIRE(vec.at(0) == "apple");
   REQUIRE(vec.at(1) == "banana");
   REQUIRE(vec.at(2) == "cherry");
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Enum default value is used when not specified on the command line",
+          "[program_options]") {
+  const auto args = ProgramDescription("enum default value test")
+                        .declareOption<Speed>("speed", "Speed setting", Speed::Medium)
+                        .parse(0, nullptr);
+  REQUIRE(args.getOption<Speed>("speed") == Speed::Medium);
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Enum value is parsed from command line string", "[program_options]") {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  const char* argv[] = { "--speed=Fast" };
+  const auto argc = 1;
+  const auto args = ProgramDescription("enum parsing test")
+                        .declareOption<Speed>("speed", "Speed setting", Speed::Slow)
+                        .parse(argc, argv);
+  // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  REQUIRE(args.getOption<Speed>("speed") == Speed::Fast);
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Returns error if enum string is not a valid enumerator", "[program_options]") {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  const char* argv[] = { "--speed=Turbo" };
+  const auto argc = 1;
+  const auto args = ProgramDescription("invalid enum test")
+                        .declareOption<Speed>("speed", "Speed setting")
+                        .parse(argc, argv);
+  // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  REQUIRE_THROWS(args.getOption<Speed>("speed"));
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -31,7 +31,7 @@ concept BasicStringStreamable = requires(std::string str, T value) {
 //=================================================================================================
 /// Types that are convertible to and from a string
 template <typename T>
-concept StringStreamable = BasicStringStreamable<T> ||
+concept StringStreamable = BasicStringStreamable<T> || std::is_enum_v<T> ||
                            (IS_STD_VECTOR_V<T> && BasicStringStreamable<typename T::value_type>);
 
 //=================================================================================================
