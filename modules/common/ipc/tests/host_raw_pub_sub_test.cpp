@@ -22,7 +22,7 @@ namespace {
 TEST_CASE("Basic pub-sub on large message works in host-only scope", "[ipc]") {
   grape::ipc::init(grape::ipc::Config{});
   const auto topic = grape::ipc::Topic{
-    .name = "pub_sub_test",
+    .name = std::format("pub_sub_test_{}", grape::WallClock::now().time_since_epoch().count()),
     .type_name = "byte",
   };
 

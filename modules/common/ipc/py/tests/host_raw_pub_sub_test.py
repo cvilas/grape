@@ -12,6 +12,7 @@ import time
 import random
 import threading
 import sys
+import uuid
 from typing import List, Optional
 
 try:
@@ -28,7 +29,7 @@ def test_basic_pub_sub_large_message():
     
     # Topic name
     topic = ipc.Topic()
-    topic.name = "pub_sub_py_test"
+    topic.name = f"/pub_sub_py_test_{uuid.uuid4().hex[:8]}"
     topic.type_name = "byte"
     
     # Create a large payload (e.g., 1080p RGB image)

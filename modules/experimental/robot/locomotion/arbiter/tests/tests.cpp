@@ -60,14 +60,15 @@ auto TeleopEmulator::isServiceDetected() const -> bool {
 
 //=================================================================================================
 TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
-  static constexpr auto* ROBOT_NAME = "test_robot";
+  static const auto robot_name =
+      std::format("test_robot_{}", grape::WallClock::now().time_since_epoch().count());
   const auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Host };
   grape::ipc::init(ipc_config);
   auto received_cmds = std::vector<grape::locomotion::Command>{};
   const auto robot_cb = [&received_cmds](const auto& cmd) { received_cmds.push_back(cmd); };
-  auto test_service = grape::locomotion::Arbiter(ROBOT_NAME, robot_cb);
+  auto test_service = grape::locomotion::Arbiter(robot_name, robot_cb);
   const auto on_loco_status = [](const auto&) {};
-  auto test_client = TeleopEmulator(ROBOT_NAME, on_loco_status);
+  auto test_client = TeleopEmulator(robot_name, on_loco_status);
 
   // Wait for client-service connection
   constexpr auto RETRY_COUNT = 10U;
@@ -104,7 +105,7 @@ TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
   REQUIRE(std::holds_alternative<grape::locomotion::Move3DCmd>(received_cmds.at(2)));
 
   // A second teleop command should be ignored as long as the first one is active
-  auto test_client2 = TeleopEmulator(ROBOT_NAME, on_loco_status);
+  auto test_client2 = TeleopEmulator(robot_name, on_loco_status);
   REQUIRE(test_client2.send(grape::locomotion::Move3DCmd{ .lateral_speed = 0.F }));
   std::this_thread::sleep_for(IPC_PROCESSING_DELAY);
   REQUIRE(received_cmds.size() == 3);

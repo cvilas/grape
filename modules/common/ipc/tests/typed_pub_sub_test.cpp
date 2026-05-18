@@ -24,7 +24,8 @@ struct TestTopicAttributes {
   static constexpr auto QOS = grape::ipc::QoS::BestEffort;
   static constexpr auto SERDES_BUFFER_SIZE = 1024U;
   static auto topicName() -> std::string {
-    return { std::string("typed_pub_sub_test") };
+    static auto now = grape::WallClock::now().time_since_epoch().count();
+    return { std::format("typed_pub_sub_test_{}", now) };
   }
 };
 
