@@ -57,10 +57,7 @@ auto main() -> int {
         });
         // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
-        // Skip ahead to the next future tick if we've fallen behind (e.g. after SIGTSTP/SIGCONT).
-        // Without this, sleep_until returns immediately for every accumulated past target,
-        // causing the thread to spin at CPU speed and contend on the FIFO's atomic counter,
-        // which stalls the render thread.
+        // Avoid spinning at CPU speed if we stalled (eg: due to SIGTSTP/SIGCONT)
         ++ticks;
         const auto next_tick = t0 + ticks * UPDATE_INTERVAL;
         if (clock::now() >= next_tick) {
