@@ -4,9 +4,8 @@
 
 ## Design considerations
 
-- Allow a range of point and line styles
-- Show/hide _bugs_ (visual markers)
-- Show/hide legend, and its position
+- Support a range of point and line styles
+- Show/hide legend
 - Visually simple layout
   - Dark background
   - Monospace white text annotations and labels
@@ -19,12 +18,12 @@
   - Draggable legend
   - 'f' key toggles FPS diagnostics
 
-## TODO
+## Roadmap
 
 - [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`
 - [ ] Refactor `Window::trace(name) -> std::optional<Trace&>` to only return existing `Trace`
-- [ ] Highlight selected trace by (reduce opacity of all other traces)
-- [ ] Set/hide visual bug
+- [ ] Highlight selected trace (reduce opacity of all other traces)
+- [ ] Set/hide visual _bug_
 
 ## Plot Window Layout
 

@@ -851,7 +851,27 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
   SDL_CHECK(TTF_Init());
 
   d_->window = SDL_CHECK(SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE));
-  d_->renderer = SDL_CHECK(SDL_CreateRenderer(d_->window, nullptr));
+
+  const auto num_supported_renderers = SDL_GetNumRenderDrivers();
+  auto supported_renderers = std::vector<std::string_view>{};
+  for (int i = 0; i < num_supported_renderers; ++i) {
+    supported_renderers.emplace_back(SDL_GetRenderDriver(i));
+  }
+  std::println(stderr, "Supported renderers: {}", supported_renderers);
+
+  // Choose an available renderer in order of preferance, otherwise fallback to a default
+  static constexpr auto PREFERRED_RENDERERS = { "gpu", "opengl", "opengles2" };
+  for (const auto& renderer_name : PREFERRED_RENDERERS) {
+    d_->renderer = SDL_CHECK(SDL_CreateRenderer(d_->window, renderer_name));
+    if (d_->renderer != nullptr) {
+      break;
+    }
+  }
+  if (d_->renderer == nullptr) {
+    d_->renderer = SDL_CHECK(SDL_CreateRenderer(d_->window, nullptr));
+  }
+  std::println("Using renderer: {}", SDL_GetRendererName(d_->renderer));
+
   d_->text_engine = SDL_CHECK(TTF_CreateRendererTextEngine(d_->renderer));
   if (!SDL_SetRenderVSync(d_->renderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {  // adaptive VSync optional
     SDL_SetRenderVSync(d_->renderer, 1);
