@@ -207,6 +207,8 @@ struct Window::Impl {
     SDL_FPoint norm{ .x = 0.85F, .y = 0.08F };  // default: top-right, as fraction of window size
     bool dragging{};
     SDL_FPoint drag_delta{};
+    SDL_Texture* texture = nullptr;    //!< cached; rebuilt only when content changes
+    std::vector<Color> cached_colors;  //!< colour snapshot for dirty detection
   } legend{};
 
   // Y-axis pan state
@@ -240,7 +242,7 @@ struct Window::Impl {
 
   void rebuildTitleText(const std::string& text);
   void rebuildLabelText(AxisId id, const std::string& text);
-  [[nodiscard]] auto rebuildLegendTexts() -> bool;
+  [[nodiscard]] auto rebuildLegend() -> bool;
 
   void renderTickText(const char* text, const SDL_FPoint& pos, const SDL_Color& col) const;
   void drawFps();
@@ -416,30 +418,91 @@ void Window::Impl::rebuildLabelText(AxisId axis_id, const std::string& text) {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Window::Impl::rebuildLegendTexts() -> bool {
+auto Window::Impl::rebuildLegend() -> bool {
   for (auto* txt : legend_texts) {
     TTF_DestroyText(txt);
   }
   legend_texts.clear();
   legend.name_maxlen = 0;
+  if (legend.texture != nullptr) {
+    SDL_DestroyTexture(legend.texture);
+    legend.texture = nullptr;
+  }
+  legend.cached_colors.clear();
 
   if (text_engine == nullptr) {
     return false;
   }
 
-  legend_texts.reserve(trace_views.size());
-  static constexpr auto COLOR = SDL_Color{ .r = 230, .g = 230, .b = 230, .a = SDL_ALPHA_OPAQUE };
+  const auto num_traces = trace_views.size();
+  if (num_traces == 0) {
+    return true;
+  }
+
+  // Build TTF_Text objects and measure the widest label
+  static constexpr auto TX_COLOR = SDL_Color{ .r = 230, .g = 230, .b = 230, .a = SDL_ALPHA_OPAQUE };
+  legend_texts.reserve(num_traces);
   for (const auto& tv : trace_views) {
     auto* txt =
         SDL_CHECK(TTF_CreateText(text_engine, default_font, tv.name.data(), tv.name.size()));
     if (txt == nullptr) {
       return false;
     }
-    SDL_CHECK(TTF_SetTextColor(txt, COLOR.r, COLOR.g, COLOR.b, COLOR.a));
+    SDL_CHECK(TTF_SetTextColor(txt, TX_COLOR.r, TX_COLOR.g, TX_COLOR.b, TX_COLOR.a));
     int tw = 0;
     SDL_CHECK(TTF_GetTextSize(txt, &tw, nullptr));
     legend.name_maxlen = std::max(legend.name_maxlen, tw);
     legend_texts.push_back(txt);
+  }
+
+  // Build the legend texture
+  static constexpr auto SWATCH_LEN = 16.0F;
+  const auto font_ht = static_cast<float>(TTF_GetFontHeight(default_font));
+  const auto tex_w = static_cast<int>(MARGIN_SZ + SWATCH_LEN + MARGIN_SZ +
+                                      static_cast<float>(legend.name_maxlen) + MARGIN_SZ);
+  const auto tex_h =
+      static_cast<int>(MARGIN_SZ + (font_ht * static_cast<float>(num_traces)) + MARGIN_SZ);
+  legend.rect.w = static_cast<float>(tex_w);
+  legend.rect.h = static_cast<float>(tex_h);
+
+  legend.texture = SDL_CHECK(SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+                                               SDL_TEXTUREACCESS_TARGET, tex_w, tex_h));
+  if (legend.texture == nullptr) {
+    return false;
+  }
+  SDL_CHECK(SDL_SetTextureBlendMode(legend.texture, SDL_BLENDMODE_BLEND));
+  SDL_CHECK(SDL_SetRenderTarget(renderer, legend.texture));
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_RenderClear(renderer);
+  const SDL_FRect full{
+    .x = 0.F, .y = 0.F, .w = static_cast<float>(tex_w), .h = static_cast<float>(tex_h)
+  };
+  static constexpr SDL_Color BGD_COLOR{ .r = 18, .g = 18, .b = 18, .a = 216 };
+  SDL_SetRenderDrawColor(renderer, BGD_COLOR.r, BGD_COLOR.g, BGD_COLOR.b, BGD_COLOR.a);
+  SDL_RenderFillRect(renderer, &full);
+  static constexpr SDL_Color BDR_COLOR{ .r = 160, .g = 160, .b = 160, .a = SDL_ALPHA_OPAQUE };
+  SDL_SetRenderDrawColor(renderer, BDR_COLOR.r, BDR_COLOR.g, BDR_COLOR.b, BDR_COLOR.a);
+  SDL_RenderRect(renderer, &full);
+
+  for (auto ii = 0UZ; ii < num_traces; ++ii) {
+    const auto& tv = trace_views.at(ii);
+    const auto ry = MARGIN_SZ + (static_cast<float>(ii) * font_ht);
+    const float mid = ry + (font_ht / 2.0F);
+    const auto color = toSDLColor(tv.color);
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderLine(renderer, MARGIN_SZ, mid, MARGIN_SZ + SWATCH_LEN, mid);
+    if (auto* txt = legend_texts.at(ii); txt != nullptr) {
+      TTF_DrawRendererText(txt, MARGIN_SZ + SWATCH_LEN + MARGIN_SZ, ry);
+    }
+  }
+
+  SDL_CHECK(SDL_SetRenderTarget(renderer, nullptr));
+
+  // Cache colours for dirty detection next frame
+  legend.cached_colors.reserve(num_traces);
+  for (const auto& tv : trace_views) {
+    legend.cached_colors.push_back(tv.color);
   }
   return true;
 }
@@ -738,40 +801,35 @@ void Window::Impl::drawLegend() {
   }
 
   const auto num_traces = trace_views.size();
-  if (num_traces != legend_texts.size()) {
-    if (not rebuildLegendTexts()) {
-      return;
-    }
+  if (num_traces == 0) {
+    return;
   }
 
-  static constexpr auto PAD_X = 4.0F;        // horizontal padding inside box
-  static constexpr auto PAD_Y = 3.0F;        // vertical padding inside box
-  static constexpr auto SWATCH_LEN = 16.0F;  // width of colour swatch
+  const auto color_eq = [](const Color& lhs, const Color& rhs) {
+    return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a;
+  };
+  const bool need_rebuild =
+      (legend.texture == nullptr) || (legend_texts.size() != num_traces) ||
+      (legend.cached_colors.size() != num_traces) ||
+      !std::equal(
+          trace_views.begin(), trace_views.end(), legend.cached_colors.begin(),
+          [&](const Trace::View& tv, const Color& cached) { return color_eq(tv.color, cached); });
 
-  const auto font_ht = static_cast<float>(TTF_GetFontHeight(default_font));
-
-  legend.rect.w = PAD_X + SWATCH_LEN + PAD_X + static_cast<float>(legend.name_maxlen) + PAD_X;
-  legend.rect.h = PAD_Y + (font_ht * static_cast<float>(num_traces)) + PAD_Y;
-
-  static constexpr SDL_Color BGD_COLOR{ .r = 18, .g = 18, .b = 18, .a = 216 };
-  SDL_SetRenderDrawColor(renderer, BGD_COLOR.r, BGD_COLOR.g, BGD_COLOR.b, BGD_COLOR.a);
-  SDL_RenderFillRect(renderer, &legend.rect);
-
-  static constexpr SDL_Color BDR_COLOR{ .r = 160, .g = 160, .b = 160, .a = SDL_ALPHA_OPAQUE };
-  SDL_SetRenderDrawColor(renderer, BDR_COLOR.r, BDR_COLOR.g, BDR_COLOR.b, BDR_COLOR.a);
-  SDL_RenderRect(renderer, &legend.rect);
-
-  for (auto ii = 0UZ; ii < num_traces; ++ii) {
-    const auto& tv = trace_views.at(ii);
-    const auto ry = legend.rect.y + PAD_Y + (static_cast<float>(ii) * font_ht);
-    const float mid = ry + (font_ht / 2.0F);
-    const auto color = toSDLColor(tv.color);
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderLine(renderer, legend.rect.x + PAD_X, mid, legend.rect.x + PAD_X + SWATCH_LEN, mid);
-    if (auto* txt = legend_texts.at(ii); txt != nullptr) {
-      TTF_DrawRendererText(txt, legend.rect.x + PAD_X + SWATCH_LEN + PAD_X, ry);
-    }
+  if (need_rebuild && not rebuildLegend()) {
+    return;
   }
+
+  if (legend.texture == nullptr) {
+    return;
+  }
+
+  const auto dst = SDL_FRect{
+    .x = legend.rect.x,
+    .y = legend.rect.y,
+    .w = legend.rect.w,
+    .h = legend.rect.h,
+  };
+  SDL_CHECK(SDL_RenderTexture(renderer, legend.texture, nullptr, &dst));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -845,6 +903,7 @@ Window::~Window() {
     TTF_DestroyText(text);
   }
   d_->legend_texts.clear();
+  SDL_DestroyTexture(d_->legend.texture);
   TTF_DestroyText(d_->tick_scratch);
   TTF_DestroyRendererTextEngine(d_->text_engine);
   TTF_CloseFont(d_->default_font);
