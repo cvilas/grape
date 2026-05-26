@@ -12,8 +12,7 @@
 - [x] [Clock](../modules/common/clock/README.md)
 - [x] [Picam](../modules/rpi/camera/README.md)  
 - [x] [Pisense](../modules/rpi/sense_hat/README.md)
-- [ ] [Plot](../modules/experimental/plot/README.md)
-- [ ] Application note on writing applications. Data sources write to spmcq. Data processors read from spmcq. Data recorders use mpscq/mpmcq to read sources and log them directly into drake file
+- [x] [Plot](../modules/common/plot/README.md)
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
 - [ ] [Linalg](../modules/experimental/linalg/README.md)
 - [ ] Basic OpenGL scenegraph
@@ -53,7 +52,7 @@
   - [ ] Build [LeRobot SO-ARM101 kit](https://github.com/TheRobotStudio/SO-ARM100)
   - [ ] Set up [LeRobot](https://huggingface.co/docs/lerobot/index)
   - [ ] RL manipulation to pick and place
--Walker
+- Walker
   - [ ] Build [XGO-Mini kit](https://shop.elecfreaks.com/products/elecfreaks-cm4-xgo-mini-robot-dog-kit-for-raspberry-pi)
   - [ ] RL walk in MuJoCo
   - [ ] RL walk in reality

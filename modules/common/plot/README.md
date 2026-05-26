@@ -22,8 +22,8 @@
 ## TODO
 
 - [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`
-- [ ] Refactor `Window::trace(name) -> std::optional<Trace&>`
-- [ ] Highlight selected trace by reducing opacity of all others
+- [ ] Refactor `Window::trace(name) -> std::optional<Trace&>` to only return existing `Trace`
+- [ ] Highlight selected trace by (reduce opacity of all other traces)
 - [ ] Set/hide visual bug
 
 ## Plot Window Layout
