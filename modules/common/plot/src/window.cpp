@@ -130,6 +130,13 @@ auto sdlCheck(T* ptr, const char* expr) -> T* {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SDL_CHECK(call) sdlCheck((call), #call)
 
+using SDLWindowPtr = std::unique_ptr<SDL_Window, void (*)(SDL_Window*)>;
+using SDLRendererPtr = std::unique_ptr<SDL_Renderer, void (*)(SDL_Renderer*)>;
+using SDLTexturePtr = std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)>;
+using TTFEnginePtr = std::unique_ptr<TTF_TextEngine, void (*)(TTF_TextEngine*)>;
+using TTFFontPtr = std::unique_ptr<TTF_Font, void (*)(TTF_Font*)>;
+using TTFTextPtr = std::unique_ptr<TTF_Text, void (*)(TTF_Text*)>;
+
 }  // namespace
 
 namespace grape::plot {
@@ -148,11 +155,11 @@ struct Window::Impl {
 
   static constexpr auto GRID_EPSILON = 0.01;
 
-  SDL_Window* window = nullptr;
-  SDL_Renderer* renderer = nullptr;
-  TTF_Font* default_font = nullptr;
-  TTF_Font* tick_font = nullptr;
-  TTF_Font* title_font = nullptr;
+  SDLWindowPtr window{ nullptr, SDL_DestroyWindow };
+  SDLRendererPtr renderer{ nullptr, SDL_DestroyRenderer };
+  TTFFontPtr default_font{ nullptr, TTF_CloseFont };
+  TTFFontPtr tick_font{ nullptr, TTF_CloseFont };
+  TTFFontPtr title_font{ nullptr, TTF_CloseFont };
   SDL_WindowID window_id = 0;
   bool open = true;
 
@@ -160,10 +167,10 @@ struct Window::Impl {
   std::vector<Trace::View> trace_views;  //!< Per-frame snapshot
 
   // Text-texture cache
-  TTF_TextEngine* text_engine = nullptr;
-  TTF_Text* title_text = nullptr;
-  TTF_Text* x_label_text = nullptr;
-  TTF_Text* y_label_text = nullptr;
+  TTFEnginePtr text_engine{ nullptr, TTF_DestroyRendererTextEngine };
+  TTFTextPtr title_text{ nullptr, TTF_DestroyText };
+  TTFTextPtr x_label_text{ nullptr, TTF_DestroyText };
+  TTFTextPtr y_label_text{ nullptr, TTF_DestroyText };
 
   SDL_FRect plot_area{};  // plot area layout
 
@@ -206,9 +213,9 @@ struct Window::Impl {
     SDL_FPoint norm{ .x = 0.85F, .y = 0.08F };  // default: top-right, as fraction of window size
     bool dragging{};
     SDL_FPoint drag_delta{};
-    SDL_Texture* texture = nullptr;    //!< cached; rebuilt only when content changes
-    std::vector<TTF_Text*> texts;      //!< one TTF_Text per trace label
-    std::vector<Color> cached_colors;  //!< colour snapshot for dirty detection
+    SDLTexturePtr texture{ nullptr, SDL_DestroyTexture };
+    std::vector<TTFTextPtr> texts;
+    std::vector<Color> colors;
   } legend{};
 
   // Y-axis pan state
@@ -226,7 +233,7 @@ struct Window::Impl {
   // Scratch buffers reused across frames
   mutable std::vector<SDL_FPoint> pts_scratch;
   mutable std::vector<SDL_FPoint> step_pts_scratch;
-  mutable TTF_Text* tick_scratch = nullptr;
+  mutable TTFTextPtr tick_scratch{ nullptr, TTF_DestroyText };
 
   // Helpers
   void recalcLayout();
@@ -263,7 +270,7 @@ struct Window::Impl {
 void Window::Impl::recalcLayout() {
   int ww = 0;
   int wh = 0;
-  SDL_CHECK(SDL_GetWindowSize(window, &ww, &wh));
+  SDL_CHECK(SDL_GetWindowSize(window.get(), &ww, &wh));
   static constexpr auto PLOT_X = BORDER_SZ + (TICK_LABEL_LEN * TICK_FONT_PT) + MARGIN_SZ + TICK_LEN;
   static constexpr auto PLOT_Y = BORDER_SZ + TITLE_FONT_PT + MARGIN_SZ;
 
@@ -276,7 +283,7 @@ void Window::Impl::recalcLayout() {
   };
   legend.rect.x = legend.norm.x * static_cast<float>(ww);
   legend.rect.y = legend.norm.y * static_cast<float>(wh);
-  SDL_CHECK(SDL_GetRenderOutputSize(renderer, &render_w, &render_h));
+  SDL_CHECK(SDL_GetRenderOutputSize(renderer.get(), &render_w, &render_h));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -382,12 +389,12 @@ auto Window::Impl::isLegendHit(float mx, float my) const -> bool {
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::rebuildTitleText(const std::string& text) {
   static constexpr auto COLOR = SDL_Color{ .r = 240, .g = 240, .b = 240, .a = SDL_ALPHA_OPAQUE };
-  TTF_DestroyText(title_text);
-  title_text = nullptr;
+  title_text.reset();
   if (text_engine != nullptr) {
-    title_text = SDL_CHECK(TTF_CreateText(text_engine, title_font, text.c_str(), 0));
+    title_text.reset(
+        SDL_CHECK(TTF_CreateText(text_engine.get(), title_font.get(), text.c_str(), 0)));
     if (title_text != nullptr) {
-      SDL_CHECK(TTF_SetTextColor(title_text, COLOR.r, COLOR.g, COLOR.b, COLOR.a));
+      SDL_CHECK(TTF_SetTextColor(title_text.get(), COLOR.r, COLOR.g, COLOR.b, COLOR.a));
     }
   }
 }
@@ -396,13 +403,13 @@ void Window::Impl::rebuildTitleText(const std::string& text) {
 void Window::Impl::rebuildLabelText(AxisId axis_id, const std::string& text) {
   static constexpr auto COLOR = SDL_Color{ .r = 160, .g = 160, .b = 255, .a = SDL_ALPHA_OPAQUE };
 
-  const auto rebuild = [&](TTF_Text*& target) {
-    TTF_DestroyText(target);
-    target = nullptr;
+  const auto rebuild = [&](TTFTextPtr& target) {
+    target.reset();
     if (text_engine != nullptr) {
-      target = SDL_CHECK(TTF_CreateText(text_engine, default_font, text.c_str(), 0));
+      target.reset(
+          SDL_CHECK(TTF_CreateText(text_engine.get(), default_font.get(), text.c_str(), 0)));
       if (target != nullptr) {
-        SDL_CHECK(TTF_SetTextColor(target, COLOR.r, COLOR.g, COLOR.b, COLOR.a));
+        SDL_CHECK(TTF_SetTextColor(target.get(), COLOR.r, COLOR.g, COLOR.b, COLOR.a));
       }
     }
   };
@@ -419,16 +426,10 @@ void Window::Impl::rebuildLabelText(AxisId axis_id, const std::string& text) {
 
 //-------------------------------------------------------------------------------------------------
 auto Window::Impl::rebuildLegend() -> bool {
-  for (auto* txt : legend.texts) {
-    TTF_DestroyText(txt);
-  }
   legend.texts.clear();
   legend.name_maxlen = 0;
-  if (legend.texture != nullptr) {
-    SDL_DestroyTexture(legend.texture);
-    legend.texture = nullptr;
-  }
-  legend.cached_colors.clear();
+  legend.texture.reset();
+  legend.colors.clear();
 
   if (text_engine == nullptr) {
     return false;
@@ -443,21 +444,22 @@ auto Window::Impl::rebuildLegend() -> bool {
   static constexpr auto TX_COLOR = SDL_Color{ .r = 230, .g = 230, .b = 230, .a = SDL_ALPHA_OPAQUE };
   legend.texts.reserve(num_traces);
   for (const auto& tv : trace_views) {
-    auto* txt =
-        SDL_CHECK(TTF_CreateText(text_engine, default_font, tv.name.data(), tv.name.size()));
+    TTFTextPtr txt{ SDL_CHECK(TTF_CreateText(text_engine.get(), default_font.get(), tv.name.data(),
+                                             tv.name.size())),
+                    TTF_DestroyText };
     if (txt == nullptr) {
       return false;
     }
-    SDL_CHECK(TTF_SetTextColor(txt, TX_COLOR.r, TX_COLOR.g, TX_COLOR.b, TX_COLOR.a));
+    SDL_CHECK(TTF_SetTextColor(txt.get(), TX_COLOR.r, TX_COLOR.g, TX_COLOR.b, TX_COLOR.a));
     int tw = 0;
-    SDL_CHECK(TTF_GetTextSize(txt, &tw, nullptr));
+    SDL_CHECK(TTF_GetTextSize(txt.get(), &tw, nullptr));
     legend.name_maxlen = std::max(legend.name_maxlen, tw);
-    legend.texts.push_back(txt);
+    legend.texts.push_back(std::move(txt));
   }
 
   // Build the legend texture
   static constexpr auto SWATCH_LEN = 16.0F;
-  const auto font_ht = static_cast<float>(TTF_GetFontHeight(default_font));
+  const auto font_ht = static_cast<float>(TTF_GetFontHeight(default_font.get()));
   const auto tex_w = static_cast<int>(MARGIN_SZ + SWATCH_LEN + MARGIN_SZ +
                                       static_cast<float>(legend.name_maxlen) + MARGIN_SZ);
   const auto tex_h =
@@ -465,44 +467,43 @@ auto Window::Impl::rebuildLegend() -> bool {
   legend.rect.w = static_cast<float>(tex_w);
   legend.rect.h = static_cast<float>(tex_h);
 
-  legend.texture = SDL_CHECK(SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
-                                               SDL_TEXTUREACCESS_TARGET, tex_w, tex_h));
+  legend.texture.reset(SDL_CHECK(SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_RGBA8888,
+                                                   SDL_TEXTUREACCESS_TARGET, tex_w, tex_h)));
   if (legend.texture == nullptr) {
     return false;
   }
-  SDL_CHECK(SDL_SetTextureBlendMode(legend.texture, SDL_BLENDMODE_BLEND));
-  SDL_CHECK(SDL_SetRenderTarget(renderer, legend.texture));
+  SDL_CHECK(SDL_SetTextureBlendMode(legend.texture.get(), SDL_BLENDMODE_BLEND));
+  SDL_CHECK(SDL_SetRenderTarget(renderer.get(), legend.texture.get()));
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-  SDL_RenderClear(renderer);
+  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
+  SDL_RenderClear(renderer.get());
   const SDL_FRect full{
     .x = 0.F, .y = 0.F, .w = static_cast<float>(tex_w), .h = static_cast<float>(tex_h)
   };
   static constexpr SDL_Color BGD_COLOR{ .r = 18, .g = 18, .b = 18, .a = 216 };
-  SDL_SetRenderDrawColor(renderer, BGD_COLOR.r, BGD_COLOR.g, BGD_COLOR.b, BGD_COLOR.a);
-  SDL_RenderFillRect(renderer, &full);
+  SDL_SetRenderDrawColor(renderer.get(), BGD_COLOR.r, BGD_COLOR.g, BGD_COLOR.b, BGD_COLOR.a);
+  SDL_RenderFillRect(renderer.get(), &full);
   static constexpr SDL_Color BDR_COLOR{ .r = 160, .g = 160, .b = 160, .a = SDL_ALPHA_OPAQUE };
-  SDL_SetRenderDrawColor(renderer, BDR_COLOR.r, BDR_COLOR.g, BDR_COLOR.b, BDR_COLOR.a);
-  SDL_RenderRect(renderer, &full);
+  SDL_SetRenderDrawColor(renderer.get(), BDR_COLOR.r, BDR_COLOR.g, BDR_COLOR.b, BDR_COLOR.a);
+  SDL_RenderRect(renderer.get(), &full);
 
   for (auto ii = 0UZ; ii < num_traces; ++ii) {
     const auto& tv = trace_views.at(ii);
     const auto ry = MARGIN_SZ + (static_cast<float>(ii) * font_ht);
     const float mid = ry + (font_ht / 2.0F);
     const auto color = toSDLColor(tv.color);
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderLine(renderer, MARGIN_SZ, mid, MARGIN_SZ + SWATCH_LEN, mid);
-    if (auto* txt = legend.texts.at(ii); txt != nullptr) {
+    SDL_SetRenderDrawColor(renderer.get(), color.r, color.g, color.b, color.a);
+    SDL_RenderLine(renderer.get(), MARGIN_SZ, mid, MARGIN_SZ + SWATCH_LEN, mid);
+    if (auto* txt = legend.texts.at(ii).get(); txt != nullptr) {
       TTF_DrawRendererText(txt, MARGIN_SZ + SWATCH_LEN + MARGIN_SZ, ry);
     }
   }
 
-  SDL_CHECK(SDL_SetRenderTarget(renderer, nullptr));
+  SDL_CHECK(SDL_SetRenderTarget(renderer.get(), nullptr));
 
-  // Cache colours for dirty detection next frame
-  legend.cached_colors.reserve(num_traces);
+  legend.colors.reserve(num_traces);
   for (const auto& tv : trace_views) {
-    legend.cached_colors.push_back(tv.color);
+    legend.colors.push_back(tv.color);
   }
   return true;
 }
@@ -515,15 +516,15 @@ void Window::Impl::renderTickText(const char* text, const SDL_FPoint& pos,
   }
   // Reuse a single TTF_Text object across all tick labels to avoid per-tick alloc/free.
   if (tick_scratch == nullptr) {
-    tick_scratch = SDL_CHECK(TTF_CreateText(text_engine, tick_font, text, 0));
+    tick_scratch.reset(SDL_CHECK(TTF_CreateText(text_engine.get(), tick_font.get(), text, 0)));
     if (tick_scratch == nullptr) {
       return;
     }
-  } else if (!SDL_CHECK(TTF_SetTextString(tick_scratch, text, 0))) {
+  } else if (!SDL_CHECK(TTF_SetTextString(tick_scratch.get(), text, 0))) {
     return;
   }
-  SDL_CHECK(TTF_SetTextColor(tick_scratch, col.r, col.g, col.b, col.a));
-  SDL_CHECK(TTF_DrawRendererText(tick_scratch, pos.x, pos.y));
+  SDL_CHECK(TTF_SetTextColor(tick_scratch.get(), col.r, col.g, col.b, col.a));
+  SDL_CHECK(TTF_DrawRendererText(tick_scratch.get(), pos.x, pos.y));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -532,24 +533,25 @@ void Window::Impl::drawPointSymbol(PointStyle ps, const SDL_FPoint& pos,
   if (ps == PointStyle::None) {
     return;
   }
-  SDL_SetRenderDrawColor(renderer, col.r, col.g, col.b, col.a);
+  auto* rdr = renderer.get();
+  SDL_SetRenderDrawColor(rdr, col.r, col.g, col.b, col.a);
   static constexpr auto EXTENT = 4.F;
 
   const auto draw_cross = [&]() {
-    SDL_RenderLine(renderer, pos.x - EXTENT, pos.y - EXTENT, pos.x + EXTENT, pos.y + EXTENT);
-    SDL_RenderLine(renderer, pos.x + EXTENT, pos.y - EXTENT, pos.x - EXTENT, pos.y + EXTENT);
+    SDL_RenderLine(rdr, pos.x - EXTENT, pos.y - EXTENT, pos.x + EXTENT, pos.y + EXTENT);
+    SDL_RenderLine(rdr, pos.x + EXTENT, pos.y - EXTENT, pos.x - EXTENT, pos.y + EXTENT);
   };
 
   const auto draw_plus = [&]() {
-    SDL_RenderLine(renderer, pos.x - EXTENT, pos.y, pos.x + EXTENT, pos.y);
-    SDL_RenderLine(renderer, pos.x, pos.y - EXTENT, pos.x, pos.y + EXTENT);
+    SDL_RenderLine(rdr, pos.x - EXTENT, pos.y, pos.x + EXTENT, pos.y);
+    SDL_RenderLine(rdr, pos.x, pos.y - EXTENT, pos.x, pos.y + EXTENT);
   };
 
   const auto draw_square = [&]() {
     const SDL_FRect rect{
       .x = pos.x - EXTENT, .y = pos.y - EXTENT, .w = 2.F * EXTENT, .h = 2.F * EXTENT
     };
-    SDL_RenderRect(renderer, &rect);
+    SDL_RenderRect(rdr, &rect);
   };
 
   switch (ps) {
@@ -563,7 +565,7 @@ void Window::Impl::drawPointSymbol(PointStyle ps, const SDL_FPoint& pos,
       const auto dot = SDL_FRect{
         .x = pos.x - HALF_DOT_SIZE, .y = pos.y - HALF_DOT_SIZE, .w = DOT_SIZE, .h = DOT_SIZE
       };
-      SDL_RenderFillRect(renderer, &dot);
+      SDL_RenderFillRect(rdr, &dot);
       break;
     }
 
@@ -580,33 +582,33 @@ void Window::Impl::drawPointSymbol(PointStyle ps, const SDL_FPoint& pos,
       break;
 
     case PointStyle::Diamond:
-      SDL_RenderLine(renderer, pos.x, pos.y - EXTENT, pos.x + EXTENT, pos.y);
-      SDL_RenderLine(renderer, pos.x + EXTENT, pos.y, pos.x, pos.y + EXTENT);
-      SDL_RenderLine(renderer, pos.x, pos.y + EXTENT, pos.x - EXTENT, pos.y);
-      SDL_RenderLine(renderer, pos.x - EXTENT, pos.y, pos.x, pos.y - EXTENT);
+      SDL_RenderLine(rdr, pos.x, pos.y - EXTENT, pos.x + EXTENT, pos.y);
+      SDL_RenderLine(rdr, pos.x + EXTENT, pos.y, pos.x, pos.y + EXTENT);
+      SDL_RenderLine(rdr, pos.x, pos.y + EXTENT, pos.x - EXTENT, pos.y);
+      SDL_RenderLine(rdr, pos.x - EXTENT, pos.y, pos.x, pos.y - EXTENT);
       break;
 
     case PointStyle::Triangle:
-      SDL_RenderLine(renderer, pos.x, pos.y - EXTENT, pos.x + EXTENT, pos.y + EXTENT);
-      SDL_RenderLine(renderer, pos.x + EXTENT, pos.y + EXTENT, pos.x - EXTENT, pos.y + EXTENT);
-      SDL_RenderLine(renderer, pos.x - EXTENT, pos.y + EXTENT, pos.x, pos.y - EXTENT);
+      SDL_RenderLine(rdr, pos.x, pos.y - EXTENT, pos.x + EXTENT, pos.y + EXTENT);
+      SDL_RenderLine(rdr, pos.x + EXTENT, pos.y + EXTENT, pos.x - EXTENT, pos.y + EXTENT);
+      SDL_RenderLine(rdr, pos.x - EXTENT, pos.y + EXTENT, pos.x, pos.y - EXTENT);
       break;
 
     case PointStyle::TriangleInverted:
-      SDL_RenderLine(renderer, pos.x, pos.y + EXTENT, pos.x + EXTENT, pos.y - EXTENT);
-      SDL_RenderLine(renderer, pos.x + EXTENT, pos.y - EXTENT, pos.x - EXTENT, pos.y - EXTENT);
-      SDL_RenderLine(renderer, pos.x - EXTENT, pos.y - EXTENT, pos.x, pos.y + EXTENT);
+      SDL_RenderLine(rdr, pos.x, pos.y + EXTENT, pos.x + EXTENT, pos.y - EXTENT);
+      SDL_RenderLine(rdr, pos.x + EXTENT, pos.y - EXTENT, pos.x - EXTENT, pos.y - EXTENT);
+      SDL_RenderLine(rdr, pos.x - EXTENT, pos.y - EXTENT, pos.x, pos.y + EXTENT);
       break;
 
     case PointStyle::Star: {
       static constexpr auto TRI_H = EXTENT * 0.866F;
       static constexpr auto TRI_R2 = EXTENT * 0.5F;
-      SDL_RenderLine(renderer, pos.x, pos.y - EXTENT, pos.x + TRI_H, pos.y + TRI_R2);
-      SDL_RenderLine(renderer, pos.x + TRI_H, pos.y + TRI_R2, pos.x - TRI_H, pos.y + TRI_R2);
-      SDL_RenderLine(renderer, pos.x - TRI_H, pos.y + TRI_R2, pos.x, pos.y - EXTENT);
-      SDL_RenderLine(renderer, pos.x, pos.y + EXTENT, pos.x + TRI_H, pos.y - TRI_R2);
-      SDL_RenderLine(renderer, pos.x + TRI_H, pos.y - TRI_R2, pos.x - TRI_H, pos.y - TRI_R2);
-      SDL_RenderLine(renderer, pos.x - TRI_H, pos.y - TRI_R2, pos.x, pos.y + EXTENT);
+      SDL_RenderLine(rdr, pos.x, pos.y - EXTENT, pos.x + TRI_H, pos.y + TRI_R2);
+      SDL_RenderLine(rdr, pos.x + TRI_H, pos.y + TRI_R2, pos.x - TRI_H, pos.y + TRI_R2);
+      SDL_RenderLine(rdr, pos.x - TRI_H, pos.y + TRI_R2, pos.x, pos.y - EXTENT);
+      SDL_RenderLine(rdr, pos.x, pos.y + EXTENT, pos.x + TRI_H, pos.y - TRI_R2);
+      SDL_RenderLine(rdr, pos.x + TRI_H, pos.y - TRI_R2, pos.x - TRI_H, pos.y - TRI_R2);
+      SDL_RenderLine(rdr, pos.x - TRI_H, pos.y - TRI_R2, pos.x, pos.y + EXTENT);
       break;
     }
 
@@ -625,13 +627,14 @@ void Window::Impl::drawPointSymbol(PointStyle ps, const SDL_FPoint& pos,
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawGrid() const {
   static constexpr auto COLOR = SDL_Color{ .r = 48, .g = 48, .b = 48, .a = SDL_ALPHA_OPAQUE };
-  SDL_SetRenderDrawColor(renderer, COLOR.r, COLOR.g, COLOR.b, COLOR.a);
+  auto* rdr = renderer.get();
+  SDL_SetRenderDrawColor(rdr, COLOR.r, COLOR.g, COLOR.b, COLOR.a);
   for (int step = 0;; ++step) {
     const auto gx = x_grid_first + (static_cast<double>(step) * x_grid_step);
     if (gx > x_view_max + (x_grid_step * GRID_EPSILON)) {
       break;
     }
-    SDL_RenderLine(renderer, dataToScreenX(gx), plot_area.y, dataToScreenX(gx),
+    SDL_RenderLine(rdr, dataToScreenX(gx), plot_area.y, dataToScreenX(gx),
                    plot_area.y + plot_area.h);
   }
   for (int step = 0;; ++step) {
@@ -639,7 +642,7 @@ void Window::Impl::drawGrid() const {
     if (gy > view.vy_max + (y_grid_step * GRID_EPSILON)) {
       break;
     }
-    SDL_RenderLine(renderer, plot_area.x, dataToScreenY(gy), plot_area.x + plot_area.w,
+    SDL_RenderLine(rdr, plot_area.x, dataToScreenY(gy), plot_area.x + plot_area.w,
                    dataToScreenY(gy));
   }
 }
@@ -647,17 +650,19 @@ void Window::Impl::drawGrid() const {
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawAxes() const {
   static constexpr auto COLOR = SDL_Color{ .r = 200, .g = 200, .b = 200, .a = SDL_ALPHA_OPAQUE };
-  SDL_SetRenderDrawColor(renderer, COLOR.r, COLOR.g, COLOR.b, COLOR.a);
+  auto* rdr = renderer.get();
+  SDL_SetRenderDrawColor(rdr, COLOR.r, COLOR.g, COLOR.b, COLOR.a);
   const std::array<SDL_FPoint, 3> pts{
     SDL_FPoint{ .x = plot_area.x, .y = plot_area.y },
     SDL_FPoint{ .x = plot_area.x, .y = plot_area.y + plot_area.h },
     SDL_FPoint{ .x = plot_area.x + plot_area.w, .y = plot_area.y + plot_area.h }
   };
-  SDL_RenderLines(renderer, pts.data(), static_cast<int>(pts.size()));
+  SDL_RenderLines(rdr, pts.data(), static_cast<int>(pts.size()));
 }
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawTraces() const {
+  auto* rdr = renderer.get();
   auto& pts = pts_scratch;
   auto& step_pts = step_pts_scratch;
   for (const auto& tv : trace_views) {
@@ -666,7 +671,7 @@ void Window::Impl::drawTraces() const {
     }
 
     const auto color = toSDLColor(tv.color);
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor(rdr, color.r, color.g, color.b, color.a);
 
     pts.clear();
     pts.reserve(tv.samples.size());
@@ -686,7 +691,7 @@ void Window::Impl::drawTraces() const {
 
     switch (tv.line_style) {
       case LineStyle::Line:
-        SDL_RenderLines(renderer, pts.data(), static_cast<int>(pts.size()));
+        SDL_RenderLines(rdr, pts.data(), static_cast<int>(pts.size()));
         break;
 
       case LineStyle::Step: {
@@ -699,14 +704,14 @@ void Window::Impl::drawTraces() const {
           step_pts.push_back(pts[i]);
         }
         // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-        SDL_RenderLines(renderer, step_pts.data(), static_cast<int>(step_pts.size()));
+        SDL_RenderLines(rdr, step_pts.data(), static_cast<int>(step_pts.size()));
         break;
       }
 
       case LineStyle::Lollipop: {
         const float base = std::clamp(dataToScreenY(0.0), plot_area.y, plot_area.y + plot_area.h);
         for (const auto& pp : pts) {
-          SDL_RenderLine(renderer, pp.x, base, pp.x, pp.y);
+          SDL_RenderLine(rdr, pp.x, base, pp.x, pp.y);
         }
         break;
       }
@@ -728,9 +733,11 @@ void Window::Impl::drawTicks() const {
   static constexpr SDL_Color TICK_COLOR{ .r = 180, .g = 180, .b = 180, .a = SDL_ALPHA_OPAQUE };
   static constexpr auto LBL_BUF_SZ = TICK_LABEL_LEN + 10U;
   static constexpr auto HALF = 0.5F;
+  auto* rdr = renderer.get();
+  auto* tfont = tick_font.get();
 
   // Y ticks
-  SDL_SetRenderDrawColor(renderer, TICK_COLOR.r, TICK_COLOR.g, TICK_COLOR.b, TICK_COLOR.a);
+  SDL_SetRenderDrawColor(rdr, TICK_COLOR.r, TICK_COLOR.g, TICK_COLOR.b, TICK_COLOR.a);
   for (int step = 0;; ++step) {
     const auto gy = y_grid_first + (static_cast<double>(step) * y_grid_step);
     if (gy > view.vy_max + (y_grid_step * GRID_EPSILON)) {
@@ -741,12 +748,12 @@ void Window::Impl::drawTicks() const {
       continue;
     }
     const auto sy = plot_area.y + plot_area.h - (norm * plot_area.h);
-    SDL_RenderLine(renderer, plot_area.x - TICK_LEN, sy, plot_area.x, sy);
+    SDL_RenderLine(rdr, plot_area.x - TICK_LEN, sy, plot_area.x, sy);
     auto lbl = std::array<char, LBL_BUF_SZ>{};
     std::vformat_to(lbl.begin(), "{:.{}g}", std::make_format_args(gy, TICK_LABEL_LEN));
     int tw = 0;
     int th = 0;
-    TTF_GetStringSize(tick_font, lbl.data(), 0, &tw, &th);
+    TTF_GetStringSize(tfont, lbl.data(), 0, &tw, &th);
     const SDL_FPoint pos = { .x = plot_area.x - TICK_LEN - static_cast<float>(tw) - MARGIN_SZ,
                              .y = sy - (HALF * static_cast<float>(th)) };
     renderTickText(lbl.data(), pos, TICK_COLOR);
@@ -754,7 +761,7 @@ void Window::Impl::drawTicks() const {
 
   // X ticks
   const auto base_y = plot_area.y + plot_area.h;
-  SDL_SetRenderDrawColor(renderer, TICK_COLOR.r, TICK_COLOR.g, TICK_COLOR.b, TICK_COLOR.a);
+  SDL_SetRenderDrawColor(rdr, TICK_COLOR.r, TICK_COLOR.g, TICK_COLOR.b, TICK_COLOR.a);
   for (int step = 0;; ++step) {
     const auto gx = x_grid_first + (static_cast<double>(step) * x_grid_step);
     if (gx > x_view_max + (x_grid_step * GRID_EPSILON)) {
@@ -764,12 +771,12 @@ void Window::Impl::drawTicks() const {
     if (sx < plot_area.x || sx > plot_area.x + plot_area.w) {
       continue;
     }
-    SDL_RenderLine(renderer, sx, base_y, sx, base_y + TICK_LEN);
+    SDL_RenderLine(rdr, sx, base_y, sx, base_y + TICK_LEN);
     auto lbl = std::array<char, LBL_BUF_SZ>{};
     std::vformat_to(lbl.begin(), "{:.{}g}", std::make_format_args(gx, TICK_LABEL_LEN));
     int tw = 0;
     int th = 0;
-    TTF_GetStringSize(tick_font, lbl.data(), 0, &tw, &th);
+    TTF_GetStringSize(tfont, lbl.data(), 0, &tw, &th);
     const SDL_FPoint pos = { .x = sx - (HALF * static_cast<float>(tw)),
                              .y = base_y + TICK_LEN + MARGIN_SZ };
     renderTickText(lbl.data(), pos, TICK_COLOR);
@@ -778,18 +785,18 @@ void Window::Impl::drawTicks() const {
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawAxisLabels() const {
-  if (x_label_text != nullptr) {
+  if (auto* txt = x_label_text.get(); txt != nullptr) {
     int tw = 0;
     int th = 0;
-    TTF_GetTextSize(x_label_text, &tw, &th);
-    TTF_DrawRendererText(x_label_text, plot_area.x + plot_area.w - static_cast<float>(tw),
+    TTF_GetTextSize(txt, &tw, &th);
+    TTF_DrawRendererText(txt, plot_area.x + plot_area.w - static_cast<float>(tw),
                          static_cast<float>(render_h) - BORDER_SZ - static_cast<float>(th));
   }
-  if (y_label_text != nullptr) {
+  if (auto* txt = y_label_text.get(); txt != nullptr) {
     int tw = 0;
     int th = 0;
-    TTF_GetTextSize(y_label_text, &tw, &th);
-    TTF_DrawRendererText(y_label_text, plot_area.x - static_cast<float>(tw) - MARGIN_SZ,
+    TTF_GetTextSize(txt, &tw, &th);
+    TTF_DrawRendererText(txt, plot_area.x - static_cast<float>(tw) - MARGIN_SZ,
                          plot_area.y - static_cast<float>(th));
   }
 }
@@ -810,9 +817,9 @@ void Window::Impl::drawLegend() {
   };
   const bool need_rebuild =
       (legend.texture == nullptr) || (legend.texts.size() != num_traces) ||
-      (legend.cached_colors.size() != num_traces) ||
+      (legend.colors.size() != num_traces) ||
       !std::equal(
-          trace_views.begin(), trace_views.end(), legend.cached_colors.begin(),
+          trace_views.begin(), trace_views.end(), legend.colors.begin(),
           [&](const Trace::View& tv, const Color& cached) { return color_eq(tv.color, cached); });
 
   if (need_rebuild && not rebuildLegend()) {
@@ -829,19 +836,20 @@ void Window::Impl::drawLegend() {
     .w = legend.rect.w,
     .h = legend.rect.h,
   };
-  SDL_CHECK(SDL_RenderTexture(renderer, legend.texture, nullptr, &dst));
+  SDL_CHECK(SDL_RenderTexture(renderer.get(), legend.texture.get(), nullptr, &dst));
 }
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawTitle() const {
-  if (title_text == nullptr) {
+  auto* txt = title_text.get();
+  if (txt == nullptr) {
     return;
   }
   static constexpr auto HALF = 0.5F;
   int tw = 0;
   int th = 0;
-  TTF_GetTextSize(title_text, &tw, &th);
-  TTF_DrawRendererText(title_text, plot_area.x + (HALF * (plot_area.w - static_cast<float>(tw))),
+  TTF_GetTextSize(txt, &tw, &th);
+  TTF_DrawRendererText(txt, plot_area.x + (HALF * (plot_area.w - static_cast<float>(tw))),
                        BORDER_SZ);
 }
 
@@ -850,7 +858,7 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
   SDL_CHECK(SDL_InitSubSystem(SDL_INIT_VIDEO));
   SDL_CHECK(TTF_Init());
 
-  d_->window = SDL_CHECK(SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE));
+  d_->window.reset(SDL_CHECK(SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE)));
 
   const auto num_supported_renderers = SDL_GetNumRenderDrivers();
   auto supported_renderers = std::vector<std::string_view>{};
@@ -862,36 +870,38 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
   // Choose an available renderer in order of preferance, otherwise fallback to a default
   static constexpr auto PREFERRED_RENDERERS = { "gpu", "opengl", "opengles2" };
   for (const auto& renderer_name : PREFERRED_RENDERERS) {
-    d_->renderer = SDL_CHECK(SDL_CreateRenderer(d_->window, renderer_name));
+    d_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(d_->window.get(), renderer_name)));
     if (d_->renderer != nullptr) {
       break;
     }
   }
   if (d_->renderer == nullptr) {
-    d_->renderer = SDL_CHECK(SDL_CreateRenderer(d_->window, nullptr));
+    d_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(d_->window.get(), nullptr)));
   }
-  std::println("Using renderer: {}", SDL_GetRendererName(d_->renderer));
+  std::println("Using renderer: {}", SDL_GetRendererName(d_->renderer.get()));
 
-  d_->text_engine = SDL_CHECK(TTF_CreateRendererTextEngine(d_->renderer));
-  if (!SDL_SetRenderVSync(d_->renderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {  // adaptive VSync optional
-    SDL_SetRenderVSync(d_->renderer, 1);
+  d_->text_engine.reset(SDL_CHECK(TTF_CreateRendererTextEngine(d_->renderer.get())));
+  if (!SDL_SetRenderVSync(d_->renderer.get(), SDL_RENDERER_VSYNC_ADAPTIVE)) {  // adaptive VSync
+                                                                               // optional
+    SDL_SetRenderVSync(d_->renderer.get(), 1);
   }
-  d_->window_id = SDL_GetWindowID(d_->window);
+  d_->window_id = SDL_GetWindowID(d_->window.get());
   if (d_->window_id == 0) {
     std::println(stderr, "SDL_GetWindowID: {}", SDL_GetError());
   }
 
   // Load fonts
   const auto font_bytes = fontData();
-  const auto open_font = [&](float pt) {
+  const auto open_font = [&](float pt) -> TTFFontPtr {
     auto* io = SDL_CHECK(SDL_IOFromConstMem(font_bytes.data(), font_bytes.size()));
-    return (io != nullptr) ? SDL_CHECK(TTF_OpenFontIO(io, /*closeio=*/true, pt)) : nullptr;
+    return { (io != nullptr) ? SDL_CHECK(TTF_OpenFontIO(io, /*closeio=*/true, pt)) : nullptr,
+             TTF_CloseFont };
   };
   d_->default_font = open_font(Impl::DEFAULT_FONT_PT);
   d_->tick_font = open_font(Impl::TICK_FONT_PT);
   d_->title_font = open_font(Impl::TITLE_FONT_PT);
   if (d_->title_font != nullptr) {
-    TTF_SetFontStyle(d_->title_font, TTF_STYLE_BOLD);
+    TTF_SetFontStyle(d_->title_font.get(), TTF_STYLE_BOLD);
   }
   d_->rebuildLabelText(AxisId::AxisX, "X");
   d_->rebuildLabelText(AxisId::AxisY, "Y");
@@ -902,22 +912,7 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
 
 //-------------------------------------------------------------------------------------------------
 Window::~Window() {
-  TTF_DestroyText(d_->title_text);
-  TTF_DestroyText(d_->x_label_text);
-  TTF_DestroyText(d_->y_label_text);
-  for (auto* text : d_->legend.texts) {
-    TTF_DestroyText(text);
-  }
-  d_->legend.texts.clear();
-  SDL_DestroyTexture(d_->legend.texture);
-  TTF_DestroyText(d_->tick_scratch);
-  TTF_DestroyRendererTextEngine(d_->text_engine);
-  TTF_CloseFont(d_->default_font);
-  TTF_CloseFont(d_->tick_font);
-  TTF_CloseFont(d_->title_font);
-  SDL_DestroyRenderer(d_->renderer);
-  SDL_DestroyWindow(d_->window);
-
+  d_.reset();
   TTF_Quit();
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
@@ -925,7 +920,7 @@ Window::~Window() {
 //-------------------------------------------------------------------------------------------------
 void Window::setTitleText(const std::string& title) {
   d_->rebuildTitleText(title);
-  SDL_CHECK(SDL_SetWindowTitle(d_->window, title.c_str()));
+  SDL_CHECK(SDL_SetWindowTitle(d_->window.get(), title.c_str()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -989,7 +984,7 @@ void Window::Impl::onMouseMotion(const SDL_MouseMotionEvent& ev) {
     legend.rect.y = ev.y - legend.drag_delta.y;
     int win_w = 0;
     int win_h = 0;
-    SDL_GetWindowSize(window, &win_w, &win_h);
+    SDL_GetWindowSize(window.get(), &win_w, &win_h);
     legend.norm.x = legend.rect.x / static_cast<float>(win_w);
     legend.norm.y = legend.rect.y / static_cast<float>(win_h);
     return;
@@ -1110,8 +1105,9 @@ void Window::render() {
   }
 
   d_->updateView();
-  SDL_SetRenderDrawColor(d_->renderer, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
-  SDL_RenderClear(d_->renderer);
+  auto* rdr = d_->renderer.get();
+  SDL_SetRenderDrawColor(rdr, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
+  SDL_RenderClear(rdr);
 
   d_->drawTitle();
   d_->drawGrid();
@@ -1124,7 +1120,7 @@ void Window::render() {
     d_->drawFps();
   }
 
-  SDL_RenderPresent(d_->renderer);
+  SDL_RenderPresent(rdr);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1148,8 +1144,8 @@ void Window::Impl::drawFps() {
   static constexpr auto TEXT_BUF_SIZE = 32;
   auto buf = std::array<char, TEXT_BUF_SIZE>{};
   std::format_to_n(buf.begin(), buf.size() - 1, "FPS: {:.1f}", static_cast<double>(fps.frame_rate));
-  SDL_SetRenderDrawColor(renderer, COLOR.r, COLOR.g, COLOR.b, COLOR.a);
-  SDL_RenderDebugText(renderer, MARGIN_SZ, MARGIN_SZ, buf.data());
+  SDL_SetRenderDrawColor(renderer.get(), COLOR.r, COLOR.g, COLOR.b, COLOR.a);
+  SDL_RenderDebugText(renderer.get(), MARGIN_SZ, MARGIN_SZ, buf.data());
 }
 
 }  // namespace grape::plot
