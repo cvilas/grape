@@ -164,7 +164,6 @@ struct Window::Impl {
   TTF_Text* title_text = nullptr;
   TTF_Text* x_label_text = nullptr;
   TTF_Text* y_label_text = nullptr;
-  std::vector<TTF_Text*> legend_texts;
 
   SDL_FRect plot_area{};  // plot area layout
 
@@ -208,6 +207,7 @@ struct Window::Impl {
     bool dragging{};
     SDL_FPoint drag_delta{};
     SDL_Texture* texture = nullptr;    //!< cached; rebuilt only when content changes
+    std::vector<TTF_Text*> texts;      //!< one TTF_Text per trace label
     std::vector<Color> cached_colors;  //!< colour snapshot for dirty detection
   } legend{};
 
@@ -260,7 +260,7 @@ struct Window::Impl {
 };
 
 //-------------------------------------------------------------------------------------------------
-void Window::Impl::recalcLayout() {  // TODO: remove legend calcs
+void Window::Impl::recalcLayout() {
   int ww = 0;
   int wh = 0;
   SDL_CHECK(SDL_GetWindowSize(window, &ww, &wh));
@@ -419,10 +419,10 @@ void Window::Impl::rebuildLabelText(AxisId axis_id, const std::string& text) {
 
 //-------------------------------------------------------------------------------------------------
 auto Window::Impl::rebuildLegend() -> bool {
-  for (auto* txt : legend_texts) {
+  for (auto* txt : legend.texts) {
     TTF_DestroyText(txt);
   }
-  legend_texts.clear();
+  legend.texts.clear();
   legend.name_maxlen = 0;
   if (legend.texture != nullptr) {
     SDL_DestroyTexture(legend.texture);
@@ -441,7 +441,7 @@ auto Window::Impl::rebuildLegend() -> bool {
 
   // Build TTF_Text objects and measure the widest label
   static constexpr auto TX_COLOR = SDL_Color{ .r = 230, .g = 230, .b = 230, .a = SDL_ALPHA_OPAQUE };
-  legend_texts.reserve(num_traces);
+  legend.texts.reserve(num_traces);
   for (const auto& tv : trace_views) {
     auto* txt =
         SDL_CHECK(TTF_CreateText(text_engine, default_font, tv.name.data(), tv.name.size()));
@@ -452,7 +452,7 @@ auto Window::Impl::rebuildLegend() -> bool {
     int tw = 0;
     SDL_CHECK(TTF_GetTextSize(txt, &tw, nullptr));
     legend.name_maxlen = std::max(legend.name_maxlen, tw);
-    legend_texts.push_back(txt);
+    legend.texts.push_back(txt);
   }
 
   // Build the legend texture
@@ -492,7 +492,7 @@ auto Window::Impl::rebuildLegend() -> bool {
     const auto color = toSDLColor(tv.color);
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_RenderLine(renderer, MARGIN_SZ, mid, MARGIN_SZ + SWATCH_LEN, mid);
-    if (auto* txt = legend_texts.at(ii); txt != nullptr) {
+    if (auto* txt = legend.texts.at(ii); txt != nullptr) {
       TTF_DrawRendererText(txt, MARGIN_SZ + SWATCH_LEN + MARGIN_SZ, ry);
     }
   }
@@ -809,7 +809,7 @@ void Window::Impl::drawLegend() {
     return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a;
   };
   const bool need_rebuild =
-      (legend.texture == nullptr) || (legend_texts.size() != num_traces) ||
+      (legend.texture == nullptr) || (legend.texts.size() != num_traces) ||
       (legend.cached_colors.size() != num_traces) ||
       !std::equal(
           trace_views.begin(), trace_views.end(), legend.cached_colors.begin(),
@@ -896,20 +896,6 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
   d_->rebuildLabelText(AxisId::AxisX, "X");
   d_->rebuildLabelText(AxisId::AxisY, "Y");
   d_->rebuildTitleText(title);
-
-  // Legend default: top-right of plot area.  Compute normX/normY from
-  // the intended pixel position so recalcLayout() can restore them later.
-  {
-    static constexpr auto INIT_OFFSET_X = 130.0F;
-    static constexpr auto INIT_OFFSET_Y = 10.0F;
-
-    int win_ww = 0;
-    int win_hh = 0;
-    SDL_CHECK(SDL_GetWindowSize(d_->window, &win_ww, &win_hh));
-    d_->legend.norm.x =
-        (static_cast<float>(width) - Impl::MARGIN_SZ - INIT_OFFSET_X) / static_cast<float>(win_ww);
-    d_->legend.norm.y = (Impl::MARGIN_SZ + INIT_OFFSET_Y) / static_cast<float>(win_hh);
-  }
   d_->recalcLayout();
   d_->zoom_history.reserve(Impl::MAX_ZOOM_HISTORY);
 }
@@ -919,10 +905,10 @@ Window::~Window() {
   TTF_DestroyText(d_->title_text);
   TTF_DestroyText(d_->x_label_text);
   TTF_DestroyText(d_->y_label_text);
-  for (auto* text : d_->legend_texts) {
+  for (auto* text : d_->legend.texts) {
     TTF_DestroyText(text);
   }
-  d_->legend_texts.clear();
+  d_->legend.texts.clear();
   SDL_DestroyTexture(d_->legend.texture);
   TTF_DestroyText(d_->tick_scratch);
   TTF_DestroyRendererTextEngine(d_->text_engine);
