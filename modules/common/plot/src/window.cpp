@@ -16,6 +16,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "font.h"
+#include "grape/exception.h"
 
 namespace {
 
@@ -111,8 +112,8 @@ auto niceStep(double range, int num_steps) -> double {
 //-------------------------------------------------------------------------------------------------
 /// Log an SDL/TTF error and return the original value when a bool-returning call fails.
 auto sdlCheck(bool ok, const char* expr) -> bool {
-  if (!ok) {
-    std::println(stderr, "{}: {}", expr, SDL_GetError());
+  if (not ok) {
+    grape::panic<grape::Exception>(std::format("{}: {}", expr, SDL_GetError()));
   }
   return ok;
 }
@@ -122,7 +123,7 @@ auto sdlCheck(bool ok, const char* expr) -> bool {
 template <typename T>
 auto sdlCheck(T* ptr, const char* expr) -> T* {
   if (ptr == nullptr) {
-    std::println(stderr, "{}: {}", expr, SDL_GetError());
+    grape::panic<grape::Exception>(std::format("{}: {}", expr, SDL_GetError()));
   }
   return ptr;
 }
@@ -523,8 +524,8 @@ void Window::Impl::renderTickText(const char* text, const SDL_FPoint& pos,
   } else if (!SDL_CHECK(TTF_SetTextString(tick_scratch.get(), text, 0))) {
     return;
   }
-  SDL_CHECK(TTF_SetTextColor(tick_scratch.get(), col.r, col.g, col.b, col.a));
-  SDL_CHECK(TTF_DrawRendererText(tick_scratch.get(), pos.x, pos.y));
+  TTF_SetTextColor(tick_scratch.get(), col.r, col.g, col.b, col.a);
+  TTF_DrawRendererText(tick_scratch.get(), pos.x, pos.y);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -878,7 +879,7 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
   if (d_->renderer == nullptr) {
     d_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(d_->window.get(), nullptr)));
   }
-  std::println("Using renderer: {}", SDL_GetRendererName(d_->renderer.get()));
+  std::println(stderr, "Using renderer: {}", SDL_GetRendererName(d_->renderer.get()));
 
   d_->text_engine.reset(SDL_CHECK(TTF_CreateRendererTextEngine(d_->renderer.get())));
   if (!SDL_SetRenderVSync(d_->renderer.get(), SDL_RENDERER_VSYNC_ADAPTIVE)) {  // adaptive VSync
