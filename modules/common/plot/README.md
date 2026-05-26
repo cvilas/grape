@@ -20,6 +20,7 @@
 
 ## Roadmap
 
+- [ ] Avoid `snap_.erase()`. Use buffer as a ring and return two contiguous `std::span<Sample>`
 - [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`
 - [ ] Refactor `Window::trace(name) -> std::optional<Trace&>` to only return existing `Trace`
 - [ ] Highlight selected trace (reduce opacity of all other traces)
