@@ -35,7 +35,7 @@ auto main() -> int {
     // data generation thread
     const auto data_thread = std::jthread([&](const std::stop_token& stoken) {
       using clock = std::chrono::steady_clock;
-      static constexpr auto UPDATE_INTERVAL = std::chrono::milliseconds(10);
+      static constexpr auto UPDATE_INTERVAL = std::chrono::milliseconds(1);
       auto ticks = std::uint64_t{};
       const auto t0 = clock::now();
       while (not stoken.stop_requested() and plot.isOpen()) {
