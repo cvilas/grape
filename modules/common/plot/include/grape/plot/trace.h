@@ -62,9 +62,9 @@ private:
   auto snapshot() -> View;
 
   static constexpr auto FIFO_CAPACITY = 1024;
-  FIFOBuffer buf_;
+  FIFOBuffer front_buffer_;
   std::string name_;
-  SnapshotBuffer snap_;
+  SnapshotBuffer back_buffer_;
   LineStyle line_style_{ LineStyle::Line };
   PointStyle point_style_{ PointStyle::None };
   Color color_{};
