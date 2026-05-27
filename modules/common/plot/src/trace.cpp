@@ -11,9 +11,8 @@ namespace grape::plot {
 //-------------------------------------------------------------------------------------------------
 Trace::Trace(std::string name, std::size_t max_history)
   : buf_({ .frame_length = sizeof(Sample), .num_frames = FIFO_CAPACITY })
-  , capacity_(max_history)
-  , name_(std::move(name)) {
-  snap_.reserve(capacity_);
+  , name_(std::move(name))
+  , snap_(max_history) {
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -63,15 +62,11 @@ auto Trace::snapshot() -> View {
   while (buf_.visitToRead([&](std::span<const std::byte> frame) {
     Sample sample{};
     std::memcpy(&sample, frame.data(), sizeof(Sample));
-    snap_.push_back(sample);
+    snap_.pushBack(sample);
   })) {
   }
-  if (snap_.size() > capacity_) {
-    snap_.erase(snap_.begin(),
-                snap_.begin() + static_cast<std::ptrdiff_t>(snap_.size() - capacity_));
-  }
   return { .name = name_,
-           .samples = snap_,
+           .samples = snap_.view(),
            .color = color_,
            .line_style = line_style_,
            .point_style = point_style_ };

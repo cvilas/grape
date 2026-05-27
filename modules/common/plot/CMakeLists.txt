@@ -15,6 +15,7 @@ set(SOURCES
     src/trace.cpp
     src/font.cpp
     src/font.h
+    include/grape/plot/snapshot_buffer.h
     include/grape/plot/style.h
     include/grape/plot/window.h
     include/grape/plot/trace.h)
@@ -27,3 +28,4 @@ define_module_library(
   PUBLIC_LINK_LIBS "grape::base;SDL3::SDL3;SDL3_ttf::SDL3_ttf")
 
 add_subdirectory(examples)
+add_subdirectory(tests)

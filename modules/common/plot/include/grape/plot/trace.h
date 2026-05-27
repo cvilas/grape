@@ -7,9 +7,10 @@
 #include <span>
 #include <string>
 #include <string_view>
-#include <vector>
+#include <utility>
 
 #include "grape/fifo_buffer.h"
+#include "grape/plot/snapshot_buffer.h"
 #include "grape/plot/style.h"
 
 namespace grape::plot {
@@ -46,10 +47,11 @@ private:
   /// @param max_history The maximum samples to retain in a snapshot.
   explicit Trace(std::string name, std::size_t max_history);
 
-  /// View of a trace snapshot (entire history).
+  /// View of a trace snapshot (entire history). Samples are split into two contiguous spans in
+  /// chronological order; the second span is empty when the buffer hasn't wrapped.
   struct View {
     std::string_view name;
-    std::span<const Sample> samples;
+    std::pair<std::span<const Sample>, std::span<const Sample>> samples;
     Color color;
     LineStyle line_style;
     PointStyle point_style;
@@ -61,9 +63,8 @@ private:
 
   static constexpr auto FIFO_CAPACITY = 1024;
   FIFOBuffer buf_;
-  std::size_t capacity_;
   std::string name_;
-  std::vector<Sample> snap_;
+  SnapshotBuffer snap_;
   LineStyle line_style_{ LineStyle::Line };
   PointStyle point_style_{ PointStyle::None };
   Color color_{};

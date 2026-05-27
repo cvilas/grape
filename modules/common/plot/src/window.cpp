@@ -293,9 +293,10 @@ void Window::Impl::updateView() {
   auto dx_max = std::numeric_limits<double>::lowest();
 
   for (const auto& tv : trace_views) {
-    if (not tv.samples.empty()) {
-      dx_min = std::min(dx_min, tv.samples.front().x);
-      dx_max = std::max(dx_max, tv.samples.back().x);
+    const auto [s1, s2] = tv.samples;
+    if (not s1.empty()) {
+      dx_min = std::min(dx_min, s1.front().x);
+      dx_max = std::max(dx_max, (s2.empty() ? s1 : s2).back().x);
     }
   }
   if (dx_min > dx_max) {
@@ -323,10 +324,12 @@ void Window::Impl::updateView() {
     view.vy_min = std::numeric_limits<double>::max();
     view.vy_max = std::numeric_limits<double>::lowest();
     for (const auto& tv : trace_views) {
-      const auto begin = std::ranges::lower_bound(tv.samples, x_view_min, {}, &Sample::x);
-      for (auto it = begin; it != tv.samples.end() && it->x <= x_view_max; ++it) {
-        view.vy_min = std::min(view.vy_min, it->y);
-        view.vy_max = std::max(view.vy_max, it->y);
+      for (const auto& span : { tv.samples.first, tv.samples.second }) {
+        const auto begin = std::ranges::lower_bound(span, x_view_min, {}, &Sample::x);
+        for (auto it = begin; it != span.end() && it->x <= x_view_max; ++it) {
+          view.vy_min = std::min(view.vy_min, it->y);
+          view.vy_max = std::max(view.vy_max, it->y);
+        }
       }
     }
     if (view.vy_min <= view.vy_max) {
@@ -667,7 +670,8 @@ void Window::Impl::drawTraces() const {
   auto& pts = pts_scratch;
   auto& step_pts = step_pts_scratch;
   for (const auto& tv : trace_views) {
-    if (tv.samples.empty()) {
+    const auto [s1, s2] = tv.samples;
+    if (s1.empty()) {
       continue;
     }
 
@@ -675,16 +679,18 @@ void Window::Impl::drawTraces() const {
     SDL_SetRenderDrawColor(rdr, color.r, color.g, color.b, color.a);
 
     pts.clear();
-    pts.reserve(tv.samples.size());
+    pts.reserve(s1.size() + s2.size());
 
     static constexpr auto CLIP_PAD = 0.005;
     const auto x_pad = (x_view_max - x_view_min) * CLIP_PAD;
 
-    for (const auto& sample : tv.samples) {
-      if (sample.x < x_view_min - x_pad || sample.x > x_view_max + x_pad) {
-        continue;
+    for (const auto& span : { s1, s2 }) {
+      for (const auto& sample : span) {
+        if (sample.x < x_view_min - x_pad || sample.x > x_view_max + x_pad) {
+          continue;
+        }
+        pts.push_back({ .x = dataToScreenX(sample.x), .y = dataToScreenY(sample.y) });
       }
-      pts.push_back({ .x = dataToScreenX(sample.x), .y = dataToScreenY(sample.y) });
     }
     if (pts.empty()) {
       continue;
