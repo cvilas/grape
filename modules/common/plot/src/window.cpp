@@ -110,7 +110,7 @@ auto niceStep(double range, int num_steps) -> double {
 }
 
 //-------------------------------------------------------------------------------------------------
-/// Log an SDL/TTF error and return the original value when a bool-returning call fails.
+/// Throw on SDL/TTF error or return the original value when a bool-returning call fails.
 auto sdlCheck(bool ok, const char* expr) -> bool {
   if (not ok) {
     grape::panic<grape::Exception>(std::format("{}: {}", expr, SDL_GetError()));
@@ -119,7 +119,7 @@ auto sdlCheck(bool ok, const char* expr) -> bool {
 }
 
 //-------------------------------------------------------------------------------------------------
-/// Log an SDL/TTF error and return the original pointer when a pointer-returning call fails.
+/// Throw on SDL/TTF error or return the original pointer when a pointer-returning call fails.
 template <typename T>
 auto sdlCheck(T* ptr, const char* expr) -> T* {
   if (ptr == nullptr) {
@@ -137,6 +137,42 @@ using SDLTexturePtr = std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)>;
 using TTFEnginePtr = std::unique_ptr<TTF_TextEngine, void (*)(TTF_TextEngine*)>;
 using TTFFontPtr = std::unique_ptr<TTF_Font, void (*)(TTF_Font*)>;
 using TTFTextPtr = std::unique_ptr<TTF_Text, void (*)(TTF_Text*)>;
+
+//-------------------------------------------------------------------------------------------------
+// Decimate to screen space, at most 2 * horizontal plot area pixel resolution, retaining both peak
+// and trough values emitted in chronological order, so that we do not miss any useful information.
+void decimateMinMax(std::vector<SDL_FPoint>& pts, std::size_t max_pts) {
+  if (pts.size() <= max_pts) {
+    return;
+  }
+  const auto total = pts.size();
+  std::size_t out = 0;
+  for (std::size_t bucket = 0; bucket < max_pts; ++bucket) {
+    // Distribute remainder evenly: each bucket gets floor(N/M) or ceil(N/M) points.
+    // Using (bucket * N) / M avoids a large last-bucket when N % M != 0.
+    const auto lo = (bucket * total) / max_pts;
+    const auto hi = ((bucket + 1) * total) / max_pts;
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    auto* peak = &pts[lo];    // min screen-y = visual top = data maximum
+    auto* trough = &pts[lo];  // max screen-y = visual bottom = data minimum
+    for (auto i = lo + 1; i < hi; ++i) {
+      if (pts[i].y < peak->y) {
+        peak = &pts[i];
+      }
+      if (pts[i].y > trough->y) {
+        trough = &pts[i];
+      }
+    }
+    const auto* first = (peak->x <= trough->x) ? peak : trough;
+    const auto* second = (peak->x <= trough->x) ? trough : peak;
+    pts[out++] = *first;
+    if (peak != trough) {
+      pts[out++] = *second;
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+  }
+  pts.resize(out);
+}
 
 }  // namespace
 
@@ -669,6 +705,7 @@ void Window::Impl::drawTraces() const {
   auto* rdr = renderer.get();
   auto& pts = pts_scratch;
   auto& step_pts = step_pts_scratch;
+  const auto max_pts = static_cast<std::size_t>(plot_area.w);
   for (const auto& tv : trace_views) {
     const auto [s1, s2] = tv.samples;
     if (s1.empty()) {
@@ -695,6 +732,8 @@ void Window::Impl::drawTraces() const {
     if (pts.empty()) {
       continue;
     }
+
+    decimateMinMax(pts, max_pts);
 
     switch (tv.line_style) {
       case LineStyle::Line:
