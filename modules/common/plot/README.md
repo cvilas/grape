@@ -20,7 +20,6 @@
 
 ## Roadmap
 
-- [ ] Use textures for title and labels, just like legends. They dont even resize on window resize
 - [ ] Learn how to benchmark performance. 
 - [ ] Benchmark performance (fps) and resource usage (memory, GPU) against QWT
 - [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`

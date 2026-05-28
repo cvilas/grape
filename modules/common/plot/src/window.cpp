@@ -203,11 +203,23 @@ struct Window::Impl {
   std::vector<std::unique_ptr<Trace>> traces;
   std::vector<Trace::View> trace_views;  //!< Per-frame snapshot
 
-  // Text-texture cache
   TTFEnginePtr text_engine{ nullptr, TTF_DestroyRendererTextEngine };
-  TTFTextPtr title_text{ nullptr, TTF_DestroyText };
-  TTFTextPtr x_label_text{ nullptr, TTF_DestroyText };
-  TTFTextPtr y_label_text{ nullptr, TTF_DestroyText };
+
+  // Pre-rendered textures for static labels (rebuilt only when text changes, not per frame)
+  struct TextTexture {
+    SDLTexturePtr texture{ nullptr, SDL_DestroyTexture };
+    int w = 0;
+    int h = 0;
+    [[nodiscard]] auto empty() const noexcept -> bool {
+      return texture == nullptr;
+    }
+  };
+  TextTexture title_tex{};
+  TextTexture x_label_tex{};
+  TextTexture y_label_tex{};
+
+  auto makeTextTexture(TTF_Font* font, SDL_Color color, const std::string& text) const
+      -> TextTexture;
 
   SDL_FRect plot_area{};  // plot area layout
 
@@ -427,39 +439,53 @@ auto Window::Impl::isLegendHit(float mx, float my) const -> bool {
 }
 
 //-------------------------------------------------------------------------------------------------
+auto Window::Impl::makeTextTexture(TTF_Font* font, SDL_Color color, const std::string& text) const
+    -> TextTexture {
+  if (text_engine == nullptr || text.empty()) {
+    return {};
+  }
+  const TTFTextPtr txt{ SDL_CHECK(TTF_CreateText(text_engine.get(), font, text.c_str(), 0)),
+                        TTF_DestroyText };
+  if (txt == nullptr) {
+    return {};
+  }
+  SDL_CHECK(TTF_SetTextColor(txt.get(), color.r, color.g, color.b, color.a));
+  int tw = 0;
+  int th = 0;
+  TTF_GetTextSize(txt.get(), &tw, &th);
+  if (tw <= 0 || th <= 0) {
+    return {};
+  }
+  auto* tex =
+      SDL_CreateTexture(renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, tw, th);
+  if (tex == nullptr) {
+    return {};
+  }
+  TextTexture result{ .texture = { tex, SDL_DestroyTexture }, .w = tw, .h = th };
+  SDL_CHECK(SDL_SetTextureBlendMode(result.texture.get(), SDL_BLENDMODE_BLEND));
+  SDL_CHECK(SDL_SetRenderTarget(renderer.get(), result.texture.get()));
+  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
+  SDL_RenderClear(renderer.get());
+  TTF_DrawRendererText(txt.get(), 0.F, 0.F);
+  SDL_CHECK(SDL_SetRenderTarget(renderer.get(), nullptr));
+  return result;
+}
+
+//-------------------------------------------------------------------------------------------------
 void Window::Impl::rebuildTitleText(const std::string& text) {
   static constexpr auto COLOR = SDL_Color{ .r = 240, .g = 240, .b = 240, .a = SDL_ALPHA_OPAQUE };
-  title_text.reset();
-  if (text_engine != nullptr) {
-    title_text.reset(
-        SDL_CHECK(TTF_CreateText(text_engine.get(), title_font.get(), text.c_str(), 0)));
-    if (title_text != nullptr) {
-      SDL_CHECK(TTF_SetTextColor(title_text.get(), COLOR.r, COLOR.g, COLOR.b, COLOR.a));
-    }
-  }
+  title_tex = makeTextTexture(title_font.get(), COLOR, text);
 }
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::rebuildLabelText(AxisId axis_id, const std::string& text) {
   static constexpr auto COLOR = SDL_Color{ .r = 160, .g = 160, .b = 255, .a = SDL_ALPHA_OPAQUE };
-
-  const auto rebuild = [&](TTFTextPtr& target) {
-    target.reset();
-    if (text_engine != nullptr) {
-      target.reset(
-          SDL_CHECK(TTF_CreateText(text_engine.get(), default_font.get(), text.c_str(), 0)));
-      if (target != nullptr) {
-        SDL_CHECK(TTF_SetTextColor(target.get(), COLOR.r, COLOR.g, COLOR.b, COLOR.a));
-      }
-    }
-  };
-
   switch (axis_id) {
     case AxisId::AxisX:
-      rebuild(x_label_text);
+      x_label_tex = makeTextTexture(default_font.get(), COLOR, text);
       break;
     case AxisId::AxisY:
-      rebuild(y_label_text);
+      y_label_tex = makeTextTexture(default_font.get(), COLOR, text);
       break;
   }
 }
@@ -831,19 +857,20 @@ void Window::Impl::drawTicks() const {
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawAxisLabels() const {
-  if (auto* txt = x_label_text.get(); txt != nullptr) {
-    int tw = 0;
-    int th = 0;
-    TTF_GetTextSize(txt, &tw, &th);
-    TTF_DrawRendererText(txt, plot_area.x + plot_area.w - static_cast<float>(tw),
-                         static_cast<float>(render_h) - BORDER_SZ - static_cast<float>(th));
+  if (!x_label_tex.empty()) {
+    const SDL_FRect dst{ .x = plot_area.x + plot_area.w - static_cast<float>(x_label_tex.w),
+                         .y = static_cast<float>(render_h) - BORDER_SZ -
+                              static_cast<float>(x_label_tex.h),
+                         .w = static_cast<float>(x_label_tex.w),
+                         .h = static_cast<float>(x_label_tex.h) };
+    SDL_CHECK(SDL_RenderTexture(renderer.get(), x_label_tex.texture.get(), nullptr, &dst));
   }
-  if (auto* txt = y_label_text.get(); txt != nullptr) {
-    int tw = 0;
-    int th = 0;
-    TTF_GetTextSize(txt, &tw, &th);
-    TTF_DrawRendererText(txt, plot_area.x - static_cast<float>(tw) - MARGIN_SZ,
-                         plot_area.y - static_cast<float>(th));
+  if (!y_label_tex.empty()) {
+    const SDL_FRect dst{ .x = plot_area.x - static_cast<float>(y_label_tex.w) - MARGIN_SZ,
+                         .y = plot_area.y - static_cast<float>(y_label_tex.h),
+                         .w = static_cast<float>(y_label_tex.w),
+                         .h = static_cast<float>(y_label_tex.h) };
+    SDL_CHECK(SDL_RenderTexture(renderer.get(), y_label_tex.texture.get(), nullptr, &dst));
   }
 }
 
@@ -887,16 +914,15 @@ void Window::Impl::drawLegend() {
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawTitle() const {
-  auto* txt = title_text.get();
-  if (txt == nullptr) {
+  if (title_tex.empty()) {
     return;
   }
   static constexpr auto HALF = 0.5F;
-  int tw = 0;
-  int th = 0;
-  TTF_GetTextSize(txt, &tw, &th);
-  TTF_DrawRendererText(txt, plot_area.x + (HALF * (plot_area.w - static_cast<float>(tw))),
-                       BORDER_SZ);
+  const SDL_FRect dst{ .x = plot_area.x + (HALF * (plot_area.w - static_cast<float>(title_tex.w))),
+                       .y = BORDER_SZ,
+                       .w = static_cast<float>(title_tex.w),
+                       .h = static_cast<float>(title_tex.h) };
+  SDL_CHECK(SDL_RenderTexture(renderer.get(), title_tex.texture.get(), nullptr, &dst));
 }
 
 //=================================================================================================
