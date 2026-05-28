@@ -7,7 +7,8 @@ define_module_example(NAME example SOURCES example.cpp)
 # QCustomPlot example — requires Qt6; QCustomPlot is vendored in qcustomplot/
 find_package(Qt6 QUIET COMPONENTS Core Widgets PrintSupport OpenGL OpenGLWidgets)
 if(NOT Qt6_FOUND)
-  message(STATUS "${MODULE_NAME}: QCustomPlot example disabled (Qt6 not found; install qt6-base-dev)")
+  message(
+    STATUS "${MODULE_NAME}: QCustomPlot example disabled (Qt6 not found; install qt6-base-dev)")
   return()
 endif()
 
