@@ -20,6 +20,7 @@
   - [ ] Build scenegraph using data-oriented design
   - [ ] Extend to support asset loading using assimp
   - [ ] Design a text-based scenegraph description format using our scripting engine
+- [ ] Interactive point cloud viewer
 - [ ] [Realtime control loop monitoring](../modules/probe/monitor/README.md)
 - [ ] [Data recording](../modules/experimental/drake/README.md)
 - [ ] Multimodal telemetry 
