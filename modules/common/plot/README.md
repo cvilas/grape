@@ -20,8 +20,6 @@
 
 ## Roadmap
 
-- [ ] Learn how to benchmark performance. 
-- [ ] Benchmark performance (fps) and resource usage (memory, GPU) against QWT
 - [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`
 - [ ] Refactor `Window::trace(name) -> std::optional<Trace&>` to only return existing `Trace`
 - [ ] Highlight selected trace (reduce opacity of all other traces)
