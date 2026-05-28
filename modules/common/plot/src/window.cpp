@@ -980,6 +980,8 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
   d_->rebuildTitleText(title);
   d_->recalcLayout();
   d_->zoom_history.reserve(Impl::MAX_ZOOM_HISTORY);
+  d_->pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
+  d_->step_pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
 }
 
 //-------------------------------------------------------------------------------------------------
