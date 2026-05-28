@@ -5,6 +5,8 @@
 ## Design considerations
 
 - Support a range of point and line styles
+- Efficient in memory, CPU and GPU usage
+- Able to update at display frame rates
 - Show/hide legend
 - Visually simple layout
   - Dark background
@@ -18,14 +20,11 @@
   - Draggable legend
   - 'f' key toggles FPS diagnostics
 
-## Roadmap
+![Demo](./docs/demo.png)
 
-- [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`
-- [ ] Refactor `Window::trace(name) -> std::optional<Trace&>` to only return existing `Trace`
-- [ ] Highlight selected trace (reduce opacity of all other traces)
-- [ ] Set/hide visual _bug_
+## Implementation
 
-## Plot Window Layout
+### Plot Window Layout
 
 Constant          | Role
 ------------------|------
@@ -38,3 +37,10 @@ Constant          | Role
 `TICK_LABEL_LEN`  | Max significant digits in a tick label |
 
 ![Layout](./docs/window_layout.drawio.svg)
+
+## Roadmap
+
+- [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`
+- [ ] Refactor `Window::trace(name) -> std::optional<Trace&>` to only return existing `Trace`
+- [ ] Highlight selected trace (reduce opacity of all other traces)
+- [ ] Set/hide visual _bug_

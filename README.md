@@ -18,6 +18,7 @@ Selected features:
 - Facilities for low latency [realtime systems](./modules/common/realtime/README.md)
 - A stubbornly strict [command line parser](./modules/common/conio/README.md)
 - A high performance [inter-process communication library](./modules/common/ipc/README.md)
+- An efficient high performance [plotting library](./modules/common/plot/README.md)
 - An [application development framework](./docs/howto/write_applications.md)
 - Support for the latest C++ standard, compilers and tooling
 - Focus on [Raspberry Pi](https://www.raspberrypi.com/) as the target embedded hardware platform
