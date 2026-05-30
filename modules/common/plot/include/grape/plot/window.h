@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "grape/plot/trace.h"
 
@@ -36,8 +37,13 @@ public:
   [[nodiscard]] auto isLegendEnabled() const -> bool;
 
   // Traces
-  /// @return The named trace; creates one if it does not exist.
-  [[nodiscard]] auto trace(const std::string& name) -> Trace&;
+  /// Create a named trace and return a reference to it.
+  /// @return Reference to the newly created (or existing) trace.
+  [[nodiscard]] auto createTrace(const std::string& name) -> Trace&;
+
+  /// Look up an existing trace by name.
+  /// @return pointer to trace or nullptr if the name is not found.
+  [[nodiscard]] auto trace(const std::string& name) const -> Trace*;
 
   /// Process events.
   /// @return False when the window has been closed.

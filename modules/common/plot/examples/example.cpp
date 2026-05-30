@@ -23,12 +23,12 @@ auto main() -> int {
     plot.setAxisText(grape::plot::AxisId::AxisY, "Amplitude");
     plot.enableLegend(true);
 
-    auto& sine = plot.trace("Sine");
+    auto& sine = plot.createTrace("Sine");
 
-    auto& cosine = plot.trace("Cosine");
+    auto& cosine = plot.createTrace("Cosine");
     cosine.setLineStyle(grape::plot::LineStyle::Step);
 
-    auto& beat = plot.trace("Beat");
+    auto& beat = plot.createTrace("Beat");
     beat.setPointStyle(grape::plot::PointStyle::Dot);
     beat.setLineStyle(grape::plot::LineStyle::Line);
 

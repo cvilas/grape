@@ -4,6 +4,7 @@
 
 #include "grape/plot/trace.h"
 
+#include <cassert>
 #include <cstring>
 
 namespace grape::plot {
@@ -52,6 +53,9 @@ auto Trace::color() const -> Color {
 
 //-------------------------------------------------------------------------------------------------
 void Trace::addData(const Sample& sample) {
+  // Enforce monotonically non-decreasing x: binary search and decimation both require sorted x.
+  assert(sample.x >= last_x_);
+  last_x_ = sample.x;
   // Silently drops if buffer is full (oldest data already in back_buffer_)
   [[maybe_unused]] const auto ok = front_buffer_.visitToWrite(
       [&](std::span<std::byte> frame) { std::memcpy(frame.data(), &sample, sizeof(Sample)); });

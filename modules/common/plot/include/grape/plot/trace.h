@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <atomic>
+#include <limits>
 #include <span>
 #include <string>
 #include <string_view>
@@ -65,6 +67,7 @@ private:
   FIFOBuffer front_buffer_;
   std::string name_;
   SnapshotBuffer back_buffer_;
+  double last_x_ = std::numeric_limits<double>::lowest();
   LineStyle line_style_{ LineStyle::Line };
   PointStyle point_style_{ PointStyle::None };
   Color color_{};
