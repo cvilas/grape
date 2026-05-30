@@ -728,6 +728,13 @@ void Window::Impl::drawAxes() const {
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawTraces() const {
   auto* rdr = renderer.get();
+
+  const SDL_Rect clip{ .x = static_cast<int>(plot_area.x),
+                       .y = static_cast<int>(plot_area.y),
+                       .w = static_cast<int>(plot_area.w),
+                       .h = static_cast<int>(plot_area.h) };
+  SDL_SetRenderClipRect(rdr, &clip);
+
   auto& pts = pts_scratch;
   auto& step_pts = step_pts_scratch;
   const auto max_pts = static_cast<std::size_t>(plot_area.w);
@@ -743,15 +750,18 @@ void Window::Impl::drawTraces() const {
     pts.clear();
     pts.reserve(s1.size() + s2.size());
 
-    static constexpr auto CLIP_PAD = 0.005;
-    const auto x_pad = (x_view_max - x_view_min) * CLIP_PAD;
-
     for (const auto& span : { s1, s2 }) {
-      for (const auto& sample : span) {
-        if (sample.x < x_view_min - x_pad || sample.x > x_view_max + x_pad) {
-          continue;
-        }
-        pts.push_back({ .x = dataToScreenX(sample.x), .y = dataToScreenY(sample.y) });
+      // include one neighbor outside the view region on either side
+      auto begin = std::ranges::lower_bound(span, x_view_min, {}, &Sample::x);
+      if (begin != span.begin()) {
+        --begin;
+      }
+      auto end = std::ranges::upper_bound(span, x_view_max, {}, &Sample::x);
+      if (end != span.end()) {
+        ++end;
+      }
+      for (auto it = begin; it != end; ++it) {
+        pts.push_back({ .x = dataToScreenX(it->x), .y = dataToScreenY(it->y) });
       }
     }
     if (pts.empty()) {
@@ -797,6 +807,8 @@ void Window::Impl::drawTraces() const {
       }
     }
   }
+
+  SDL_SetRenderClipRect(rdr, nullptr);  // restore: no clipping
 }
 
 //-------------------------------------------------------------------------------------------------
