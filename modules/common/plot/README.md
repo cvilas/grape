@@ -29,7 +29,8 @@ The renderer follows these rules to be CPU-, GPU- and memory-efficient:
 - Minimises draw calls per frame. (One large draw is cheaper than many small ones)
 - Keeps data buffers contiguous and pre-allocated for cache coherence
 - Uses lock-free, wait-free queues to marshall data from frontend to rendering backend
-- Decimates visual data to screen resolution; i.e., does't submit more vertices than there are pixels. Uses min-max instead of stride to preserve peaks.
+- Decimates visual data to screen resolution; i.e., does't submit more vertices than there are 
+  pixels. Uses min-max instead of stride to preserve peaks.
 - Caches static text as textures for reuse
 
 ### Plot Window Layout

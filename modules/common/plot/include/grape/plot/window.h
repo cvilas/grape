@@ -57,7 +57,7 @@ public:
 
 private:
   struct Impl;
-  std::unique_ptr<Impl> d_;
+  std::unique_ptr<Impl> impl_;
 };
 
 }  // namespace grape::plot

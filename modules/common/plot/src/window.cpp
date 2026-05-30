@@ -205,7 +205,7 @@ struct Window::Impl {
 
   TTFEnginePtr text_engine{ nullptr, TTF_DestroyRendererTextEngine };
 
-  // Pre-rendered textures for static labels (rebuilt only when text changes, not per frame)
+  // Pre-rendered textures for static labels
   struct TextTexture {
     SDLTexturePtr texture{ nullptr, SDL_DestroyTexture };
     int w = 0;
@@ -223,7 +223,6 @@ struct Window::Impl {
 
   SDL_FRect plot_area{};  // plot area layout
 
-  // View state
   struct ViewState {
     double x_range_width = 0.0;  // 0 = show all; >0 = show last N x-units
     double vy_min = -1.0;
@@ -284,7 +283,6 @@ struct Window::Impl {
   mutable std::vector<SDL_FPoint> step_pts_scratch;
   mutable TTFTextPtr tick_scratch{ nullptr, TTF_DestroyText };
 
-  // Helpers
   void recalcLayout();
   void updateView();
 
@@ -322,13 +320,14 @@ void Window::Impl::recalcLayout() {
   SDL_CHECK(SDL_GetWindowSize(window.get(), &ww, &wh));
   static constexpr auto PLOT_X = BORDER_SZ + (TICK_LABEL_LEN * TICK_FONT_PT) + MARGIN_SZ + TICK_LEN;
   static constexpr auto PLOT_Y = BORDER_SZ + TITLE_FONT_PT + MARGIN_SZ;
+  static constexpr auto BOTTOM_MARGIN =
+      BORDER_SZ + DEFAULT_FONT_PT + MARGIN_SZ + TICK_FONT_PT + MARGIN_SZ + TICK_LEN;
 
   plot_area = {
     .x = PLOT_X,
     .y = PLOT_Y,
     .w = static_cast<float>(ww) - PLOT_X - BORDER_SZ,
-    .h = static_cast<float>(wh) - PLOT_Y - BORDER_SZ - DEFAULT_FONT_PT - MARGIN_SZ - TICK_FONT_PT -
-         MARGIN_SZ - TICK_LEN,
+    .h = static_cast<float>(wh) - PLOT_Y - BOTTOM_MARGIN,
   };
   legend.rect.x = legend.norm.x * static_cast<float>(ww);
   legend.rect.y = legend.norm.y * static_cast<float>(wh);
@@ -926,11 +925,12 @@ void Window::Impl::drawTitle() const {
 }
 
 //=================================================================================================
-Window::Window(int width, int height, const std::string& title) : d_(std::make_unique<Impl>()) {
+Window::Window(int width, int height, const std::string& title) : impl_(std::make_unique<Impl>()) {
   SDL_CHECK(SDL_InitSubSystem(SDL_INIT_VIDEO));
   SDL_CHECK(TTF_Init());
 
-  d_->window.reset(SDL_CHECK(SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE)));
+  impl_->window.reset(
+      SDL_CHECK(SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE)));
 
   const auto num_supported_renderers = SDL_GetNumRenderDrivers();
   auto supported_renderers = std::vector<std::string_view>{};
@@ -942,23 +942,22 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
   // Choose an available renderer in order of preferance, otherwise fallback to a default
   static constexpr auto PREFERRED_RENDERERS = { "gpu", "opengl", "opengles2" };
   for (const auto& renderer_name : PREFERRED_RENDERERS) {
-    d_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(d_->window.get(), renderer_name)));
-    if (d_->renderer != nullptr) {
+    impl_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(impl_->window.get(), renderer_name)));
+    if (impl_->renderer != nullptr) {
       break;
     }
   }
-  if (d_->renderer == nullptr) {
-    d_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(d_->window.get(), nullptr)));
+  if (impl_->renderer == nullptr) {
+    impl_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(impl_->window.get(), nullptr)));
   }
-  std::println(stderr, "Using renderer: {}", SDL_GetRendererName(d_->renderer.get()));
+  std::println(stderr, "Using renderer: {}", SDL_GetRendererName(impl_->renderer.get()));
 
-  d_->text_engine.reset(SDL_CHECK(TTF_CreateRendererTextEngine(d_->renderer.get())));
-  if (!SDL_SetRenderVSync(d_->renderer.get(), SDL_RENDERER_VSYNC_ADAPTIVE)) {  // adaptive VSync
-                                                                               // optional
-    SDL_SetRenderVSync(d_->renderer.get(), 1);
+  impl_->text_engine.reset(SDL_CHECK(TTF_CreateRendererTextEngine(impl_->renderer.get())));
+  if (!SDL_SetRenderVSync(impl_->renderer.get(), SDL_RENDERER_VSYNC_ADAPTIVE)) {
+    SDL_SetRenderVSync(impl_->renderer.get(), 1);
   }
-  d_->window_id = SDL_GetWindowID(d_->window.get());
-  if (d_->window_id == 0) {
+  impl_->window_id = SDL_GetWindowID(impl_->window.get());
+  if (impl_->window_id == 0) {
     std::println(stderr, "SDL_GetWindowID: {}", SDL_GetError());
   }
 
@@ -969,57 +968,57 @@ Window::Window(int width, int height, const std::string& title) : d_(std::make_u
     return { (io != nullptr) ? SDL_CHECK(TTF_OpenFontIO(io, /*closeio=*/true, pt)) : nullptr,
              TTF_CloseFont };
   };
-  d_->default_font = open_font(Impl::DEFAULT_FONT_PT);
-  d_->tick_font = open_font(Impl::TICK_FONT_PT);
-  d_->title_font = open_font(Impl::TITLE_FONT_PT);
-  if (d_->title_font != nullptr) {
-    TTF_SetFontStyle(d_->title_font.get(), TTF_STYLE_BOLD);
+  impl_->default_font = open_font(Impl::DEFAULT_FONT_PT);
+  impl_->tick_font = open_font(Impl::TICK_FONT_PT);
+  impl_->title_font = open_font(Impl::TITLE_FONT_PT);
+  if (impl_->title_font != nullptr) {
+    TTF_SetFontStyle(impl_->title_font.get(), TTF_STYLE_BOLD);
   }
-  d_->rebuildLabelText(AxisId::AxisX, "X");
-  d_->rebuildLabelText(AxisId::AxisY, "Y");
-  d_->rebuildTitleText(title);
-  d_->recalcLayout();
-  d_->zoom_history.reserve(Impl::MAX_ZOOM_HISTORY);
-  d_->pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
-  d_->step_pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
+  impl_->rebuildLabelText(AxisId::AxisX, "");
+  impl_->rebuildLabelText(AxisId::AxisY, "");
+  impl_->rebuildTitleText(title);
+  impl_->recalcLayout();
+  impl_->zoom_history.reserve(Impl::MAX_ZOOM_HISTORY);
+  impl_->pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
+  impl_->step_pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
 }
 
 //-------------------------------------------------------------------------------------------------
 Window::~Window() {
-  d_.reset();
+  impl_.reset();
   TTF_Quit();
   SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 //-------------------------------------------------------------------------------------------------
 void Window::setTitleText(const std::string& title) {
-  d_->rebuildTitleText(title);
-  SDL_CHECK(SDL_SetWindowTitle(d_->window.get(), title.c_str()));
+  impl_->rebuildTitleText(title);
+  SDL_CHECK(SDL_SetWindowTitle(impl_->window.get(), title.c_str()));
 }
 
 //-------------------------------------------------------------------------------------------------
 void Window::setAxisText(AxisId id, const std::string& label) {
-  d_->rebuildLabelText(id, label);
+  impl_->rebuildLabelText(id, label);
 }
 
 //-------------------------------------------------------------------------------------------------
 void Window::enableLegend(bool on) {
-  d_->legend.enabled = on;
+  impl_->legend.enabled = on;
 }
 
 //-------------------------------------------------------------------------------------------------
 auto Window::isLegendEnabled() const -> bool {
-  return d_->legend.enabled;
+  return impl_->legend.enabled;
 }
 
 //-------------------------------------------------------------------------------------------------
 bool Window::isOpen() const {
-  return d_->open;
+  return impl_->open;
 }
 
 //-------------------------------------------------------------------------------------------------
 auto Window::trace(const std::string& name) -> Trace& {
-  for (auto& tr : d_->traces) {
+  for (auto& tr : impl_->traces) {
     if (tr->name() == name) {
       return *tr;
     }
@@ -1028,7 +1027,7 @@ auto Window::trace(const std::string& name) -> Trace& {
   auto trace = std::unique_ptr<Trace>(new Trace(name, Impl::MAX_POINTS_PER_TRACE));
   const auto color = generateRandomColor();
   trace->setColor(Color{ .r = color.r, .g = color.g, .b = color.b, .a = SDL_ALPHA_OPAQUE });
-  return *(d_->traces.emplace_back(std::move(trace)));
+  return *(impl_->traces.emplace_back(std::move(trace)));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1122,43 +1121,43 @@ auto Window::processEvents() -> bool {
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
       case SDL_EVENT_QUIT:
-        d_->open = false;
+        impl_->open = false;
         break;
 
       case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-        if (event.window.windowID == d_->window_id) {
-          d_->open = false;
+        if (event.window.windowID == impl_->window_id) {
+          impl_->open = false;
         }
         break;
 
       case SDL_EVENT_WINDOW_RESIZED:
-        if (event.window.windowID == d_->window_id) {
-          d_->recalcLayout();
+        if (event.window.windowID == impl_->window_id) {
+          impl_->recalcLayout();
         }
         break;
 
       case SDL_EVENT_MOUSE_BUTTON_DOWN:
-        d_->onMouseButtonDown(event.button);
+        impl_->onMouseButtonDown(event.button);
         break;
 
       case SDL_EVENT_MOUSE_MOTION:
-        d_->onMouseMotion(event.motion);
+        impl_->onMouseMotion(event.motion);
         break;
 
       case SDL_EVENT_MOUSE_BUTTON_UP:
         if (event.button.button == SDL_BUTTON_LEFT) {
-          d_->legend.dragging = false;
-          d_->y_pan_dragging = false;
+          impl_->legend.dragging = false;
+          impl_->y_pan_dragging = false;
         }
         break;
 
       case SDL_EVENT_MOUSE_WHEEL:
-        d_->onMouseWheel(event.wheel);
+        impl_->onMouseWheel(event.wheel);
         break;
 
       case SDL_EVENT_KEY_DOWN:
         if (event.key.key == SDLK_F) {
-          d_->fps.show = !d_->fps.show;
+          impl_->fps.show = !impl_->fps.show;
         }
         break;
 
@@ -1166,32 +1165,32 @@ auto Window::processEvents() -> bool {
         break;
     }
   }
-  return d_->open;
+  return impl_->open;
 }
 
 //-------------------------------------------------------------------------------------------------
 void Window::render() {
   static constexpr auto BG_COLOR = SDL_Color{ .r = 10, .g = 10, .b = 14, .a = SDL_ALPHA_OPAQUE };
 
-  d_->trace_views.clear();
-  for (auto& tr : d_->traces) {
-    d_->trace_views.push_back(tr->snapshot());
+  impl_->trace_views.clear();
+  for (auto& tr : impl_->traces) {
+    impl_->trace_views.push_back(tr->snapshot());
   }
 
-  d_->updateView();
-  auto* rdr = d_->renderer.get();
+  impl_->updateView();
+  auto* rdr = impl_->renderer.get();
   SDL_SetRenderDrawColor(rdr, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
   SDL_RenderClear(rdr);
 
-  d_->drawTitle();
-  d_->drawGrid();
-  d_->drawAxes();
-  d_->drawTraces();
-  d_->drawTicks();
-  d_->drawAxisLabels();
-  d_->drawLegend();
-  if (d_->fps.show) {
-    d_->drawFps();
+  impl_->drawTitle();
+  impl_->drawGrid();
+  impl_->drawAxes();
+  impl_->drawTraces();
+  impl_->drawTicks();
+  impl_->drawAxisLabels();
+  impl_->drawLegend();
+  if (impl_->fps.show) {
+    impl_->drawFps();
   }
 
   SDL_RenderPresent(rdr);
