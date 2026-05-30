@@ -47,8 +47,3 @@ Constant          | Role
 
 ![Layout](./docs/window_layout.drawio.svg)
 
-## Roadmap
-
-- [ ] Add `Window::createTrace(name, capacity, color, line_style, point_style)`
-- [ ] Refactor `Window::trace(name) -> std::optional<Trace&>` to only return existing `Trace`
-- [ ] Highlight selected trace (reduce opacity of all other traces)

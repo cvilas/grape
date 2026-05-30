@@ -6,9 +6,11 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cmath>
 #include <format>
 #include <limits>
+#include <mutex>
 #include <print>
 #include <random>
 
@@ -139,39 +141,51 @@ using TTFFontPtr = std::unique_ptr<TTF_Font, void (*)(TTF_Font*)>;
 using TTFTextPtr = std::unique_ptr<TTF_Text, void (*)(TTF_Text*)>;
 
 //-------------------------------------------------------------------------------------------------
-// Decimate to screen space, at most 2 * horizontal plot area pixel resolution, retaining both peak
-// and trough values emitted in chronological order, so that we do not miss any useful information.
-void decimateMinMax(std::vector<SDL_FPoint>& pts, std::size_t max_pts) {
-  if (pts.size() <= max_pts) {
+struct RenderTargetGuard {
+  explicit RenderTargetGuard(SDL_Renderer* renderer) : rdr(renderer) {
+  }
+  ~RenderTargetGuard() {
+    SDL_SetRenderTarget(rdr, nullptr);
+  }
+  RenderTargetGuard(const RenderTargetGuard&) = delete;
+  RenderTargetGuard(RenderTargetGuard&&) = delete;
+  RenderTargetGuard& operator=(const RenderTargetGuard&) = delete;
+  RenderTargetGuard& operator=(RenderTargetGuard&&) = delete;
+  SDL_Renderer* rdr;
+};
+
+//-------------------------------------------------------------------------------------------------
+// Decimate in data space to at most max_pts retained points, keeping peak (max y) and trough
+// (min y) per bucket in chronological order so no extremes are lost.
+void decimateSamples(std::vector<grape::plot::Sample>& samples, std::size_t max_pts) {
+  if (samples.size() <= max_pts) {
     return;
   }
-  const auto total = pts.size();
+  const auto total = samples.size();
   std::size_t out = 0;
   for (std::size_t bucket = 0; bucket < max_pts; ++bucket) {
-    // Distribute remainder evenly: each bucket gets floor(N/M) or ceil(N/M) points.
-    // Using (bucket * N) / M avoids a large last-bucket when N % M != 0.
     const auto lo = (bucket * total) / max_pts;
     const auto hi = ((bucket + 1) * total) / max_pts;
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-    auto* peak = &pts[lo];    // min screen-y = visual top = data maximum
-    auto* trough = &pts[lo];  // max screen-y = visual bottom = data minimum
+    auto* peak = &samples[lo];    // data maximum
+    auto* trough = &samples[lo];  // data minimum
     for (auto i = lo + 1; i < hi; ++i) {
-      if (pts[i].y < peak->y) {
-        peak = &pts[i];
+      if (samples[i].y > peak->y) {
+        peak = &samples[i];
       }
-      if (pts[i].y > trough->y) {
-        trough = &pts[i];
+      if (samples[i].y < trough->y) {
+        trough = &samples[i];
       }
     }
-    const auto* first = (peak->x <= trough->x) ? peak : trough;
-    const auto* second = (peak->x <= trough->x) ? trough : peak;
-    pts[out++] = *first;
+    const auto val_first = (peak->x <= trough->x) ? *peak : *trough;
+    const auto val_second = (peak->x <= trough->x) ? *trough : *peak;
+    samples[out++] = val_first;
     if (peak != trough) {
-      pts[out++] = *second;
+      samples[out++] = val_second;
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
   }
-  pts.resize(out);
+  samples.resize(out);
 }
 
 }  // namespace
@@ -198,9 +212,13 @@ struct Window::Impl {
   TTFFontPtr tick_font{ nullptr, TTF_CloseFont };
   TTFFontPtr title_font{ nullptr, TTF_CloseFont };
   SDL_WindowID window_id = 0;
-  bool open = true;
+  std::atomic<bool> open = true;
 
-  std::vector<std::unique_ptr<Trace>> traces;
+  static constexpr std::size_t MAX_TRACES = 64;
+  std::array<std::unique_ptr<Trace>, MAX_TRACES> traces;
+  std::atomic<std::size_t> trace_count{ 0 };
+  mutable std::mutex create_mutex;
+
   std::vector<Trace::View> trace_views;  //!< Per-frame snapshot
 
   TTFEnginePtr text_engine{ nullptr, TTF_DestroyRendererTextEngine };
@@ -244,10 +262,10 @@ struct Window::Impl {
   double y_grid_first = 0.0;
 
   // Screen-space transform (precomputed in updateView; screen = offset + data * scale)
-  float sx_scale = 1.0F;
-  float sx_offset = 0.0F;
-  float sy_scale = -1.0F;
-  float sy_offset = 0.0F;
+  double sx_scale = 1.0;
+  double sx_offset = 0.0;
+  double sy_scale = -1.0;
+  double sy_offset = 0.0;
 
   // Cached render output size (updated in recalcLayout)
   int render_w = 0;
@@ -264,6 +282,7 @@ struct Window::Impl {
     SDLTexturePtr texture{ nullptr, SDL_DestroyTexture };
     std::vector<TTFTextPtr> texts;
     std::vector<Color> colors;
+    std::vector<std::string> names;
   } legend{};
 
   // Y-axis pan state
@@ -281,6 +300,7 @@ struct Window::Impl {
   // Scratch buffers reused across frames
   mutable std::vector<SDL_FPoint> pts_scratch;
   mutable std::vector<SDL_FPoint> step_pts_scratch;
+  mutable std::vector<Sample> sample_scratch;
   mutable TTFTextPtr tick_scratch{ nullptr, TTF_DestroyText };
 
   void recalcLayout();
@@ -373,7 +393,8 @@ void Window::Impl::updateView() {
     for (const auto& tv : trace_views) {
       for (const auto& span : { tv.samples.first, tv.samples.second }) {
         const auto begin = std::ranges::lower_bound(span, x_view_min, {}, &Sample::x);
-        for (auto it = begin; it != span.end() && it->x <= x_view_max; ++it) {
+        const auto end = std::ranges::upper_bound(span, x_view_max, {}, &Sample::x);
+        for (auto it = begin; it != end; ++it) {
           view.vy_min = std::min(view.vy_min, it->y);
           view.vy_max = std::max(view.vy_max, it->y);
         }
@@ -402,20 +423,20 @@ void Window::Impl::updateView() {
   y_grid_first = std::ceil(view.vy_min / y_grid_step) * y_grid_step;
 
   // Precompute screen-space transform so dataToScreenX/Y are multiply-adds in the hot loop.
-  sx_scale = static_cast<float>(static_cast<double>(plot_area.w) / (x_view_max - x_view_min));
-  sx_offset = plot_area.x - (static_cast<float>(x_view_min) * sx_scale);
-  sy_scale = -static_cast<float>(static_cast<double>(plot_area.h) / (view.vy_max - view.vy_min));
-  sy_offset = (plot_area.y + plot_area.h) - (static_cast<float>(view.vy_min) * sy_scale);
+  sx_scale = static_cast<double>(plot_area.w) / (x_view_max - x_view_min);
+  sx_offset = static_cast<double>(plot_area.x);
+  sy_scale = -static_cast<double>(plot_area.h) / (view.vy_max - view.vy_min);
+  sy_offset = static_cast<double>(plot_area.y + plot_area.h);
 }
 
 //-------------------------------------------------------------------------------------------------
 float Window::Impl::dataToScreenX(double xd) const {
-  return sx_offset + (static_cast<float>(xd) * sx_scale);
+  return static_cast<float>(sx_offset + ((xd - x_view_min) * sx_scale));
 }
 
 //-------------------------------------------------------------------------------------------------
 float Window::Impl::dataToScreenY(double yd) const {
-  return sy_offset + (static_cast<float>(yd) * sy_scale);
+  return static_cast<float>(sy_offset + ((yd - view.vy_min) * sy_scale));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -463,10 +484,10 @@ auto Window::Impl::makeTextTexture(TTF_Font* font, SDL_Color color, const std::s
   TextTexture result{ .texture = { tex, SDL_DestroyTexture }, .w = tw, .h = th };
   SDL_CHECK(SDL_SetTextureBlendMode(result.texture.get(), SDL_BLENDMODE_BLEND));
   SDL_CHECK(SDL_SetRenderTarget(renderer.get(), result.texture.get()));
+  const RenderTargetGuard guard{ renderer.get() };
   SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
   SDL_RenderClear(renderer.get());
   TTF_DrawRendererText(txt.get(), 0.F, 0.F);
-  SDL_CHECK(SDL_SetRenderTarget(renderer.get(), nullptr));
   return result;
 }
 
@@ -495,6 +516,7 @@ auto Window::Impl::rebuildLegend() -> bool {
   legend.name_maxlen = 0;
   legend.texture.reset();
   legend.colors.clear();
+  legend.names.clear();
 
   if (text_engine == nullptr) {
     return false;
@@ -539,6 +561,7 @@ auto Window::Impl::rebuildLegend() -> bool {
   }
   SDL_CHECK(SDL_SetTextureBlendMode(legend.texture.get(), SDL_BLENDMODE_BLEND));
   SDL_CHECK(SDL_SetRenderTarget(renderer.get(), legend.texture.get()));
+  const RenderTargetGuard target_guard{ renderer.get() };
 
   SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
   SDL_RenderClear(renderer.get());
@@ -564,11 +587,11 @@ auto Window::Impl::rebuildLegend() -> bool {
     }
   }
 
-  SDL_CHECK(SDL_SetRenderTarget(renderer.get(), nullptr));
-
   legend.colors.reserve(num_traces);
+  legend.names.reserve(num_traces);
   for (const auto& tv : trace_views) {
     legend.colors.push_back(tv.color);
+    legend.names.emplace_back(tv.name);
   }
   return true;
 }
@@ -699,16 +722,16 @@ void Window::Impl::drawGrid() const {
     if (gx > x_view_max + (x_grid_step * GRID_EPSILON)) {
       break;
     }
-    SDL_RenderLine(rdr, dataToScreenX(gx), plot_area.y, dataToScreenX(gx),
-                   plot_area.y + plot_area.h);
+    const auto sx = dataToScreenX(gx);
+    SDL_RenderLine(rdr, sx, plot_area.y, sx, plot_area.y + plot_area.h);
   }
   for (int step = 0;; ++step) {
     const auto gy = y_grid_first + (static_cast<double>(step) * y_grid_step);
     if (gy > view.vy_max + (y_grid_step * GRID_EPSILON)) {
       break;
     }
-    SDL_RenderLine(rdr, plot_area.x, dataToScreenY(gy), plot_area.x + plot_area.w,
-                   dataToScreenY(gy));
+    const auto sy = dataToScreenY(gy);
+    SDL_RenderLine(rdr, plot_area.x, sy, plot_area.x + plot_area.w, sy);
   }
 }
 
@@ -727,6 +750,10 @@ void Window::Impl::drawAxes() const {
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawTraces() const {
+  if (plot_area.w <= 0.F || plot_area.h <= 0.F) {
+    return;
+  }
+
   auto* rdr = renderer.get();
 
   const SDL_Rect clip{ .x = static_cast<int>(plot_area.x),
@@ -747,8 +774,8 @@ void Window::Impl::drawTraces() const {
     const auto color = toSDLColor(tv.color);
     SDL_SetRenderDrawColor(rdr, color.r, color.g, color.b, color.a);
 
-    pts.clear();
-    pts.reserve(s1.size() + s2.size());
+    auto& samples = sample_scratch;
+    samples.clear();
 
     for (const auto& span : { s1, s2 }) {
       // include one neighbor outside the view region on either side
@@ -761,14 +788,19 @@ void Window::Impl::drawTraces() const {
         ++end;
       }
       for (auto it = begin; it != end; ++it) {
-        pts.push_back({ .x = dataToScreenX(it->x), .y = dataToScreenY(it->y) });
+        samples.push_back(*it);
       }
     }
-    if (pts.empty()) {
+    if (samples.empty()) {
       continue;
     }
 
-    decimateMinMax(pts, max_pts);
+    decimateSamples(samples, max_pts);
+
+    pts.clear();
+    for (const auto& sm : samples) {
+      pts.push_back({ .x = dataToScreenX(sm.x), .y = dataToScreenY(sm.y) });
+    }
 
     switch (tv.line_style) {
       case LineStyle::Line:
@@ -777,7 +809,6 @@ void Window::Impl::drawTraces() const {
 
       case LineStyle::Step: {
         step_pts.clear();
-        step_pts.reserve((pts.size() * 2) - 1);
         // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         step_pts.push_back(pts[0]);
         for (std::size_t i = 1; i < pts.size(); ++i) {
@@ -844,7 +875,6 @@ void Window::Impl::drawTicks() const {
 
   // X ticks
   const auto base_y = plot_area.y + plot_area.h;
-  SDL_SetRenderDrawColor(rdr, TICK_COLOR.r, TICK_COLOR.g, TICK_COLOR.b, TICK_COLOR.a);
   for (int step = 0;; ++step) {
     const auto gx = x_grid_first + (static_cast<double>(step) * x_grid_step);
     if (gx > x_view_max + (x_grid_step * GRID_EPSILON)) {
@@ -901,10 +931,13 @@ void Window::Impl::drawLegend() {
   };
   const bool need_rebuild =
       (legend.texture == nullptr) || (legend.texts.size() != num_traces) ||
-      (legend.colors.size() != num_traces) ||
+      (legend.colors.size() != num_traces) || (legend.names.size() != num_traces) ||
       !std::equal(
           trace_views.begin(), trace_views.end(), legend.colors.begin(),
-          [&](const Trace::View& tv, const Color& cached) { return color_eq(tv.color, cached); });
+          [&](const Trace::View& tv, const Color& cached) { return color_eq(tv.color, cached); }) ||
+      !std::equal(
+          trace_views.begin(), trace_views.end(), legend.names.begin(),
+          [](const Trace::View& tv, const std::string& cached) { return tv.name == cached; });
 
   if (need_rebuild && not rebuildLegend()) {
     return;
@@ -951,10 +984,10 @@ Window::Window(int width, int height, const std::string& title) : impl_(std::mak
   }
   std::println(stderr, "Supported renderers: {}", supported_renderers);
 
-  // Choose an available renderer in order of preferance, otherwise fallback to a default
+  // Choose an available renderer in order of preference, otherwise fall back to SDL default.
   static constexpr auto PREFERRED_RENDERERS = { "gpu", "opengl", "opengles2" };
   for (const auto& renderer_name : PREFERRED_RENDERERS) {
-    impl_->renderer.reset(SDL_CHECK(SDL_CreateRenderer(impl_->window.get(), renderer_name)));
+    impl_->renderer.reset(SDL_CreateRenderer(impl_->window.get(), renderer_name));
     if (impl_->renderer != nullptr) {
       break;
     }
@@ -992,7 +1025,8 @@ Window::Window(int width, int height, const std::string& title) : impl_(std::mak
   impl_->recalcLayout();
   impl_->zoom_history.reserve(Impl::MAX_ZOOM_HISTORY);
   impl_->pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
-  impl_->step_pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
+  impl_->step_pts_scratch.reserve(Impl::MAX_POINTS_PER_TRACE * 2);
+  impl_->sample_scratch.reserve(Impl::MAX_POINTS_PER_TRACE);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1029,17 +1063,34 @@ bool Window::isOpen() const {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto Window::trace(const std::string& name) -> Trace& {
-  for (auto& tr : impl_->traces) {
-    if (tr->name() == name) {
-      return *tr;
+auto Window::createTrace(const std::string& name) -> Trace& {
+  const std::scoped_lock lock(impl_->create_mutex);
+  const auto count = impl_->trace_count.load(std::memory_order_relaxed);
+  for (std::size_t i = 0; i < count; ++i) {
+    if (impl_->traces.at(i)->name() == name) {
+      return *impl_->traces.at(i);
     }
   }
-
-  auto trace = std::unique_ptr<Trace>(new Trace(name, Impl::MAX_POINTS_PER_TRACE));
+  if (count >= Impl::MAX_TRACES) {
+    panic<Exception>("Too many traces");
+  }
+  auto& slot = impl_->traces.at(count);
+  slot = std::unique_ptr<Trace>(new Trace(name, Impl::MAX_POINTS_PER_TRACE));
   const auto color = generateRandomColor();
-  trace->setColor(Color{ .r = color.r, .g = color.g, .b = color.b, .a = SDL_ALPHA_OPAQUE });
-  return *(impl_->traces.emplace_back(std::move(trace)));
+  slot->setColor(Color{ .r = color.r, .g = color.g, .b = color.b, .a = SDL_ALPHA_OPAQUE });
+  impl_->trace_count.store(count + 1, std::memory_order_release);
+  return *slot;
+}
+
+//-------------------------------------------------------------------------------------------------
+auto Window::trace(const std::string& name) const -> Trace* {
+  const auto count = impl_->trace_count.load(std::memory_order_acquire);
+  for (std::size_t i = 0; i < count; ++i) {
+    if (impl_->traces.at(i)->name() == name) {
+      return impl_->traces.at(i).get();
+    }
+  }
+  return nullptr;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1101,8 +1152,11 @@ void Window::Impl::onMouseWheel(const SDL_MouseWheelEvent& ev) {
 
   if (ctrl) {
     // Y zoom: scale range around the mouse pivot (works in both directions)
-    const double pivot = screenToDataY(my);
     const double cur_rng = view.vy_max - view.vy_min;
+    if (cur_rng <= 0.0) {
+      return;
+    }
+    const double pivot = screenToDataY(my);
     const double factor = (ev.y > 0) ? ZOOM_IN : (1.0 / ZOOM_IN);
     const double new_rng = cur_rng * factor;
     const double lo_frac = (pivot - view.vy_min) / cur_rng;
@@ -1185,8 +1239,10 @@ void Window::render() {
   static constexpr auto BG_COLOR = SDL_Color{ .r = 10, .g = 10, .b = 14, .a = SDL_ALPHA_OPAQUE };
 
   impl_->trace_views.clear();
-  for (auto& tr : impl_->traces) {
-    impl_->trace_views.push_back(tr->snapshot());
+  const auto count = impl_->trace_count.load(std::memory_order_acquire);
+  impl_->trace_views.reserve(count);
+  for (std::size_t i = 0; i < count; ++i) {
+    impl_->trace_views.push_back(impl_->traces.at(i)->snapshot());
   }
 
   impl_->updateView();

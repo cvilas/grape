@@ -40,9 +40,17 @@ void plot(const BatteryStatus& data, grape::plot::Window& plot) {
     first_ts = data.timestamp;
   }
   const auto dt = std::chrono::duration<double>(data.timestamp - first_ts).count();
-  plot.trace(LABEL_FIELD_0).addData({ .x = dt, .y = static_cast<double>(data.state_of_charge) });
-  plot.trace(LABEL_FIELD_1).addData({ .x = dt, .y = data.current });
-  plot.trace(LABEL_FIELD_2).addData({ .x = dt, .y = data.terminal_voltage });
+
+  const auto get_trace = [&](const char* label) -> grape::plot::Trace& {
+    if (auto* tr = plot.trace(label); tr != nullptr) {
+      return *tr;
+    }
+    return plot.createTrace(label);
+  };
+
+  get_trace(LABEL_FIELD_0).addData({ .x = dt, .y = static_cast<double>(data.state_of_charge) });
+  get_trace(LABEL_FIELD_1).addData({ .x = dt, .y = data.current });
+  get_trace(LABEL_FIELD_2).addData({ .x = dt, .y = data.terminal_voltage });
 }
 
 //-------------------------------------------------------------------------------------------------
