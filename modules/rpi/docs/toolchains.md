@@ -7,7 +7,7 @@
 echo 'deb http://deb.debian.org/debian trixie-backports main' | sudo tee /etc/apt/sources.list.d/trixie-backports.list
 sudo apt update && sudo apt full-upgrade -y -t trixie-backports 
 
-# Add sid (warning: see next step)
+# Add sid/unstable (warning: see next step)
 echo 'deb http://deb.debian.org/debian sid main' | sudo tee /etc/apt/sources.list.d/sid.list
 
 # Pin trixie-backports and trixie higher than sid for package updates

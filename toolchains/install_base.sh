@@ -5,7 +5,7 @@ set -e
 # Install baseline system utilities and development tools
 sudo apt-get update
 sudo apt-get install -y build-essential pkg-config gpg wget ca-certificates \
-  git-lfs curl ninja-build ccache doxygen graphviz python-is-python3 \
+  git-lfs curl ninja-build ccache doxygen graphviz python-is-python3 python3-dev \
   avahi-daemon avahi-utils iproute2 iputils-ping \
   net-tools iw iftop htop nvtop patch evtest
 
