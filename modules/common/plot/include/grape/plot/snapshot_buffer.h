@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <cassert>
+#include <format>
 #include <span>
-#include <stdexcept>
 #include <vector>
 
+#include "grape/exception.h"
 #include "grape/plot/style.h"
 
 namespace grape::plot {
@@ -25,7 +25,7 @@ public:
 
   constexpr explicit SnapshotBuffer(std::size_t cap) : data_(cap) {
     if (cap < MIN_CAPACITY) {
-      throw std::invalid_argument("SnapshotBuffer: capacity must be >= 2");
+      panic<Exception>(std::format("Capacity must be >= {}", MIN_CAPACITY));
     }
   }
 
@@ -62,16 +62,18 @@ public:
     return (*this)[idx];
   }
 
-  /// @pre !empty()
-  [[nodiscard]] constexpr auto front() const noexcept -> const Sample& {
-    assert(!empty());  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  [[nodiscard]] constexpr auto front() const -> const Sample& {
+    if (empty()) {
+      panic<Exception>("Buffer is empty");
+    }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     return data_[head_];
   }
 
-  /// @pre !empty()
-  [[nodiscard]] constexpr auto back() const noexcept -> const Sample& {
-    assert(!empty());  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  [[nodiscard]] constexpr auto back() const -> const Sample& {
+    if (empty()) {
+      panic<Exception>("Buffer is empty");
+    }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     return data_[wrap(head_ + size_ - 1, capacity())];
   }
@@ -99,7 +101,7 @@ public:
 private:
   [[nodiscard]] static constexpr auto wrap(std::size_t idx, std::size_t cap) noexcept
       -> std::size_t {
-    return idx < cap ? idx : idx - cap;
+    return ((idx < cap) ? idx : idx - cap);
   }
 
   std::vector<Sample> data_;

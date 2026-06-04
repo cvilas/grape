@@ -17,7 +17,7 @@ struct Sample {
 /// Plot axis identifiers
 enum class AxisId : std::uint8_t { AxisX, AxisY };
 
-/// Symbols styles to mark data points
+/// Symbol styles to mark data points
 enum class PointStyle : std::uint8_t {
   None,
   Dot,
@@ -34,10 +34,10 @@ enum class PointStyle : std::uint8_t {
 
 /// Line styles to join data points
 enum class LineStyle : std::uint8_t {
-  None,      ///< Unconnected data points (only symbols)
-  Lollipop,  ///< Vertical lines from baseline + optional symbol at tip
-  Step,      ///< Staircase: step height is the value of the previous data point
-  Line,      ///< Points connected by straight line segments (default)
+  None,      //!< Unconnected data points (only symbols)
+  Lollipop,  //!< Vertical lines from baseline + optional symbol at tip
+  Step,      //!< Staircase: step height is the value of the previous data point
+  Line,      //!< Points connected by straight line segments (default)
 };
 
 /// RGBA color specification

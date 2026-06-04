@@ -3,24 +3,23 @@
 ## Prerequisites
 
 ```bash
-sudo apt install linux-perf nvtop heaptrack
+sudo apt install linux-perf nvtop heaptrack hotspot
 ```
 
-## CPU and energy baseline with `perf stat`
-
-Run the application for a fixed duration and collect CPU and system energy counters:
+## CPU profiling with `perf`
 
 ```bash
-sudo perf stat -e power/energy-pkg/,power/energy-psys/ \
-  -- timeout 15s </path/to/grape_plot_example> 2>&1
+sudo perf record -e cycles,instructions,cache-misses -- timeout 15s /path/to/grape_plot_example
 ```
+
+Run `hotspot` to interactively display perf data
 
 ## Real-time GPU load with `nvtop`
 
 `nvtop` supports Intel, AMD, and NVIDIA GPUs. Run it alongside the application:
 
 ```bash
-</path/to/grape_plot_example>
+/path/to/grape_plot_example
 
 # On another terminal
 nvtop

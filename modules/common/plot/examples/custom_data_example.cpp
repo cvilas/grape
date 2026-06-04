@@ -32,9 +32,9 @@ struct BatteryStatus {
 // Free function extends plotting support for custom data structure
 //
 void plot(const BatteryStatus& data, grape::plot::Window& plot) {
-  static constexpr auto LABEL_FIELD_0 = "SoC (%)";
-  static constexpr auto LABEL_FIELD_1 = "Current (A)";
-  static constexpr auto LABEL_FIELD_2 = "Voltage (V)";
+  static constexpr auto LABEL_SOC = "SoC (%)";
+  static constexpr auto LABEL_CURRENT = "Current (A)";
+  static constexpr auto LABEL_VOLTAGE = "Voltage (V)";
   static auto first_ts = grape::WallClock::TimePoint{};
   if (first_ts == grape::WallClock::TimePoint{}) {
     first_ts = data.timestamp;
@@ -48,9 +48,9 @@ void plot(const BatteryStatus& data, grape::plot::Window& plot) {
     return plot.createTrace(label);
   };
 
-  get_trace(LABEL_FIELD_0).addData({ .x = dt, .y = static_cast<double>(data.state_of_charge) });
-  get_trace(LABEL_FIELD_1).addData({ .x = dt, .y = data.current });
-  get_trace(LABEL_FIELD_2).addData({ .x = dt, .y = data.terminal_voltage });
+  get_trace(LABEL_SOC).addData({ .x = dt, .y = static_cast<double>(data.state_of_charge) });
+  get_trace(LABEL_CURRENT).addData({ .x = dt, .y = data.current });
+  get_trace(LABEL_VOLTAGE).addData({ .x = dt, .y = data.terminal_voltage });
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ auto main() -> int {
       }
     });
 
-    // main thread redraws plot
+    // main thread refreshes plot view
     while (plot_window.processEvents()) {
       /* runs at display refresh rate */
       plot_window.render();
