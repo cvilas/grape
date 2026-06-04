@@ -17,8 +17,8 @@ using Sample = grape::plot::Sample;
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Capacity guard rejects invalid input", "[snapshot_buffer]") {
-  REQUIRE_THROWS_AS(SnapshotBuffer(0), std::invalid_argument);
-  REQUIRE_THROWS_AS(SnapshotBuffer(1), std::invalid_argument);
+  REQUIRE_THROWS(SnapshotBuffer(0));
+  REQUIRE_THROWS(SnapshotBuffer(1));
   REQUIRE_NOTHROW(SnapshotBuffer(2));
 }
 

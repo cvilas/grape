@@ -1003,7 +1003,7 @@ Window::Window(int width, int height, const std::string& title) : impl_(std::mak
   }
   impl_->window_id = SDL_GetWindowID(impl_->window.get());
   if (impl_->window_id == 0) {
-    std::println(stderr, "SDL_GetWindowID: {}", SDL_GetError());
+    panic<Exception>(std::format("SDL_GetWindowID: {}", SDL_GetError()));
   }
 
   // Load fonts
