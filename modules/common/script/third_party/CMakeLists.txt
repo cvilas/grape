@@ -2,7 +2,7 @@
 # Copyright (C) 2023 GRAPE Contributors
 # =================================================================================================
 
-set(LUA_SOURCES_DIR ./lua-5.4.8/src)
+set(LUA_SOURCES_DIR ./lua-5.5.0/src)
 set(LUA_SOURCES
     ${LUA_SOURCES_DIR}/lapi.c
     ${LUA_SOURCES_DIR}/lapi.h
@@ -67,11 +67,8 @@ set(LUA_SOURCES
 
 add_library(lualib OBJECT ${LUA_SOURCES})
 target_compile_definitions(
-        lualib
-        PRIVATE
-            $<$<PLATFORM_ID:Linux>:LUA_USE_LINUX>
-            $<$<PLATFORM_ID:Darwin>:LUA_USE_MACOSX>
-            $<$<PLATFORM_ID:Windows>:LUA_USE_WINDOWS>)
+  lualib PRIVATE $<$<PLATFORM_ID:Linux>:LUA_USE_LINUX> $<$<PLATFORM_ID:Darwin>:LUA_USE_MACOSX>
+                 $<$<PLATFORM_ID:Windows>:LUA_USE_WINDOWS>)
 set_target_properties(lualib PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(lualib PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
 set_target_properties(lualib PROPERTIES POSITION_INDEPENDENT_CODE ON) # always need this
@@ -80,11 +77,8 @@ set_target_properties(lualib PROPERTIES C_CLANG_TIDY "")
 add_executable(grape_lua ${LUA_SOURCES_DIR}/lua.c)
 target_link_libraries(grape_lua lualib m)
 target_compile_definitions(
-        grape_lua
-        PRIVATE
-            $<$<PLATFORM_ID:Linux>:LUA_USE_LINUX>
-            $<$<PLATFORM_ID:Darwin>:LUA_USE_MACOSX>
-            $<$<PLATFORM_ID:Windows>:LUA_USE_WINDOWS>)
+  grape_lua PRIVATE $<$<PLATFORM_ID:Linux>:LUA_USE_LINUX> $<$<PLATFORM_ID:Darwin>:LUA_USE_MACOSX>
+                    $<$<PLATFORM_ID:Windows>:LUA_USE_WINDOWS>)
 set_target_properties(grape_lua PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(grape_lua PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
 set_target_properties(grape_lua PROPERTIES C_CLANG_TIDY "")
