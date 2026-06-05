@@ -7,6 +7,7 @@
 #include <ecal/pubsub/publisher.h>
 #include <ecal/pubsub/types.h>
 
+#include "default_config.h"
 #include "grape/exception.h"
 #include "grape/ipc/session.h"
 #include "grape/wall_clock.h"
@@ -39,15 +40,6 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallba
   }
 }
 
-//-------------------------------------------------------------------------------------------------
-auto createConfig() -> eCAL::Publisher::Configuration {
-  auto config = eCAL::GetPublisherConfiguration();
-  config.layer.shm.enable = true;
-  config.layer.udp.enable = true;
-  config.layer.tcp.enable = true;
-  return config;
-}
-
 }  // namespace
 
 namespace grape::ipc {
@@ -73,7 +65,8 @@ RawPublisher::RawPublisher(const Topic& topic, MatchCallback&& match_cb) {
   };
   const auto type_info =
       eCAL::SDataTypeInformation{ .name = topic.type_name, .encoding = "grape", .descriptor = "" };
-  impl_ = std::make_unique<RawPublisher::Impl>(topic.name, type_info, event_cb, createConfig());
+  impl_ = std::make_unique<RawPublisher::Impl>(topic.name, type_info, event_cb,
+                                               defaultConfig().publisher);
 }
 
 //-------------------------------------------------------------------------------------------------

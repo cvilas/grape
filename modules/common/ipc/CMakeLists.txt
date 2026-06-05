@@ -11,6 +11,7 @@ find_package(eCAL ${ECAL_VERSION_REQUIRED} REQUIRED)
 
 # library sources
 set(SOURCES
+    src/default_config.h
     src/discovery.cpp
     src/session.cpp
     src/raw_publisher.cpp

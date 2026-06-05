@@ -4,9 +4,9 @@
 
 #include "grape/ipc/session.h"
 
-#include <ecal/config/configuration.h>
 #include <ecal/core.h>
 
+#include "default_config.h"
 #include "grape/exception.h"
 
 namespace grape::ipc {
@@ -17,7 +17,7 @@ void init(const Config& config) {
     panic("Already initialised");
   }
 
-  auto ecal_config = eCAL::Init::Configuration();
+  auto ecal_config = defaultConfig();
   switch (config.scope) {
     case Config::Scope::Host:
       ecal_config.communication_mode = eCAL::eCommunicationMode::local;

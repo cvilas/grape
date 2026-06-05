@@ -7,6 +7,11 @@ declare_module(
   DEPENDS_ON_MODULES "base"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  message(STATUS "${MODULE_NAME}: Only supported on Linux. Bypassing module.")
+  return()
+endif()
+
 # library sources
 set(SOURCES src/tick.h src/clock_broadcaster.cpp src/follower_clock.cpp README.md
             include/grape/clock/follower_clock.h include/grape/clock/clock_broadcaster.h)

@@ -5,16 +5,10 @@
 #include "grape/realtime/spmcq.h"
 
 #include <atomic>
-#include <cerrno>
 #include <format>
 #include <memory>
 #include <new>
-#include <system_error>
 #include <type_traits>
-
-#include <fcntl.h>        // AT_FDCWD
-#include <sys/syscall.h>  // SYS_renameat2
-#include <unistd.h>       // syscall()
 
 #include "grape/exception.h"
 #include "grape/shared_memory.h"
@@ -23,30 +17,6 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 auto shmName(std::string_view name) -> std::string {
   return name.starts_with('/') ? std::string(name) : std::format("/{}", name);
-}
-
-//-------------------------------------------------------------------------------------------------
-auto shmStagingName(std::string_view name) -> std::string {
-  return std::format("{}.__init", shmName(name));
-}
-
-//-------------------------------------------------------------------------------------------------
-auto shmRename(const std::string& from, const std::string& to)
-    -> std::expected<void, grape::Error> {
-  static constexpr auto SHM_FS_ROOT = "/dev/shm";
-  const auto from_path = std::format("{}{}", SHM_FS_ROOT, from);
-  const auto to_path = std::format("{}{}", SHM_FS_ROOT, to);
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-  if (::syscall(SYS_renameat2, AT_FDCWD, from_path.c_str(), AT_FDCWD, to_path.c_str(),
-                RENAME_NOREPLACE) == -1) {
-    const auto err = errno;
-    if (err == EEXIST) {
-      return std::unexpected{ grape::Error{ std::format("'{}' already exists", to) } };
-    }
-    return std::unexpected(
-        grape::Error{ "(renameat2) ", std::error_code(err, std::system_category()).message() });
-  }
-  return {};
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -100,17 +70,17 @@ auto Writer::create(std::string_view name, const Config& config,
   }
   const auto data_size = config.frame_length * config.num_frames;
 
-  // create shared memory region under a staging name
   const auto shm_name = shmName(name);
-  const auto staging_name = shmStagingName(name);
-  std::ignore = SharedMemory::remove(staging_name);  // clean up stale ones from the past
   const auto control_len = sizeof(Control);
   const auto metadata_len = metadata.size_bytes();
   const auto preamble_len = control_len + metadata_len;
   const auto frames_offset = alignUp(preamble_len, std::hardware_destructive_interference_size);
   const auto shm_len = frames_offset + data_size;
-  auto maybe_shm = SharedMemory::create(staging_name, shm_len, SharedMemory::Access::ReadWrite);
+  auto maybe_shm = SharedMemory::create(shm_name, shm_len, SharedMemory::Access::ReadWrite);
   if (not maybe_shm) {
+    if (SharedMemory::exists(shm_name)) {
+      return std::unexpected{ Error{ std::format("'{}' already exists", shm_name) } };
+    }
     return std::unexpected{ maybe_shm.error() };
   }
 
@@ -120,25 +90,22 @@ auto Writer::create(std::string_view name, const Config& config,
 
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   auto* ctrl = reinterpret_cast<Control*>(shm.data());
+
+  ctrl->magic = 0U;  // Will be set when the region is ready for readers
   ctrl->config = config;
   ctrl->write_count = 0U;
   ctrl->metadata_length = metadata_len;
   ctrl->frames_offset = frames_offset;
-  ctrl->magic = Control::MAGIC;
 
   // copy metadata into the buffer immediately after the control block
   std::ranges::copy(metadata, shm.subspan(control_len).begin());
 
+  // Mark as ready for readers
+  std::atomic_ref<std::uint64_t>(ctrl->magic).store(Control::MAGIC, std::memory_order_release);
+
   // cache pointers to hot-path data
   auto* const write_count_ptr = &ctrl->write_count;
   const auto frames = shm.subspan(frames_offset);
-
-  // rename and make it available for readers
-  const auto maybe_rename = shmRename(staging_name, shm_name);
-  if (not maybe_rename) {
-    std::ignore = SharedMemory::remove(staging_name);
-    return std::unexpected{ maybe_rename.error() };
-  }
 
   return Writer{ std::string{ name }, std::move(impl), config, frames, write_count_ptr };
 }
@@ -150,7 +117,6 @@ Writer::~Writer() {
   }
   try {
     std::ignore = SharedMemory::remove(shmName(name_));
-    std::ignore = SharedMemory::remove(shmStagingName(name_));
   } catch (...) {
     grape::Exception::print();
   }
@@ -189,13 +155,16 @@ auto Reader::connect(std::string_view name) -> std::expected<Reader, Error> {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   auto* ctrl = reinterpret_cast<Control*>(shm.data());
 
-  if (ctrl->magic != Control::MAGIC) {
-    return std::unexpected{ Error{ std::format("'{}' has incorrect magic", name) } };
+  const auto magic = std::atomic_ref<std::uint64_t>(ctrl->magic).load(std::memory_order_acquire);
+  if (magic != Control::MAGIC) {
+    return std::unexpected{ Error{ std::format("'{}' is not ready", name) } };
   }
   const auto& config = ctrl->config;
-  const auto expected_size = ctrl->frames_offset + (config.frame_length * config.num_frames);
-  if (shm.size_bytes() != expected_size) {
-    return std::unexpected{ Error{ std::format("'{}' has unexpected data size", name) } };
+  const auto frames_len = config.frame_length * config.num_frames;
+  const auto expected_size = ctrl->frames_offset + frames_len;
+  if (shm.size_bytes() < expected_size) {
+    return std::unexpected{ Error{
+        std::format("'{}' has unexpected data size (too small)", name) } };
   }
 
   const auto control_len = sizeof(Control);
@@ -205,7 +174,7 @@ auto Reader::connect(std::string_view name) -> std::expected<Reader, Error> {
   const auto metadata = shm.subspan(control_len, ctrl->metadata_length);
 
   auto* const write_count_ptr = &ctrl->write_count;
-  const auto frames = shm.subspan(ctrl->frames_offset);
+  const auto frames = shm.subspan(ctrl->frames_offset, frames_len);
 
   return Reader{ std::move(impl), config, metadata, frames, write_count_ptr };
 }

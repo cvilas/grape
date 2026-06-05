@@ -10,7 +10,7 @@
 The build system supports cross-compiling for `aarch64-linux-gnu` from an x86-64 host 
 
 ```bash
-# cross build using llvm toolchain (toolchain_clang_aarch64.cmake)
+# cross build using llvm toolchain (toolchain_llvm_aarch64.cmake)
 cmake --preset llvm-cross
 cmake --build build/llvm-cross
 

@@ -7,6 +7,11 @@ declare_module(
   DEPENDS_ON_MODULES "camera"
   DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
 
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  message(STATUS "${MODULE_NAME}: Only supported on Linux. Bypassing module.")
+  return()
+endif()
+
 find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 
 set(LIBCAMERA_VERSION_REQUIRED "0.5")

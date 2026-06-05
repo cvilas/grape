@@ -7,14 +7,6 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#ifndef HOST_NAME_MAX
-#ifdef _POSIX_HOST_NAME_MAX
-#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
-#else
-#define HOST_NAME_MAX 255  // NOLINT(cppcoreguidelines-macro-usage)
-#endif
-#endif
-
 namespace grape::utils {
 
 //-------------------------------------------------------------------------------------------------
