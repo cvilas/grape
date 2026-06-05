@@ -18,8 +18,8 @@
     {
       "name": "llvm",
       "inherits": "base",
-      "description": "Configure all modules with clang toolchain",
-      "toolchainFile": "${sourceDir}/toolchains/toolchain_clang.cmake"
+      "description": "Configure all modules with LLVM toolchain",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_llvm.cmake"
     },
     {
       "name": "native",
@@ -28,10 +28,16 @@
       "generator": "Unix Makefiles"
     },
     {
+      "name": "osx",
+      "inherits": "base",
+      "description": "Configure all modules with LLVM toolchain for macOS",      
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_osx.cmake"
+    },
+    {
       "name": "llvm-cross",
       "inherits": "base",
-      "description": "Cross-compile for aarch64 target using clang toolchain",
-      "toolchainFile": "${sourceDir}/toolchains/toolchain_clang_aarch64.cmake"
+      "description": "Cross-compile for aarch64 target using LLVM toolchain",
+      "toolchainFile": "${sourceDir}/toolchains/toolchain_llvm_aarch64.cmake"
     },
     {
       "name": "gcc-cross",

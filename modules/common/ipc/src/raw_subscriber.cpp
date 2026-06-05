@@ -7,6 +7,7 @@
 #include <ecal/pubsub/subscriber.h>
 #include <ecal/pubsub/types.h>
 
+#include "default_config.h"
 #include "grape/exception.h"
 #include "grape/ipc/session.h"
 
@@ -40,15 +41,13 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SSubEventCallba
 
 //-------------------------------------------------------------------------------------------------
 auto createConfig(grape::ipc::QoS qos) -> eCAL::Subscriber::Configuration {
-  auto config = eCAL::GetSubscriberConfiguration();
+  auto config = grape::ipc::defaultConfig().subscriber;
   switch (qos) {
     case grape::ipc::QoS::BestEffort:
-      config.layer.shm.enable = true;
       config.layer.udp.enable = true;
       config.layer.tcp.enable = false;
       break;
     case grape::ipc::QoS::Reliable:
-      config.layer.shm.enable = true;
       config.layer.udp.enable = false;
       config.layer.tcp.enable = true;
       break;

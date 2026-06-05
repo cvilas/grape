@@ -2,13 +2,14 @@
 Raspberry-pi camera image publisher configuration
 ]]
 
-local hostname = os.getenv("HOST") or ""
-if hostname == "" then
-    local f = io.open("/etc/hostname", "r")
-    if f then
-        hostname = f:read("*l")  -- first line
-        hostname = hostname:gsub("%s+$", "")  -- trim trailing whitespace
-        f:close()
+local hostname = "unknown-host"
+local p = io.popen("hostname")
+if p then
+    local line = p:read("*l") or ""
+    p:close()
+    line = line:gsub("^%s+", ""):gsub("%s+$", "")
+    if line ~= "" then
+        hostname = line
     end
 end
 

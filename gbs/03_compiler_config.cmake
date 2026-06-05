@@ -33,7 +33,8 @@ set(CLANG_WARNINGS -Weverything
   -Wfunction-effects # https://clang.llvm.org/docs/FunctionEffectAnalysis.html
   -Wperf-constraint-implies-noexcept
   -Wno-c2y-extensions
-  -Wno-c23-extensions) 
+  -Wno-c23-extensions
+  -Wno-poison-system-directories) 
 
 # GCC warnings
 set(GCC_WARNINGS

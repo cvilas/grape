@@ -7,6 +7,11 @@ declare_module(
   DEPENDS_ON_MODULES "realtime"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  message(STATUS "${MODULE_NAME}: Only supported on Linux. Bypassing module.")
+  return()
+endif()
+
 set(SOURCES
     README.md
     include/grape/rpi/sense_hat/display.h

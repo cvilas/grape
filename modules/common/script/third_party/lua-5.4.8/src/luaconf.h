@@ -51,6 +51,19 @@
 #define LUA_USE_WINDOWS  /* enable goodies for regular Windows */
 #endif
 
+/*
+** Auto-detect common hosted platforms when Lua is built as an embedded third-party
+** library and the build system does not forward the usual LUA_USE_* platform defines.
+*/
+#if !defined(LUA_USE_WINDOWS) && !defined(LUA_USE_LINUX) && !defined(LUA_USE_MACOSX) \
+	&& !defined(LUA_USE_IOS)
+#if defined(__APPLE__) && defined(__MACH__)
+#define LUA_USE_MACOSX
+#elif defined(__linux__)
+#define LUA_USE_LINUX
+#endif
+#endif
+
 
 #if defined(LUA_USE_WINDOWS)
 #define LUA_DL_DLL	/* enable support for DLL */
