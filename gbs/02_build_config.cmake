@@ -2,6 +2,8 @@
 # Copyright (C) 2018 GRAPE Contributors
 # =================================================================================================
 
+check_lfs_pulled()
+
 # Global configuration for FetchContent used to integrate third-party content directly into codebase
 include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
