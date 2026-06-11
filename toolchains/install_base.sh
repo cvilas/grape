@@ -12,10 +12,12 @@ sudo apt-get install -y build-essential pkg-config gpg wget ca-certificates \
 # Install uv (fast Python package and project manager)
 # https://docs.astral.sh/uv/getting-started/installation/
 curl -LsSf https://astral.sh/uv/install.sh | sh
+if [[ -f "${HOME}/.local/bin/env" ]]; then
+  source "${HOME}/.local/bin/env"
+fi
 
 # Install support libraries for 3D graphics and GUIs
 sudo apt-get install -y libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
 libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev \
 libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev \
 libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
-
