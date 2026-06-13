@@ -1,0 +1,23 @@
+--- cmake/eCALConfig.cmake.in
++++ cmake/eCALConfig.cmake.in
+@@ -33,7 +33,9 @@ set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
+-# Try and find protobuf in Config mode first
+-# (Primarily for Windows where we provide protobuf as part of eCAL)
+-find_package(Protobuf CONFIG)
+-if(NOT Protobuf_FOUND)
+-  # Search for Protobuf using Module mode (with no Config mode fallback)
+-  find_package(Protobuf MODULE REQUIRED)
+-endif()
++if(@ECAL_USE_PROTOBUF@)
++  # Try and find protobuf in Config mode first
++  # (Primarily for Windows where we provide protobuf as part of eCAL)
++  find_package(Protobuf CONFIG)
++  if(NOT Protobuf_FOUND)
++    # Search for Protobuf using Module mode (with no Config mode fallback)
++    find_package(Protobuf MODULE REQUIRED)
++  endif()
++endif()
+ 
+ include("@PACKAGE_eCAL_install_cmake_dir@/helper_functions/ecal_add_functions.cmake")
+ include("@PACKAGE_eCAL_install_cmake_dir@/helper_functions/ecal_helper_functions.cmake")
+ include("@PACKAGE_eCAL_install_cmake_dir@/helper_functions/ecal_install_functions.cmake")
