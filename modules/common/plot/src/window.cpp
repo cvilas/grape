@@ -267,9 +267,9 @@ struct Window::Impl {
   double sy_scale = -1.0;
   double sy_offset = 0.0;
 
-  // Cached render output size (updated in recalcLayout)
-  int render_w = 0;
-  int render_h = 0;
+  // Cached window size in logical coordinates (updated in recalcLayout)
+  int window_w = 0;
+  int window_h = 0;
 
   // Legend data
   struct Legend {
@@ -335,9 +335,7 @@ struct Window::Impl {
 
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::recalcLayout() {
-  int ww = 0;
-  int wh = 0;
-  SDL_CHECK(SDL_GetWindowSize(window.get(), &ww, &wh));
+  SDL_CHECK(SDL_GetWindowSize(window.get(), &window_w, &window_h));
   static constexpr auto PLOT_X = BORDER_SZ + (TICK_LABEL_LEN * TICK_FONT_PT) + MARGIN_SZ + TICK_LEN;
   static constexpr auto PLOT_Y = BORDER_SZ + TITLE_FONT_PT + MARGIN_SZ;
   static constexpr auto BOTTOM_MARGIN =
@@ -346,12 +344,11 @@ void Window::Impl::recalcLayout() {
   plot_area = {
     .x = PLOT_X,
     .y = PLOT_Y,
-    .w = static_cast<float>(ww) - PLOT_X - BORDER_SZ,
-    .h = static_cast<float>(wh) - PLOT_Y - BOTTOM_MARGIN,
+    .w = static_cast<float>(window_w) - PLOT_X - BORDER_SZ,
+    .h = static_cast<float>(window_h) - PLOT_Y - BOTTOM_MARGIN,
   };
-  legend.rect.x = legend.norm.x * static_cast<float>(ww);
-  legend.rect.y = legend.norm.y * static_cast<float>(wh);
-  SDL_CHECK(SDL_GetRenderOutputSize(renderer.get(), &render_w, &render_h));
+  legend.rect.x = legend.norm.x * static_cast<float>(window_w);
+  legend.rect.y = legend.norm.y * static_cast<float>(window_h);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -900,7 +897,7 @@ void Window::Impl::drawTicks() const {
 void Window::Impl::drawAxisLabels() const {
   if (!x_label_tex.empty()) {
     const SDL_FRect dst{ .x = plot_area.x + plot_area.w - static_cast<float>(x_label_tex.w),
-                         .y = static_cast<float>(render_h) - BORDER_SZ -
+                         .y = static_cast<float>(window_h) - BORDER_SZ -
                               static_cast<float>(x_label_tex.h),
                          .w = static_cast<float>(x_label_tex.w),
                          .h = static_cast<float>(x_label_tex.h) };
