@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <limits>
 #include <span>
 #include <string>
