@@ -40,7 +40,7 @@
   - [ ] Auto serdes using [variadic structured bindings](https://youtu.be/qIDFyhtUMnQ)
   - [ ] Plotting serialised topic data directly as `grape_plot --topics="/some/topic/name","/another/topic/name"`
   - [ ] Cross language [binding](https://godbolt.org/z/bYPcjMd9q) to functions for scripting
-  - [ ] Automatic differentiation using reflection
+  - [ ] [Automatic differentiation](https://solidean.com/blog/2026/fwd-diff-autodiff-cpp/)
   - [ ] Message dispatch using [pattern matching](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf)
   - [ ] _this_ parameter in member functions for [dependency injection](https://www.linkedin.com/pulse/c26s-game-changing-features-memory-constrained-systems-lourette-xqd5e/)
   - [ ] Static reflection in [embedded messaging protocols](https://www.linkedin.com/pulse/eliminating-dynamic-memory-embedded-protocols-c26-static-lourette-sio1e/)
