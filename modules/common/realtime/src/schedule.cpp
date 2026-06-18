@@ -8,6 +8,8 @@
 #ifdef __linux__
 #include <malloc.h>
 #endif
+#include <string>
+#include <string_view>
 #include <system_error>
 
 #include <sched.h>

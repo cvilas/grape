@@ -3,18 +3,34 @@
 //=================================================================================================
 
 #include <algorithm>
+#include <chrono>
+#include <compare>
+#include <cstdlib>
+#include <format>
+#include <functional>
 #include <numbers>
-#include <print>
+#include <ratio>
+#include <string>
+#include <string_view>
 #include <thread>
+#include <utility>
+#include <variant>
 
+#include <ftxui/component/app.hpp>
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/event.hpp>
 #include <ftxui/component/loop.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/color.hpp>
 
 #include "grape/conio/program_options.h"
+#include "grape/exception.h"
+#include "grape/ipc/config.h"
 #include "grape/ipc/session.h"
+#include "grape/locomotion/move_3d_cmd.h"
 #include "grape/locomotion/teleop_client.h"
+#include "grape/wall_clock.h"
 
 namespace {
 

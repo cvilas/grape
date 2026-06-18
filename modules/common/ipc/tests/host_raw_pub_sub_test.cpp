@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
+#include "grape/ipc/config.h"
 #include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"

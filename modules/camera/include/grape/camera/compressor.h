@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <span>
 #include <vector>
 
-#include "grape/camera/image_frame.h"
-
 namespace grape::camera {
+
+struct ImageFrame;
 
 //=================================================================================================
 /// Compresses an image frame without loss into byte stream for network transmission

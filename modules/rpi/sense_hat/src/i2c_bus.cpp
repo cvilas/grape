@@ -4,18 +4,21 @@
 
 #include "grape/rpi/sense_hat/i2c_bus.h"
 
-#include <algorithm>
+#include <algorithm>  // for __copy, copy
 #include <array>
 #include <cerrno>
-#include <iterator>
-#include <system_error>
-#include <utility>
+#include <format>
+#include <iterator>  // for next
+#include <string>
+#include <string_view>
+#include <system_error>  // for error_code, generic_category
+#include <utility>       // for exchange
 
-#include <fcntl.h>
-#include <linux/i2c-dev.h>
-#include <linux/i2c.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
+#include <fcntl.h>          // for O_RDWR, open
+#include <linux/i2c-dev.h>  // for I2C_RDWR, i2c_rdwr_ioctl_data
+#include <linux/i2c.h>      // for i2c_msg, I2C_M_RD
+#include <sys/ioctl.h>      // for ioctl
+#include <unistd.h>         // for close
 
 namespace grape::rpi::sense_hat {
 

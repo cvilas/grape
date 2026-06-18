@@ -4,12 +4,19 @@
 
 #include "grape/ipc/raw_subscriber.h"
 
+#include <utility>
+
+#include <ecal/config/configuration.h>
+#include <ecal/config/subscriber.h>
 #include <ecal/pubsub/subscriber.h>
 #include <ecal/pubsub/types.h>
+#include <ecal/types.h>
 
 #include "default_config.h"
 #include "grape/exception.h"
+#include "grape/ipc/qos.h"
 #include "grape/ipc/session.h"
+#include "grape/ipc/topic.h"
 
 namespace {
 

@@ -5,7 +5,11 @@
 #include "grape/conio/program_options.h"
 
 #include <algorithm>
+#include <compare>
+#include <cstdio>
+#include <cstdlib>
 #include <print>
+#include <utility>
 
 namespace grape::conio {
 

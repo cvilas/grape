@@ -7,10 +7,9 @@
 #include <atomic>
 #include <memory>
 
-#include "grape/camera/image_frame.h"
-
 namespace grape::camera {
 
+struct ImageFrame;
 //=================================================================================================
 /// Display window to render a camera image
 class Display {

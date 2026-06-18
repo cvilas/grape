@@ -2,19 +2,48 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
+#include <atomic>
+#include <chrono>
+#include <compare>
 #include <csignal>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <optional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_scancode.h>
 
 #include "grape/camera/decompressor.h"
 #include "grape/camera/display.h"
+#include "grape/camera/image_frame.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
 #include "grape/fifo_buffer.h"
+#include "grape/ipc/config.h"
+#include "grape/ipc/entity_id.h"
+#include "grape/ipc/match.h"
+#include "grape/ipc/qos.h"
 #include "grape/ipc/raw_subscriber.h"
 #include "grape/ipc/session.h"
+#include "grape/log/config.h"
+#include "grape/log/record.h"
+#include "grape/log/severity.h"
+#include "grape/log/sinks/console_sink.h"
 #include "grape/log/syslog.h"
+#include "grape/utils/enums.h"
+#include "grape/utils/file_system.h"
 #include "grape/wall_clock.h"
 
 //-------------------------------------------------------------------------------------------------

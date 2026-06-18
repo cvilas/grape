@@ -38,6 +38,15 @@ define_property(
 set_property(GLOBAL PROPERTY EXTERNAL_PROJECTS "")
 
 # ==================================================================================================
+# (for internal use)
+# Attach include-what-you-use to project targets when requested.
+function(apply_iwyu target_name)
+  if(ENABLE_IWYU AND IWYU_BIN)
+    set_target_properties(${target_name} PROPERTIES CXX_INCLUDE_WHAT_YOU_USE "${IWYU_BIN}")
+  endif()
+endfunction()
+
+# ==================================================================================================
 # Function: enumerate_modules
 #
 # Description:
@@ -303,6 +312,7 @@ function(define_module_library)
       FILES ${TARGET_ARG_PUBLIC_HEADERS})
 
   apply_clang_format(${LIBRARY_NAME})
+  apply_iwyu(${LIBRARY_NAME})
 
   set_target_properties(
     ${LIBRARY_NAME}
@@ -363,6 +373,7 @@ function(define_module_example)
 
   add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL ${TARGET_ARG_SOURCES})
   apply_clang_format(${TARGET_NAME})
+  apply_iwyu(${TARGET_NAME})
   add_dependencies(examples ${TARGET_NAME}) # Set this example to be built on `make examples`
 
   target_include_directories(
@@ -424,6 +435,7 @@ function(define_module_app)
 
   add_executable(${TARGET_NAME} ${TARGET_ARG_SOURCES})
   apply_clang_format(${TARGET_NAME})
+  apply_iwyu(${TARGET_NAME})
 
   set(MODULE_${MODULE_NAME}_EXE_TARGETS
       ${MODULE_${MODULE_NAME}_EXE_TARGETS} ${TARGET_NAME}
@@ -521,6 +533,7 @@ function(define_module_test)
 
   add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL ${TARGET_ARG_SOURCES}) # Don't build on `make`
   apply_clang_format(${TARGET_NAME})
+  apply_iwyu(${TARGET_NAME})
 
   # Add to cmake tests (call using ctest)
   add_test(

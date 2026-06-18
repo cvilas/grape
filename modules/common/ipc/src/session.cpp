@@ -4,10 +4,16 @@
 
 #include "grape/ipc/session.h"
 
+#include <cstdlib>  // for atexit
+#include <string>
+#include <tuple>
+
+#include <ecal/config/configuration.h>
 #include <ecal/core.h>
 
 #include "default_config.h"
 #include "grape/exception.h"
+#include "grape/ipc/config.h"
 
 namespace grape::ipc {
 

@@ -4,9 +4,11 @@
 
 #pragma once
 
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <memory>
+#include <type_traits>
 
 #include "grape/error.h"
 #include "grape/wall_clock.h"

@@ -4,15 +4,17 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <memory>
 #include <span>
 
 #include "grape/ipc/error.h"
 #include "grape/ipc/match.h"
-#include "grape/ipc/topic.h"
 
 namespace grape::ipc {
+struct Topic;
 
 //=================================================================================================
 /// Publishers post data on a topic.

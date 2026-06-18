@@ -7,6 +7,7 @@
 #include <thread>
 
 #include "grape/exception.h"
+#include "grape/ipc/config.h"
 #include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/session.h"
 

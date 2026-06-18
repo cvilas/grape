@@ -4,13 +4,24 @@
 
 #include "grape/ipc/raw_publisher.h"
 
+#include <functional>
+#include <string>
+#include <utility>
+
+#include <ecal/config/configuration.h>
 #include <ecal/pubsub/publisher.h>
 #include <ecal/pubsub/types.h>
+#include <ecal/types.h>
 
 #include "default_config.h"
 #include "grape/exception.h"
 #include "grape/ipc/session.h"
+#include "grape/ipc/topic.h"
 #include "grape/wall_clock.h"
+
+namespace eCAL::Publisher {
+struct Configuration;
+}
 
 namespace {
 

@@ -4,10 +4,23 @@
 
 #include "grape/camera/camera.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <format>
+#include <limits>
+#include <span>
+#include <utility>
+#include <vector>
+
 #include <SDL3/SDL_camera.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_surface.h>
 
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
+#include "grape/wall_clock.h"
 
 namespace {
 

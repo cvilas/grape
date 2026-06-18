@@ -8,17 +8,39 @@
 #include <array>
 #include <atomic>
 #include <cmath>
+#include <cstdio>  // for size_t, stderr
 #include <format>
+#include <functional>  // for less
+#include <initializer_list>
 #include <limits>
-#include <mutex>
+#include <mutex>  // for scoped_lock, mutex
 #include <print>
 #include <random>
+#include <span>
+#include <string_view>
+#include <utility>  // for pair, get, move
+#include <vector>
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_blendmode.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_iostream.h>
+#include <SDL3/SDL_keyboard.h>
+#include <SDL3/SDL_keycode.h>
+#include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_timer.h>
+#include <SDL3/SDL_video.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "font.h"
 #include "grape/exception.h"
+#include "grape/plot/style.h"
+#include "grape/plot/trace.h"
 
 namespace {
 

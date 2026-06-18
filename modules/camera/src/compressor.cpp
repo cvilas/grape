@@ -4,10 +4,13 @@
 
 #include "grape/camera/compressor.h"
 
-#include <cstring>  // memcpy
+#include <cstring>   // for memcpy
+#include <iterator>  // for next
+#include <utility>   // for move
 
 #include <lz4.h>
 
+#include "grape/camera/image_frame.h"
 #include "grape/log/syslog.h"
 
 namespace grape::camera {

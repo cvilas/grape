@@ -4,19 +4,18 @@
 
 #pragma once
 
+#include <cstddef>  // for size_t
 #include <limits>
 #include <span>
 #include <string>
 #include <string_view>
-#include <utility>
+#include <utility>  // for pair
 
 #include "grape/fifo_buffer.h"
 #include "grape/plot/snapshot_buffer.h"
 #include "grape/plot/style.h"
 
 namespace grape::plot {
-
-class Window;
 
 //=================================================================================================
 /// A single 2D data trace rendered inside a Window.

@@ -4,12 +4,14 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
-#include "grape/plot/trace.h"
-
 namespace grape::plot {
+
+class Trace;
+enum class AxisId : std::uint8_t;
 
 //=================================================================================================
 /// 2D realtime plot window.

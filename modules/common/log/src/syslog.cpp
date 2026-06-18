@@ -4,10 +4,13 @@
 
 #include "grape/log/syslog.h"
 
-#include <mutex>
+#include <mutex>  // for call_once, once_flag
 #include <optional>
+#include <string>
 
 #include "grape/exception.h"
+#include "grape/log/config.h"
+#include "grape/log/logger.h"
 
 namespace {
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)

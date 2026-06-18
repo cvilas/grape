@@ -4,10 +4,26 @@
 
 #include "grape/camera/display.h"
 
-#include <SDL3/SDL_render.h>
+#include <array>
+#include <chrono>
+#include <format>
+#include <initializer_list>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
 
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_video.h>
+
+#include "grape/camera/image_frame.h"
+#include "grape/camera/image_spec.h"
 #include "grape/exception.h"
 #include "grape/log/syslog.h"
+#include "grape/wall_clock.h"
 
 namespace grape::camera {
 

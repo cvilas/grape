@@ -10,6 +10,8 @@
 #include <thread>
 
 #include "grape/exception.h"
+#include "grape/plot/style.h"
+#include "grape/plot/trace.h"
 #include "grape/plot/window.h"
 #include "grape/wall_clock.h"
 

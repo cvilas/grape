@@ -4,16 +4,21 @@
 
 #pragma once
 
+#include <cstddef>  // for byte, size_t
+#include <cstdint>  // for uint64_t
 #include <functional>
 #include <memory>
 #include <span>
+#include <string>
 
+#include "grape/ipc/entity_id.h"
 #include "grape/ipc/match.h"
-#include "grape/ipc/qos.h"
-#include "grape/ipc/topic.h"
 #include "grape/wall_clock.h"
 
 namespace grape::ipc {
+
+enum class QoS : std::uint8_t;
+struct Topic;
 
 //=================================================================================================
 /// Meta information about data contained in a sample

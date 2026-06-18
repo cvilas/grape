@@ -4,6 +4,17 @@
 
 #include "grape/locomotion/arbiter.h"
 
+#include <compare>
+#include <ratio>
+#include <string_view>
+#include <utility>
+
+#include "grape/ipc/entity_id.h"
+#include "grape/ipc/error.h"
+#include "grape/ipc/raw_subscriber.h"
+#include "grape/locomotion/arbiter_status.h"
+#include "grape/locomotion/keep_alive_cmd.h"
+#include "grape/locomotion/move_3d_cmd.h"
 #include "grape/log/syslog.h"
 
 namespace grape::locomotion {

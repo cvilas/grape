@@ -5,8 +5,10 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <format>
 #include <memory>
+#include <ratio>
 #include <string_view>
 
 namespace grape::clock {

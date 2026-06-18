@@ -5,6 +5,7 @@
 #include "grape/ipc/session.h"
 
 #include "catch2/catch_test_macros.hpp"
+#include "grape/ipc/config.h"
 
 namespace {
 

@@ -2,14 +2,26 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
+#include <chrono>
+#include <cstddef>
+#include <cstdlib>
+#include <expected>
 #include <print>
+#include <span>
+#include <string>
+#include <string_view>
 #include <thread>
 #include <vector>
 
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/ipc/config.h"
+#include "grape/ipc/entity_id.h"
+#include "grape/ipc/error.h"
+#include "grape/ipc/match.h"
 #include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/session.h"
+#include "grape/ipc/topic.h"
 #include "perf_constants.h"
 
 //=================================================================================================

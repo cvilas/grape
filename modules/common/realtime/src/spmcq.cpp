@@ -4,10 +4,12 @@
 
 #include "grape/realtime/spmcq.h"
 
+#include <algorithm>  // for __copy, copy
 #include <atomic>
 #include <format>
 #include <memory>
 #include <new>
+#include <tuple>  // for __ignore_type, ignore
 #include <type_traits>
 
 #include "grape/exception.h"

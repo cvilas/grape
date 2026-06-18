@@ -4,9 +4,11 @@
 
 #include "grape/script/script.h"
 
-#include <utility>
+#include <cstddef>  // for size_t
+#include <tuple>    // for __ignore_type, ignore
+#include <utility>  // for exchange, move
 
-#include "lua.hpp"
+#include <lua.hpp>  // for Lua C API (provides extern "C" wrapper for C++)
 
 namespace grape::script {
 
