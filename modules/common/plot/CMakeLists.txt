@@ -15,6 +15,13 @@ set(HEADERS include/grape/plot/snapshot_buffer.h include/grape/plot/style.h
 
 set(SOURCES src/window.cpp src/trace.cpp src/font.cpp src/font.h)
 
+set(SOURCES
+    src/window.cpp
+    src/trace.cpp
+    src/font.cpp
+    src/font.h
+    ${PUBLIC_HEADERS})
+
 define_module_library(
   NAME plot
   SOURCES ${SOURCES}
