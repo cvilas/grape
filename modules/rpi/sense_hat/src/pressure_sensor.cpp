@@ -5,10 +5,18 @@
 #include "grape/rpi/sense_hat/pressure_sensor.h"
 
 #include <array>
+#include <chrono>
+#include <compare>
+#include <cstdint>
 #include <format>
+#include <span>
+#include <string_view>
 #include <thread>
+#include <tuple>
+#include <utility>
 
 #include "grape/exception.h"
+#include "grape/rpi/sense_hat/i2c_bus.h"
 #include "lps25h.h"
 #include "utils.h"
 

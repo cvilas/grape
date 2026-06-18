@@ -5,13 +5,25 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <expected>
 #include <functional>
+#include <stop_token>
+#include <string>
 #include <thread>
 
 #include "grape/ipc/publisher.h"
 #include "grape/ipc/subscriber.h"
+#include "grape/locomotion/command.h"
 #include "grape/locomotion/topics.h"
 #include "grape/statistics/sliding_mean.h"
+#include "grape/wall_clock.h"
+
+namespace grape::ipc {
+enum class Error : std::uint8_t;
+struct SampleInfo;
+}  // namespace grape::ipc
 
 namespace grape::locomotion {
 

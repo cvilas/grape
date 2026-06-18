@@ -8,6 +8,7 @@
 #include <print>
 
 #include "grape/conio/program_options.h"
+#include "grape/ipc/config.h"
 #include "grape/ipc/session.h"
 #include "grape/locomotion/arbiter.h"
 

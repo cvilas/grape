@@ -4,17 +4,26 @@
 
 #pragma once
 
-#include <cstring>
+#include <atomic>   // for atomic_uint32_t, memory_order_relaxed
+#include <cstddef>  // for byte
+#include <cstdint>
+#include <cstring>  // for memcpy
 #include <format>
+#include <memory>
 #include <source_location>
+#include <span>
 #include <stop_token>
+#include <type_traits>
+#include <utility>  // for forward
 
 #include "grape/fifo_buffer.h"
 #include "grape/log/config.h"
 #include "grape/log/record.h"
-#include "grape/log/severity.h"
+#include "grape/wall_clock.h"
 
 namespace grape::log {
+
+enum class Severity : std::uint8_t;
 
 //=================================================================================================
 /// A buffered lock-free logger suitable for realtime applications

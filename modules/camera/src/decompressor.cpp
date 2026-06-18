@@ -9,6 +9,7 @@
 
 #include <lz4.h>
 
+#include "grape/camera/image_spec.h"
 #include "grape/log/syslog.h"
 
 namespace grape::camera {

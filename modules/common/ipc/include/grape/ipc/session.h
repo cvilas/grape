@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "grape/ipc/config.h"
-
 namespace grape::ipc {
+
+struct Config;
 
 /// Initialise IPC session for the process
 /// @param config Process IPC configuration

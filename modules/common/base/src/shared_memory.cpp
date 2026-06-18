@@ -4,13 +4,16 @@
 
 #include "grape/shared_memory.h"
 
+#include <cerrno>
+#include <string_view>
 #include <system_error>
 #include <utility>
 
-#include <fcntl.h>     // for O_* constants
-#include <sys/mman.h>  // for mmap
-#include <sys/stat.h>  // For mode constants
-#include <unistd.h>    // for open/close
+#include <fcntl.h>      // for O_RDONLY, O_RDWR, O_CREAT, O_EXCL
+#include <sys/mman.h>   // for PROT_READ, shm_open, MAP_FAILED, MAP_SHARED
+#include <sys/stat.h>   // for stat, fstat, S_IRGRP, S_IROTH, S_IRUSR, S_IWGRP
+#include <sys/types.h>  // for off_t
+#include <unistd.h>     // for close, ftruncate
 
 namespace grape {
 

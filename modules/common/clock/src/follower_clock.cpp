@@ -4,6 +4,11 @@
 
 #include "grape/clock/follower_clock.h"
 
+#include <compare>
+#include <expected>
+#include <system_error>
+
+#include "grape/shared_memory.h"
 #include "tick.h"
 
 namespace grape::clock {

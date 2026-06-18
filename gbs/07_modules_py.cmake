@@ -84,6 +84,7 @@ function(define_module_pybinding)
   nanobind_add_module(${PY_MODULE_NAME} ${ARG_SOURCES})
   target_link_libraries(${PY_MODULE_NAME} PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS}) 
   apply_clang_format(${PY_MODULE_NAME})
+  apply_iwyu(${PY_MODULE_NAME})
 
   # Treat nanobind as a third-party library
   # - disable clang-tidy

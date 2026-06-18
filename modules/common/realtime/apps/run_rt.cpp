@@ -2,12 +2,23 @@
 // Copyright (C) 2018 GRAPE Contributors
 //=================================================================================================
 
+#include <array>
+#include <cerrno>
+#include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <expected>
+#include <initializer_list>
 #include <print>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include <unistd.h>
 
 #include "grape/conio/program_options.h"
+#include "grape/error.h"
 #include "grape/exception.h"
 #include "grape/realtime/schedule.h"
 

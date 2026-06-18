@@ -4,9 +4,15 @@
 
 #include "grape/rpi/sense_hat/inertial_sensor.h"
 
+#include <array>
+#include <format>
+#include <span>
+#include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "grape/exception.h"
+#include "grape/rpi/sense_hat/i2c_bus.h"
 #include "lsm9ds1.h"
 #include "utils.h"
 

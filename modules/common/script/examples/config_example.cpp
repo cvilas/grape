@@ -2,7 +2,10 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#include <cstdlib>
 #include <print>
+#include <string>
+#include <string_view>
 
 #include "grape/exception.h"
 #include "grape/script/script.h"

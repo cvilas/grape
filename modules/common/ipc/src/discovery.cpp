@@ -4,7 +4,12 @@
 
 #include "grape/ipc/discovery.h"
 
+#include <set>
+#include <tuple>
+
+#include <ecal/pubsub/types.h>
 #include <ecal/registration.h>
+#include <ecal/types.h>
 
 namespace {
 //-------------------------------------------------------------------------------------------------

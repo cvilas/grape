@@ -8,6 +8,7 @@
 #include "grape/camera/compressor.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/ipc/config.h"
 #include "grape/ipc/raw_publisher.h"
 #include "grape/ipc/session.h"
 #include "grape/log/syslog.h"

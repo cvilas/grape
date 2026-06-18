@@ -4,14 +4,25 @@
 
 #pragma once
 
+#include <cstdint>
+#include <expected>
 #include <functional>
 #include <string>
+#include <variant>
 
 #include "grape/ipc/publisher.h"
 #include "grape/ipc/subscriber.h"
 #include "grape/locomotion/topics.h"
+#include "grape/wall_clock.h"
+
+namespace grape::ipc {
+enum class Error : std::uint8_t;
+struct Match;
+struct SampleInfo;
+}  // namespace grape::ipc
 
 namespace grape::locomotion {
+struct ArbiterStatus;
 
 //=================================================================================================
 /// Teleoperation client interface. Sends locomotion commands over the alternate command channel to

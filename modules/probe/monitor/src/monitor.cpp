@@ -4,19 +4,33 @@
 
 #include "grape/probe/monitor.h"
 
-#include <cstdio>
-#include <format>
-#include <limits>
-#include <mutex>
-#include <shared_mutex>
+#include <algorithm>     // for __copy, copy
+#include <cstdio>        // for fputs, stderr
+#include <format>        // for format
+#include <limits>        // for numeric_limits
+#include <mutex>         // for unique_lock
+#include <shared_mutex>  // for shared_lock, shared_mutex
+#include <string>        // for basic_string, char_traits
+#include <tuple>         // for __ignore_type, ignore
+#include <utility>       // for unreachable, move
+#include <vector>
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_error.h>   // for SDL_GetError
+#include <SDL3/SDL_events.h>  // for SDL_EventType, SDL_Pol...
+#include <SDL3/SDL_init.h>    // for SDL_INIT_VIDEO, SDL_Init
+#include <SDL3/SDL_render.h>  // for SDL_CreateRenderer
+#include <SDL3/SDL_video.h>   // for SDL_CreateWindow, SDL_...
 
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
-#include "grape/exception.h"
-#include "imgui.h"
-#include "implot.h"
+#include "backends/imgui_impl_sdl3.h"          // for ImGui_ImplSDL3_InitFor...
+#include "backends/imgui_impl_sdlrenderer3.h"  // for ImGui_ImplSDLRenderer3...
+#include "grape/exception.h"                   // for panic
+#include "grape/probe/signal.h"                // for Signal
+#include "grape/probe/type_id.h"               // for TypeId, length
+#include "imgui.h"                             // for ImGuiDataType_, ImGuiIO
+#include "implot.h"                            // for ImPlotPoint, ImPlotAxi...
+
+struct ImGuiContext;
+struct ImPlotContext;
 
 namespace {
 //-------------------------------------------------------------------------------------------------

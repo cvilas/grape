@@ -4,6 +4,20 @@
 
 #include "grape/locomotion/teleop_client.h"
 
+#include <format>
+#include <string_view>
+#include <utility>
+
+#include "grape/ipc/error.h"
+#include "grape/ipc/match.h"
+#include "grape/locomotion/arbiter_status.h"
+#include "grape/locomotion/keep_alive_cmd.h"
+#include "grape/locomotion/move_3d_cmd.h"
+
+namespace grape::ipc {
+struct SampleInfo;
+}
+
 namespace grape::locomotion {
 
 //-------------------------------------------------------------------------------------------------

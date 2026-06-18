@@ -4,12 +4,31 @@
 
 #define SDL_MAIN_USE_CALLBACKS 1  // NOLINT(cppcoreguidelines-macro-usage)
 
+#include <atomic>
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
+
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
 #include <SDL3/SDL_main.h>
+#include <SDL3/SDL_scancode.h>
 
 #include "grape/camera/camera.h"
 #include "grape/camera/display.h"
+#include "grape/camera/image_frame.h"
 #include "grape/conio/program_options.h"
 #include "grape/exception.h"
+#include "grape/log/config.h"
+#include "grape/log/record.h"
+#include "grape/log/severity.h"
+#include "grape/log/sinks/console_sink.h"
 #include "grape/log/syslog.h"
 
 //-------------------------------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "grape/exception.h"
+#include "grape/ipc/config.h"
 #include "grape/ipc/session.h"
 #include "grape/ipc/subscriber.h"
 #include "topic_example.h"

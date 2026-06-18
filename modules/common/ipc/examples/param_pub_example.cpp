@@ -8,6 +8,7 @@
 #include <print>
 
 #include "grape/exception.h"
+#include "grape/ipc/config.h"
 #include "grape/ipc/publisher.h"
 #include "grape/ipc/session.h"
 #include "topic_example.h"

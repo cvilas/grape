@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstddef>  // for byte, size_t
+#include <cstdint>  // for uint8_t, uintptr_t
 #include <functional>
 #include <ranges>
 #include <span>
@@ -12,6 +14,7 @@
 
 #include "grape/fifo_buffer.h"
 #include "grape/probe/signal.h"
+#include "grape/probe/type_id.h"  // for NumericType, toTypeId
 #include "grape/utils/enums.h"
 
 namespace grape::probe {

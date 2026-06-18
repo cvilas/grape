@@ -4,8 +4,13 @@
 
 #pragma once
 
+#include <algorithm>
 #include <format>
+#include <sstream>
+#include <string>
 #include <string_view>
+#include <type_traits>
+#include <vector>
 
 #include "grape/conio/string_streamable.h"
 #include "grape/exception.h"

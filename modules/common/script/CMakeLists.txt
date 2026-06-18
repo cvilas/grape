@@ -15,7 +15,7 @@ set(SOURCES src/script.cpp)
 define_module_library(
   NAME script
   PUBLIC_LINK_LIBS "grape::base"
-  PRIVATE_LINK_LIBS $<BUILD_LOCAL_INTERFACE:lualib>
+  PRIVATE_LINK_LIBS lualib
   SOURCES ${SOURCES}
   PUBLIC_HEADERS ${HEADERS}
   PRIVATE_INCLUDE_PATHS ""

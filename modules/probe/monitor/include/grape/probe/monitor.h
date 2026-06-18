@@ -4,15 +4,17 @@
 
 #pragma once
 
+#include <cstddef>  // for byte
+#include <cstdint>  // for uint8_t
 #include <functional>
 #include <memory>
 #include <span>
 #include <string_view>
 
-#include "grape/probe/signal.h"
 #include "grape/utils/enums.h"
 
 namespace grape::probe {
+struct Signal;
 
 // Proof of concept
 class Monitor {

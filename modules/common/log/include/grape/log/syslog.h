@@ -4,7 +4,17 @@
 
 #pragma once
 
+#include <format>
+#include <source_location>
+#include <type_traits>
+#include <utility>
+
 #include "grape/log/logger.h"
+#include "grape/log/severity.h"
+
+namespace grape::log {
+struct Config;
+}  // namespace grape::log
 
 namespace grape::syslog {
 

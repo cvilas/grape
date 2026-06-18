@@ -4,9 +4,14 @@
 
 #include "grape/log/logger.h"
 
+#include <cassert>
+#include <cstdio>  // for fputs, stderr
+#include <string>
 #include <thread>
 
 #include "grape/exception.h"
+#include "grape/log/severity.h"
+#include "grape/log/sinks/sink.h"
 
 namespace grape::log {
 

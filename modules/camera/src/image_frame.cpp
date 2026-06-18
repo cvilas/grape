@@ -4,6 +4,11 @@
 
 #include "grape/camera/image_frame.h"
 
+#include <memory>
+#include <string>
+
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
 
 #include "grape/log/syslog.h"

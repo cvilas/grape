@@ -4,17 +4,35 @@
 
 #include "grape/joystick/joystick.h"
 
-#include <climits>
-#include <concepts>  //std::invocable
-#include <cstring>
+#include <array>
+#include <cerrno>
+#include <climits>   // for CHAR_BIT
+#include <concepts>  // for invocable
+#include <cstdint>
+#include <cstdio>  // for size_t, fputs, stderr
+#include <exception>
 #include <expected>
 #include <format>
+#include <ratio>
+#include <string_view>
+#include <system_error>
+#include <tuple>  // for __ignore_type, ignore
 #include <unordered_map>
+#include <utility>  // for move, cmp_less
+#include <variant>
 
-#include <fcntl.h>
+#include <fcntl.h>                    // for O_RDONLY, open, O_NONBLOCK
+#include <linux/input-event-codes.h>  // for BTN_BASE6, KEY_MAX, ABS_MAX
 #include <linux/input.h>
-#include <sys/epoll.h>
-#include <unistd.h>
+#include <sys/epoll.h>  // for epoll_event, EPOLLERR, EPOLLHUP
+#include <sys/ioctl.h>
+#include <sys/time.h>  // for timeval
+#include <unistd.h>    // for close, read
+
+#include "grape/joystick/controls.h"
+#include "grape/wall_clock.h"
+
+struct timeval;
 
 namespace {
 

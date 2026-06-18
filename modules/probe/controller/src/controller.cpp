@@ -5,8 +5,12 @@
 #include "grape/probe/controller.h"
 
 #include <algorithm>
-#include <cstring>  // std::memcpy
-#include <numeric>  // std::accumulate
+#include <bit>       // for bit_cast
+#include <cstring>   // std::memcpy
+#include <iterator>  // for begin, distance, end
+#include <numeric>   // std::accumulate
+#include <string>    // for basic_string
+#include <utility>   // for move
 
 #include "grape/exception.h"
 
