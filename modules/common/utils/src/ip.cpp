@@ -5,6 +5,7 @@
 #include "grape/utils/ip.h"
 
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
 
 namespace grape::utils {

@@ -13,8 +13,8 @@ if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 # library sources
-set(SOURCES src/tick.h src/clock_broadcaster.cpp src/follower_clock.cpp README.md
-            include/grape/clock/follower_clock.h include/grape/clock/clock_broadcaster.h)
+set(HEADERS include/grape/clock/follower_clock.h include/grape/clock/clock_broadcaster.h)
+set(SOURCES src/tick.h src/clock_broadcaster.cpp src/follower_clock.cpp)
 
 # library target
 define_module_library(
@@ -22,8 +22,7 @@ define_module_library(
   PUBLIC_LINK_LIBS "grape::base"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                       $<INSTALL_INTERFACE:include>
+  PUBLIC_HEADERS ${HEADERS}
   PRIVATE_INCLUDE_PATHS ""
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 

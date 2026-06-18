@@ -8,14 +8,16 @@
 #include <climits>  // for PATH_MAX
 #include <cstdlib>  // for getenv
 #include <fstream>
+#include <tuple>  // for ignore
 
-#include <pwd.h>
-#include <sys/types.h>  // for getpwuid
-#include <unistd.h>
-
-#ifdef __APPLE__
+#ifdef __linux__
+#include <bits/local_lim.h>  // for HOST_NAME_MAX
+#elifdef __APPLE__
 #include <mach-o/dyld.h>
 #endif
+
+#include <pwd.h>     // for getpwuid, passwd
+#include <unistd.h>  // for gethostname, getuid, readlink
 
 #ifndef HOST_NAME_MAX
 #ifdef _POSIX_HOST_NAME_MAX
@@ -30,11 +32,11 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 auto readProgramPath() -> std::filesystem::path {
   auto program_path = std::array<char, PATH_MAX>{};
-#ifdef __APPLE__
+#ifdef __linux__
+  std::ignore = readlink("/proc/self/exe", program_path.data(), PATH_MAX - 1);
+#elifdef __APPLE__
   std::uint32_t buf_len = program_path.size();
   std::ignore = _NSGetExecutablePath(program_path.data(), &buf_len);
-#elifdef __linux__
-  std::ignore = readlink("/proc/self/exe", program_path.data(), PATH_MAX - 1);
 #endif
   return { program_path.data() };
 }

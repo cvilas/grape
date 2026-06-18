@@ -7,6 +7,8 @@ include(GNUInstallDirs)
 include(FetchContent)
 include(CTest)
 
+set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ON)
+
 # ==================================================================================================
 # Global list of all modules
 define_property(
@@ -232,10 +234,9 @@ endmacro()
 # Parameters:
 #   NAME        : (string) Base name of the library. Eg: 'mylib' creates 'lib<project_name>_mylib.so/.a`
 #   SOURCES     : (list) Source files to compile into the library above
+#   PUBLIC_HEADERS : (list) Public headers installed and exported as a CMake HEADERS file set.
 #   NOINSTALL   : (optional) Flag to tell the build system not to install the library on call to `make install`. Useful for libraries only usable in the build tree (Eg: helper libs for tests and examples)
-#   [PUBLIC_INCLUDE_PATHS] : (list, optional) Publicly included directories. See cmake documentation for 'PUBLIC' keyword in `target_include_directories`
 #   [PRIVATE_INCLUDE_PATHS] : (list, optional) Privately included directories. See cmake documentation for 'PRIVATE' keyword in `target_include_directories`
-#   [SYSTEM_PUBLIC_INCLUDE_PATHS] : (list, optional) Publicly included system directories on some platforms. See 'SYSTEM' keyword in `target_include_directories`
 #   [SYSTEM_PRIVATE_INCLUDE_PATHS] : (list, optional) Privately included system directories on some platforms. See 'SYSTEM' keyword in `target_include_directories`
 #   [PUBLIC_LINK_LIBS] : (list, optional) Public link dependencies. See 'PUBLIC' keyword in `target_link_libraries`
 #   [PRIVATE_LINK_LIBS]: (list, optional) Private link dependencies. See 'PRIVATE' keyword in `target_link_libraries`
@@ -245,9 +246,8 @@ function(define_module_library)
   set(single_opts NAME)
   set(multi_opts
       SOURCES
-      PUBLIC_INCLUDE_PATHS
+      PUBLIC_HEADERS
       PRIVATE_INCLUDE_PATHS
-      SYSTEM_PUBLIC_INCLUDE_PATHS
       SYSTEM_PRIVATE_INCLUDE_PATHS
       PUBLIC_LINK_LIBS
       PRIVATE_LINK_LIBS)
@@ -262,6 +262,9 @@ function(define_module_library)
   if(NOT TARGET_ARG_NAME)
     message(FATAL_ERROR "Library name not specified")
   endif()
+  if(NOT TARGET_ARG_PUBLIC_HEADERS)
+    message(FATAL_ERROR "Public headers not specified")
+  endif()
 
   set(LIBRARY_NAME ${CMAKE_PROJECT_NAME}_${TARGET_ARG_NAME})
   set(LIBRARY_EXPORT_NAME ${TARGET_ARG_NAME})
@@ -269,7 +272,6 @@ function(define_module_library)
 
   add_library(${LIBRARY_NAME} ${TARGET_ARG_SOURCES})
   add_library(${LIBRARY_NAME_ALIAS} ALIAS ${LIBRARY_NAME})
-  add_clang_format(${LIBRARY_NAME})
 
   if(NOT TARGET_ARG_NOINSTALL)
     set(MODULE_${MODULE_NAME}_LIB_TARGETS
@@ -279,18 +281,28 @@ function(define_module_library)
 
   target_include_directories(
     ${LIBRARY_NAME} BEFORE
-    PUBLIC ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
+    PUBLIC $<BUILD_INTERFACE:${MODULE_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:include>
     PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
 
   target_include_directories(
     ${LIBRARY_NAME} SYSTEM BEFORE
-    PUBLIC ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
     PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
 
   target_link_libraries(
     ${LIBRARY_NAME}
     PUBLIC ${TARGET_ARG_PUBLIC_LINK_LIBS}
     PRIVATE ${TARGET_ARG_PRIVATE_LINK_LIBS})
+
+  target_sources(
+    ${LIBRARY_NAME}
+    PUBLIC
+      FILE_SET public_headers
+      TYPE HEADERS
+      BASE_DIRS ${MODULE_SOURCE_DIR}/include
+      FILES ${TARGET_ARG_PUBLIC_HEADERS})
+
+  apply_clang_format(${LIBRARY_NAME})
 
   set_target_properties(
     ${LIBRARY_NAME}
@@ -350,7 +362,7 @@ function(define_module_example)
   set(TARGET_NAME ${CMAKE_PROJECT_NAME}_${MODULE_NAME}_${TARGET_ARG_NAME})
 
   add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL ${TARGET_ARG_SOURCES})
-  add_clang_format(${TARGET_NAME})
+  apply_clang_format(${TARGET_NAME})
   add_dependencies(examples ${TARGET_NAME}) # Set this example to be built on `make examples`
 
   target_include_directories(
@@ -411,7 +423,7 @@ function(define_module_app)
   set(TARGET_NAME ${CMAKE_PROJECT_NAME}_${TARGET_ARG_NAME})
 
   add_executable(${TARGET_NAME} ${TARGET_ARG_SOURCES})
-  add_clang_format(${TARGET_NAME})
+  apply_clang_format(${TARGET_NAME})
 
   set(MODULE_${MODULE_NAME}_EXE_TARGETS
       ${MODULE_${MODULE_NAME}_EXE_TARGETS} ${TARGET_NAME}
@@ -508,7 +520,7 @@ function(define_module_test)
   set(TARGET_NAME ${CMAKE_PROJECT_NAME}_${MODULE_NAME}_${TARGET_ARG_NAME})
 
   add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL ${TARGET_ARG_SOURCES}) # Don't build on `make`
-  add_clang_format(${TARGET_NAME})
+  apply_clang_format(${TARGET_NAME})
 
   # Add to cmake tests (call using ctest)
   add_test(
@@ -571,7 +583,7 @@ function(install_modules)
       ${config_create_location}/${INSTALL_MODULE_NAME}-config-version.cmake
       VERSION ${VERSION}
       COMPATIBILITY AnyNewerVersion)
-    
+
     # install config files (dev component: needed to use the package in downstream CMake projects)
     install(FILES "${config_create_location}/${INSTALL_MODULE_NAME}-config.cmake"
                   "${config_create_location}/${INSTALL_MODULE_NAME}-config-version.cmake"
@@ -596,12 +608,7 @@ function(install_modules)
           RUNTIME DESTINATION bin COMPONENT runtime
           LIBRARY DESTINATION lib COMPONENT runtime
           ARCHIVE DESTINATION lib COMPONENT dev
-          INCLUDES DESTINATION include)
-      endif()
-
-      # dev component: public header files
-      if(EXISTS ${MODULE_${module}_PATH}/include)
-        install(DIRECTORY ${MODULE_${module}_PATH}/include/ DESTINATION include COMPONENT dev)
+          FILE_SET public_headers DESTINATION include COMPONENT dev)
       endif()
 
       # dev component: export targets (for downstream find_package)
@@ -611,7 +618,7 @@ function(install_modules)
         DESTINATION ${config_install_location}
         COMPONENT dev)
     endif()
-    
+
   endforeach()
 
   # configure the uninstaller script

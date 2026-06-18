@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <span>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace grape::utils {
 class StackTrace {
 public:
   [[nodiscard]] static auto current() -> StackTrace;
-  [[nodiscard]] auto trace() const -> const std::vector<std::string>&;
+  [[nodiscard]] auto trace() const -> std::span<const std::string>;
 
 private:
   static constexpr auto MAX_FRAMES = 16U;
