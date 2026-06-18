@@ -22,9 +22,8 @@ with section("parse"):
       'kwargs': {
         'NAME': '*',
         'SOURCES': '*',
-        'PUBLIC_INCLUDE_PATHS': '*',
+        'PUBLIC_HEADERS': '*',
         'PRIVATE_INCLUDE_PATHS': '*',
-        'SYSTEM_PUBLIC_INCLUDE_PATHS': '*',
         'SYSTEM_PRIVATE_INCLUDE_PATHS': '*',
         'PUBLIC_LINK_LIBS': '*',
         'PRIVATE_LINK_LIBS': '*'

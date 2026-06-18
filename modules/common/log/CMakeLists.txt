@@ -8,8 +8,7 @@ declare_module(
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
-set(SOURCES
-    README.md
+set(HEADERS
     include/grape/log/formatters/default_formatter.h
     include/grape/log/sinks/sink.h
     include/grape/log/sinks/console_sink.h
@@ -18,9 +17,9 @@ set(SOURCES
     include/grape/log/logger.h
     include/grape/log/record.h
     include/grape/log/severity.h
-    include/grape/log/syslog.h
-    src/logger.cpp
-    src/syslog.cpp)
+    include/grape/log/syslog.h)
+
+set(SOURCES src/logger.cpp src/syslog.cpp)
 
 # library target
 define_module_library(
@@ -28,8 +27,7 @@ define_module_library(
   PUBLIC_LINK_LIBS "grape::base"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                       $<INSTALL_INTERFACE:include>
+  PUBLIC_HEADERS ${HEADERS}
   PRIVATE_INCLUDE_PATHS ""
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 

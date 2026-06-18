@@ -12,13 +12,12 @@ if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   return()
 endif()
 
+set(HEADERS
+    include/grape/rpi/sense_hat/display.h include/grape/rpi/sense_hat/humidity_sensor.h
+    include/grape/rpi/sense_hat/pressure_sensor.h include/grape/rpi/sense_hat/i2c_bus.h
+    include/grape/rpi/sense_hat/inertial_sensor.h)
+
 set(SOURCES
-    README.md
-    include/grape/rpi/sense_hat/display.h
-    include/grape/rpi/sense_hat/humidity_sensor.h
-    include/grape/rpi/sense_hat/pressure_sensor.h
-    include/grape/rpi/sense_hat/i2c_bus.h
-    include/grape/rpi/sense_hat/inertial_sensor.h
     src/display.cpp
     src/humidity_sensor.cpp
     src/pressure_sensor.cpp
@@ -34,8 +33,7 @@ define_module_library(
   PUBLIC_LINK_LIBS "grape::base;grape::realtime"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                       $<INSTALL_INTERFACE:include>
+  PUBLIC_HEADERS ${HEADERS}
   PRIVATE_INCLUDE_PATHS ""
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 

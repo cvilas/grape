@@ -8,8 +8,9 @@ declare_module(
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
 # library sources
-set(SOURCES src/controller.cpp README.md include/grape/probe/controller.h
-            include/grape/probe/signal.h include/grape/probe/type_id.h)
+set(HEADERS include/grape/probe/controller.h include/grape/probe/signal.h
+            include/grape/probe/type_id.h)
+set(SOURCES src/controller.cpp)
 
 # library target
 define_module_library(
@@ -17,8 +18,7 @@ define_module_library(
   PUBLIC_LINK_LIBS "grape::realtime"
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                       $<INSTALL_INTERFACE:include>
+  PUBLIC_HEADERS ${HEADERS}
   PRIVATE_INCLUDE_PATHS ""
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 

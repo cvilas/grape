@@ -10,7 +10,8 @@ declare_module(
 find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 
 # library sources
-set(SOURCES src/monitor.cpp README.md include/grape/probe/monitor.h)
+set(HEADERS include/grape/probe/monitor.h)
+set(SOURCES src/monitor.cpp)
 
 # library target
 define_module_library(
@@ -18,8 +19,7 @@ define_module_library(
   PUBLIC_LINK_LIBS "grape::probe_controller"
   PRIVATE_LINK_LIBS $<BUILD_LOCAL_INTERFACE:imguilib> $<BUILD_LOCAL_INTERFACE:implotlib>
   SOURCES ${SOURCES}
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                       $<INSTALL_INTERFACE:include>
+  PUBLIC_HEADERS ${HEADERS}
   PRIVATE_INCLUDE_PATHS ""
   SYSTEM_PRIVATE_INCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/ ${CMAKE_CURRENT_SOURCE_DIR}/third_party/implot/

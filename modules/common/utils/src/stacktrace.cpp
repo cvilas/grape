@@ -48,7 +48,7 @@ auto StackTrace::current() -> StackTrace {
 }
 
 //-------------------------------------------------------------------------------------------------
-auto StackTrace::trace() const -> const std::vector<std::string>& {
+auto StackTrace::trace() const -> std::span<const std::string> {
   return symbol_list_;
 }
 

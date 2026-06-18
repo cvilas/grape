@@ -54,7 +54,7 @@ set_target_properties(implotlib PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILE
 set_target_properties(implotlib PROPERTIES POSITION_INDEPENDENT_CODE ON) # force -fPIC
 
 add_executable(implot_demo EXCLUDE_FROM_ALL ${IMPLOT_SOURCES_DIR}/examples/implot_demo_main.cpp)
-add_clang_format(implot_demo)
+apply_clang_format(implot_demo)
 add_dependencies(examples implot_demo)
 target_include_directories(implot_demo PRIVATE ${IMPLOT_SOURCES_DIR} ${IMGUI_SOURCES_DIR})
 target_link_libraries(implot_demo PRIVATE implotlib imguilib)
@@ -62,7 +62,7 @@ set_target_properties(implot_demo PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPI
 set_target_properties(implot_demo PROPERTIES CXX_CLANG_TIDY "")
 
 add_executable(implot_example EXCLUDE_FROM_ALL ${IMPLOT_SOURCES_DIR}/examples/implot_example.cpp)
-add_clang_format(implot_example)
+apply_clang_format(implot_example)
 add_dependencies(examples implot_example)
 target_include_directories(implot_example SYSTEM PRIVATE ${IMPLOT_SOURCES_DIR} ${IMGUI_SOURCES_DIR})
 target_link_libraries(implot_example PRIVATE implotlib imguilib)

@@ -3,7 +3,7 @@
 # =================================================================================================
 
 # --------------------------------------------------------------------------------------------------
-# Configures source code formatting tools.Apply by calling add_clang_format() on target
+# Configures source code formatting tools.Apply by calling apply_clang_format() on target
 # --------------------------------------------------------------------------------------------------
 option(ENABLE_FORMATTER "Enable automatic source file formatting" ON)
 
@@ -18,21 +18,27 @@ endif()
 add_custom_target(format COMMENT "Format source files")
 
 # Function to apply clang formatting on a target
-function(add_clang_format target_name)
+function(apply_clang_format target_name)
   if(CLANG_FORMAT_BIN AND ENABLE_FORMATTER)
     if(NOT TARGET ${target_name})
       message(FATAL_ERROR "add_clangformat called on a non-target \"${target_name}\"")
     endif()
 
     # figure out which sources this should be applied to
-    get_target_property(_clang_sources ${target_name} SOURCES)
+    get_target_property(_sources ${target_name} SOURCES)
+    get_target_property(_public_headers_set ${target_name} HEADER_SET_public_headers)
+    if(_public_headers_set)
+      list(APPEND _sources ${_public_headers_set})
+    endif()
+    list(REMOVE_DUPLICATES _sources)
+
     get_target_property(_builddir ${target_name} BINARY_DIR)
 
     # There are file types we don't want to process (or may be the inverse list is shorter)
     set(supported_file_types ".c" ".cpp" ".h" ".hpp" ".inl")
 
     set(sources "")
-    foreach(source ${_clang_sources})
+    foreach(source ${_sources})
       if(NOT TARGET ${source})
         get_filename_component(_ext_type ${source} EXT)
         if(NOT ${_ext_type} STREQUAL "")

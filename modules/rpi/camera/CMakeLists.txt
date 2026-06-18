@@ -60,13 +60,13 @@ if(NOT LIBCAMERA_STDLIB STREQUAL STDLIB_PATTERN)
   return()
 endif()
 
-set(SOURCES include/grape/rpi/camera.h src/camera.cpp)
+set(HEADERS include/grape/rpi/camera.h)
+set(SOURCES src/camera.cpp)
 
 define_module_library(
   NAME rpi_camera
   SOURCES ${SOURCES}
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                       $<INSTALL_INTERFACE:include>
+  PUBLIC_HEADERS ${HEADERS}
   PUBLIC_LINK_LIBS "grape::camera;PkgConfig::LIBCAMERA")
 
 add_subdirectory(apps)

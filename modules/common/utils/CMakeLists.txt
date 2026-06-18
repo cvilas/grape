@@ -12,14 +12,7 @@ declare_module(
 configure_file(src/version_impl.h.in ${CMAKE_CURRENT_BINARY_DIR}/version_impl.h @ONLY)
 
 # library sources
-set(SOURCES
-    src/ip.cpp
-    src/file_system.cpp
-    src/stacktrace.cpp
-    src/utils.cpp
-    src/version.cpp
-    src/version_impl.h.in
-    README.md
+set(HEADERS
     include/grape/utils/detail/enums_detail.h
     include/grape/utils/enums.h
     include/grape/utils/file_system.h
@@ -28,14 +21,16 @@ set(SOURCES
     include/grape/utils/utils.h
     include/grape/utils/version.h)
 
+set(SOURCES src/ip.cpp src/file_system.cpp src/stacktrace.cpp src/utils.cpp src/version.cpp
+            src/version_impl.h.in)
+
 # library target
 define_module_library(
   NAME utils
   PUBLIC_LINK_LIBS ""
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
-  PUBLIC_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                       $<INSTALL_INTERFACE:include>
+  PUBLIC_HEADERS ${HEADERS}
   PRIVATE_INCLUDE_PATHS $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 

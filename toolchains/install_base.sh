@@ -7,7 +7,7 @@ sudo apt-get update
 sudo apt-get install -y build-essential pkg-config gpg wget ca-certificates \
   git-lfs curl ninja-build ccache doxygen graphviz python-is-python3 python3-dev \
   avahi-daemon avahi-utils iproute2 iputils-ping \
-  net-tools iw iftop htop nvtop patch evtest
+  net-tools iw iftop htop nvtop patch evtest iwyu
 
 # Install uv (fast Python package and project manager)
 # https://docs.astral.sh/uv/getting-started/installation/

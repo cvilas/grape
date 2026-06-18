@@ -5,7 +5,10 @@
 
 #include "grape/exception.h"
 
+#include <cstdio>
 #include <exception>
+#include <span>
+#include <string_view>
 
 #include "grape/utils/utils.h"
 
