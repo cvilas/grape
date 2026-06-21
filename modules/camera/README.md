@@ -13,3 +13,4 @@ Cross platform camera support
 
 - [ ] Define bespoke pixel_format as uint32_t fourcc codes in `ImageSpec`
 - [ ] In `camera_pub`, introduce lockless ring buffer between compressor and publisher (main thread)
+- [ ] Audio support for camera_pub/sub
