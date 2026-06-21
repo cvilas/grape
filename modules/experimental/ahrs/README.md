@@ -7,7 +7,9 @@
     - [ ] [refx](https://github.com/mosaico-labs/refx)
     - [ ] [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
   - [ ] Implement the algorithm
-- [ ] 3D viewing and signal plotting (SDL3, imgui, implot)
+- [ ] Visualisation
+  - [ ] Raw imu signal plotting
+  - [ ] HUD (pitch, roll, DI)
 
 ## Make hat work in Ubuntu
 
