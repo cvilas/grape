@@ -112,6 +112,29 @@ TEST_CASE("Ensures 'help' is always available", "[program_options]") {
 }
 
 //-------------------------------------------------------------------------------------------------
+TEST_CASE("hasOption reports existence, including options resolved to their default",
+          "[program_options]") {
+  static constexpr auto INT_KEY_DEFAULT_VALUE = 20;
+  // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  const char* argv[] = { "--specified_key=10" };
+  const auto argc = 1;
+  const auto args =
+      ProgramDescription("hasOption existence test")
+          .declareOption<int>("specified_key", "a key passed on the command line")
+          .declareOption<int>("default_key", "a key left at its default", INT_KEY_DEFAULT_VALUE)
+          .parse(argc, argv);
+  // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+
+  // option passed on the command line -> exists
+  REQUIRE(args.hasOption("specified_key"));
+  // option declared with a default and resolved to it -> exists (and holds a usable value)
+  REQUIRE(args.hasOption("default_key"));
+  REQUIRE(args.getOption<int>("default_key") == INT_KEY_DEFAULT_VALUE);
+  // option that was never declared -> does not exist
+  REQUIRE_FALSE(args.hasOption("undeclared_key"));
+}
+
+//-------------------------------------------------------------------------------------------------
 TEST_CASE("Parses vector of integers from comma-separated string", "[program_options]") {
   // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const char* argv[] = { "--int_list=1,2,3,4,5" };

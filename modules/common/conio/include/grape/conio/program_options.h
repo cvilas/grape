@@ -33,9 +33,13 @@ public:
     bool is_specified{ false };
   };
 
-  /// Check whether an option was specified on the command line
+  /// Check whether an option exists and therefore has a value that can be retrieved with
+  /// getOption(). An option exists if it was declared and resolved during parsing, i.e. it was
+  /// either specified on the command line or left at its declared default value. (Required options
+  /// that are missing on the command line cause parse() to terminate early, so any option present
+  /// here is guaranteed to hold a usable value.)
   /// @param key The command line option (without the '--').
-  /// @return true if option is found
+  /// @return true if the option exists, false otherwise.
   [[nodiscard]] auto hasOption(std::string_view key) const -> bool;
 
   /// Get the value to a command line option or throw if the option was not specified
