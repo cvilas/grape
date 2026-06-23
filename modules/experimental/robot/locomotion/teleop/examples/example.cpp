@@ -19,7 +19,7 @@ auto main(int argc, const char* argv[]) -> int {
     const auto args = grape::conio::ProgramDescription("Robot teleop client example")
                           .declareOption<std::string>("robot", "Robot name", "dummy_robot")
                           .parse(argc, argv);
-    const auto robot_name = args.getOption<std::string>("robot");
+    const auto robot_name = args.get<std::string>("robot");
 
     const auto ipc_config = grape::ipc::Config{ .scope = grape::ipc::Config::Scope::Network };
     grape::ipc::init(ipc_config);

@@ -150,7 +150,7 @@ auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
                           .declareOption<std::string>("hint", "Part of camera name to match", "")
                           .parse(argc, const_cast<const char**>(argv));
 
-    const auto camera_name_hint = args.getOption<std::string>("hint");
+    const auto camera_name_hint = args.get<std::string>("hint");
 
     static auto app = std::make_unique<Application>(camera_name_hint);
     *appstate = app.get();

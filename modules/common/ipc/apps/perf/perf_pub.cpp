@@ -51,11 +51,11 @@ auto main(int argc, const char* argv[]) -> int {
             .declareOption<double>("interval", "publish interval in seconds", DEFAULT_INTERVAL)
             .parse(argc, argv);
 
-    const auto payload_size = args.getOption<std::size_t>("size");
+    const auto payload_size = args.get<std::size_t>("size");
     const auto payload = std::vector<std::byte>(payload_size, DEFAULT_PAYLOAD_FILL);
     std::println("Payload size: {} bytes", payload_size);
 
-    const auto interval_sec = std::chrono::duration<double>(args.getOption<double>("interval"));
+    const auto interval_sec = std::chrono::duration<double>(args.get<double>("interval"));
     const auto interval =
         std::chrono::duration_cast<std::chrono::steady_clock::duration>(interval_sec);
     std::println("Publish interval: {} s", interval_sec.count());

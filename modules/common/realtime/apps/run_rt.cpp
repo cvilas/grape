@@ -37,8 +37,8 @@ auto main(int argc, char* argv[]) -> int {
             .declareOption<std::vector<unsigned int>>("cpus", "CPU core to run on", DEFAULT_CPUS)
             .declareOption<std::string>("app", "Application to run, with it's options")
             .parse(argc, const_cast<const char**>(argv));
-    const auto cpus = args.getOption<std::vector<unsigned int>>("cpus");
-    const auto priority = static_cast<std::uint8_t>(args.getOption<int>("priority"));
+    const auto cpus = args.get<std::vector<unsigned int>>("cpus");
+    const auto priority = static_cast<std::uint8_t>(args.get<int>("priority"));
 
     // Set CPU affinity
     const auto cpu_set_err = grape::realtime::setCpuAffinity(cpus);
@@ -64,7 +64,7 @@ auto main(int argc, char* argv[]) -> int {
     }
 
     // run the application
-    const auto app = args.getOption<std::string>("app");
+    const auto app = args.get<std::string>("app");
     std::println("Executing application: {}", app);
     auto app_argv = std::array<const char*, 4>{ "/bin/sh", "-c", app.c_str(), nullptr };
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)

@@ -251,7 +251,7 @@ auto main(int argc, char* argv[]) -> int {
                           .parse(argc, const_cast<const char**>(argv));
 
     const auto& maybe_log_level =
-        grape::enums::cast<grape::log::Severity>(args.getOption<std::string>("log_level"));
+        grape::enums::cast<grape::log::Severity>(args.get<std::string>("log_level"));
     const auto log_level = maybe_log_level ? maybe_log_level.value() : grape::log::Severity::Debug;
 
     setupSignalHandling();
@@ -263,7 +263,7 @@ auto main(int argc, char* argv[]) -> int {
       return EXIT_FAILURE;
     }
 
-    const auto topic = args.getOption<std::string>("topic");
+    const auto topic = args.get<std::string>("topic");
     grape::syslog::Note("Subscribing to images on topic: '{}'", topic);
 
     auto subscriber = grape::camera::Subscriber(topic);

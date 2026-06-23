@@ -91,7 +91,7 @@ auto main(int argc, const char* argv[]) -> int {
             .declareOption<std::string>("qos", "Quality of service [BestEffort|Reliable]")
             .declareOption<std::string>("topic", "Topic", grape::ipc::ex::perf::topic().name)
             .parse(argc, argv);
-    const auto maybe_qos = grape::enums::cast<grape::ipc::QoS>(args.getOption<std::string>("qos"));
+    const auto maybe_qos = grape::enums::cast<grape::ipc::QoS>(args.get<std::string>("qos"));
     if (not maybe_qos) {
       std::println("Invalid QoS specified");
       return EXIT_FAILURE;
@@ -119,7 +119,7 @@ auto main(int argc, const char* argv[]) -> int {
                    toString(match.remote_entity), match.topic.type_name);
     };
 
-    const auto topic = args.getOption<std::string>("topic");
+    const auto topic = args.get<std::string>("topic");
     auto sub = grape::ipc::RawSubscriber(topic, maybe_qos.value(), data_cb, match_cb);
 
     std::println("Press CTRL+C to exit");
