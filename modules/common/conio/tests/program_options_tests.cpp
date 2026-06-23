@@ -15,6 +15,11 @@ using ProgramOptions = grape::conio::ProgramOptions;
 using ProgramDescription = grape::conio::ProgramDescription;
 
 //-------------------------------------------------------------------------------------------------
+TEST_CASE("Returns error when 'help' is declared as an option key", "[program_options]") {
+  REQUIRE_THROWS(ProgramDescription("reserved key test").declareOption<int>("help", "a key", 0));
+}
+
+//-------------------------------------------------------------------------------------------------
 TEST_CASE("Returns error on duplicate declaration of options", "[program_options]") {
   static constexpr auto KEY = "duplicated_key";
   REQUIRE_THROWS(ProgramDescription("duplicate option declarations test")
@@ -31,7 +36,7 @@ TEST_CASE("Returns error on undeclared options specified on the command line",
   const auto argc = 1;
   const auto args = ProgramDescription("undeclared option test").parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  REQUIRE_THROWS(args.getOption<std::string>("undeclared_key"));
+  REQUIRE_THROWS(args.get<std::string>("undeclared_key"));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -47,7 +52,7 @@ TEST_CASE("Returns error on type mismatch between declaration and parsing", "[pr
   const auto args = ProgramDescription("declaration and parsed type mismatch test")
                         .declareOption<int>("int_key", "An integer key", 1)
                         .parse(0, nullptr);
-  REQUIRE_THROWS(args.getOption<std::string>("int_key"));
+  REQUIRE_THROWS(args.get<std::string>("int_key"));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -60,7 +65,7 @@ TEST_CASE("Returns error if value specified at runtime is unparsable as defined 
                         .declareOption<int>("int_key", "An integer key")
                         .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  REQUIRE_THROWS(args.getOption<int>("int_key"));
+  REQUIRE_THROWS(args.get<int>("int_key"));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -72,7 +77,7 @@ TEST_CASE("Reads required option if specified on the command line", "[program_op
                         .declareOption<int>("required_key", "A required key")
                         .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  REQUIRE(args.getOption<int>("required_key") == 16);
+  REQUIRE(args.get<int>("required_key") == 16);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -82,7 +87,7 @@ TEST_CASE("Default value is used for optional argument if unspecified", "[progra
       ProgramDescription("optional args default value test")
           .declareOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE)
           .parse(0, nullptr);
-  REQUIRE(args.getOption<int>("int_key") == INT_KEY_DEFAULT_VALUE);
+  REQUIRE(args.get<int>("int_key") == INT_KEY_DEFAULT_VALUE);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -96,19 +101,13 @@ TEST_CASE("Default value is overridden when optional argument is specified", "[p
           .declareOption<int>("int_key", "optional integer key", INT_KEY_DEFAULT_VALUE)
           .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  REQUIRE(args.getOption<int>("int_key") == 10);
+  REQUIRE(args.get<int>("int_key") == 10);
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Detects unspecified option", "[program_options]") {
   const auto args = ProgramDescription("unspecified option test").parse(0, nullptr);
-  REQUIRE_FALSE(args.hasOption("key3"));
-}
-
-//-------------------------------------------------------------------------------------------------
-TEST_CASE("Ensures 'help' is always available", "[program_options]") {
-  const auto args = ProgramDescription("check help option test").parse(0, nullptr);
-  REQUIRE(args.hasOption("help"));
+  REQUIRE_FALSE(args.exists("key3"));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -121,7 +120,7 @@ TEST_CASE("Parses vector of integers from comma-separated string", "[program_opt
                         .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 
-  const auto vec = args.getOption<std::vector<int>>("int_list");
+  const auto vec = args.get<std::vector<int>>("int_list");
   REQUIRE(vec.size() == 5);
   REQUIRE(vec.at(0) == 1);
   REQUIRE(vec.at(1) == 2);
@@ -140,7 +139,7 @@ TEST_CASE("Parses vector of strings from comma-separated string", "[program_opti
                         .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 
-  const auto vec = args.getOption<std::vector<std::string>>("str_list");
+  const auto vec = args.get<std::vector<std::string>>("str_list");
   REQUIRE(vec.size() == 3);
   REQUIRE(vec.at(0) == "apple");
   REQUIRE(vec.at(1) == "banana");
@@ -153,7 +152,7 @@ TEST_CASE("Enum default value is used when not specified on the command line",
   const auto args = ProgramDescription("enum default value test")
                         .declareOption<Speed>("speed", "Speed setting", Speed::Medium)
                         .parse(0, nullptr);
-  REQUIRE(args.getOption<Speed>("speed") == Speed::Medium);
+  REQUIRE(args.get<Speed>("speed") == Speed::Medium);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -165,7 +164,7 @@ TEST_CASE("Enum value is parsed from command line string", "[program_options]") 
                         .declareOption<Speed>("speed", "Speed setting", Speed::Slow)
                         .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  REQUIRE(args.getOption<Speed>("speed") == Speed::Fast);
+  REQUIRE(args.get<Speed>("speed") == Speed::Fast);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -177,7 +176,7 @@ TEST_CASE("Returns error if enum string is not a valid enumerator", "[program_op
                         .declareOption<Speed>("speed", "Speed setting")
                         .parse(argc, argv);
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
-  REQUIRE_THROWS(args.getOption<Speed>("speed"));
+  REQUIRE_THROWS(args.get<Speed>("speed"));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -189,7 +188,7 @@ TEST_CASE("Uses default vector value when optional vector argument is unspecifie
           .declareOption<std::vector<int>>("int_list", "A list with default", default_values)
           .parse(0, nullptr);
 
-  const auto vec = args.getOption<std::vector<int>>("int_list");
+  const auto vec = args.get<std::vector<int>>("int_list");
   REQUIRE(vec.size() == 3);
   REQUIRE(vec.at(0) == 100);
   REQUIRE(vec.at(1) == 200);

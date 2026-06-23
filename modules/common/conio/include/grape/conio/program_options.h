@@ -4,13 +4,14 @@
 
 #pragma once
 
-#include <algorithm>
+#include <flat_map>
 #include <format>
+#include <functional>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <vector>
+#include <utility>
 
 #include "grape/conio/string_streamable.h"
 #include "grape/exception.h"
@@ -29,33 +30,26 @@ public:
     std::string brief;
     std::string value;
     std::string_view type;
-    bool is_required{ false };
-    bool is_specified{ false };
   };
 
-  /// Check whether an option was specified on the command line
-  /// @param key The command line option (without the '--').
+  /// Check whether an option exists
+  /// @param key The option (without the '--').
   /// @return true if option is found
-  [[nodiscard]] auto hasOption(std::string_view key) const -> bool;
+  [[nodiscard]] constexpr auto exists(std::string_view key) const -> bool;
 
-  /// Get the value to a command line option or throw if the option was not specified
-  /// @param key The command line option (without the '--').
+  /// Get the value for an option. Throws if the option does not exist
+  /// @param key The option (without the '--').
   /// @return  The value of the specified option.
   template <StringStreamable T>
-  [[nodiscard]] auto getOption(std::string_view key) const -> T;
+  [[nodiscard]] constexpr auto get(std::string_view key) const -> T;
 
 private:
   friend class ProgramDescription;
 
   /// @brief Constructor. See ProgramDescription::parse
   /// @param options List of supported program options
-  explicit ProgramOptions(std::vector<Option>&& options);
-
-  static constexpr auto HELP_KEY = "help";
-
-  static void insertHelp(std::vector<Option>& options);
-
-  std::vector<Option> options_;
+  explicit constexpr ProgramOptions(std::flat_map<std::string, Option, std::less<>>&& options);
+  std::flat_map<std::string, Option, std::less<>> options_;
 };
 
 //=================================================================================================
@@ -63,7 +57,6 @@ private:
 ///
 /// Features:
 /// - Enforces that every supported command line option is declared and described exactly once
-/// - Notifies an error if unsupported options are specified on the command line
 /// - Notifies an error if required options are not specified on the command line
 /// - Notifies an error if value types are mismatched between where they are defined and where they
 /// are used
@@ -74,7 +67,7 @@ class ProgramDescription {
 public:
   /// @brief Creates object
   /// @param brief A brief text describing the application
-  constexpr explicit ProgramDescription(const std::string& brief);
+  constexpr explicit ProgramDescription(std::string_view brief);
 
   /// @brief Declare a required command line option (--key=value)
   /// @tparam T Value type
@@ -82,7 +75,8 @@ public:
   /// @param brief A brief text describing the option
   /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
-  auto declareOption(const std::string& key, const std::string& brief) -> ProgramDescription&;
+  constexpr auto declareOption(this auto&& self, std::string_view key, std::string_view brief)
+      -> decltype(auto);
 
   /// @brief Declare an optional command line option (--key=value)
   /// @tparam T Value type
@@ -91,98 +85,132 @@ public:
   /// @param default_value Default value to use if the option is not specified on the command line
   /// @return Reference to self. Enables daisy-chained calls
   template <StringStreamable T>
-  auto declareOption(const std::string& key, const std::string& brief, const T& default_value)
-      -> ProgramDescription&;
+  constexpr auto declareOption(this auto&& self, std::string_view key, std::string_view brief,
+                               const T& default_value) -> decltype(auto);
 
   /// @brief Parses and returns command line options at runtime.
   /// @param argc Number of arguments on the command line
   /// @param argv array of C-style strings
   /// @return Object containing command line options
-  [[nodiscard]] auto parse(int argc, const char** argv) const -> ProgramOptions;
+  [[nodiscard]] auto parse(int argc, const char** argv) && -> ProgramOptions;
 
 private:
-  std::vector<ProgramOptions::Option> options_;
+  static constexpr auto HELP_KEY = "help";
+  struct CheckedOption {
+    ProgramOptions::Option option;
+    bool is_required{ false };
+    bool is_specified{ false };
+  };
+  std::flat_map<std::string, CheckedOption, std::less<>> options_;
+  std::string help_text_;
 };
 
 //-------------------------------------------------------------------------------------------------
-constexpr ProgramDescription::ProgramDescription(const std::string& brief) {
-  options_.emplace_back(ProgramOptions::Option{
-      .key = ProgramOptions::HELP_KEY,
-      .brief = brief,
-      .value = "",
-      .type = utils::getTypeName<std::string>(),
-      .is_required = false,
-      .is_specified = false,
-  });
+constexpr ProgramDescription::ProgramDescription(std::string_view brief) {
+  help_text_ = std::string{ brief } + "\nOptions:\n";
+  help_text_ += std::format("--{} [optional]: {}\n", HELP_KEY, "This text!");
 }
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-auto ProgramDescription::declareOption(const std::string& key, const std::string& brief)
-    -> ProgramDescription& {
-  options_.emplace_back(ProgramOptions::Option{
-      .key = key,
-      .brief = brief,
-      .value = "",
-      .type = utils::getTypeName<T>(),
-      .is_required = true,
-      .is_specified = false,
-  });
-  return *this;
+constexpr auto ProgramDescription::declareOption(this auto&& self, std::string_view key,
+                                                 std::string_view brief) -> decltype(auto) {
+  if (key == HELP_KEY) {
+    panic(std::format("'{}' is a reserved option key", key));
+  }
+  constexpr auto TYPE_NAME = utils::getTypeName<T>();
+  const auto insert_result = self.options_.try_emplace(
+      std::string(key), CheckedOption{
+               .option = {
+                   .key = std::string(key),
+                   .brief = std::string(brief),
+                   .value = "",
+                   .type = TYPE_NAME,
+               },
+               .is_required = true,
+               .is_specified = false,
+           });
+  if (not insert_result.second) {
+    panic(std::format("Redeclared option: {}", key));
+  }
+  self.help_text_ += std::format("--{} [required]: {}. [type: {}]\n", key, brief, TYPE_NAME);
+  return std::forward<decltype(self)>(self);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-auto ProgramDescription::declareOption(const std::string& key, const std::string& brief,
-                                       const T& default_value) -> ProgramDescription& {
+constexpr auto ProgramDescription::declareOption(this auto&& self, std::string_view key,
+                                                 std::string_view brief, const T& default_value)
+    -> decltype(auto) {
+  if (key == HELP_KEY) {
+    panic(std::format("'{}' is a reserved option key", key));
+  }
   const auto to_string = [](const auto& val) {
     if constexpr (std::is_enum_v<std::decay_t<decltype(val)>>) {
       return std::string{ grape::enums::name(val) };
     } else {
-      std::ostringstream oss;
-      oss << val;
-      return oss.str();
+      return std::format("{}", val);
     }
   };
-  options_.emplace_back(ProgramOptions::Option{
-      .key = key,
-      .brief = brief,
-      .value = to_string(default_value),
-      .type = utils::getTypeName<T>(),
-      .is_required = false,
-      .is_specified = false,
-  });
-  return *this;
+  constexpr auto TYPE_NAME = utils::getTypeName<T>();
+  const auto default_value_str = to_string(default_value);
+  const auto insert_result = self.options_.try_emplace(
+      std::string(key), CheckedOption{
+               .option = {
+                   .key = std::string(key),
+                   .brief = std::string(brief),
+                   .value = default_value_str,
+                   .type = TYPE_NAME,
+               },
+               .is_required = false,
+               .is_specified = false,
+           });
+  if (not insert_result.second) {
+    panic(std::format("Redeclared option: {}", key));
+  }
+  self.help_text_ += std::format("--{} [optional]: {}; (default: {}) [type: {}]\n", key, brief,
+                                 default_value_str, TYPE_NAME);
+  return std::forward<decltype(self)>(self);
+}
+
+//-------------------------------------------------------------------------------------------------
+constexpr ProgramOptions::ProgramOptions(
+    std::flat_map<std::string, ProgramOptions::Option, std::less<>>&& options)
+  : options_(std::move(options)) {
+}
+
+//-------------------------------------------------------------------------------------------------
+constexpr auto ProgramOptions::exists(std::string_view key) const -> bool {
+  return options_.contains(key);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-auto ProgramOptions::getOption(std::string_view key) const -> T {
-  const auto it = std::find_if(options_.begin(), options_.end(),
-                               [&key](const auto& opt) -> bool { return key == opt.key; });
+constexpr auto ProgramOptions::get(std::string_view key) const -> T {
+  const auto it = options_.find(key);
   if (it == options_.end()) {
     panic(std::format("Undeclared option: {}", key));
   }
 
-  if (it->type != utils::getTypeName<T>()) {
+  if (it->second.type != utils::getTypeName<T>()) {
     panic(std::format("Type mismatch for option: {}", key));
   }
 
   if constexpr (std::is_same_v<T, std::string>) {
     // note: since std::istringstream extracts only up to whitespace, this special case is
     // neccessary for parsing strings containing multiple words
-    return it->value;
+    return it->second.value;
   } else if constexpr (std::is_enum_v<T>) {
-    const auto opt = grape::enums::cast<T>(it->value);
+    const auto opt = grape::enums::cast<T>(it->second.value);
     if (not opt.has_value()) {
-      panic(std::format("Unparsable value for option: {}", key));
+      panic(std::format("Unparsable option: {}={}", key, it->second.value));
     }
     return *opt;
   } else {
     T value;
-    std::istringstream stream(it->value);
-    if (not(stream >> value)) {
-      panic(std::format("Unparsable value for option: {}", key));
+    std::istringstream stream(it->second.value);
+    if (not(stream >> value) or not stream.eof()) {
+      panic(std::format("Unparsable option: {}={}", key, it->second.value));
     }
     return value;
   }

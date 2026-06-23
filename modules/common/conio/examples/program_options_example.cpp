@@ -2,9 +2,13 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#include <cstdlib>
 #include <print>
+#include <string>
+#include <vector>
 
 #include "grape/conio/program_options.h"
+#include "grape/exception.h"
 
 //=================================================================================================
 auto main(int argc, const char* argv[]) -> int {
@@ -17,12 +21,9 @@ auto main(int argc, const char* argv[]) -> int {
             .declareOption<std::vector<unsigned int>>("cpus", "CPU affinity list", { 1U, 2U })
             .parse(argc, argv);
 
-    const auto port = args.getOption<int>("port");
-    const auto addr = args.getOption<std::string>("address");
-    const auto cpus = args.getOption<std::vector<unsigned int>>("cpus");
-
-    // help is always available. Specify '--help' on command line or get it directly as here.
-    std::println("Help text:\n{}\n", args.getOption<std::string>("help"));
+    const auto port = args.get<int>("port");
+    const auto addr = args.get<std::string>("address");
+    const auto cpus = args.get<std::vector<unsigned int>>("cpus");
 
     // print the arguments passed. At this point, they have all been validated.
     std::println("You specified port = {}", port);

@@ -120,7 +120,7 @@ auto main(int argc, const char* argv[]) -> int {
     const auto args = grape::conio::ProgramDescription("Keyboard teleop console")
                           .declareOption<std::string>("robot", "Robot name", "dummy_robot")
                           .parse(argc, argv);
-    const auto robot_name = args.getOption<std::string>("robot");
+    const auto robot_name = args.get<std::string>("robot");
     static constexpr auto MAX_LINEAR_SPEED = 1.F;
     static constexpr auto MAX_TURN_SPEED = 30.F * static_cast<float>(std::numbers::pi) / 180.F;
     static constexpr auto SPEED_STEP = 0.1F;

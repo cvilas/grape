@@ -70,8 +70,8 @@ auto main(int argc, const char* argv[]) -> int {
             .declareOption<ipc::Config::Scope>("scope", "scope [Network|Host]", DEFAULT_SCOPE)
             .parse(argc, argv);
 
-    const auto interval = std::chrono::duration<double>(args.getOption<double>("interval"));
-    const auto scope = args.getOption<ipc::Config::Scope>("scope");
+    const auto interval = std::chrono::duration<double>(args.get<double>("interval"));
+    const auto scope = args.get<ipc::Config::Scope>("scope");
 
     ipc::init(ipc::Config{ .scope = scope });
 

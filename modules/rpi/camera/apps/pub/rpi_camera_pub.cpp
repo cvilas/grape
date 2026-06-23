@@ -156,14 +156,14 @@ auto main(int argc, char* argv[]) -> int {
             .parse(argc, const_cast<const char**>(argv));
 
     const auto& maybe_log_level =
-        grape::enums::cast<grape::log::Severity>(args.getOption<std::string>("log_level"));
+        grape::enums::cast<grape::log::Severity>(args.get<std::string>("log_level"));
     const auto log_level = maybe_log_level ? maybe_log_level.value() : grape::log::Severity::Debug;
 
     setupSignalHandling();
     setupLogging(log_level);
     setupIpc();
 
-    const auto config_file_name = args.getOption<std::string>("config");
+    const auto config_file_name = args.get<std::string>("config");
     const auto config_file_path = grape::utils::resolveFilePath(config_file_name);
     if (not config_file_path) {
       grape::syslog::Critical("Could not find config file '{}'", config_file_name);
