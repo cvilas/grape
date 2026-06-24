@@ -107,7 +107,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 constexpr ProgramDescription::ProgramDescription(std::string_view brief) {
-  help_text_ = std::string{ brief } + "\nOptions:\n";
+  help_text_ = std::string{ "Help requested:\n" } + std::string{ brief } + "\nOptions:\n";
   help_text_ += std::format("--{} [optional]: {}\n", HELP_KEY, "This text!");
 }
 

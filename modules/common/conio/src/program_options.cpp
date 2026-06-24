@@ -20,8 +20,7 @@ auto ProgramDescription::parse(int argc, const char** argv) && -> ProgramOptions
       const size_t sep = kv.find('=');
       const auto key = kv.substr(0, sep);
       if (key == HELP_KEY) {
-        std::println(stderr, "{}", help_text_);
-        std::exit(EXIT_SUCCESS);  // NOLINT(concurrency-mt-unsafe)
+        panic(help_text_);
       }
 
       const auto it = options_.find(key);

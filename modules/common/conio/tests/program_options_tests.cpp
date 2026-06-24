@@ -15,12 +15,21 @@ using ProgramOptions = grape::conio::ProgramOptions;
 using ProgramDescription = grape::conio::ProgramDescription;
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Returns error when 'help' is declared as an option key", "[program_options]") {
+TEST_CASE("'help' cannot be declared as an option key", "[program_options]") {
   REQUIRE_THROWS(ProgramDescription("reserved key test").declareOption<int>("help", "a key", 0));
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Returns error on duplicate declaration of options", "[program_options]") {
+TEST_CASE("Throws help message when requested", "[program_options]") {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+  const char* argv[] = { "--help" };
+  const auto argc = 1;
+  REQUIRE_THROWS(ProgramDescription("check help option test").parse(argc, argv));
+  // NOLINTEND(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Duplicate option declarations are not allowed", "[program_options]") {
   static constexpr auto KEY = "duplicated_key";
   REQUIRE_THROWS(ProgramDescription("duplicate option declarations test")
                      .declareOption<int>(KEY, "a key", 1)
@@ -29,8 +38,7 @@ TEST_CASE("Returns error on duplicate declaration of options", "[program_options
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Returns error on undeclared options specified on the command line",
-          "[program_options]") {
+TEST_CASE("Querying dndeclared options are not allowed", "[program_options]") {
   // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const char* argv[] = { "--test_key=10" };
   const auto argc = 1;
@@ -40,15 +48,14 @@ TEST_CASE("Returns error on undeclared options specified on the command line",
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Returns error if required option is not specified on the command line",
-          "[program_options]") {
+TEST_CASE("Required option must be specified on the command line", "[program_options]") {
   REQUIRE_THROWS(ProgramDescription("missing option test")
                      .declareOption<std::string>("required_key", "A required key")
                      .parse(0, nullptr));
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Returns error on type mismatch between declaration and parsing", "[program_options]") {
+TEST_CASE("Type mismatch between declaration and parsing is not allowed", "[program_options]") {
   const auto args = ProgramDescription("declaration and parsed type mismatch test")
                         .declareOption<int>("int_key", "An integer key", 1)
                         .parse(0, nullptr);
@@ -56,8 +63,7 @@ TEST_CASE("Returns error on type mismatch between declaration and parsing", "[pr
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Returns error if value specified at runtime is unparsable as defined type",
-          "[program_options]") {
+TEST_CASE("Unparsable value specified at runtime is not allowed", "[program_options]") {
   // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const char* argv[] = { "--int_key=\"a string value\"" };
   const auto argc = 1;
@@ -147,8 +153,7 @@ TEST_CASE("Parses vector of strings from comma-separated string", "[program_opti
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Enum default value is used when not specified on the command line",
-          "[program_options]") {
+TEST_CASE("Optional enum argument uses default value if unspecified", "[program_options]") {
   const auto args = ProgramDescription("enum default value test")
                         .declareOption<Speed>("speed", "Speed setting", Speed::Medium)
                         .parse(0, nullptr);
@@ -168,7 +173,7 @@ TEST_CASE("Enum value is parsed from command line string", "[program_options]") 
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Returns error if enum string is not a valid enumerator", "[program_options]") {
+TEST_CASE("Invalid enum strings cannot be passed as enum values", "[program_options]") {
   // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-array-to-pointer-decay)
   const char* argv[] = { "--speed=Turbo" };
   const auto argc = 1;
@@ -180,8 +185,7 @@ TEST_CASE("Returns error if enum string is not a valid enumerator", "[program_op
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Uses default vector value when optional vector argument is unspecified",
-          "[program_options]") {
+TEST_CASE("Optional vector argument uses default if unspecified", "[program_options]") {
   const std::vector<int> default_values = { 100, 200, 300 };
   const auto args =
       ProgramDescription("vector default test")
