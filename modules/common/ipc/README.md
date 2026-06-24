@@ -45,10 +45,5 @@ uv pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
 
 ## Roadmap
 
-- [ ] Implement means to isolate communication to within a group of processes and to create 
-      multiple such groups. See [this discussion](https://github.com/eclipse-ecal/ecal/discussions/2093) 
-      for a solution.
-- [ ] Support specifying type and encoding information via `RawPublisher` and `RawSubscriber` interfaces
-- [ ] Support zero-copy. Note the disadvantes due to synchronisation between readers and writers. 
-      [reference](https://eclipse-ecal.github.io/ecal/stable/advanced/layers/shm.html)
-  - [ ] Implement zero-copy on the publisher side by using `CPayloadWriter`
+- [ ] Implement means to isolate groups of nodes. See [this discussion](https://github.com/eclipse-ecal/ecal/discussions/2093) 
+- [ ] Support specifying encoding information via `RawPublisher` and `RawSubscriber` interfaces
