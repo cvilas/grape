@@ -15,7 +15,8 @@
 - [x] [Plot](../modules/common/plot/README.md)
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
 - [ ] [Linalg](../modules/experimental/linalg/README.md)
-- [ ] Secure teleop (encryption and authentication)
+- [ ] Support zero-copy in IPC
+- [ ] Secure teleop (authentication and encryption) 
 - [ ] Audio support for [camera](../modules/camera/README.md)
 - [ ] Basic OpenGL scenegraph
   - [ ] Clean up experimental implementation in scratch/scenegraph/copilot
