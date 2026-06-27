@@ -37,6 +37,25 @@ jobs:
         run: |
           git fetch --unshallow --tags || git fetch --depth=100 --tags
 
+      - name: Compute changed-modules base ref
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_REF="${{ github.event.pull_request.base.sha }}"
+          else
+            CHANGED_REF="${{ github.event.before }}"
+          fi
+
+          # Fallback for edge cases like first push where `before` can be all-zero.
+          if [ -z "${CHANGED_REF}" ] || [ "${CHANGED_REF}" = "0000000000000000000000000000000000000000" ]; then
+            CHANGED_REF="HEAD~1"
+          fi
+
+          # Best effort: ensure the reference is present locally for git diff during CMake configure.
+          git fetch --no-tags --depth=1 origin "${CHANGED_REF}" || true
+
+          echo "BUILD_CHANGED_MODULES_REF=${CHANGED_REF}" >> $GITHUB_ENV
+          echo "Using BUILD_CHANGED_MODULES_REF=${CHANGED_REF}"
+
       - name: Install system dependencies and utilities 
         run: |
           chmod +x ./toolchains/install_base.sh
@@ -73,7 +92,7 @@ jobs:
             grape-${{ runner.arch }}-${{ runner.os }}-cache
 
       - name: Configure (llvm)
-        run: cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON
+        run: cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
       
       - name: Check formatting
         run: |
@@ -91,7 +110,7 @@ jobs:
         run: cmake --build build/llvm --target check --parallel
 
       - name: Configure (gcc)
-        run: cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF
+        run: cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
       
       - name: Build (gcc)
         run: cmake --build build/native --target all examples tests --parallel
