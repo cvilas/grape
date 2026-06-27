@@ -125,11 +125,15 @@ message(STATUS "======= External dependencies: Completed build =======")
 #-------------------------------------------------------------------------------------------------
 # Configure modules enabled with -DBUILD_MODULES="semi-colon;separated;list".
 # - Special value "all" will build all modules found
+# - Set BUILD_DEPENDEES=ON to also enable all modules that transitively depend on BUILD_MODULES
 if (NOT BUILD_MODULES)
   message(STATUS "BUILD_MODULES not specified. Only modules set to ALWAYS_BUILD will be enabled.")
 else ()
   message(STATUS "Requested modules (BUILD_MODULES): ${BUILD_MODULES}")
 endif ()
+if(BUILD_DEPENDEES)
+  message(STATUS "BUILD_DEPENDEES=ON: Transitive downstream dependees will also be enabled")
+endif()
 message(STATUS "----------------------------------------------------------------------")
 message(STATUS "Configuring modules")
 message(STATUS "----------------------------------------------------------------------")

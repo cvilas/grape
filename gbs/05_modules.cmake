@@ -28,6 +28,15 @@ define_property(
   FULL_DOCS "Modules marked for build either directly or to satisfy dependencies")
 set_property(GLOBAL PROPERTY ENABLED_MODULES "")
 
+# Global list of modules enabled because they are downstream dependees of explicitly requested modules
+define_property(
+  GLOBAL
+  PROPERTY DEPENDEE_MODULES
+  INHERITED
+  BRIEF_DOCS "Modules enabled as downstream dependees of explicitly requested modules"
+  FULL_DOCS "Modules enabled as downstream dependees of explicitly requested modules")
+set_property(GLOBAL PROPERTY DEPENDEE_MODULES "")
+
 # Global list of external projects to build
 define_property(
   GLOBAL
@@ -97,14 +106,15 @@ function(enumerate_modules)
   message(STATUS "Modules")
   foreach(module IN LISTS _declared_modules_list)
     set(reason_to_build "")
+    get_property(_dependee_modules_list GLOBAL PROPERTY DEPENDEE_MODULES)
     if(BUILD_MODULE_${module})
       set(reason_to_build "Enabled")
+    elseif(module IN_LIST _dependee_modules_list)
+      set(reason_to_build "Enabled (dependee)")
+    elseif(module IN_LIST _enabled_modules_list)
+      set(reason_to_build "Enabled (dependency)")
     else()
-      if(module IN_LIST _enabled_modules_list)
-        set(reason_to_build "Enabled (dependency)")
-      else()
-        set(reason_to_build "Disabled")
-      endif()
+      set(reason_to_build "Disabled")
     endif()
     message(STATUS "\t${module}: ${reason_to_build}")
   endforeach()
@@ -735,6 +745,48 @@ function(mark_module_and_dependencies_to_build)
 endfunction()
 
 # ==================================================================================================
+# (for internal use)
+# Transitively find all declared modules that depend on any currently-enabled module and mark them
+# (and their own upstream dependencies) for build.
+function(mark_downstream_dependees_to_build)
+  get_property(_declared_modules GLOBAL PROPERTY DECLARED_MODULES)
+
+  # Seed the expansion set with only the explicitly requested modules, not ALWAYS_BUILD modules
+  # or upstream deps, so only true downstream dependees are discovered.
+  set(_expansion_set "")
+  foreach(module IN LISTS BUILD_MODULES)
+    if(NOT "${module}" STREQUAL "all")
+      list(APPEND _expansion_set ${module})
+    endif()
+  endforeach()
+
+  # Fixed-point: a module is a dependee if any of its DEPENDS_ON entries is in the expansion set.
+  # Guard on _expansion_set membership (not _enabled_modules) so that modules already enabled
+  # as upstream deps of ALWAYS_BUILD modules are still added to the expansion set, allowing their
+  # own dependees to be discovered in subsequent passes.
+  set(changed TRUE)
+  while(changed)
+    set(changed FALSE)
+    foreach(module IN LISTS _declared_modules)
+      if(NOT "${module}" IN_LIST _expansion_set)
+        foreach(dep IN LISTS MODULE_${module}_DEPENDS_ON)
+          if("${dep}" IN_LIST _expansion_set)
+            get_property(_enabled_modules GLOBAL PROPERTY ENABLED_MODULES)
+            if(NOT "${module}" IN_LIST _enabled_modules)
+              mark_module_and_dependencies_to_build(MODULE_NAME ${module})
+            endif()
+            set_property(GLOBAL APPEND PROPERTY DEPENDEE_MODULES ${module})
+            list(APPEND _expansion_set ${module})
+            set(changed TRUE)
+            break()
+          endif()
+        endforeach()
+      endif()
+    endforeach()
+  endwhile()
+endfunction()
+
+# ==================================================================================================
 # (for internal use) Walk through all enabled modules and their dependencies and mark them for
 # building
 function(mark_modules_to_build)
@@ -744,6 +796,10 @@ function(mark_modules_to_build)
       mark_module_and_dependencies_to_build(MODULE_NAME ${module})
     endif()
   endforeach()
+
+  if(BUILD_DEPENDEES)
+    mark_downstream_dependees_to_build()
+  endif()
 endfunction()
 
 # ==================================================================================================
