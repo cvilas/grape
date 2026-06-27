@@ -57,6 +57,7 @@ The following _module selection_ options are supported
 | `BUILD_MODULES` | `string` | _(none)_ | Semicolon-separated list of modules to build. Special value `all` builds every module. If unset, only `ALWAYS_BUILD` modules are built. |
 | `DISABLE_MODULES` | `string` | _(none)_ | Semicolon-separated list of modules to forcibly exclude, even if listed in `BUILD_MODULES`. |
 | `BUILD_DEPENDEES` | `BOOL` | `OFF` | When `ON`, also enables all modules that transitively depend on the modules in `BUILD_MODULES`. Only true downstream dependees are included; `ALWAYS_BUILD` modules and their sibling dependents are not pulled in. |
+| `BUILD_CHANGED_MODULES` | `string` | _(none)_ | Git ref to diff against (e.g. `origin/main`). CMake runs `git diff --name-only <ref>...HEAD`, maps changed files to module names, then builds those modules plus their upstream dependencies and transitive downstream dependees. Intended for CI pipelines on merge requests: pass the destination branch and only the changed slice of the graph is built and tested. |
 
 Example: Select `native` preset for configuration and restrict configured modules to `ipc` and its transitive dependencies and dependees:
 

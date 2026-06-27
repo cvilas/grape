@@ -37,6 +37,15 @@ define_property(
   FULL_DOCS "Modules enabled as downstream dependees of explicitly requested modules")
 set_property(GLOBAL PROPERTY DEPENDEE_MODULES "")
 
+# Global list of modules identified as changed by git diff (when BUILD_CHANGED_MODULES is set)
+define_property(
+  GLOBAL
+  PROPERTY CHANGED_MODULES
+  INHERITED
+  BRIEF_DOCS "Modules whose source files changed according to git diff"
+  FULL_DOCS "Modules whose source files changed according to git diff")
+set_property(GLOBAL PROPERTY CHANGED_MODULES "")
+
 # Global list of external projects to build
 define_property(
   GLOBAL
@@ -103,11 +112,13 @@ function(enumerate_modules)
   # print a summary of modules
   get_property(_declared_modules_list GLOBAL PROPERTY DECLARED_MODULES)
   get_property(_enabled_modules_list GLOBAL PROPERTY ENABLED_MODULES)
+  get_property(_dependee_modules_list GLOBAL PROPERTY DEPENDEE_MODULES)
+  get_property(_changed_modules_list GLOBAL PROPERTY CHANGED_MODULES)
   message(STATUS "Modules")
   foreach(module IN LISTS _declared_modules_list)
-    set(reason_to_build "")
-    get_property(_dependee_modules_list GLOBAL PROPERTY DEPENDEE_MODULES)
-    if(BUILD_MODULE_${module})
+    if(module IN_LIST _changed_modules_list)
+      set(reason_to_build "Enabled (changed)")
+    elseif(BUILD_MODULE_${module})
       set(reason_to_build "Enabled")
     elseif(module IN_LIST _dependee_modules_list)
       set(reason_to_build "Enabled (dependee)")
@@ -746,19 +757,15 @@ endfunction()
 
 # ==================================================================================================
 # (for internal use)
-# Transitively find all declared modules that depend on any currently-enabled module and mark them
-# (and their own upstream dependencies) for build.
+# Transitively find modules that depend on any currently-enabled module and mark them for build.
 function(mark_downstream_dependees_to_build)
   get_property(_declared_modules GLOBAL PROPERTY DECLARED_MODULES)
 
-  # Seed the expansion set with only the explicitly requested modules, not ALWAYS_BUILD modules
-  # or upstream deps, so only true downstream dependees are discovered.
-  set(_expansion_set "")
-  foreach(module IN LISTS BUILD_MODULES)
-    if(NOT "${module}" STREQUAL "all")
-      list(APPEND _expansion_set ${module})
-    endif()
-  endforeach()
+  # Seed from explicitly requested modules. ALWAYS_BUILD modules are intentionally excluded.
+  get_property(_changed_modules GLOBAL PROPERTY CHANGED_MODULES)
+  set(_expansion_set ${BUILD_MODULES} ${_changed_modules})
+  list(REMOVE_ITEM _expansion_set "all")
+  list(REMOVE_DUPLICATES _expansion_set)
 
   # Fixed-point: a module is a dependee if any of its DEPENDS_ON entries is in the expansion set.
   # Guard on _expansion_set membership (not _enabled_modules) so that modules already enabled
@@ -787,17 +794,64 @@ function(mark_downstream_dependees_to_build)
 endfunction()
 
 # ==================================================================================================
+# (for internal use)
+# Run git diff against the given ref, map changed file paths to declared module names, populate
+# the CHANGED_MODULES global property, and mark each changed module for build.
+function(compute_changed_modules GIT_REF)
+  execute_process(
+    COMMAND git diff --name-only ${GIT_REF}...HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE _diff_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _git_result
+    ERROR_VARIABLE _git_error)
+
+  if(NOT _git_result EQUAL 0)
+    message(FATAL_ERROR "BUILD_CHANGED_MODULES: git diff failed: ${_git_error}")
+  endif()
+
+  string(REPLACE "\n" ";" _changed_files "${_diff_output}")
+
+  get_property(_declared_modules GLOBAL PROPERTY DECLARED_MODULES)
+  set(_changed "")
+  foreach(file IN LISTS _changed_files)
+    foreach(module IN LISTS _declared_modules)
+      file(RELATIVE_PATH _module_rel_path ${CMAKE_SOURCE_DIR} ${MODULE_${module}_PATH})
+      if("${file}" MATCHES "^${_module_rel_path}/")
+        list(APPEND _changed ${module})
+        break()
+      endif()
+    endforeach()
+  endforeach()
+  list(REMOVE_DUPLICATES _changed)
+
+  if(_changed)
+    message(STATUS "BUILD_CHANGED_MODULES: changed modules: ${_changed}")
+    set_property(GLOBAL PROPERTY CHANGED_MODULES ${_changed})
+  else()
+    message(STATUS "BUILD_CHANGED_MODULES: no module source files changed relative to ${GIT_REF}")
+  endif()
+endfunction()
+
+# ==================================================================================================
 # (for internal use) Walk through all enabled modules and their dependencies and mark them for
 # building
 function(mark_modules_to_build)
+  if(BUILD_CHANGED_MODULES)
+    compute_changed_modules(${BUILD_CHANGED_MODULES})
+  endif()
+
   get_property(_declared_modules GLOBAL PROPERTY DECLARED_MODULES)
+  get_property(_changed_modules GLOBAL PROPERTY CHANGED_MODULES)
   foreach(module IN LISTS _declared_modules)
     if(${BUILD_MODULE_${module}})
+      mark_module_and_dependencies_to_build(MODULE_NAME ${module})
+    elseif("${module}" IN_LIST _changed_modules)
       mark_module_and_dependencies_to_build(MODULE_NAME ${module})
     endif()
   endforeach()
 
-  if(BUILD_DEPENDEES)
+  if(BUILD_DEPENDEES OR BUILD_CHANGED_MODULES)
     mark_downstream_dependees_to_build()
   endif()
 endfunction()
