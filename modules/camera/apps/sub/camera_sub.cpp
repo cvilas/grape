@@ -106,7 +106,7 @@ void Subscriber::onReceivedSample(const ipc::Sample& sample) {
   }
 
   // define sample writer
-  auto is_fifo_frame_size_sufficient = false;
+  auto is_fifo_frame_size_sufficient = true;
   const auto sample_writer = [&](std::span<std::byte> frame) {
     const auto sample_len = sample.data.size_bytes();
     is_fifo_frame_size_sufficient = (frame.size_bytes() >= SAMPLE_SIZE_OFFSET + sample_len);
