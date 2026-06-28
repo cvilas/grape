@@ -26,12 +26,12 @@ FetchContent_Declare(
   EXCLUDE_FROM_ALL
   SYSTEM)
 FetchContent_MakeAvailable(robin-map)
+
 FetchContent_Declare(
   nanobind
   URL ${CMAKE_SOURCE_DIR}/external/sources/nanobind-${NANOBIND_VERSION_REQUIRED}.tar.gz
   EXCLUDE_FROM_ALL
-  SYSTEM
-  DEPENDS robin-map)
+  SYSTEM)
 set(NB_TEST OFF CACHE INTERNAL "")
 set(NB_USE_SUBMODULE_DEPS OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(nanobind)
@@ -82,33 +82,39 @@ function(define_module_pybinding)
 
   # Build python extension module and link to libraries from the enclosing module
   nanobind_add_module(${PY_MODULE_NAME} ${ARG_SOURCES})
+
+  # treat as third-party: suppress linter and compiler warnings, mark headers as system includes.
+  # Guard with a one-shot flag so multiple bindings in the same module don't clobber the
+  # INTERFACE_INCLUDE_DIRECTORIES that were just restored.
+  if(TARGET nanobind-static AND NOT _GBS_NANOBIND_CONFIGURED)
+    set_target_properties(nanobind-static PROPERTIES CXX_CLANG_TIDY "")
+    target_compile_options(nanobind-static PRIVATE -w) # -w after all dir-scope flags to override them
+    get_target_property(_nanobind_include_dirs nanobind-static INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(nanobind-static PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
+    target_include_directories(nanobind-static SYSTEM INTERFACE ${_nanobind_include_dirs})
+    set(_GBS_NANOBIND_CONFIGURED TRUE CACHE INTERNAL "")
+  endif()
+
   target_link_libraries(${PY_MODULE_NAME} PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS}) 
   apply_clang_format(${PY_MODULE_NAME})
   apply_iwyu(${PY_MODULE_NAME})
 
-  # Treat nanobind as a third-party library
-  # - disable clang-tidy
-  # - relax compiler warnings
-  # - mark include directories as SYSTEM to suppress warnings in nanobind headers
-  set_target_properties(nanobind-static PROPERTIES CXX_CLANG_TIDY "")
-  set_target_properties(nanobind-static PROPERTIES COMPILE_OPTIONS ${THIRD_PARTY_COMPILER_WARNINGS})
-  get_target_property(nanobind_include_directories nanobind-static INTERFACE_INCLUDE_DIRECTORIES)
-  set_target_properties(nanobind-static PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
-  target_include_directories(nanobind-static SYSTEM INTERFACE ${nanobind_include_directories})
-
-  # generate module directory structure
-  set(PY_BINDINGS_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PY_MODULE_NAME})
+  # Each binding gets its own staging tree so multiple bindings in the same module don't
+  # overwrite each other's pyproject.toml/setup.py.
+  # Layout: <binary_dir>/<name>_build/{pyproject.toml, setup.py, <name>/__init__.py, <name>.so}
+  set(PY_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PY_MODULE_NAME}_build)
+  set(PY_BINDINGS_DIR ${PY_BUILD_DIR}/${PY_MODULE_NAME})
   file(MAKE_DIRECTORY ${PY_BINDINGS_DIR})
   configure_file(${GBS_TEMPLATES_DIR}/py/__init__.py.in ${PY_BINDINGS_DIR}/__init__.py @ONLY)
-  configure_file(${GBS_TEMPLATES_DIR}/py/pyproject.toml.in ${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml @ONLY)
-  configure_file(${GBS_TEMPLATES_DIR}/py/setup.py.in ${CMAKE_CURRENT_BINARY_DIR}/setup.py @ONLY)
+  configure_file(${GBS_TEMPLATES_DIR}/py/pyproject.toml.in ${PY_BUILD_DIR}/pyproject.toml @ONLY)
+  configure_file(${GBS_TEMPLATES_DIR}/py/setup.py.in ${PY_BUILD_DIR}/setup.py @ONLY)
 
   # Package module as wheel
   add_custom_command(
     TARGET ${PY_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PY_MODULE_NAME}> ${PY_BINDINGS_DIR}/
     COMMAND ${UV_EXECUTABLE} build --wheel --no-build-isolation -q --out-dir ${PY_WHEELS_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    WORKING_DIRECTORY ${PY_BUILD_DIR}
     COMMENT "Building Python wheel for ${PY_MODULE_NAME}")
     
 endfunction()

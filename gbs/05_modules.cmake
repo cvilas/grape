@@ -2,57 +2,21 @@
 # Copyright (C) 2018 GRAPE Contributors
 # ==================================================================================================
 
-include(CMakePackageConfigHelpers)
-include(GNUInstallDirs)
-include(FetchContent)
 include(CTest)
 
 set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ON)
 
 # ==================================================================================================
-# Global list of all modules
-define_property(
-  GLOBAL
-  PROPERTY DECLARED_MODULES
-  INHERITED
-  BRIEF_DOCS "All the declared modules in the system"
-  FULL_DOCS "All the declared modules in the system")
+# Global module tracking properties
+define_property(GLOBAL PROPERTY DECLARED_MODULES)   # All modules found in the source tree
+define_property(GLOBAL PROPERTY ENABLED_MODULES)    # Modules marked for build (direct + deps)
+define_property(GLOBAL PROPERTY DEPENDEE_MODULES)   # Modules enabled as downstream dependees
+define_property(GLOBAL PROPERTY CHANGED_MODULES)    # Modules with files changed (git diff)
+define_property(GLOBAL PROPERTY EXTERNAL_PROJECTS)  # External projects required by enabled modules
 set_property(GLOBAL PROPERTY DECLARED_MODULES "")
-
-# Global list of all modules marked for build
-define_property(
-  GLOBAL
-  PROPERTY ENABLED_MODULES
-  INHERITED
-  BRIEF_DOCS "Modules marked for build either directly or to satisfy dependencies"
-  FULL_DOCS "Modules marked for build either directly or to satisfy dependencies")
 set_property(GLOBAL PROPERTY ENABLED_MODULES "")
-
-# Global list of modules enabled because they are downstream dependees of explicitly requested modules
-define_property(
-  GLOBAL
-  PROPERTY DEPENDEE_MODULES
-  INHERITED
-  BRIEF_DOCS "Modules enabled as downstream dependees of explicitly requested modules"
-  FULL_DOCS "Modules enabled as downstream dependees of explicitly requested modules")
 set_property(GLOBAL PROPERTY DEPENDEE_MODULES "")
-
-# Global list of modules identified as changed by git diff (when BUILD_CHANGED_MODULES is set)
-define_property(
-  GLOBAL
-  PROPERTY CHANGED_MODULES
-  INHERITED
-  BRIEF_DOCS "Modules whose source files changed according to git diff"
-  FULL_DOCS "Modules whose source files changed according to git diff")
 set_property(GLOBAL PROPERTY CHANGED_MODULES "")
-
-# Global list of external projects to build
-define_property(
-  GLOBAL
-  PROPERTY EXTERNAL_PROJECTS
-  INHERITED
-  BRIEF_DOCS "External projects marked for build either directly or to satisfy dependencies"
-  FULL_DOCS "External projects marked for build either directly or to satisfy dependencies")
 set_property(GLOBAL PROPERTY EXTERNAL_PROJECTS "")
 
 # ==================================================================================================
@@ -77,8 +41,6 @@ function(enumerate_modules)
   set(flags "")
   set(single_opts ROOT_PATH)
   set(multi_opts "")
-  include(CMakeParseArguments)
-
   cmake_parse_arguments(_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(_ARG_UNPARSED_ARGUMENTS)
@@ -148,6 +110,7 @@ function(configure_modules)
 
   # Generate input paths for source code documentation DOC_INPUT_PATHS DOC_EXAMPLE_PATHS
   set(DOC_INPUT_PATHS ${CMAKE_SOURCE_DIR}/docs ${CMAKE_SOURCE_DIR}/README.md)
+  set(DOC_EXAMPLE_PATHS "")
   foreach(module IN LISTS _enabled_modules_list)
     set(DOC_INPUT_PATHS ${DOC_INPUT_PATHS} ${MODULE_${module}_PATH}/include
                         ${MODULE_${module}_PATH}/docs ${MODULE_${module}_PATH}/README.md)
@@ -180,7 +143,6 @@ macro(declare_module)
   set(single_opts NAME)
   set(multi_opts DEPENDS_ON_MODULES DEPENDS_ON_EXTERNAL_PROJECTS)
 
-  include(CMakeParseArguments)
   cmake_parse_arguments(MODULE_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(MODULE_ARG_UNPARSED_ARGUMENTS)
@@ -282,7 +244,6 @@ function(define_module_library)
       PUBLIC_LINK_LIBS
       PRIVATE_LINK_LIBS)
 
-  include(CMakeParseArguments)
   cmake_parse_arguments(TARGET_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(TARGET_ARG_UNPARSED_ARGUMENTS)
@@ -310,13 +271,13 @@ function(define_module_library)
   endif()
 
   target_include_directories(
-    ${LIBRARY_NAME} BEFORE
+    ${LIBRARY_NAME}
     PUBLIC $<BUILD_INTERFACE:${MODULE_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>
     PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
 
   target_include_directories(
-    ${LIBRARY_NAME} SYSTEM BEFORE
+    ${LIBRARY_NAME} SYSTEM
     PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
 
   target_link_libraries(
@@ -343,8 +304,25 @@ function(define_module_library)
 
   # sometimes libraries have no cpp files. So this is needed
   set_target_properties(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-  set_target_properties(${LIBRARY_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
+  set_target_properties(${LIBRARY_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
 
+endfunction()
+
+#==================================================================================================
+# (for internal use) Apply common include directory and link library settings to a target.
+function(_gbs_apply_target_options target)
+  set(_multi PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS
+             SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
+  cmake_parse_arguments(A "" "" "${_multi}" ${ARGN})
+  target_include_directories(${target}
+    PUBLIC  ${A_PUBLIC_INCLUDE_PATHS}
+    PRIVATE ${A_PRIVATE_INCLUDE_PATHS})
+  target_include_directories(${target} SYSTEM
+    PUBLIC  ${A_SYSTEM_PUBLIC_INCLUDE_PATHS}
+    PRIVATE ${A_SYSTEM_PRIVATE_INCLUDE_PATHS})
+  target_link_libraries(${target}
+    PUBLIC  ${A_PUBLIC_LINK_LIBS}
+    PRIVATE ${A_PRIVATE_LINK_LIBS})
 endfunction()
 
 # ==================================================================================================
@@ -379,7 +357,6 @@ function(define_module_example)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
       SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
 
-  include(CMakeParseArguments)
   cmake_parse_arguments(TARGET_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(TARGET_ARG_UNPARSED_ARGUMENTS)
@@ -397,21 +374,13 @@ function(define_module_example)
   apply_iwyu(${TARGET_NAME})
   add_dependencies(examples ${TARGET_NAME}) # Set this example to be built on `make examples`
 
-  target_include_directories(
-    ${TARGET_NAME} BEFORE
-    PUBLIC ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
-    PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
-
-  target_include_directories(
-    ${TARGET_NAME} SYSTEM BEFORE
-    PUBLIC ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
-    PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
-
-  target_link_libraries(
-    ${TARGET_NAME}
-    PUBLIC ${TARGET_ARG_PUBLIC_LINK_LIBS}
-    PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS} # link to libraries from the enclosing module
-            ${TARGET_ARG_PRIVATE_LINK_LIBS})
+  _gbs_apply_target_options(${TARGET_NAME}
+    PUBLIC_INCLUDE_PATHS         ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
+    PRIVATE_INCLUDE_PATHS        ${TARGET_ARG_PRIVATE_INCLUDE_PATHS}
+    SYSTEM_PUBLIC_INCLUDE_PATHS  ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
+    SYSTEM_PRIVATE_INCLUDE_PATHS ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS}
+    PUBLIC_LINK_LIBS             ${TARGET_ARG_PUBLIC_LINK_LIBS}
+    PRIVATE_LINK_LIBS            ${MODULE_${MODULE_NAME}_LIB_TARGETS} ${TARGET_ARG_PRIVATE_LINK_LIBS})
 
 endfunction()
 
@@ -441,7 +410,6 @@ function(define_module_app)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
       SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
 
-  include(CMakeParseArguments)
   cmake_parse_arguments(TARGET_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(TARGET_ARG_UNPARSED_ARGUMENTS)
@@ -462,26 +430,18 @@ function(define_module_app)
       ${MODULE_${MODULE_NAME}_EXE_TARGETS} ${TARGET_NAME}
       CACHE INTERNAL "Targets in module ${MODULE_NAME}")
 
-  target_include_directories(
-    ${TARGET_NAME} BEFORE
-    PUBLIC ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
-    PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
-
-  target_include_directories(
-    ${TARGET_NAME} SYSTEM BEFORE
-    PUBLIC ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
-    PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
-
-  target_link_libraries(
-    ${TARGET_NAME}
-    PUBLIC ${TARGET_ARG_PUBLIC_LINK_LIBS}
-    PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS} # link to libraries from the enclosing module
-            ${TARGET_ARG_PRIVATE_LINK_LIBS})
+  _gbs_apply_target_options(${TARGET_NAME}
+    PUBLIC_INCLUDE_PATHS         ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
+    PRIVATE_INCLUDE_PATHS        ${TARGET_ARG_PRIVATE_INCLUDE_PATHS}
+    SYSTEM_PUBLIC_INCLUDE_PATHS  ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
+    SYSTEM_PRIVATE_INCLUDE_PATHS ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS}
+    PUBLIC_LINK_LIBS             ${TARGET_ARG_PUBLIC_LINK_LIBS}
+    PRIVATE_LINK_LIBS            ${MODULE_${MODULE_NAME}_LIB_TARGETS} ${TARGET_ARG_PRIVATE_LINK_LIBS})
 
   # Set rpath for installed executables, but not for statically linked ones (which will fail)
   get_target_property(${TARGET_NAME}_link_libs ${TARGET_NAME} LINK_LIBRARIES)
   if(NOT ${TARGET_NAME}_link_libs MATCHES "-static")
-    set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib:${CMAKE_INSTALL_PREFIX}/lib")
+    set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
   endif()
 
 endfunction()
@@ -495,9 +455,9 @@ FetchContent_Declare(
   EXCLUDE_FROM_ALL
   SYSTEM)
 FetchContent_MakeAvailable(Catch2)
-set_target_properties(Catch2 PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")
+target_compile_options(Catch2 PRIVATE -w)
 set_target_properties(Catch2 PROPERTIES CXX_CLANG_TIDY "")
-set_target_properties(Catch2WithMain PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")
+target_compile_options(Catch2WithMain PRIVATE -w)
 
 # ==================================================================================================
 # Adds a custom target to group all test programs built on call to `make tests`
@@ -539,7 +499,6 @@ function(define_module_test)
   set(multi_opts SOURCES PUBLIC_INCLUDE_PATHS PRIVATE_INCLUDE_PATHS SYSTEM_PUBLIC_INCLUDE_PATHS 
       SYSTEM_PRIVATE_INCLUDE_PATHS PUBLIC_LINK_LIBS PRIVATE_LINK_LIBS)
 
-  include(CMakeParseArguments)
   cmake_parse_arguments(TARGET_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(TARGET_ARG_UNPARSED_ARGUMENTS)
@@ -563,21 +522,14 @@ function(define_module_test)
     WORKING_DIRECTORY ${TARGET_ARG_WORKING_DIRECTORY})
   add_dependencies(tests ${TARGET_NAME}) # Set this to be built on `make tests`
 
-  target_include_directories(
-    ${TARGET_NAME} BEFORE
-    PUBLIC ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
-    PRIVATE ${TARGET_ARG_PRIVATE_INCLUDE_PATHS})
-
-  target_include_directories(
-    ${TARGET_NAME} SYSTEM BEFORE
-    PUBLIC ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
-    PRIVATE ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS})
-
-  target_link_libraries(
-    ${TARGET_NAME}
-    PUBLIC ${TARGET_ARG_PUBLIC_LINK_LIBS}
-    PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS} # link to libraries from the enclosing module
-            ${TARGET_ARG_PRIVATE_LINK_LIBS} Catch2::Catch2WithMain)
+  _gbs_apply_target_options(${TARGET_NAME}
+    PUBLIC_INCLUDE_PATHS         ${TARGET_ARG_PUBLIC_INCLUDE_PATHS}
+    PRIVATE_INCLUDE_PATHS        ${TARGET_ARG_PRIVATE_INCLUDE_PATHS}
+    SYSTEM_PUBLIC_INCLUDE_PATHS  ${TARGET_ARG_SYSTEM_PUBLIC_INCLUDE_PATHS}
+    SYSTEM_PRIVATE_INCLUDE_PATHS ${TARGET_ARG_SYSTEM_PRIVATE_INCLUDE_PATHS}
+    PUBLIC_LINK_LIBS             ${TARGET_ARG_PUBLIC_LINK_LIBS}
+    PRIVATE_LINK_LIBS            ${MODULE_${MODULE_NAME}_LIB_TARGETS} ${TARGET_ARG_PRIVATE_LINK_LIBS}
+                                 Catch2::Catch2WithMain)
 
 endfunction()
 
@@ -625,7 +577,7 @@ function(install_modules)
             COMPONENT dev)
 
     # install package targets
-    if(DEFINED INSTALL_MODULE_LIB_TARGETS OR DEFINED INSTALL_MODULE_EXE_TARGETS)
+    if(INSTALL_MODULE_LIB_TARGETS OR INSTALL_MODULE_EXE_TARGETS)
       message(VERBOSE "Module \"${module}\" installable targets:")
       message(VERBOSE "  Library targets\t : ${INSTALL_MODULE_LIB_TARGETS}")
       message(VERBOSE "  Executable targets\t : ${INSTALL_MODULE_EXE_TARGETS}")
@@ -691,8 +643,6 @@ function(mark_module_and_dependencies_to_build)
   set(flags "")
   set(single_opts MODULE_NAME)
   set(multi_opts "")
-  include(CMakeParseArguments)
-
   cmake_parse_arguments(_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(_ARG_UNPARSED_ARGUMENTS)
@@ -721,7 +671,7 @@ function(mark_module_and_dependencies_to_build)
   # Recursively process all dependencies.
   foreach(dep IN LISTS MODULE_${_ARG_MODULE_NAME}_DEPENDS_ON)
     if(NOT EXISTS ${MODULE_${dep}_PATH})
-      message(FATAL_ERROR "Module \"${module}\" internal dependency \"${dep}\" does not exist")
+      message(FATAL_ERROR "Module \"${_ARG_MODULE_NAME}\" internal dependency \"${dep}\" does not exist")
     endif()
     mark_module_and_dependencies_to_build(MODULE_NAME ${dep})
 
@@ -867,7 +817,6 @@ function(find_module_declarations result)
   # This is the regex string we search for in the files to find a module declaration
   set(declaration_search_regex "^declare_module\\(")
 
-  include(CMakeParseArguments)
   cmake_parse_arguments(_ARG "${flags}" "${single_opts}" "${multi_opts}" ${ARGN})
 
   if(_ARG_UNPARSED_ARGUMENTS)
@@ -880,7 +829,7 @@ function(find_module_declarations result)
 
   # * Find all cmakelists.txt recursively starting from specified path
   # * From these, extract those that contain 'declare_module' string
-  file(GLOB_RECURSE _all_cmakelists "${_ARG_ROOT_PATH}/CMakeLists.txt")
+  file(GLOB_RECURSE _all_cmakelists CONFIGURE_DEPENDS "${_ARG_ROOT_PATH}/CMakeLists.txt")
 
   set(module_files_list)
   foreach(file ${_all_cmakelists})
@@ -935,5 +884,5 @@ FetchContent_Declare(
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(benchmark)
-set_target_properties(benchmark PROPERTIES COMPILE_OPTIONS "${THIRD_PARTY_COMPILER_WARNINGS}")
+target_compile_options(benchmark PRIVATE -w)
 set_target_properties(benchmark PROPERTIES CXX_CLANG_TIDY "")

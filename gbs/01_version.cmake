@@ -9,9 +9,9 @@ execute_process(
   COMMAND git rev-parse --abbrev-ref HEAD
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE REPO_BRANCH
-  ERROR_VARIABLE error_branch_check
+  RESULT_VARIABLE _result
   OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(error_branch_check)
+if(NOT _result EQUAL 0)
   set(REPO_BRANCH "unknown-branch")
   message(WARNING "Repo branch check failed. Will use \"${REPO_BRANCH}\"")
 endif()
@@ -21,9 +21,9 @@ execute_process(
   COMMAND git log -1 --format=%h
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE REPO_HASH
-  ERROR_VARIABLE error_hash_check
+  RESULT_VARIABLE _result
   OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(error_hash_check)
+if(NOT _result EQUAL 0)
   set(REPO_HASH "ffffffff")
   message(WARNING "Repo commit hash check failed. Will use \"${REPO_HASH}\"")
 endif()
@@ -33,9 +33,9 @@ execute_process(
   COMMAND git describe --tags --abbrev=0
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE REPO_TAG
-  ERROR_VARIABLE error_version_check
+  RESULT_VARIABLE _result
   OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(error_version_check)
+if(NOT _result EQUAL 0)
   set(REPO_TAG "v0.0.0")
   message(WARNING "Repo version check failed. Will use \"${REPO_TAG}\"")
 endif()

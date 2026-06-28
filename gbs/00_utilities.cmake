@@ -7,7 +7,7 @@
 function(print_cmake_variables)
   get_cmake_property(variable_names VARIABLES)
   list (SORT variable_names)
-  foreach (var ${variable_names})
+  foreach(var IN LISTS variable_names)
     message(STATUS "${var}=${${var}}")
   endforeach()
 endfunction()
@@ -34,11 +34,11 @@ endfunction()
 # USING_LIBSTDCXX is set if libstdc++ is in use
 # USING_LIBCPP is set if libc++ is in use
 function(detect_cxx_stdlib)
-    # Save the current compiler flags
-    set(CMAKE_REQUIRED_FLAGS_SAVED ${CMAKE_REQUIRED_FLAGS})
-    
-    # Test for libstdc++
+    include(CMakePushCheckState)
+    cmake_push_check_state()
     set(CMAKE_REQUIRED_FLAGS "${CMAKE_CXX_FLAGS}")
+
+    # Test for libstdc++
     check_cxx_source_compiles("
         #include <cstddef>
         #if !defined(__GLIBCXX__)
@@ -46,7 +46,7 @@ function(detect_cxx_stdlib)
         #endif
         int main() { return 0; }
     " USING_LIBSTDCXX)
-    
+
     # Test for libc++
     check_cxx_source_compiles("
         #include <cstddef>
@@ -55,10 +55,9 @@ function(detect_cxx_stdlib)
         #endif
         int main() { return 0; }
     " USING_LIBCPP)
-    
-    # Restore compiler flags
-    set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS_SAVED})
-    
+
+    cmake_pop_check_state()
+
     # Set results in parent scope
     set(USING_LIBSTDCXX ${USING_LIBSTDCXX} PARENT_SCOPE)
     set(USING_LIBCPP ${USING_LIBCPP} PARENT_SCOPE)
