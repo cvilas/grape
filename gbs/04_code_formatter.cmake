@@ -37,6 +37,7 @@ function(apply_clang_format target_name)
     # There are file types we don't want to process (or may be the inverse list is shorter)
     set(supported_file_types ".c" ".cpp" ".h" ".hpp" ".inl")
 
+    set(counter 0)
     set(sources "")
     foreach(source ${_sources})
       if(NOT TARGET ${source})
@@ -90,4 +91,4 @@ endif()
 
 # print summary
 message(STATUS "\tENABLE_FORMATTER       : ${ENABLE_FORMATTER} (${CLANG_FORMAT_BIN})")
-message(STATUS "\tENABLE_CMAKE_FORMATTER : ${ENABLE_FORMATTER} (${CMAKE_FORMAT_BIN})")
+message(STATUS "\tENABLE_CMAKE_FORMATTER : ${ENABLE_CMAKE_FORMATTER} (${CMAKE_FORMAT_BIN})")

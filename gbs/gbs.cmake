@@ -70,14 +70,14 @@ execute_process(
 )
 
 # if configuration succeeded, then build all external projects
-if (${_result} EQUAL 0)
-  message(STATUS "========= External dependencies: Building    =========")
+if(_result EQUAL 0)
+  message(STATUS "========= External dependencies: Building    ==========")
   execute_process(
     COMMAND ${CMAKE_COMMAND} --build .
     WORKING_DIRECTORY ${EP_BINARY_DIR}
     RESULT_VARIABLE _result
     ERROR_VARIABLE _error)
-endif ()
+endif()
 
 # If anything went wrong with external project build, stop and exit
 if (NOT ${_result} EQUAL 0)

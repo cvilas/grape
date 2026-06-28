@@ -53,7 +53,6 @@ set(GCC_WARNINGS
   -Wduplicated-cond # warn if if / else chain has duplicated conditions
   -Wduplicated-branches # warn if if / else branches have duplicated code
   -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
-  -Wconversion
   -Wcast-qual
   -Wpointer-arith
 )
@@ -75,7 +74,7 @@ if(ENABLE_ASAN)
 endif()
 
 option(ENABLE_LSAN "Enable run-time memory leak detector" FALSE)
-if(${ENABLE_LSAN})
+if(ENABLE_LSAN)
   list(APPEND SANITIZERS "leak")
 endif()
 
@@ -85,7 +84,7 @@ if(ENABLE_UBSAN)
 endif()
 
 option(ENABLE_TSAN "Enable thread sanitizer" FALSE)
-if(${ENABLE_TSAN})
+if(ENABLE_TSAN)
   if("address" IN_LIST SANITIZERS OR "leak" IN_LIST SANITIZERS)
     message(FATAL_ERROR "Thread sanitizer does not work with Address and Leak sanitizer enabled")
   else()
@@ -94,7 +93,7 @@ if(${ENABLE_TSAN})
 endif()
 
 option(ENABLE_MSAN "Enable memory sanitizer" FALSE)
-if(${ENABLE_MSAN})
+if(ENABLE_MSAN)
   if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
     message(WARNING "Memory sanitizer requires all code (including libc++) to be MSAN-instrumented to avoid false positives")
   endif()
@@ -110,22 +109,18 @@ endif()
 
 list(JOIN SANITIZERS "," LIST_OF_SANITIZERS)
 if(LIST_OF_SANITIZERS)
-  if(NOT "${LIST_OF_SANITIZERS}" STREQUAL "")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=${LIST_OF_SANITIZERS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=${LIST_OF_SANITIZERS}")
-    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -fsanitize=${LIST_OF_SANITIZERS}")
-  endif()
+  add_compile_options(-fsanitize=${LIST_OF_SANITIZERS})
+  add_link_options(-fsanitize=${LIST_OF_SANITIZERS})
 endif()
 
 # Set whether to enable inter-procedural optimisation
+set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # Ensure sub-projects respect INTERPROCEDURAL_OPTIMIZATION
 option(ENABLE_IPO "Enable interprocedural optimization" OFF)
 if(ENABLE_IPO)
   include(CheckIPOSupported)
   check_ipo_supported(RESULT is_ipo_supported OUTPUT output)
   if(is_ipo_supported)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-    cmake_policy(SET CMP0069 NEW) # For submodules (eg: googletest) that use CMake older than v3.8
-    set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # About: Run "cmake --help-policy CMP0069"
   else()
     message(WARNING "Interprocedural optimisation is not supported: ${output}")
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)
@@ -135,16 +130,11 @@ endif()
 # Configure compiler cache
 option(ENABLE_CACHE "Enable cache if available" ON)
 if(ENABLE_CACHE)
-  set(CACHE_PROGRAM_OPTIONS "ccache" "sccache")
-  foreach(cache_option IN LISTS CACHE_PROGRAM_OPTIONS)
-    find_program(CACHE_BIN ${cache_option})
-    if(CACHE_BIN)
-      set(CMAKE_CXX_COMPILER_LAUNCHER ${CACHE_BIN})
-      set(CMAKE_C_COMPILER_LAUNCHER ${CACHE_BIN})
-      break()
-    endif()
-  endforeach()
-  if(NOT CACHE_BIN)
+  find_program(CACHE_BIN NAMES ccache sccache)
+  if(CACHE_BIN)
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CACHE_BIN})
+    set(CMAKE_C_COMPILER_LAUNCHER ${CACHE_BIN})
+  else()
     message(WARNING "Compiler cache requested but none found")
   endif()
 endif()
