@@ -36,25 +36,9 @@ string(REPLACE ";" "\\;" formatted_external_projects_list "${_external_projects_
 # - Variables set there are not shared by the rest of this project
 # - CMake parameters must be explicitly passed as if cmake was called on it from the command line
 message(STATUS "========= External dependencies: Configuring =========")
-
-# Delete local deployment directories of external projects
-#execute_process(
-#  COMMAND bash -c "find ${EP_BINARY_DIR} -type d \\( -name \"deploy\" -o -name \"tmp\" \\) | xargs rm -r"
-#  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-#  RESULT_VARIABLE _result
-#  ERROR_VARIABLE _error
-#)
-#if(NOT _result EQUAL 0)
-#  message(WARNING "Clean up command failed: ${_error}")
-#else()
-#  message(STATUS "Cleaned up external build directories")
-#  file(MAKE_DIRECTORY ${EP_DEPLOY_DIR}) # make the deploy directory again
-#endif()
-
-# Configure external projects
 execute_process(
   COMMAND ${CMAKE_COMMAND}
-  -G "Ninja" ${CMAKE_SOURCE_DIR}/external # Use 'Ninja' for parallel build
+  -G "Ninja" ${CMAKE_SOURCE_DIR}/external
   -DEXTERNAL_PROJECTS_LIST=${formatted_external_projects_list}
   -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
   -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
@@ -66,23 +50,20 @@ execute_process(
   -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
   WORKING_DIRECTORY ${EP_BINARY_DIR}
   RESULT_VARIABLE _result
-  ERROR_VARIABLE _error
-)
-
-# if configuration succeeded, then build all external projects
-if(_result EQUAL 0)
-  message(STATUS "========= External dependencies: Building    ==========")
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} --build .
-    WORKING_DIRECTORY ${EP_BINARY_DIR}
-    RESULT_VARIABLE _result
-    ERROR_VARIABLE _error)
+  ERROR_VARIABLE _error)
+if(NOT _result EQUAL 0)
+  message(FATAL_ERROR "External dependencies: configure failed\n${_error}")
 endif()
 
-# If anything went wrong with external project build, stop and exit
-if (NOT ${_result} EQUAL 0)
-  message(FATAL_ERROR "Error processing ${CMAKE_SOURCE_DIR}/external/CMakeLists.txt: ${_error}")
-endif ()
+message(STATUS "========= External dependencies: Building    ==========")
+execute_process(
+  COMMAND ${CMAKE_COMMAND} --build .
+  WORKING_DIRECTORY ${EP_BINARY_DIR}
+  RESULT_VARIABLE _result
+  ERROR_VARIABLE _error)
+if(NOT _result EQUAL 0)
+  message(FATAL_ERROR "External dependencies: build failed\n${_error}")
+endif()
 
 # Install all artifacts from external projects, applying the same runtime/dev component split
 # as for internal modules:
