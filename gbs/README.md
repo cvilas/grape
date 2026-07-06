@@ -107,12 +107,13 @@ After configuration, targets are built with `cmake --build <build/dir>`. The fol
 | `examples` | Build all example programs. |
 | `tests` | Build all unit test binaries. |
 | `check` | Build and run all unit tests; generate a test report. |
+| `dep_graph` | Render module dependency graph SVG into `build/<preset>/docs/dep_graph.svg`. |
 | `format` | Apply `clang-format` and `cmake-format` to all sources in enabled modules. |
 | `docs` | Generate Doxygen HTML documentation into `build/docs/`. |
 | `install` | Build and install libraries, headers, and apps under `CMAKE_INSTALL_PREFIX`. |
 | `pack` | Package installed artifacts for deployment. |
 
-Example 1: Build all targets and run unit tests:
+Example 1: Build all binaries and run unit tests:
 
 ```sh
 cmake --build build/native --parallel --target all examples check

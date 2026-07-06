@@ -14,6 +14,7 @@ include(${GBS_TEMPLATES_DIR}/04_code_formatter.cmake)
 include(${GBS_TEMPLATES_DIR}/05_modules.cmake)
 include(${GBS_TEMPLATES_DIR}/06_packager_config.cmake)
 include(${GBS_TEMPLATES_DIR}/07_modules_py.cmake)
+include(${GBS_TEMPLATES_DIR}/08_dep_graph.cmake)
 
 #-------------------------------------------------------------------------------------------------
 # Enumerate all modules and those selected for build (with -DBUILD_MODULES)
@@ -123,5 +124,8 @@ message(STATUS "Configuring modules")
 message(STATUS "----------------------------------------------------------------------")
 configure_modules()
 
+#-------------------------------------------------------------------------------------------------
+# Diagnostics
+generate_dependency_graph()
 #print_cmake_variables()
 
