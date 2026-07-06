@@ -4,7 +4,6 @@
 
 declare_module(
   NAME conio
-  ALWAYS_BUILD
   DEPENDS_ON_MODULES "base"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
