@@ -16,15 +16,15 @@
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
 - [ ] [Linalg](../modules/experimental/linalg/README.md)
 - [ ] Support zero-copy in IPC
-- [ ] Secure teleop (authentication and encryption) 
+- [ ] [Remote teleop](../modules/experimental/robot/locomotion/teleop/README.md)
 - [ ] Audio support for [camera](../modules/camera/README.md)
 - [ ] Basic OpenGL scenegraph
   - [ ] Clean up experimental implementation in scratch/scenegraph/copilot
   - [ ] Build scenegraph using data-oriented design
   - [ ] Extend to support asset loading using assimp
   - [ ] Design a text-based scenegraph description format using our scripting engine
+  - [ ] Interactive point cloud viewer
 - [ ] [Data recording](../modules/experimental/drake/README.md)
-- [ ] Interactive point cloud viewer
 - [ ] Advanced serialisation
   - [ ] Auto serdes using reflection and [variadic structured bindings](https://github.com/cvilas/scratch/blob/master/variadic_bindings.cpp)
   - [ ] Cross language [binding](https://godbolt.org/z/bYPcjMd9q) to functions for scripting
@@ -39,31 +39,10 @@
   - [ ] Differentiator
   - [ ] Integrator
   - [ ] Velocity observer
-- [ ] Multimodal telemetry: 
-  - 1x audio channel, 2x 1080p30 video channel, 1x bidirectional data channel (teleop), 3x unidirectional data channel for structured & unstructured data
-  - teleop control authentication and arbitration
 - [ ] CANOpen
 - [ ] [CI jobs](../.github/workflows/README.md)
 - [ ] Optimise the [ring buffers](https://rigtorp.se/ringbuffer/)
 
-## Study
-
-- std::simd
-- [std::execution](https://github.com/NVIDIA/stdexec)
-- std::meta
-- std::linalg
-- std::hive
-- std::debugging
-- std::polymorphic & std::indirect
-- std::is_within_lifetime
-- RCU (read-copy-update)
-- std::text_encoding
-- std::strong_ordering
-- new SI ratio prefixes
-- parallel range algorithms
-- pointer provenance
-- Polymorphic resource allocators (`std::pmr` namespace) and how to use them in embedded systems
-- [Robotics at compile time](https://youtu.be/Y6AUsB3RUhA)
 
 ## References
 
