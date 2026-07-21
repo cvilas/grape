@@ -22,3 +22,11 @@ control of its _locomotion_ functions.
 - Terminal-based client applications for wide deployability, including on the robot itself
 - Interacts with [locomotion command arbiter](../arbiter/README.md) to inject control command on the alternate channel
 
+## Roadmap
+
+- [ ] Secure teleop (authentication and encryption) 
+- [ ] Low latency multimodal telemetry: 
+  - 1x audio channel, 
+  - 2x 1080p30 video channel, 
+  - 1x bidirectional data channel (teleop), 
+  - 3x unidirectional data channel for structured & unstructured data
