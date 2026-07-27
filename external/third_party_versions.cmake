@@ -4,7 +4,7 @@
 
 # List of all third-party dependency versions
 
-set(CATCH2_VERSION_REQUIRED       3.15.2)
+set(CATCH2_VERSION_REQUIRED       3.15.3)
 set(BENCHMARK_VERSION_REQUIRED    1.9.5)
 set(FTXUI_VERSION_REQUIRED        7.0.1)
 set(FREETYPE_VERSION_REQUIRED     2.14.3)
