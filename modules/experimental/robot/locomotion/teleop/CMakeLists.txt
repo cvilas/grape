@@ -9,7 +9,7 @@ declare_module(
 
 # library sources
 set(HEADERS include/grape/locomotion/teleop_client.h)
-set(SOURCES README.md src/teleop_client.cpp)
+set(SOURCES src/teleop_client.cpp)
 
 # library target
 define_module_library(

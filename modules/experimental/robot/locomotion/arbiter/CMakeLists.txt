@@ -9,7 +9,7 @@ declare_module(
 
 # library sources
 set(HEADERS include/grape/locomotion/arbiter.h)
-set(SOURCES README.md src/arbiter.cpp)
+set(SOURCES src/arbiter.cpp)
 
 # library target
 define_module_library(
