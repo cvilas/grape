@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace grape::utils {
+namespace grape {
 
 /// Software version data
 struct [[nodiscard]] Version {
@@ -31,4 +31,4 @@ auto getVersion() -> Version;
 /// @return Source configuration that generated project binaries
 auto getBuildInfo() -> BuildInfo;
 
-}  // namespace grape::utils
+}  // namespace grape

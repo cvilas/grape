@@ -8,13 +8,13 @@
 #include <string_view>
 #include <tuple>
 
-#include "grape/utils/version.h"
+#include "grape/version.h"
 
 //=================================================================================================
 auto main() -> int {
   try {
-    const auto vn = grape::utils::getVersion();
-    const auto bi = grape::utils::getBuildInfo();
+    const auto vn = grape::getVersion();
+    const auto bi = grape::getBuildInfo();
     std::println("Version    : {:d}.{:d}.{:d}", vn.major, vn.minor, vn.patch);
     std::println("Build Info : '{}' branch, '{}' profile, '{}' hash", bi.branch, bi.profile,
                  bi.hash);
