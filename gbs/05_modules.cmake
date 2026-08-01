@@ -135,11 +135,12 @@ endfunction()
 # Parameters:
 #  NAME (required): A unique name for the module 
 #  ALWAYS_BUILD (optional): If true, the module is always built, disregarding BUILD_MODULES setting
+#  NO_MODULE_DEPENDENCIES (optional): If true, configure fails if any module dependencies are declared
 #  DEPENDS_ON_MODULES (list): List of other modules that this module depends on
 #  DEPENDS_ON_EXTERNAL_PROJECTS (list): List of tags to external projects that this module depends on
 #
 macro(declare_module)
-  set(flags ALWAYS_BUILD)
+  set(flags ALWAYS_BUILD NO_MODULE_DEPENDENCIES)
   set(single_opts NAME)
   set(multi_opts DEPENDS_ON_MODULES DEPENDS_ON_EXTERNAL_PROJECTS)
 
@@ -151,6 +152,11 @@ macro(declare_module)
 
   if(NOT MODULE_ARG_NAME)
     message(FATAL_ERROR "NAME not specified")
+  endif()
+
+  if(MODULE_ARG_NO_MODULE_DEPENDENCIES AND MODULE_ARG_DEPENDS_ON_MODULES)
+    message(FATAL_ERROR
+            "Module \"${MODULE_ARG_NAME}\" must not declare any module dependencies")
   endif()
 
   # Either have it always build, or allow user to choose at configuration-time
