@@ -1,23 +1,19 @@
 # =================================================================================================
-# Copyright (C) 2023 GRAPE Contributors
+# Copyright (C) 2026 GRAPE Contributors
 # =================================================================================================
 
-declare_module(NAME utils NO_MODULE_DEPENDENCIES)
+declare_module(NAME version ALWAYS_BUILD NO_MODULE_DEPENDENCIES)
+
+# generate version header
+configure_file(src/version_impl.h.in ${CMAKE_CURRENT_BINARY_DIR}/version_impl.h @ONLY)
 
 # library sources
-set(HEADERS
-    include/grape/utils/detail/enums_detail.h
-    include/grape/utils/enums.h
-    include/grape/utils/file_system.h
-    include/grape/utils/ip.h
-    include/grape/utils/stacktrace.h
-    include/grape/utils/utils.h)
-
-set(SOURCES src/ip.cpp src/file_system.cpp src/stacktrace.cpp src/utils.cpp)
+set(HEADERS include/grape/version.h)
+set(SOURCES src/version.cpp src/version_impl.h.in)
 
 # library target
 define_module_library(
-  NAME utils
+  NAME version
   PUBLIC_LINK_LIBS ""
   PRIVATE_LINK_LIBS ""
   SOURCES ${SOURCES}
@@ -26,6 +22,4 @@ define_module_library(
   SYSTEM_PRIVATE_INCLUDE_PATHS "")
 
 # Subprojects
-add_subdirectory(examples)
-add_subdirectory(tests)
 add_subdirectory(apps)

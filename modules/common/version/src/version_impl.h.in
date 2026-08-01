@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace grape::utils
+namespace grape
 {
 
 static constexpr std::uint8_t VERSION_MAJOR = @VERSION_MAJOR@;
@@ -19,4 +19,4 @@ static constexpr std::string_view REPO_BRANCH = "@REPO_BRANCH@";
 static constexpr std::string_view BUILD_PROFILE = "@CMAKE_BUILD_TYPE@";
 static constexpr std::string_view REPO_HASH = "@REPO_HASH@";
 
-} // namespace grape::utils
+} // namespace grape
