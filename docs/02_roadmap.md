@@ -43,7 +43,7 @@
   - 1x audio channel, 2x 1080p30 video channel, 1x bidirectional data channel (teleop), 3x unidirectional data channel for structured & unstructured data
   - teleop control authentication and arbitration
 - [ ] CANOpen
-- [ ] CI updates (See TODO in [README](../.github/workflows/README.md))
+- [ ] [CI jobs](../.github/workflows/README.md)
 - [ ] Optimise the [ring buffers](https://rigtorp.se/ringbuffer/)
 
 ## Study
