@@ -92,7 +92,12 @@ jobs:
             grape-${{ runner.arch }}-${{ runner.os }}-cache
 
       - name: Configure (llvm)
-        run: cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
+          else
+            cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES=all
+          fi
       
       - name: Check formatting
         run: |
@@ -110,7 +115,12 @@ jobs:
         run: cmake --build build/llvm --target check --parallel
 
       - name: Configure (gcc)
-        run: cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
+          else
+            cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF -DBUILD_MODULES=all
+          fi
       
       - name: Build (gcc)
         run: cmake --build build/native --target all examples tests --parallel
