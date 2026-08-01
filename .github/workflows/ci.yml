@@ -66,6 +66,12 @@ jobs:
           chmod +x ./toolchains/install_cmake.sh
           ./toolchains/install_cmake.sh
 
+      - name: Verify CMake in PATH
+        run: |
+          which cmake
+          cmake --version
+          echo "$PATH"
+
       - name: Install LLVM/Clang toolchain
         run: |
           chmod +x ./toolchains/install_llvm.sh
