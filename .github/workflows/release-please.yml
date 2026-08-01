@@ -1,0 +1,33 @@
+# Runs release-please on every merge to main.
+#
+# release-please inspects Conventional Commit messages since the last release
+# and determines the correct semver bump (patch / minor / major). It then opens
+# (or updates) a "Release PR" that contains the bumped version and a generated
+# CHANGELOG entry. Merging that Release PR creates the vX.Y.Z git tag and a
+# GitHub Release automatically.
+#
+# Commit types that drive the version bump:
+#   fix: …        → patch bump  (e.g. 0.1.19 → 0.1.20)
+#   feat: …       → minor bump  (e.g. 0.1.19 → 0.2.0)
+#   feat!: … /
+#   BREAKING CHANGE: …  → major bump  (e.g. 0.1.19 → 1.0.0)
+#
+# See: https://github.com/googleapis/release-please
+
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+

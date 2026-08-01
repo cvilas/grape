@@ -21,8 +21,24 @@
 - Check the box to enable it.
 - Click Save if prompted.
 
+## Semantic versioning (release-please)
+
+Versioning follows [Semantic Versioning](https://semver.org) driven by 
+[Conventional Commits](https://www.conventionalcommits.org) and automated via
+[release-please](https://github.com/googleapis/release-please). How it works:
+
+- Follow the Conventional Commits format (enforced by `pr-title-lint.yml`) everywhere including the merge commit message on `main`:
+  - `fix: …` → patch bump (0.1.x → 0.1.x+1)
+  - `feat: …` → minor bump (0.x.0 → 0.x+1.0)
+  - `feat!: …` or footer `BREAKING CHANGE: …` → major bump (x.0.0 → x+1.0.0)
+  - `chore:`, `docs:`, `ci:`, etc. → no version bump
+- On each merge to `main`, `release-please.yml` opens or updates a Release PR that contains the computed next version and a generated `CHANGELOG.md` entry.
+- Merging the Release PR creates the `vX.Y.Z` git tag and a GitHub Release.
+
+The `CHANGELOG.md` and `.release-please-manifest.json` at the repo root are maintained automatically by release-please — do not edit them by hand.
+
 ## TODO
 
 - Add cross-builds (presets: `llvm-cross`, `gcc-cross`)
 - Add a few sanitizer builds
-- Separate [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html) build on realtime module 
+- Separate [RTSan](https://clang.llvm.org/docs/RealtimeSanitizer.html) build on realtime module
