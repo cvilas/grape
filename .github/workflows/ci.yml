@@ -17,7 +17,7 @@ jobs:
       fail-fast: false # Allow other builds to continue even if one fails
       matrix:
         include:
-          - runner: [self-hosted, X64]
+          - runner: ubuntu-latest
             name: x86_64            
           - runner: [self-hosted, ARM64]
             name: aarch64
