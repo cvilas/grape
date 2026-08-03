@@ -9,8 +9,6 @@
 #include "grape/ipc/session.h"
 #include "grape/locomotion/arbiter.h"
 #include "grape/locomotion/topics.h"
-#include "grape/serdes/serdes.h"
-#include "grape/serdes/stream.h"
 
 namespace {
 
