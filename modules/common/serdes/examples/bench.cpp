@@ -6,21 +6,48 @@
 
 #include <benchmark/benchmark.h>
 
-#include "advanced_example.h"
+#include "grape/serdes/serdes.h"
 #include "grape/serdes/stream.h"
 
 namespace {
 
+//-------------------------------------------------------------------------------------------------
+struct Position {
+  double x{};
+  double y{};
+  double z{};
+};
+
+//-------------------------------------------------------------------------------------------------
+struct Quaternion {
+  double x{};
+  double y{};
+  double z{};
+  double w{};
+};
+
+//-------------------------------------------------------------------------------------------------
+struct PoseStamped {
+  std::int64_t nanoseconds{};
+  Position position{};
+  Quaternion orientation{};
+};
+
 constexpr auto BUFFER_INIT_SIZE = 1024U;
+using OutStream = grape::serdes::OutStream<BUFFER_INIT_SIZE>;
+using InStream = grape::serdes::InStream;
+using Serialiser = grape::serdes::Serialiser<OutStream>;
+using Deserialiser = grape::serdes::Deserialiser<InStream>;
 
 //-------------------------------------------------------------------------------------------------
 void bmSerialize(benchmark::State& state) {
   const auto pos = PoseStamped();
-  auto buf = grape::serdes::OutStream<BUFFER_INIT_SIZE>();
+  auto buf = OutStream();
 
   for (auto st : state) {
     (void)st;
-    auto serializer = grape::serdes::Serialiser(buf);
+    buf.reset();
+    auto serializer = Serialiser(buf);
     if (not serializer.pack(pos)) {
       throw std::runtime_error("Serialisation error");
     }
@@ -33,16 +60,16 @@ void bmSerialize(benchmark::State& state) {
 //-------------------------------------------------------------------------------------------------
 void bmDeserialize(benchmark::State& state) {
   const auto pos = PoseStamped();
-  auto obuf = grape::serdes::OutStream<BUFFER_INIT_SIZE>();
-  auto serializer = grape::serdes::Serialiser(obuf);
+  auto obuf = OutStream();
+  auto serializer = Serialiser(obuf);
   if (not serializer.pack(pos)) {
     throw std::runtime_error("Serialisation error");
   }
 
   for (auto st : state) {
     (void)st;
-    auto ibuf = grape::serdes::InStream(obuf.data());
-    auto deserializer = grape::serdes::Deserialiser(ibuf);
+    auto ibuf = InStream(obuf.data());
+    auto deserializer = Deserialiser(ibuf);
     PoseStamped deserialized_pose;
     if (not deserializer.unpack(deserialized_pose)) {
       throw std::runtime_error("Deserialisation error");

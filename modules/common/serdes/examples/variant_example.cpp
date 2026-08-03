@@ -34,37 +34,6 @@ struct Walk {
 };
 
 //-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto serialise(Serialiser& ser, const Sit& st) -> bool {
-  return ser.pack(st.speed);
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto deserialise(Deserialiser& des, Sit& st) -> bool {
-  return des.unpack(st.speed);
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto serialise(Serialiser& ser, const Stand& st) -> bool {
-  return ser.pack(st.speed);
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto deserialise(Deserialiser& des, Stand& st) -> bool {
-  return des.unpack(st.speed);
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto serialise(Serialiser& ser, const Walk& st) -> bool {
-  return ser.pack(st.forward_speed) and ser.pack(st.lateral_speed) and ser.pack(st.turn_speed);
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto deserialise(Deserialiser& des, Walk& st) -> bool {
-  return des.unpack(st.forward_speed) and des.unpack(st.lateral_speed) and
-         des.unpack(st.turn_speed);
-}
-
-//-------------------------------------------------------------------------------------------------
 struct VisitCommand {
   void operator()(const Sit& ev) {
     std::println("[Sit] speed={}", ev.speed);
@@ -81,7 +50,7 @@ struct VisitCommand {
 
 //=================================================================================================
 /// Demonstrates serialisation and deserialisation of a std::variant
-/// Custom data types must satisfy the Serialisable and Deserialisable concepts
+/// Custom data types are automatically supported when they are decomposable public structs
 auto main() -> int {
   try {
     using Command = std::variant<Sit, Stand, Walk>;

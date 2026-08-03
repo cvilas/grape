@@ -2,12 +2,37 @@
 // Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
-#include "advanced_example.h"
-
+#include <cstdint>
 #include <print>
 
+#include "grape/serdes/serdes.h"
 #include "grape/serdes/stream.h"
 #include "grape/wall_clock.h"
+
+namespace {
+//-------------------------------------------------------------------------------------------------
+struct Position {
+  double x{};
+  double y{};
+  double z{};
+};
+
+//-------------------------------------------------------------------------------------------------
+struct Quaternion {
+  double x{};
+  double y{};
+  double z{};
+  double w{};
+};
+
+//-------------------------------------------------------------------------------------------------
+struct PoseStamped {
+  grape::WallClock::TimePoint timestamp;
+  Position position{};
+  Quaternion orientation{};
+};
+
+}  // namespace
 
 //=================================================================================================
 /// Demonstrates serialisation of a complex data structure
@@ -23,7 +48,7 @@ auto main(int argc, const char* argv[]) -> int {
 
   try {
     const auto pose = PoseStamped{
-      .nanoseconds = grape::WallClock::toNanos(grape::WallClock::now()),
+      .timestamp = grape::WallClock::now(),
       .position = { .x = 0.01, .y = 2.0, .z = 10.0 },
       .orientation = { .x = 0.01, .y = 0.03, .z = 0.1, .w = 1 },
     };
@@ -47,16 +72,15 @@ auto main(int argc, const char* argv[]) -> int {
     }
 
     // compare
-    std::println("Original pose: timestamp={}, position=[{}, {}, {}], orientation=[{}, {}, {}, {}]",
-                 grape::WallClock::fromNanos(pose.nanoseconds), pose.position.x, pose.position.y,
-                 pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z,
-                 pose.orientation.w);
+    std::println(
+        "Original pose: timestamp=[{}], position=[{}, {}, {}], orientation=[{}, {}, {}, {}]",
+        pose.timestamp, pose.position.x, pose.position.y, pose.position.z, pose.orientation.x,
+        pose.orientation.y, pose.orientation.z, pose.orientation.w);
 
     std::println(
-        "Recovered pose: timestamp={}, position=[{}, {}, {}], orientation=[{}, {}, {}, {}]",
-        grape::WallClock::fromNanos(pose.nanoseconds), pose2.position.x, pose2.position.y,
-        pose2.position.z, pose2.orientation.x, pose2.orientation.y, pose2.orientation.z,
-        pose2.orientation.w);
+        "Recovered pose: timestamp=[{}], position=[{}, {}, {}], orientation=[{}, {}, {}, {}]",
+        pose2.timestamp, pose2.position.x, pose2.position.y, pose2.position.z, pose2.orientation.x,
+        pose2.orientation.y, pose2.orientation.z, pose2.orientation.w);
 
     return EXIT_SUCCESS;
   } catch (const std::exception& ex) {

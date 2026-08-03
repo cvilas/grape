@@ -111,42 +111,6 @@ void bmMsgpackDeserialize(benchmark::State& state) {
 }
 
 //-------------------------------------------------------------------------------------------------
-template <grape::serdes::WritableStream Stream>
-[[nodiscard]] auto serialize(grape::serdes::Serialiser<Stream>& ser, const Person& p) -> bool {
-  if (not ser.pack(p.name)) {
-    return false;
-  }
-  if (not ser.pack(p.id)) {
-    return false;
-  }
-  if (not ser.pack(p.email)) {
-    return false;
-  }
-  if (not ser.pack(p.scores)) {
-    return false;
-  }
-  return true;
-}
-
-//-------------------------------------------------------------------------------------------------
-template <grape::serdes::ReadableStream Stream>
-[[nodiscard]] auto deserialize(grape::serdes::Deserialiser<Stream>& des, Person& p) -> bool {
-  if (not des.unpack(p.name)) {
-    return false;
-  }
-  if (not des.unpack(p.id)) {
-    return false;
-  }
-  if (not des.unpack(p.email)) {
-    return false;
-  }
-  if (not des.unpack(p.scores)) {
-    return false;
-  }
-  return true;
-}
-
-//-------------------------------------------------------------------------------------------------
 void bmGrapeSerialize(benchmark::State& state) {
   const auto p = generatePerson();
   auto buf = grape::serdes::OutStream<BUFFER_INIT_SIZE>();
@@ -154,7 +118,7 @@ void bmGrapeSerialize(benchmark::State& state) {
   for (auto s : state) {
     (void)s;
     auto serializer = grape::serdes::Serialiser(buf);
-    if (not serialize(serializer, p)) {
+    if (not serializer.pack(p)) {
       throw std::runtime_error("Serialisation error");
     }
 
@@ -170,7 +134,7 @@ void bmGrapeDeserialize(benchmark::State& state) {
 
   auto obuf = grape::serdes::OutStream<BUFFER_INIT_SIZE>();
   auto serializer = grape::serdes::Serialiser(obuf);
-  if (not serialize(serializer, p)) {
+  if (not serializer.pack(p)) {
     throw std::runtime_error("Serialisation error");
   }
 
@@ -179,7 +143,7 @@ void bmGrapeDeserialize(benchmark::State& state) {
     auto ibuf = grape::serdes::InStream({ obuf.data(), obuf.size() });
     auto deserializer = grape::serdes::Deserialiser(ibuf);
     Person deserialized_person;
-    if (not deserialize(deserializer, deserialized_person)) {
+    if (not deserializer.unpack(deserialized_person)) {
       throw std::runtime_error("Deserialisation error");
     }
   }

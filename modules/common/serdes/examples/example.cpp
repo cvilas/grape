@@ -61,16 +61,6 @@ using InStream = grape::serdes::InStream;
 using Serialiser = grape::serdes::Serialiser<OutStream>;
 using Deserialiser = grape::serdes::Deserialiser<InStream>;
 
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto serialise(Serialiser& ser, const State& st) -> bool {
-  return ser.pack(st.name) and ser.pack(st.timestamp) and ser.pack(st.position);
-}
-
-//-------------------------------------------------------------------------------------------------
-[[nodiscard]] auto deserialise(Deserialiser& des, State& st) -> bool {
-  return des.unpack(st.name) and des.unpack(st.timestamp) and des.unpack(st.position);
-}
-
 }  // namespace
 
 //=================================================================================================

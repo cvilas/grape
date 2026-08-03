@@ -18,7 +18,7 @@ using Serialiser = grape::serdes::Serialiser<OutStream>;
 using Deserialiser = grape::serdes::Deserialiser<InStream>;
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Serialize arithmetic types", "[serdes]") {
+TEST_CASE("Serialise arithmetic types", "[serdes]") {
   auto ostream = OutStream();
   auto ser = Serialiser(ostream);
 
@@ -57,7 +57,7 @@ TEST_CASE("Serialize arithmetic types", "[serdes]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Serialize string", "[serdes]") {
+TEST_CASE("Serialise string", "[serdes]") {
   auto ostream = OutStream();
   auto ser = Serialiser(ostream);
 
@@ -73,7 +73,7 @@ TEST_CASE("Serialize string", "[serdes]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Serialize vector", "[serdes]") {
+TEST_CASE("Serialise vector", "[serdes]") {
   auto ostream = OutStream();
   auto ser = Serialiser(ostream);
 
@@ -90,7 +90,7 @@ TEST_CASE("Serialize vector", "[serdes]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Serialize array", "[serdes]") {
+TEST_CASE("Serialise array", "[serdes]") {
   auto ostream = OutStream();
   auto ser = Serialiser(ostream);
 
@@ -107,7 +107,7 @@ TEST_CASE("Serialize array", "[serdes]") {
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Serialize variant", "[serdes]") {
+TEST_CASE("Serialise variant", "[serdes]") {
   using Var = std::variant<int, float, std::string>;
 
   auto ostream = OutStream();
@@ -148,22 +148,56 @@ TEST_CASE("Serialize variant", "[serdes]") {
 }
 
 //-------------------------------------------------------------------------------------------------
+TEST_CASE("Serialise chrono time_point", "[serdes]") {
+  using TimePoint = std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>;
+
+  auto ostream = OutStream();
+  auto ser = Serialiser(ostream);
+
+  const auto t1 = TimePoint{ std::chrono::nanoseconds{ 123456789 } };
+  REQUIRE(ser.pack(t1));
+
+  auto istream = InStream(ostream.data());
+  auto des = Deserialiser(istream);
+
+  auto t2 = TimePoint{};
+  REQUIRE(des.unpack(t2));
+  REQUIRE(t2 == t1);
+}
+
+//-------------------------------------------------------------------------------------------------
+enum class MotorMode : std::uint8_t {
+  Idle = 0,
+  Position = 1,
+  Velocity = 2,
+};
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Serialise enum", "[serdes]") {
+  auto ostream = OutStream();
+  auto ser = Serialiser(ostream);
+
+  constexpr auto MODE1 = MotorMode::Velocity;
+  REQUIRE(ser.pack(MODE1));
+  REQUIRE(ostream.size() == sizeof(std::underlying_type_t<MotorMode>));
+
+  auto istream = InStream(ostream.data());
+  auto des = Deserialiser(istream);
+
+  auto mode2 = MotorMode::Idle;
+  REQUIRE(des.unpack(mode2));
+  REQUIRE(mode2 == MODE1);
+}
+
+//-------------------------------------------------------------------------------------------------
 struct Point {
   int x{ 0 };
   int y{ 0 };
   auto operator==(const Point&) const -> bool = default;
 };
 
-[[nodiscard]] auto serialise(Serialiser& ser, const Point& pt) -> bool {
-  return ser.pack(pt.x) && ser.pack(pt.y);
-}
-
-[[nodiscard]] auto deserialise(Deserialiser& des, Point& pt) -> bool {
-  return des.unpack(pt.x) && des.unpack(pt.y);
-}
-
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Serialize custom data structure", "[serdes]") {
+TEST_CASE("Serialise custom data structure", "[serdes]") {
   auto ostream = OutStream();
   auto ser = Serialiser(ostream);
 
