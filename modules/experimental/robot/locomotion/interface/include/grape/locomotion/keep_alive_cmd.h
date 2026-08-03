@@ -6,8 +6,6 @@
 
 #include <string>
 
-#include "grape/serdes/serdes.h"
-
 namespace grape::locomotion {
 
 //=================================================================================================
@@ -23,17 +21,4 @@ struct KeepAliveCmd {};
   return "KeepAliveCmd{}";
 }
 
-//-------------------------------------------------------------------------------------------------
-template <serdes::WritableStream S>
-[[nodiscard]] auto serialise(serdes::Serialiser<S>& ser, const KeepAliveCmd& data) -> bool {
-  return ser.pack(sizeof(data));
-}
-
-//-------------------------------------------------------------------------------------------------
-template <serdes::ReadableStream S>
-[[nodiscard]] auto deserialise(serdes::Deserialiser<S>& des, KeepAliveCmd& data) -> bool {
-  (void)data;
-  auto sz = std::size_t{};
-  return des.unpack(sz);
-}
 }  // namespace grape::locomotion

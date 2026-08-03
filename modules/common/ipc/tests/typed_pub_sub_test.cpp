@@ -30,16 +30,6 @@ struct TestTopicAttributes {
   }
 };
 
-template <grape::serdes::WritableStream Stream>
-auto serialise(grape::serdes::Serialiser<Stream>& ser, const TestDataType& st) -> bool {
-  return ser.pack(st.id) and ser.pack(st.message);
-}
-
-template <grape::serdes::ReadableStream Stream>
-[[nodiscard]] auto deserialise(grape::serdes::Deserialiser<Stream>& des, TestDataType& st) -> bool {
-  return des.unpack(st.id) and des.unpack(st.message);
-}
-
 }  // namespace
 
 //=================================================================================================
