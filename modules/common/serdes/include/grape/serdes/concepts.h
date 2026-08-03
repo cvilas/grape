@@ -26,24 +26,6 @@ concept ReadableStream = requires(Stream strm, std::span<std::byte> data) {
   /* Reads 'data' from stream 's'. Return false on failure  */
 };
 
-template <WritableStream Stream>
-class Serialiser;
-
-template <ReadableStream Stream>
-class Deserialiser;
-
-//-------------------------------------------------------------------------------------------------
-// Concepts for serialization requirements
-template <typename T, typename Stream>
-concept Serialisable = WritableStream<Stream> && requires(Serialiser<Stream>& ser, const T& value) {
-  { serialise(ser, value) } -> std::same_as<bool>;
-};
-
-template <typename T, typename Stream>
-concept Deserialisable = ReadableStream<Stream> && requires(Deserialiser<Stream>& des, T& value) {
-  { deserialise(des, value) } -> std::same_as<bool>;
-};
-
 //-------------------------------------------------------------------------------------------------
 // Concept for arithmetic data types, including bool and char
 template <typename T>

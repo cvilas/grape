@@ -5,13 +5,42 @@
 #pragma once
 
 #include <array>
+#include <chrono>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include "grape/serdes/concepts.h"
 
 namespace grape::serdes {
+
+namespace detail {
+
+/// Concept defines aggregate types on which variadic structured bindings can be applied
+template <typename T>
+concept SerializableAggregate = std::is_aggregate_v<std::remove_cvref_t<T>> && requires(T&& value) {
+  []<typename U>(U & obj) constexpr {
+    auto&& [... fields] = obj;
+    ((void)fields, ...);
+  }(std::forward<T>(value));
+};
+
+/// Processes members of an aggregate type T field-by-field using fn
+template <SerializableAggregate T>
+[[nodiscard]] constexpr auto processMembers(T&& value, auto&& fn) -> bool {
+  auto process = std::forward<decltype(fn)>(fn);
+  return [&process]<typename U>(U& obj) constexpr -> bool {
+    auto&& [... fields] = obj;
+    auto ok = true;
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    ((ok = ok && process(fields)), ...);
+    return ok;
+  }(std::forward<T>(value));
+}
+
+}  // namespace detail
 
 //=================================================================================================
 /// @brief Simple serialiser that just packs bytes into a stream buffer
@@ -22,7 +51,6 @@ public:
   /// Initialise with a stream buffer
   /// @param stream The output stream buffer to encode data into
   explicit constexpr Serialiser(Stream& stream) : stream_(stream) {
-    stream_.reset();
   }
 
   [[nodiscard]] constexpr auto pack(const std::string& value) -> bool {
@@ -32,6 +60,23 @@ public:
   template <arithmetic T>
   [[nodiscard]] constexpr auto pack(const T& value) -> bool {
     return pack(std::span<const T>{ &value, 1U });
+  }
+
+  template <typename T>
+    requires std::is_enum_v<T>
+  [[nodiscard]] constexpr auto pack(const T& value) -> bool {
+    using Underlying = std::underlying_type_t<T>;
+    return this->pack(static_cast<Underlying>(value));
+  }
+
+  template <typename Rep, typename Period>
+  [[nodiscard]] constexpr auto pack(const std::chrono::duration<Rep, Period>& value) -> bool {
+    return this->pack(value.count());
+  }
+
+  template <typename Clock, typename Duration>
+  [[nodiscard]] constexpr auto pack(const std::chrono::time_point<Clock, Duration>& value) -> bool {
+    return this->pack(value.time_since_epoch());
   }
 
   template <arithmetic T>
@@ -52,14 +97,10 @@ public:
     return std::visit([this](const auto& val) { return this->pack(val); }, value);
   }
 
-  /// Serialises user-defined types using a user-defined free function
-  /// @tparam T Type to serialise
-  /// @param value Value to serialise
-  /// @return True if serialisation was successful, false otherwise
   template <typename T>
-    requires Serialisable<T, Stream>
+    requires detail::SerializableAggregate<const T&>
   [[nodiscard]] constexpr auto pack(const T& value) -> bool {
-    return serialise(*this, value);  // call user-defined function
+    return detail::processMembers(value, [this](const auto& field) { return this->pack(field); });
   }
 
 private:
@@ -112,6 +153,38 @@ public:
     return unpack(std::span<T>{ &value, 1U });
   }
 
+  template <typename T>
+    requires std::is_enum_v<T>
+  [[nodiscard]] constexpr auto unpack(T& value) -> bool {
+    using Underlying = std::underlying_type_t<T>;
+    auto raw = Underlying{};
+    if (not this->unpack(raw)) {
+      return false;
+    }
+    value = static_cast<T>(raw);
+    return true;
+  }
+
+  template <typename Rep, typename Period>
+  [[nodiscard]] constexpr auto unpack(std::chrono::duration<Rep, Period>& value) -> bool {
+    auto raw = Rep{};
+    if (not this->unpack(raw)) {
+      return false;
+    }
+    value = std::chrono::duration<Rep, Period>{ raw };
+    return true;
+  }
+
+  template <typename Clock, typename Duration>
+  [[nodiscard]] constexpr auto unpack(std::chrono::time_point<Clock, Duration>& value) -> bool {
+    auto duration = Duration{};
+    if (not this->unpack(duration)) {
+      return false;
+    }
+    value = std::chrono::time_point<Clock, Duration>{ duration };
+    return true;
+  }
+
   template <arithmetic T>
   [[nodiscard]] constexpr auto unpack(std::vector<T>& data) -> bool {
     std::size_t sz{};
@@ -146,27 +219,20 @@ public:
     using UnpackFn = bool (*)(Deserialiser*, VariantType*);
 
     // create function pointer array for O(1) dispatch
-    static constexpr auto DISPATCH_TABLE = []() constexpr {
-      std::array<UnpackFn, sizeof...(Types)> table{};
-
-      [&table]<std::size_t... Is>(std::index_sequence<Is...>) constexpr {
-        auto make_unpacker = []<std::size_t I>() constexpr -> UnpackFn {
-          return [](Deserialiser* self, VariantType* var) -> bool {
-            using T = std::variant_alternative_t<I, VariantType>;
-            T val{};
-            if (self->unpack(val)) {
-              *var = std::move(val);
-              return true;
-            }
-            return false;
-          };
-        };
-
-        ((table.at(Is) = make_unpacker.template operator()<Is>()), ...);
-      }(std::make_index_sequence<sizeof...(Types)>{});
-
-      return std::move(table);
-    }();
+    static constexpr auto DISPATCH_TABLE =
+        []<std::size_t... Is>(std::index_sequence<Is...>) constexpr {
+          return std::array<UnpackFn, sizeof...(Types)>{ []<std::size_t I>() constexpr -> UnpackFn {
+            return [](Deserialiser* self, VariantType* var) -> bool {
+              using T = std::variant_alternative_t<I, VariantType>;
+              T val{};
+              if (self->unpack(val)) {
+                *var = std::move(val);
+                return true;
+              }
+              return false;
+            };
+          }.template operator()<Is>()... };
+        }(std::make_index_sequence<sizeof...(Types)>{});
 
     // unpack the type at index idx in the variant
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
@@ -178,14 +244,10 @@ public:
     return true;
   }
 
-  /// Unpacks user-defined types using a user-defined free function
-  /// @tparam T Type to unpack
-  /// @param value Value to unpack into
-  /// @return True if unpacking was successful, false otherwise
   template <typename T>
-    requires Deserialisable<T, Stream>
+    requires detail::SerializableAggregate<T&>
   [[nodiscard]] constexpr auto unpack(T& value) -> bool {
-    return deserialise(*this, value);  // call user-defined function
+    return detail::processMembers(value, [this](auto& field) { return this->unpack(field); });
   }
 
 private:

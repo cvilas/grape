@@ -8,6 +8,8 @@
 #include <array>
 #include <span>
 
+#include "grape/serdes/concepts.h"
+
 namespace grape::serdes {
 
 //=================================================================================================
@@ -108,5 +110,8 @@ private:
   std::size_t offset_{ 0 };
   std::span<const std::byte> stream_;
 };
+
+static_assert(WritableStream<OutStream<1>>);
+static_assert(ReadableStream<InStream>);
 
 }  // namespace grape::serdes

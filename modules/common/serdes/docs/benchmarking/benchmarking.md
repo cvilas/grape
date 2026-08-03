@@ -3,19 +3,16 @@
 For POD types and data structures based on them, the following may be the simplest way to serialise and deserialise; just remap the data as a stream of characters:
 
 ```c++
-struct MyCustomObject{/* fields */};
+struct MyCustomObject {/* fields */};
 
-template<Stream S, DataType T>
-void serialise(S& io, const T& obj) {
-  io.write(reinterpret_cast<char* const>(&obj), sizeof(T));
-}
+auto out = grape::serdes::OutStream<256>{};
+auto ser = grape::serdes::Serialiser(out);
+ser.pack(MyCustomObject{});
 
-template<Stream S, DataType T>
-auto deserialise(S& io) -> T {
-  T obj;
-  io.read(reinterpret_cast<char*>(&obj), sizeof(T));
-  return obj;
-}
+auto in = grape::serdes::InStream(out.data());
+auto des = grape::serdes::Deserialiser(in);
+auto obj = MyCustomObject{};
+des.unpack(obj);
 ```
 
 This is not portable across architectures and compilers due to potential differences in memory alignment (padding), endianness, etc. It is also not suitable for complex structures containing pointers or dynamic memory (eg: `std::vector`). Therefore, we want a scheme built on top of a _specification_ defining rules for encoding and decoding data-types. Interoperability is a side-effect of such specification; if it is simple and well documented, its easy to implement encoders and decoders in any programming language.
