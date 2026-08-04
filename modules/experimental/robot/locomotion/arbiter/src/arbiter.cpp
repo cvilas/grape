@@ -102,7 +102,7 @@ void Arbiter::watchdogLoop(const std::stop_token& stop_token) {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Arbiter::publishStatus() const {
+void Arbiter::publishStatus() {
   const auto avg_latency = std::chrono::duration_cast<WallClock::Duration>(
       std::chrono::duration<float>(cmd_latency_.load()));
   const auto status = ArbiterStatus{

@@ -45,5 +45,6 @@ uv pip install <install_location>/share/grape/py/wheels/grape_ipc_py-*.whl
 
 ## Roadmap
 
+- [ ] In `Subscriber<T>`, validate topic data types match before asserting match callback and before deserialisation in data callback
 - [ ] Implement means to isolate groups of nodes. See [this discussion](https://github.com/eclipse-ecal/ecal/discussions/2093) 
 - [ ] Support specifying encoding information via `RawPublisher` and `RawSubscriber` interfaces

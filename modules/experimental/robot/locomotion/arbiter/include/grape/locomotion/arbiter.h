@@ -61,7 +61,7 @@ private:
 
   void onAlternate(const std::expected<AlternateCommandTopic::DataType, ipc::Error>& cmd,
                    const ipc::SampleInfo& info);
-  void publishStatus() const;
+  void publishStatus();
   void watchdogLoop(const std::stop_token& stop_token);
 
   static_assert(std::atomic<WallClock::TimePoint>::is_always_lock_free);
