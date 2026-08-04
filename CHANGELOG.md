@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/cvilas/grape/compare/v0.2.0...v0.3.0) (2026-08-04)
+
+
+### Features
+
+* Introduces automatic serialisation and deserialisation ([f89b503](https://github.com/cvilas/grape/commit/f89b5037cc9562a731400358f4c10a7016e12701))
+* Updates ftxui ([8f1e0fe](https://github.com/cvilas/grape/commit/8f1e0fe1040fb7b23de2e7e23d2f15dedc8221e8))
+* Updates SDL ([992bbfe](https://github.com/cvilas/grape/commit/992bbfe8f6492d9b95b355689e60c981e078771a))
+
+
+### Bug Fixes
+
+* Adds to flag to programmatically indicate independent modules ([263a2a2](https://github.com/cvilas/grape/commit/263a2a27a6d64de10f9d0a34b6cfd3fc9ca9bfee))
+* **ipc:** Creates serialiser once in publisher ([1e3cf2a](https://github.com/cvilas/grape/commit/1e3cf2a7abaf99203718f7beb6c2d0919955581d))
+* Removes manual serdes across the board ([6325ab4](https://github.com/cvilas/grape/commit/6325ab42dcf1fe4685c6d355125a9f2bf47d057c))
+
 ## [0.2.0](https://github.com/cvilas/grape/compare/v0.1.19...v0.2.0) (2026-08-01)
 
 
