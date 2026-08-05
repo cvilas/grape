@@ -27,9 +27,9 @@ concept ReadableStream = requires(Stream strm, std::span<std::byte> data) {
 };
 
 //-------------------------------------------------------------------------------------------------
-// Concept for arithmetic data types, including bool and char
+// Concept for primitive value types (integer, float, char, bool)
 template <typename T>
-concept arithmetic = std::integral<T> || std::floating_point<T>;
+concept PrimitiveValueType = std::integral<T> || std::floating_point<T>;
 
 // Some preconditions for interoperability
 static_assert(sizeof(float) == 4);
