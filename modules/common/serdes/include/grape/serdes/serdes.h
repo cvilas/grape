@@ -57,7 +57,7 @@ public:
     return packWithSize(std::span<const char>{ value.c_str(), value.size() });
   }
 
-  template <arithmetic T>
+  template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto pack(const T& value) -> bool {
     return pack(std::span<const T>{ &value, 1U });
   }
@@ -79,12 +79,12 @@ public:
     return this->pack(value.time_since_epoch());
   }
 
-  template <arithmetic T>
+  template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto pack(const std::vector<T>& data) -> bool {
     return packWithSize(std::span<const T>{ data.data(), data.size() });
   }
 
-  template <arithmetic T, std::size_t N>
+  template <PrimitiveValueType T, std::size_t N>
   [[nodiscard]] constexpr auto pack(const std::array<T, N>& data) -> bool {
     return pack(std::span<const T>{ data.data(), data.size() });
   }
@@ -104,7 +104,7 @@ public:
   }
 
 private:
-  template <arithmetic T>
+  template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto packWithSize(std::span<const T> data) -> bool {
     if (not pack(data.size())) {
       return false;
@@ -116,7 +116,7 @@ private:
     return true;
   }
 
-  template <arithmetic T>
+  template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto pack(std::span<const T> data) -> bool {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     return stream_.write({ reinterpret_cast<const std::byte*>(data.data()), data.size_bytes() });
@@ -148,7 +148,7 @@ public:
     return true;
   }
 
-  template <arithmetic T>
+  template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto unpack(T& value) -> bool {
     return unpack(std::span<T>{ &value, 1U });
   }
@@ -185,7 +185,7 @@ public:
     return true;
   }
 
-  template <arithmetic T>
+  template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto unpack(std::vector<T>& data) -> bool {
     std::size_t sz{};
     if (not unpack(sz)) {
@@ -199,7 +199,7 @@ public:
     return true;
   }
 
-  template <arithmetic T, std::size_t N>
+  template <PrimitiveValueType T, std::size_t N>
   [[nodiscard]] constexpr auto unpack(std::array<T, N>& data) -> bool {
     return unpack(std::span<T>{ data.data(), data.size() });
   }
@@ -251,7 +251,7 @@ public:
   }
 
 private:
-  template <arithmetic T>
+  template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto unpack(std::span<T> data) -> bool {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     return stream_.read({ reinterpret_cast<std::byte*>(data.data()), data.size_bytes() });

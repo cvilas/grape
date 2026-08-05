@@ -39,9 +39,14 @@ Serialisation and deserialisation facility for structured data
 
 A few third party libraries were considered initially. [Benchmarking](./docs/benchmarking/benchmarking.md) showed that nothing beats a simple data packing/unpacking scheme. So, that's what is implemented. Additionally, the first-principles approach meant that every single requirement stated previously could be met.
 
-## TODO
+## Roadmap
 
-- [ ] Extend support for `std::vector`/`std::array` beyond arithmetic types
-- [ ] Catch type errors in deserialisation
-  - [ ] Enum values out of range 
-  - [ ] Deserialisation into wrong/incompatible type
+### Implement robust type checking at deserialisation
+
+The following are not checked
+- Enum values out of range 
+- Deserialisation into wrong/incompatible type
+
+A simple type checking mechanism could be a GUID prefix in the serdes stream that uniquely 
+identifies an aggregate type. The GUID should be computable at compile time at both serialisation
+and deserialisation endpoints independently to avoid runtime overheads.   
