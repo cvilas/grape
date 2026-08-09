@@ -35,7 +35,7 @@ Versioning follows [Semantic Versioning](https://semver.org) driven by
 - On each merge to `main`, `release-please.yml` opens or updates a Release PR that contains the computed next version and a generated `CHANGELOG.md` entry.
 - Merging the Release PR creates the `vX.Y.Z` git tag and a GitHub Release.
 
-The `CHANGELOG.md` and the release-please manifest under [.github/release-please](../release-please) are maintained automatically by release-please — do not edit them by hand.
+The `CHANGELOG.md` and the release-please files under [.github/release-please](../release-please) are used by the release automation. The manifest is maintained automatically by release-please — do not edit it by hand.
 
 ## TODO
 
