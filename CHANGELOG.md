@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/cvilas/grape/compare/v0.3.0...v0.4.0) (2026-08-09)
+
+
+### Features
+
+* **external:** Updates nanobind and ftxui ([51165e9](https://github.com/cvilas/grape/commit/51165e9f5d8681114c4d69ba87b359c0b3df4510))
+
+
+### Bug Fixes
+
+* **ci:** move release-please metadata out of workflows ([15166fb](https://github.com/cvilas/grape/commit/15166fbc1ec9a8fe563cc6ee1d71ce7a17315166))
+* **serdes:** Renames a concept to clarify its scope ([02f0cb0](https://github.com/cvilas/grape/commit/02f0cb0286fb4b8eed202a94172d4c9eb0f8c05b))
+
 ## [0.3.0](https://github.com/cvilas/grape/compare/v0.2.0...v0.3.0) (2026-08-04)
 
 
