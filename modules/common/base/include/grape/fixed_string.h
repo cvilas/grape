@@ -40,6 +40,9 @@ public:
     data_.at(length) = '\0';
   }
 
+  constexpr explicit BasicFixedString(std::nullptr_t) =
+      delete ("Construction from nullptr is not allowed");
+
   constexpr explicit BasicFixedString(std::basic_string_view<CharT, Traits> sv) {
     const auto length = std::min(sv.size(), N - 1);
     std::copy_n(sv.begin(), length, data_.data());
