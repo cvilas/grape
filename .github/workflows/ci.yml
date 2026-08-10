@@ -107,14 +107,14 @@ jobs:
       - name: Configure (llvm)
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            "${CMAKE_BIN}" --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
+            ${CMAKE_BIN} --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
           else
-            "${CMAKE_BIN}" --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES=all
+            ${CMAKE_BIN} --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES=all
           fi
       
       - name: Check formatting
         run: |
-          "${CMAKE_BIN}" --build build/llvm --target format
+          ${CMAKE_BIN} --build build/llvm --target format
           if ! git diff --exit-code --quiet; then
             echo "::error::Following files are incorrectly formatted"
             git status
