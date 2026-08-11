@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/cvilas/grape/compare/v0.4.0...v0.4.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* **base:** Disallows string construction from nullptr ([495b9c3](https://github.com/cvilas/grape/commit/495b9c31ff1fd96fb702cd4f6851b77248ff787b))
+
 ## [0.4.0](https://github.com/cvilas/grape/compare/v0.3.0...v0.4.0) (2026-08-09)
 
 * **external:** Updates nanobind and ftxui ([51165e9](https://github.com/cvilas/grape/commit/51165e9f5d8681114c4d69ba87b359c0b3df4510))
