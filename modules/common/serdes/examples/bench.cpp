@@ -43,16 +43,16 @@ using Deserialiser = grape::serdes::Deserialiser<InStream>;
 void bmSerialize(benchmark::State& state) {
   const auto pos = PoseStamped();
   auto buf = OutStream();
+  auto serializer = Serialiser(buf);
 
   for (auto st : state) {
     (void)st;
     buf.reset();
-    auto serializer = Serialiser(buf);
     if (not serializer.pack(pos)) {
       throw std::runtime_error("Serialisation error");
     }
 
-    benchmark::DoNotOptimize(buf.data());
+    benchmark::DoNotOptimize(buf);
     benchmark::ClobberMemory();
   }
 }
@@ -66,11 +66,11 @@ void bmDeserialize(benchmark::State& state) {
     throw std::runtime_error("Serialisation error");
   }
 
+  PoseStamped deserialized_pose;
   for (auto st : state) {
     (void)st;
     auto ibuf = InStream(obuf.data());
     auto deserializer = Deserialiser(ibuf);
-    PoseStamped deserialized_pose;
     if (not deserializer.unpack(deserialized_pose)) {
       throw std::runtime_error("Deserialisation error");
     }

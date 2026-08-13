@@ -27,7 +27,7 @@ public:
       return false;
     }
     auto to = std::span{ buf_ }.subspan(offset_, len);
-    std::copy(data.begin(), data.end(), to.begin());
+    std::ranges::copy(data, to.begin());
     offset_ += len;
     return true;
   }
