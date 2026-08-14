@@ -310,7 +310,7 @@ function(define_module_library)
 
   # sometimes libraries have no cpp files. So this is needed
   set_target_properties(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-  set_target_properties(${LIBRARY_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+  set_target_properties(${LIBRARY_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 
 endfunction()
 
@@ -447,7 +447,7 @@ function(define_module_app)
   # Set rpath for installed executables, but not for statically linked ones (which will fail)
   get_target_property(${TARGET_NAME}_link_libs ${TARGET_NAME} LINK_LIBRARIES)
   if(NOT ${TARGET_NAME}_link_libs MATCHES "-static")
-    set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN:$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
   endif()
 
 endfunction()
