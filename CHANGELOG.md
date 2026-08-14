@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.2](https://github.com/cvilas/grape/compare/v0.4.1...v0.4.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* **build:** Simplifies nanobind integration ([7c6ca55](https://github.com/cvilas/grape/commit/7c6ca55f2ead72a259b59dd40c71f359a6e08aeb))
+* **joystick:** Passes a POD type as a copy not a reference ([dba5b95](https://github.com/cvilas/grape/commit/dba5b95a8fd11e70a89b2d831992b84b7fdca2c1))
+* **probe:** Simplifies an accumulation loop ([b058942](https://github.com/cvilas/grape/commit/b058942fa5da826cf741f29e5e0c6f1715dd2961))
+* **serdes:** Improves benchmarking ([cbae3aa](https://github.com/cvilas/grape/commit/cbae3aa1452bf8a5ced7a9cbfe6ae16e3b87b792))
+
 ## [0.4.1](https://github.com/cvilas/grape/compare/v0.4.0...v0.4.1) (2026-08-11)
 
 
