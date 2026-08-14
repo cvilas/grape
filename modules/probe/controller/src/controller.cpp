@@ -8,7 +8,6 @@
 #include <bit>       // for bit_cast
 #include <cstring>   // std::memcpy
 #include <iterator>  // for begin, distance, end
-#include <numeric>   // std::accumulate
 #include <string>    // for basic_string
 #include <utility>   // for move
 
@@ -21,10 +20,11 @@ using Signal = grape::probe::Signal;
 //-------------------------------------------------------------------------------------------------
 /// Calculates memory size required to capture a snapshot frame
 auto calcSnapFrameSize(std::span<const Signal> signals) -> std::size_t {
-  return std::accumulate(std::begin(signals), std::end(signals), std::size_t{ 0U },
-                         [](const std::uint32_t& acc, const Signal& sig) -> std::size_t {
-                           return acc + (length(sig.type) * sig.num_elements);
-                         });
+  std::size_t total = 0;
+  for (const auto& sig : signals) {
+    total += length(sig.type) * sig.num_elements;
+  }
+  return total;
 }
 
 //-------------------------------------------------------------------------------------------------
