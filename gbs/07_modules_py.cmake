@@ -81,19 +81,8 @@ function(define_module_pybinding)
   set(PY_MODULE_NAME ${ARG_NAME})
 
   # Build python extension module and link to libraries from the enclosing module
-  nanobind_add_module(${PY_MODULE_NAME} ${ARG_SOURCES})
-
-  # treat as third-party: suppress linter and compiler warnings, mark headers as system includes.
-  # Guard with a one-shot flag so multiple bindings in the same module don't clobber the
-  # INTERFACE_INCLUDE_DIRECTORIES that were just restored.
-  if(TARGET nanobind-static AND NOT _GBS_NANOBIND_CONFIGURED)
-    set_target_properties(nanobind-static PROPERTIES CXX_CLANG_TIDY "")
-    target_compile_options(nanobind-static PRIVATE -w) # -w after all dir-scope flags to override them
-    get_target_property(_nanobind_include_dirs nanobind-static INTERFACE_INCLUDE_DIRECTORIES)
-    set_target_properties(nanobind-static PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
-    target_include_directories(nanobind-static SYSTEM INTERFACE ${_nanobind_include_dirs})
-    set(_GBS_NANOBIND_CONFIGURED TRUE CACHE INTERNAL "")
-  endif()
+  nanobind_add_module(${PY_MODULE_NAME} NB_SUPPRESS_WARNINGS ${ARG_SOURCES})
+  target_compile_options(nanobind-static PRIVATE -w)
 
   target_link_libraries(${PY_MODULE_NAME} PRIVATE ${MODULE_${MODULE_NAME}_LIB_TARGETS}) 
   apply_clang_format(${PY_MODULE_NAME})
