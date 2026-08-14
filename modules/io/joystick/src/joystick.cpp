@@ -61,7 +61,7 @@ template <std::size_t N>
 class BitSet {
 public:
   /// @return true if bit at index is set
-  [[nodiscard]] constexpr auto check(const std::size_t& index) const -> bool {
+  [[nodiscard]] constexpr auto check(std::size_t index) const -> bool {
     const auto byte_idx = index / CHAR_BIT;
     const auto bit_idx = index % CHAR_BIT;
     return ((data_.at(byte_idx) & (1U << bit_idx)) != 0);
