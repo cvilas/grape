@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/cvilas/grape/compare/v0.4.2...v0.5.0) (2026-08-16)
+
+
+### Features
+
+* **external:** Updates nanobind ([156e043](https://github.com/cvilas/grape/commit/156e043894f68d7f66a38629c723e89788761623))
+
 ## [0.4.2](https://github.com/cvilas/grape/compare/v0.4.1...v0.4.2) (2026-08-14)
 
 
