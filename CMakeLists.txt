@@ -13,5 +13,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_UNITY_BUILD ON)
 
 # Integrate the Grape Build System to setup the project
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 include(${CMAKE_SOURCE_DIR}/external/third_party_versions.cmake)
 include(${CMAKE_SOURCE_DIR}/gbs/gbs.cmake)
