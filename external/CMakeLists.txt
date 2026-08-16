@@ -11,6 +11,8 @@
 cmake_minimum_required(VERSION 4.1.1)
 project(grape-external LANGUAGES C CXX)
 
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+
 find_package(Git REQUIRED)
 include(ExternalProject)
 include(${CMAKE_CURRENT_LIST_DIR}/third_party_versions.cmake)
