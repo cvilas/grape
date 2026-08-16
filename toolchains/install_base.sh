@@ -2,10 +2,6 @@
 
 set -e
 
-# Self-hosted runners can retain a stale or malformed Kitware source list from
-# previous runs. Remove it here and let install_cmake.sh recreate it correctly.
-sudo rm -f /etc/apt/sources.list.d/kitware.list
-
 # Install baseline system utilities and development tools
 sudo apt-get update
 sudo apt-get install -y build-essential pkg-config gpg wget ca-certificates \
