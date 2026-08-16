@@ -28,8 +28,43 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
+      tag_name: ${{ steps.release-please.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release-please
         with:
           config-file: .github/release-please/config.json
           manifest-file: .github/release-please/manifest.json
+
+  build-release-tarball:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          lfs: true
+          fetch-depth: 0
+
+      - name: Create source tarball with LFS artifacts
+        run: |
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          TARBALL="grape-${TAG}.tar.gz"
+          git lfs pull
+          tar czf "/tmp/${TARBALL}" \
+            --exclude='.git' \
+            --transform "s|^\.|grape-${TAG}|" \
+            .
+          echo "TARBALL=/tmp/${TARBALL}" >> "$GITHUB_ENV"
+          echo "TARBALL_NAME=${TARBALL}" >> "$GITHUB_ENV"
+
+      - name: Upload tarball to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ needs.release-please.outputs.tag_name }}" \
+            "${TARBALL}" \
+            --repo "${{ github.repository }}"
