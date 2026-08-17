@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/cvilas/grape/compare/v0.5.0...v0.5.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **ci:** Updates cache on merge to main branch ([3aad941](https://github.com/cvilas/grape/commit/3aad941ade044ac7eca3bd0e824b8e06dcc722c2))
+
 ## [0.5.0](https://github.com/cvilas/grape/compare/v0.4.2...v0.5.0) (2026-08-16)
 
 
