@@ -81,20 +81,23 @@ jobs:
           echo "CCACHE_DIR=$HOME/.cache/ccache" >> $GITHUB_ENV
           echo "CTCACHE_DIR=$HOME/.cache/ctcache" >> $GITHUB_ENV
 
-      - name: Cache build artifacts
-        uses: actions/cache@v4
+      # Restore latest cache via prefix match (unique key never hits); refreshed only on merges 
+      # to main/master (see "Save build cache" below).
+      - name: Restore build cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             ${{ env.CCACHE_DIR }}
             ${{ env.CTCACHE_DIR }}
-          key: grape-${{ runner.arch }}-${{ runner.os }}-cache
+          key: grape-${{ runner.arch }}-${{ runner.os }}-cache-${{ github.run_id }}
           restore-keys: |
-            grape-${{ runner.arch }}-${{ runner.os }}-cache
+            grape-${{ runner.arch }}-${{ runner.os }}-cache-
 
       - name: Configure (llvm)
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
+            cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES="" \
+            -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
           else
             cmake --preset llvm -DLINTER_WARNING_IS_ERROR=ON -DBUILD_MODULES=all
           fi
@@ -117,7 +120,8 @@ jobs:
       - name: Configure (gcc)
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF -DBUILD_MODULES="" -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
+            cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF -DBUILD_MODULES="" \
+            -DBUILD_CHANGED_MODULES=${BUILD_CHANGED_MODULES_REF}
           else
             cmake --preset native -DENABLE_FORMATTER=OFF -DENABLE_LINTER=OFF -DBUILD_MODULES=all
           fi
@@ -129,5 +133,15 @@ jobs:
         run: cmake --build build/native --target check --parallel
 
       - name: Report ccache stats
-        run: ccache -s        
+        run: ccache -s
+
+      # Only refresh the cache after a successful merge to main/master, not on every PR build.
+      - name: Save build cache
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ env.CCACHE_DIR }}
+            ${{ env.CTCACHE_DIR }}
+          key: grape-${{ runner.arch }}-${{ runner.os }}-cache-${{ github.run_id }}        
         
