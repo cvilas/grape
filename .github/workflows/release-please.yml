@@ -68,3 +68,17 @@ jobs:
           gh release upload "${{ needs.release-please.outputs.tag_name }}" \
             "${TARBALL}" \
             --repo "${{ github.repository }}"
+
+      - name: Add LFS warning to release notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          EXISTING_BODY="$(gh release view "${TAG}" --repo "${{ github.repository }}" --json body -q '.body')"
+          WARNING="> [!WARNING]
+          > The auto-generated **Source code** archives (zip/tar.gz) at the bottom of this release do **not** include Git LFS files and are incomplete. Use **\`${TARBALL_NAME}\`** attached above instead.
+
+          "
+          gh release edit "${TAG}" \
+            --repo "${{ github.repository }}" \
+            --notes "${WARNING}${EXISTING_BODY}"
