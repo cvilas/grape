@@ -9,14 +9,12 @@
 # - CPPCoreGuidelines
 # - High Integrity C++ coding standard
 #
-# Style rules:
-# - The linter prompts the developer to use Modern C++ features with `modernize-*` checks
-# - Style rules comes from ROS coding style. See corresponding .clang-format file. Identifier 
-#   naming conventions are encoded in this file with `readability-*` rules
-#
 # Additionally, checks are turned on to catch
 # - Use of language features that may be bug-prone
 # - Use of language features that may cause performance issues
+#
+# Style rules: Mostly defined in .clang-format. This file supplements those rules with additional
+# `modernize-*` and `readability-*` checks. 
 
 # Enable rule sets. Some checks are turned off because they are flagged by multiple rule-sets
 Checks: '-*,
