@@ -168,9 +168,24 @@ if(ENABLE_LINTER)
       list(APPEND LINTER_ARGS -warnings-as-errors=*)
     endif()  
     # NOTE: To speed up linting, clang-tidy is invoked via clang-tidy-cache.
-    # (https://github.com/matus-chochlik/ctcache) Cache location is set by environment variable
-    # CTCACHE_DIR
-    set(LINTER_INVOKE_COMMAND ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} -p ${CMAKE_BINARY_DIR} ${LINTER_ARGS})
+    # (https://github.com/matus-chochlik/ctcache)
+    if(NOT DEFINED ENV{CTCACHE_DIR})
+      if(DEFINED ENV{XDG_CACHE_HOME} AND NOT "$ENV{XDG_CACHE_HOME}" STREQUAL "")
+        set(CTCACHE_DIR_DEFAULT "$ENV{XDG_CACHE_HOME}/clang-tidy/${CMAKE_PROJECT_NAME}")
+      elseif(DEFINED ENV{HOME} AND NOT "$ENV{HOME}" STREQUAL "")
+        set(CTCACHE_DIR_DEFAULT "$ENV{HOME}/.cache/clang-tidy/${CMAKE_PROJECT_NAME}")
+      else()
+        set(CTCACHE_DIR_DEFAULT "${CMAKE_SOURCE_DIR}/.cache/clang-tidy")
+      endif()
+    else()
+      set(CTCACHE_DIR_DEFAULT "$ENV{CTCACHE_DIR}")
+    endif()
+    set(LINTER_INVOKE_COMMAND
+      ${CMAKE_COMMAND} -E env
+        "CTCACHE_DIR=${CTCACHE_DIR_DEFAULT}"
+        CTCACHE_STRIP_SRC=1
+        "CTCACHE_STRIP=${CMAKE_SOURCE_DIR}:${CMAKE_BINARY_DIR}"
+        ${GBS_TEMPLATES_DIR}/clang-tidy-cache.py ${LINTER_BIN} -p ${CMAKE_BINARY_DIR} ${LINTER_ARGS})
     set(CMAKE_C_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
     set(CMAKE_CXX_CLANG_TIDY ${LINTER_INVOKE_COMMAND})
   else()
