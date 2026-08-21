@@ -9,7 +9,7 @@ declare_module(
 
 # library sources
 set(SOURCES)
-set(PUBLIC_HEADERS include/grape/linalg/matrix.h)
+set(PUBLIC_HEADERS include/grape/linalg/quaternion.h)
 
 # library target
 define_module_library(
