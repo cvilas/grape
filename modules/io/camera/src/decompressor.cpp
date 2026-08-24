@@ -21,7 +21,7 @@ Decompressor::Decompressor(Callback&& cb) : callback_(std::move(cb)) {
 //-------------------------------------------------------------------------------------------------
 auto Decompressor::decompress(std::span<const std::byte> bytes) -> bool {
   static constexpr auto HDR_SIZE = sizeof(ImageFrame::Header);
-  if (bytes.size_bytes() < HDR_SIZE) {
+  if (bytes.size_bytes() < HDR_SIZE) [[unlikely]] {
     syslog::Error("Input data too small for header");
     return false;
   }
@@ -40,7 +40,7 @@ auto Decompressor::decompress(std::span<const std::byte> bytes) -> bool {
       reinterpret_cast<const char*>(&bytes.at(HDR_SIZE)), reinterpret_cast<char*>(buffer_.data()),
       static_cast<int>(bytes.size_bytes() - HDR_SIZE), static_cast<int>(data_size));
   // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-  if (decompressed_data_size <= 0) {
+  if (decompressed_data_size <= 0) [[unlikely]] {
     syslog::Error("Failed to decompress image data");
     return false;
   }
