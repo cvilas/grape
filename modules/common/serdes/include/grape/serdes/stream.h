@@ -23,7 +23,7 @@ public:
   /// @return true on success. false if buffer doesn't have enough space. Nothing is written if so.
   [[nodiscard]] constexpr auto write(std::span<const std::byte> data) -> bool {
     const auto len = data.size_bytes();
-    if (offset_ + len > MAX_SIZE) {
+    if (offset_ + len > MAX_SIZE) [[unlikely]] {
       return false;
     }
     auto to = std::span{ buf_ }.subspan(offset_, len);
@@ -82,7 +82,7 @@ public:
   /// Nothing is read if so.
   [[nodiscard]] constexpr auto read(std::span<std::byte> to) -> bool {
     const auto len = to.size_bytes();
-    if (offset_ + len > stream_.size()) {
+    if (offset_ + len > stream_.size()) [[unlikely]] {
       return false;
     }
     const auto from = stream_.subspan(offset_, len);
