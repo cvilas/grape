@@ -11,9 +11,6 @@
 cmake_minimum_required(VERSION 4.1.1)
 project(grape-external LANGUAGES C CXX)
 
-set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
-
-find_package(Git REQUIRED)
 include(ExternalProject)
 include(${CMAKE_CURRENT_LIST_DIR}/third_party_versions.cmake)
 
@@ -21,8 +18,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/third_party_versions.cmake)
 # Setup baseline build configuration
 # -------------------------------------------------------------------------------------------------
 set_directory_properties(PROPERTIES EP_UPDATE_DISCONNECTED 1) # skip update step
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/modules/")
 set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 
 # Collect common arguments to configure external projects
 set(EP_CMAKE_EXTRA_ARGS

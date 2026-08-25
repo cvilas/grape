@@ -114,7 +114,6 @@ if(LIST_OF_SANITIZERS)
 endif()
 
 # Set whether to enable inter-procedural optimisation
-set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # Ensure sub-projects respect INTERPROCEDURAL_OPTIMIZATION
 option(ENABLE_IPO "Enable interprocedural optimization" OFF)
 if(ENABLE_IPO)
   include(CheckIPOSupported)
