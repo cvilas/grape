@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0](https://github.com/cvilas/grape/compare/v0.5.1...v0.6.0) (2026-08-25)
+
+
+### Features
+
+* Updates nanobind ([ecd24f4](https://github.com/cvilas/grape/commit/ecd24f4e1e1c318a6237441e83631d1eca9098af))
+
+
+### Performance Improvements
+
+* Annotate a few branches with [[unlikely]] ([f6d02c4](https://github.com/cvilas/grape/commit/f6d02c4601378ca8b793f5c65ab449d04fd9d5eb))
+
 ## [0.5.1](https://github.com/cvilas/grape/compare/v0.5.0...v0.5.1) (2026-08-17)
 
 
