@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/cvilas/grape/compare/v0.6.0...v0.7.0) (2026-08-27)
+
+
+### Features
+
+* Updates Catch2 ([79db5a6](https://github.com/cvilas/grape/commit/79db5a62e8c62abe30f017d470f556a70f6db5d8))
+
 ## [0.6.0](https://github.com/cvilas/grape/compare/v0.5.1...v0.6.0) (2026-08-25)
 
 
