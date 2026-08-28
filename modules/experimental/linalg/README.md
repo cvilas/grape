@@ -6,6 +6,10 @@ A simple linear algebra library for robotic applications
 
 ## Detailed description
 
+- [ ] Implement constexpr matrix and quaternion operations library to support AHRS implementation
+  - [ ] [refx](https://github.com/mosaico-labs/refx)
+  - [ ] [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
+
 - [ ] Matrix classes for robot math
 - [ ] Coordinate frame [awareness](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
 - [ ] linear algebra internal implementation using std::mdspan and c++26 linalg 
