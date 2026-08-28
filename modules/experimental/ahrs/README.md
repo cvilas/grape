@@ -3,9 +3,6 @@
 ## TODO
 
 - [ ] Pick an AHRS algorithm to implement
-  - [ ] Implement constexpr matrix and quaternion operations library to support AHRS implementation
-    - [ ] [refx](https://github.com/mosaico-labs/refx)
-    - [ ] [PoC](https://github.com/cvilas/scratch/blob/master/linalg.cpp)
   - [ ] Implement the algorithm
 - [ ] Visualisation
   - [ ] Raw imu signal plotting
