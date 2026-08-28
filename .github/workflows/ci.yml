@@ -12,6 +12,9 @@ concurrency:
 
 jobs:
   build-and-test:
+    # Skip release-please PRs; source changes were already validated before release,
+    # and the merge-to-main push runs the full CI again.
+    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false # Allow other builds to continue even if one fails
