@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/cvilas/grape/compare/v0.7.0...v0.8.0) (2026-08-29)
+
+
+### Features
+
+* **build:** updates minimum supported cmake version ([ff651ed](https://github.com/cvilas/grape/commit/ff651ed8fc27b9f662eb89a19a2b1cdc6b3ebf8b))
+
+
+### Bug Fixes
+
+* **ci:** linter validates formatting of every commit message, not just PR title ([b5b7b18](https://github.com/cvilas/grape/commit/b5b7b18c3f9e5bf229276fcf76253545056b1214))
+
 ## [0.7.0](https://github.com/cvilas/grape/compare/v0.6.0...v0.7.0) (2026-08-27)
 
 
