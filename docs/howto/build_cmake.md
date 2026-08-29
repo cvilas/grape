@@ -5,7 +5,7 @@ sudo apt install libssl-dev
 
 # Choose verson. Note: Bleeding edge may break third party dependencies (CMake often deprecates
 # features in older versions). Choose wisely
-CMAKE_VERSION=4.1.1
+CMAKE_VERSION=4.3.0
 
 # Download and extract
 wget https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz
