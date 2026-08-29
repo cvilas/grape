@@ -1,4 +1,4 @@
-# Validates that every PR title follows the Conventional Commits specification.
+# Validates that every PR title and commit follows the Conventional Commits specification.
 # This ensures release-please can determine the correct semver bump automatically.
 #
 # Valid prefixes: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
@@ -6,13 +6,14 @@
 #
 # See: https://www.conventionalcommits.org
 
-name: PR Title Lint
+name: PR Semantic Lint
 
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
 
 permissions:
+  contents: read
   pull-requests: read
 
 jobs:
@@ -20,5 +21,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  lint-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: wagoid/commitlint-github-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

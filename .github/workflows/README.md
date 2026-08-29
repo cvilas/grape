@@ -27,7 +27,7 @@ Versioning follows [Semantic Versioning](https://semver.org) driven by
 [Conventional Commits](https://www.conventionalcommits.org) and automated via
 [release-please](https://github.com/googleapis/release-please). How it works:
 
-- Follow the Conventional Commits format (enforced by `pr-title-lint.yml`) everywhere including the merge commit message on `main`:
+- Follow the Conventional Commits format for every commit in the PR (enforced by `commit-lint.yml`):
   - `fix: …` → patch bump (0.1.x → 0.1.x+1)
   - `feat: …` → minor bump (0.x.0 → 0.x+1.0)
   - `feat!: …` or footer `BREAKING CHANGE: …` → major bump (x.0.0 → x+1.0.0)
