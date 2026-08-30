@@ -1,4 +1,4 @@
-# ahrs - Attitude-Heading Reference System using Raspberry Pi5 Sense HAT
+# ahrs - Attitude-Heading Reference System
 
 ## TODO
 
