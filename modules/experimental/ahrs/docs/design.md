@@ -37,6 +37,7 @@
 
 ### Implementation
 
+- Python AHRS toolbox and related math: https://ahrs.readthedocs.io/en/latest/index.html
 - PX4 sources, specifically 
   - `src/modules/ekf2/EKF/ekf.cpp`
   - `src/modules/ekf2/EKF/ekf.h`
@@ -65,4 +66,8 @@
 - control/status files (fault handling)
 - params/common definitions (tuning map)
 
+### Devices
+
+- x-io technologies: [[product](https://x-io.co.uk/x-imu3/)] [[code](https://github.com/xioTechnologies)]
+- sense hat IMU in Ubuntu: https://github.com/astro-pi/python-sense-hat/issues/79. And try linux-modules-extra-raspi
 
