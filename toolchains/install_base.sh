@@ -9,6 +9,8 @@ sudo apt-get install -y build-essential pkg-config gpg wget ca-certificates \
   avahi-daemon avahi-utils iproute2 iputils-ping \
   lsb-release net-tools iw iftop htop nvtop patch evtest iwyu
 
+git lfs install
+
 # Install uv (fast Python package and project manager)
 # https://docs.astral.sh/uv/getting-started/installation/
 curl -LsSf https://astral.sh/uv/install.sh | sh
