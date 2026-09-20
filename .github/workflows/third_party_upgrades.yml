@@ -1,0 +1,44 @@
+name: Third-party upgrades
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Report available third-party updates
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 "${GITHUB_WORKSPACE}/external/scripts/update_third_party_sources.py" \
+            --metadata "${GITHUB_WORKSPACE}/external/third_party_sources.json" \
+            --versions "${GITHUB_WORKSPACE}/external/third_party_versions.cmake" \
+            --sources-dir "${GITHUB_WORKSPACE}/external/sources" \
+            --check-updates \
+            --report-only
+
+      - name: Run Renovate
+        uses: renovatebot/github-action@v43.0.13
+        env:
+          LOG_LEVEL: info
+          RENOVATE_ALLOW_COMMANDS: '^python3 external/scripts/update_third_party_sources\.py.*$'
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+        with:
+          configurationFile: .github/renovate.json5
+          token: ${{ secrets.GITHUB_TOKEN }}

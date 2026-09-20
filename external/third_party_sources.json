@@ -1,0 +1,126 @@
+{
+  "dependencies": [
+    {
+      "name": "Catch2",
+      "version_variable": "CATCH2_VERSION_REQUIRED",
+      "repo": "catchorg/Catch2",
+      "tag_regex": "^v(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "v{version}",
+      "download_url_template": "https://github.com/catchorg/Catch2/archive/refs/tags/v{version}.tar.gz",
+      "archive_name_template": "Catch2-{version}.tar.gz",
+      "archive_glob": "Catch2-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "benchmark",
+      "version_variable": "BENCHMARK_VERSION_REQUIRED",
+      "repo": "google/benchmark",
+      "tag_regex": "^v(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "v{version}",
+      "download_url_template": "https://github.com/google/benchmark/archive/refs/tags/v{version}.tar.gz",
+      "archive_name_template": "benchmark-{version}.tar.gz",
+      "archive_glob": "benchmark-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "FTXUI",
+      "version_variable": "FTXUI_VERSION_REQUIRED",
+      "repo": "ArthurSonzogni/FTXUI",
+      "tag_regex": "^v(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "v{version}",
+      "download_url_template": "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v{version}.tar.gz",
+      "archive_name_template": "FTXUI-{version}.tar.gz",
+      "archive_glob": "FTXUI-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "freetype",
+      "version_variable": "FREETYPE_VERSION_REQUIRED",
+      "repo": "freetype/freetype",
+      "tag_regex": "^VER-(?P<version>\\d+-\\d+-\\d+)$",
+      "tag_template": "VER-{version_dash}",
+      "download_url_template": "https://github.com/freetype/freetype/archive/refs/tags/VER-{version_dash}.tar.gz",
+      "archive_name_template": "freetype-VER-{version_dash}.tar.gz",
+      "archive_glob": "freetype-VER-*.tar.gz",
+      "version_dash": true,
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "SDL3",
+      "version_variable": "SDL3_VERSION_REQUIRED",
+      "repo": "libsdl-org/SDL",
+      "tag_regex": "^release-(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "release-{version}",
+      "download_url_template": "https://github.com/libsdl-org/SDL/archive/refs/tags/release-{version}.tar.gz",
+      "archive_name_template": "SDL-release-{version}.tar.gz",
+      "archive_glob": "SDL-release-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "SDL3_ttf",
+      "version_variable": "SDL3_TTF_VERSION_REQUIRED",
+      "repo": "libsdl-org/SDL_ttf",
+      "tag_regex": "^release-(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "release-{version}",
+      "download_url_template": "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-{version}.tar.gz",
+      "archive_name_template": "SDL_ttf-release-{version}.tar.gz",
+      "archive_glob": "SDL_ttf-release-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "eCAL",
+      "version_variable": "ECAL_VERSION_REQUIRED",
+      "repo": "eclipse-ecal/ecal",
+      "tag_regex": "^v(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "v{version}",
+      "download_url_template": "",
+      "archive_name_template": "ecal-fat-source-{version}.tar.gz",
+      "archive_glob": "ecal-fat-source-*.tar.gz",
+      "auto_update": false,
+      "sync_archive": false,
+      "notes": "Fat source archive and patching flow are custom; update manually."
+    },
+    {
+      "name": "lz4",
+      "version_variable": "LZ4_VERSION_REQUIRED",
+      "repo": "lz4/lz4",
+      "tag_regex": "^v(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "v{version}",
+      "download_url_template": "https://github.com/lz4/lz4/archive/refs/tags/v{version}.tar.gz",
+      "archive_name_template": "lz4-{version}.tar.gz",
+      "archive_glob": "lz4-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "robin-map",
+      "version_variable": "ROBIN_MAP_VERSION_REQUIRED",
+      "repo": "Tessil/robin-map",
+      "tag_regex": "^v(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "v{version}",
+      "download_url_template": "https://github.com/Tessil/robin-map/archive/refs/tags/v{version}.tar.gz",
+      "archive_name_template": "robin-map-{version}.tar.gz",
+      "archive_glob": "robin-map-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    },
+    {
+      "name": "nanobind",
+      "version_variable": "NANOBIND_VERSION_REQUIRED",
+      "repo": "wjakob/nanobind",
+      "tag_regex": "^v(?P<version>\\d+\\.\\d+\\.\\d+)$",
+      "tag_template": "v{version}",
+      "download_url_template": "https://github.com/wjakob/nanobind/archive/refs/tags/v{version}.tar.gz",
+      "archive_name_template": "nanobind-{version}.tar.gz",
+      "archive_glob": "nanobind-*.tar.gz",
+      "auto_update": true,
+      "sync_archive": true
+    }
+  ]
+}
