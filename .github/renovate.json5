@@ -40,7 +40,7 @@
       "matchStrings": ["set\\(FREETYPE_VERSION_REQUIRED\\s+(?<currentValue>[^\\s\\)]+)\\)"],
       "depNameTemplate": "freetype/freetype",
       "datasourceTemplate": "github-tags",
-      "versioningTemplate": "semver",
+      "versioningTemplate": "regex:^(?<major>\\d+)[.-](?<minor>\\d+)[.-](?<patch>\\d+)$",
       "extractVersionTemplate": "^VER-(?<version>.*)$"
     },
     {
@@ -105,10 +105,6 @@
   "postUpgradeTasks": {
     "commands": [
       "python3 external/scripts/update_third_party_sources.py --sync-archives --prune --strict"
-    ],
-    "fileFilters": [
-      "external/third_party_versions.cmake",
-      "external/sources/*.tar.gz"
     ],
     "executionMode": "update"
   }

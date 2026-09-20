@@ -8,6 +8,7 @@ import glob
 import json
 import os
 import re
+import tempfile
 import sys
 import urllib.error
 import urllib.request
@@ -78,8 +79,29 @@ def parse_args() -> argparse.Namespace:
 
 
 def read_metadata(path: Path) -> list[Dependency]:
+    """Load dependency metadata.
+
+    Required per dependency entry: name, version_variable, repo, tag_regex,
+    archive_name_template, archive_glob, auto_update, sync_archive.
+    Optional fields: tag_template, download_url_template, version_dash, notes.
+    download_url_template is required when sync_archive is true.
+    """
     data = json.loads(path.read_text(encoding="utf-8"))
-    return [Dependency(**dep) for dep in data["dependencies"]]
+    dependencies: list[Dependency] = []
+    for index, dep in enumerate(data["dependencies"]):
+        try:
+            parsed = Dependency(**dep)
+        except TypeError as exc:
+            message = f"Invalid dependency metadata entry at index {index}: {exc}"
+            raise ValueError(message) from exc
+        if parsed.sync_archive and not parsed.download_url_template:
+            message = (
+                f"Invalid dependency metadata entry at index {index}: "
+                "download_url_template is required when sync_archive is true"
+            )
+            raise ValueError(message)
+        dependencies.append(parsed)
+    return dependencies
 
 
 def read_versions(path: Path) -> tuple[str, dict[str, str]]:
@@ -109,6 +131,7 @@ def github_api_get(url: str) -> Any:
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "grape-third-party-updater",
+        "X-GitHub-Api-Version": "2022-11-28",
     }
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if token:
@@ -124,7 +147,7 @@ def fetch_latest_version(dep: Dependency) -> str | None:
     latest_version: str | None = None
     page = 1
 
-    while page <= 5:
+    while True:
         try:
             tags = github_api_get(f"https://api.github.com/repos/{dep.repo}/tags?per_page=100&page={page}")
         except urllib.error.HTTPError:
@@ -171,8 +194,16 @@ def apply_version_updates(
 def download(url: str, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     request = urllib.request.Request(url, headers={"User-Agent": "grape-third-party-updater"})
-    with urllib.request.urlopen(request, timeout=120) as response, destination.open("wb") as file:  # noqa: S310
-        file.write(response.read())
+    temp_path: Path | None = None
+    try:
+        with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
+            with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as temp_file:
+                temp_file.write(response.read())
+                temp_path = Path(temp_file.name)
+        temp_path.replace(destination)
+    finally:
+        if temp_path is not None and temp_path.exists():
+            temp_path.unlink(missing_ok=True)
 
 
 def sync_archives(
@@ -195,6 +226,7 @@ def sync_archives(
         archive_name = dep.archive_name_template.format(**tokens)
         archive_path = sources_dir / archive_name
 
+        download_failed = False
         if dep.sync_archive:
             if not archive_path.exists():
                 url = dep.download_url_template.format(**tokens)
@@ -202,14 +234,18 @@ def sync_archives(
                 if not report_only:
                     try:
                         download(url, archive_path)
+                    except urllib.error.HTTPError as exc:
+                        errors.append(f"{dep.name}: failed to download {url}: {exc}")
+                        download_failed = True
                     except urllib.error.URLError as exc:
                         errors.append(f"{dep.name}: failed to download {url}: {exc}")
+                        download_failed = True
             else:
                 actions.append(f"keep {archive_name}")
         else:
             actions.append(f"skip sync for {dep.name}")
 
-        if prune:
+        if prune and dep.sync_archive and not download_failed and archive_path.exists():
             pattern = str(sources_dir / dep.archive_glob)
             for path_str in glob.glob(pattern):
                 path = Path(path_str)
