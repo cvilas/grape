@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/cvilas/grape/compare/v0.8.0...v0.9.0) (2026-10-02)
+
+
+### Features
+
+* **toolchain:** upgrades llvm to v23 ([e45eed3](https://github.com/cvilas/grape/commit/e45eed35d225c08676e937b0da874371e4a4a73f))
+
 ## [0.8.0](https://github.com/cvilas/grape/compare/v0.7.0...v0.8.0) (2026-09-02)
 
 
