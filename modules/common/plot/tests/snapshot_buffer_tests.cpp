@@ -10,8 +10,7 @@ namespace {
 
 using Catch::Approx;
 
-using SnapshotBuffer = grape::plot::SnapshotBuffer;
-using Sample = grape::plot::Sample;
+using grape::plot::SnapshotBuffer;
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 

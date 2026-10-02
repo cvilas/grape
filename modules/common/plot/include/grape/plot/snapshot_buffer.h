@@ -10,6 +10,7 @@
 
 #include "grape/exception.h"
 #include "grape/plot/style.h"
+#include "grape/utils/attributes.h"
 
 namespace grape::plot {
 
@@ -49,12 +50,13 @@ public:
     return data_.size();
   }
 
-  [[nodiscard]] constexpr auto operator[](std::size_t idx) const noexcept -> const Sample& {
+  [[nodiscard]] constexpr auto
+  operator[](std::size_t idx) const noexcept GRAPE_LIFETIMEBOUND->const Sample& {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     return data_[wrap(head_ + idx, capacity())];
   }
 
-  [[nodiscard]] constexpr auto at(std::size_t idx) const -> const Sample& {
+  [[nodiscard]] constexpr auto at(std::size_t idx) const GRAPE_LIFETIMEBOUND -> const Sample& {
     if (idx >= size_) {
       throw std::out_of_range("SnapshotBuffer::at: index out of range");
     }
@@ -62,7 +64,7 @@ public:
     return (*this)[idx];
   }
 
-  [[nodiscard]] constexpr auto front() const -> const Sample& {
+  [[nodiscard]] constexpr auto front() const GRAPE_LIFETIMEBOUND -> const Sample& {
     if (empty()) {
       panic<Exception>("Buffer is empty");
     }
@@ -70,7 +72,7 @@ public:
     return data_[head_];
   }
 
-  [[nodiscard]] constexpr auto back() const -> const Sample& {
+  [[nodiscard]] constexpr auto back() const GRAPE_LIFETIMEBOUND -> const Sample& {
     if (empty()) {
       panic<Exception>("Buffer is empty");
     }

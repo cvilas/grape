@@ -129,8 +129,8 @@ Camera::Camera(const Config& config, Callback&& image_callback) : impl_(std::mak
 
   auto camera_count = 0;
   // NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cppcoreguidelines-no-malloc)
-  auto camera_ids_deleter = [](SDL_CameraID* ptr) { SDL_free(ptr); };
-  auto cameras_ids = std::unique_ptr<SDL_CameraID, decltype(camera_ids_deleter)>(
+  const auto camera_ids_deleter = [](SDL_CameraID* ptr) { SDL_free(ptr); };
+  const auto cameras_ids = std::unique_ptr<SDL_CameraID, decltype(camera_ids_deleter)>(
       SDL_GetCameras(&camera_count), camera_ids_deleter);
   if ((cameras_ids == nullptr) or (camera_count == 0)) {
     panic(std::format("No cameras enumerated: {}", SDL_GetError()));
@@ -189,8 +189,8 @@ void Camera::acquire() {
     .header = { .timestamp = now,
                 .bytes_pitch = static_cast<std::uint32_t>(sdl_frame->pitch),
                 .image_spec = { .size = { .width = static_cast<std::uint16_t>(sdl_frame->w),
-                                          .height = static_cast<std::uint16_t>(sdl_frame->h) },
-                                .pixel_format = static_cast<std::uint32_t>(sdl_frame->format) }, },
+                                          .height = static_cast<std::uint16_t>(sdl_frame->h), },
+                                .pixel_format = static_cast<std::uint32_t>(sdl_frame->format), }, },
     .pixels = { static_cast<std::byte*>(sdl_frame->pixels), static_cast<std::size_t>(data_size) },
   };
 

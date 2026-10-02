@@ -10,7 +10,7 @@
 auto main() -> int {
   static constexpr auto PERIOD = std::chrono::milliseconds(250);
 
-  auto timer = grape::WallTimer(PERIOD, []() {
+  const auto timer = grape::WallTimer(PERIOD, [] {
     const auto now = grape::WallClock::now();
     std::println("Blink! {}", now);
   });

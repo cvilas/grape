@@ -67,7 +67,7 @@ struct ConfigTableDetail {
   int table_reference;
 };
 
-using ConfigTable = grape::script::ConfigTable;
+using grape::script::ConfigTable;
 
 //-------------------------------------------------------------------------------------------------
 // Splits the key into tokens and recursively reads all the way to the last token (leaf) in the

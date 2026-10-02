@@ -13,9 +13,9 @@
 
 namespace {
 
-using Config = grape::spmcq::Config;
-using Reader = grape::spmcq::Reader;
-using Writer = grape::spmcq::Writer;
+using grape::spmcq::Config;
+using grape::spmcq::Reader;
+using grape::spmcq::Writer;
 
 //-------------------------------------------------------------------------------------------------
 auto uniqueName() -> std::string {
@@ -263,7 +263,7 @@ TEST_CASE("Concurrent writer and reader", "[spmcq]") {
 
   std::atomic<bool> done{ false };
 
-  std::thread producer([&writer, &done]() {
+  std::thread producer([&writer, &done] {
     for (std::uint64_t i = 0; i < NUM_WRITES; ++i) {
       writeValue(writer, i);
     }
@@ -364,9 +364,9 @@ TEST_CASE("Zero metadata bytes: reader metadata is empty", "[spmcq]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Non-empty metadata is accessible to reader", "[spmcq]") {
   const auto name = uniqueName();
-  static constexpr std::array<std::byte, 5U> META{ std::byte{ 0x01 }, std::byte{ 0x02 },
-                                                   std::byte{ 0x03 }, std::byte{ 0x04 },
-                                                   std::byte{ 0x05 } };
+  static constexpr std::array<std::byte, 5U> META{
+    std::byte{ 0x01 }, std::byte{ 0x02 }, std::byte{ 0x03 }, std::byte{ 0x04 }, std::byte{ 0x05 },
+  };
   auto maybe_writer = Writer::create(name, Config{ .frame_length = 8U, .num_frames = 4U },
                                      std::span<const std::byte>{ META.data(), META.size() });
   REQUIRE(maybe_writer);

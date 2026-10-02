@@ -9,7 +9,7 @@
 
 namespace grape::ipc::py {
 
-void bindTopic(nanobind::module_& module) {
+void bindTopic(const nanobind::module_& module) {
   nanobind::class_<Topic>(module, "Topic")
       .def(nanobind::init<>())
       .def_rw("name", &Topic::name)

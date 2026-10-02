@@ -32,10 +32,10 @@ test_array = {90, 28, 16}
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("[configuration script tests]", "[script]") {
-  auto script = grape::script::ConfigScript(std::string(TEST_CONFIG));
+  const auto script = grape::script::ConfigScript(std::string(TEST_CONFIG));
   const auto root_table = script.table();
 
-  using ConfigTable = grape::script::ConfigTable;
+  using grape::script::ConfigTable;
 
   SECTION("can parse all supported types") {
     // string

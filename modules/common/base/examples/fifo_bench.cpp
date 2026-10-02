@@ -26,7 +26,7 @@ void bmFifoWrite(benchmark::State& state) {
     std::memcpy(buffer.data(), data.data(), data.size());
   };
   bool succeeded = false;
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
     benchmark::DoNotOptimize(succeeded = fifo.visitToWrite(writer));
     if (not succeeded) {
@@ -63,7 +63,7 @@ void bmFifoRead(benchmark::State& state) {
   };
 
   bool succeeded = false;
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
     benchmark::DoNotOptimize(succeeded = fifo.visitToRead(reader));
     if (not succeeded) {

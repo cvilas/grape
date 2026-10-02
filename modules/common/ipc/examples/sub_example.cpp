@@ -31,7 +31,7 @@ auto main() -> int {
     };
 
     const auto topic = grape::ipc::ex::ExampleTopicAttributes{};
-    auto subscriber = grape::ipc::Subscriber(topic, data_cb, match_cb);
+    const auto subscriber = grape::ipc::Subscriber(topic, data_cb, match_cb);
 
     constexpr auto SLEEP_TIME = std::chrono::milliseconds(500);
     while (grape::ipc::ok()) {

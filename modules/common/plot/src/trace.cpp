@@ -70,11 +70,13 @@ auto Trace::snapshot() -> View {
     back_buffer_.pushBack(sample);
   })) {
   }
-  return { .name = name_,
-           .samples = back_buffer_.view(),
-           .color = color_,
-           .line_style = line_style_,
-           .point_style = point_style_ };
+  return {
+    .name = name_,
+    .samples = back_buffer_.view(),
+    .color = color_,
+    .line_style = line_style_,
+    .point_style = point_style_,
+  };
 }
 
 }  // namespace grape::plot

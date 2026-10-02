@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "grape/utils/attributes.h"
+
 namespace grape::utils {
 
 //=================================================================================================
@@ -16,7 +18,7 @@ namespace grape::utils {
 class StackTrace {
 public:
   [[nodiscard]] static auto current() -> StackTrace;
-  [[nodiscard]] auto trace() const -> std::span<const std::string>;
+  [[nodiscard]] auto trace() const GRAPE_LIFETIMEBOUND -> std::span<const std::string>;
 
 private:
   static constexpr auto MAX_FRAMES = 16U;

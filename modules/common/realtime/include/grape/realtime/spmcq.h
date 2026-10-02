@@ -17,6 +17,7 @@
 #include <utility>      // for forward
 
 #include "grape/error.h"
+#include "grape/utils/attributes.h"
 #include "grape/utils/enums.h"
 
 //=================================================================================================
@@ -78,7 +79,8 @@ public:
 private:
   struct Impl;
   explicit Writer(std::string name, std::unique_ptr<Impl> impl, const Config& config,
-                  std::span<std::byte> frames, std::uint64_t* write_count_ptr);
+                  std::span<std::byte> frames GRAPE_LIFETIMEBOUND,
+                  std::uint64_t* write_count_ptr GRAPE_LIFETIMEBOUND);
   std::string name_;
   std::unique_ptr<Impl> impl_;
   Config config_;
@@ -145,8 +147,9 @@ public:
 private:
   struct Impl;
   explicit Reader(std::unique_ptr<Impl> impl, const Config& config,
-                  std::span<const std::byte> metadata, std::span<const std::byte> frames,
-                  const std::uint64_t* write_count_ptr);
+                  std::span<const std::byte> metadata GRAPE_LIFETIMEBOUND,
+                  std::span<const std::byte> frames GRAPE_LIFETIMEBOUND,
+                  const std::uint64_t* write_count_ptr GRAPE_LIFETIMEBOUND);
   std::unique_ptr<Impl> impl_;
   Config config_;
   std::span<const std::byte> metadata_;

@@ -11,8 +11,7 @@ enum class Speed : std::uint8_t { Slow, Medium, Fast };  // NOLINT(misc-use-inte
 
 namespace {
 
-using ProgramOptions = grape::conio::ProgramOptions;
-using ProgramDescription = grape::conio::ProgramDescription;
+using grape::conio::ProgramDescription;
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("'help' cannot be declared as an option key", "[program_options]") {

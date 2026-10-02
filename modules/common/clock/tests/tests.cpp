@@ -100,9 +100,9 @@ TEST_CASE("FollowerClock operation with broadcaster", "[clock]") {
     }
   };
 
-  auto driver = std::jthread(driver_thread, clock_name);
+  const auto driver = std::jthread(driver_thread, clock_name);
 
-  auto clock = grape::clock::FollowerClock(clock_name);
+  const auto clock = grape::clock::FollowerClock(clock_name);
   static constexpr auto MASTER_CLOCK_TIMEOUT = 10s;
   REQUIRE(clock.waitForNextTick(MASTER_CLOCK_TIMEOUT));
 

@@ -11,7 +11,7 @@
 //=================================================================================================
 auto main() -> int {
   try {
-    auto sensor = grape::rpi::sense_hat::HumiditySensor({});
+    const auto sensor = grape::rpi::sense_hat::HumiditySensor({});
 
     static constexpr auto DT = std::chrono::seconds(1);
     auto next_ts = grape::WallClock::now();

@@ -8,7 +8,7 @@
 
 namespace grape::ipc::ex::perf {
 static auto topic() -> const Topic& {
-  static auto topic = grape::ipc::Topic{
+  static const auto topic = grape::ipc::Topic{
     .name = "grape/ipc/example/perf",
     .type_name = "bytes",
   };

@@ -39,12 +39,15 @@ public:
   static constexpr auto NUM_PIXELS = WIDTH * HEIGHT;
 
   static constexpr auto transform(const RGB888& color) -> RGB565 {
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,hicpp-signed-bitwise)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+    const auto red = static_cast<std::uint32_t>(color.r);
+    const auto green = static_cast<std::uint32_t>(color.g);
+    const auto blue = static_cast<std::uint32_t>(color.b);
     return RGB565{
-      .value = static_cast<std::uint16_t>(((color.r >> 3U) << 11U) | ((color.g >> 2U) << 5U) |
-                                          (color.b >> 3U)),
+      .value =
+          static_cast<std::uint16_t>(((red >> 3U) << 11U) | ((green >> 2U) << 5U) | (blue >> 3U)),
     };
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,hicpp-signed-bitwise)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
   }
 
   Display();

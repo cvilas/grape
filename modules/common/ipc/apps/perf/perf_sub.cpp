@@ -120,7 +120,7 @@ auto main(int argc, const char* argv[]) -> int {
     };
 
     const auto topic = args.get<std::string>("topic");
-    auto sub = grape::ipc::RawSubscriber(topic, maybe_qos.value(), data_cb, match_cb);
+    const auto sub = grape::ipc::RawSubscriber(topic, maybe_qos.value(), data_cb, match_cb);
 
     std::println("Press CTRL+C to exit");
     static constexpr auto LOOP_WAIT = std::chrono::milliseconds(100);

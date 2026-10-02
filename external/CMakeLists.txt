@@ -98,6 +98,9 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
       -DSDL_TESTS=OFF
       -DSDL_EXAMPLES=OFF
       -DSDL_CCACHE=ON)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      list(APPEND SDL3_CMAKE_ARGS -DHAVE_GETRESUID=1)
+    endif()
     ExternalProject_Add(
       SDL3
       URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL-release-${SDL3_VERSION_REQUIRED}.tar.gz
@@ -239,4 +242,3 @@ if(lz4 IN_LIST EXTERNAL_PROJECTS_LIST)
       CMAKE_ARGS ${LZ4_CMAKE_ARGS})
   endif()
 endif()
-

@@ -72,7 +72,7 @@ void Publisher::onCompressedFrame(std::span<const std::byte> bytes,
     syslog::Error("Publish failed: {}", toString(pub_result.error()));
   }
 
-  auto ts = std::chrono::steady_clock::now();
+  const auto ts = std::chrono::steady_clock::now();
   static auto last_ts = ts;
   const auto dt = ts - last_ts;
   last_ts = ts;
@@ -98,11 +98,12 @@ auto Publisher::Config::init(const script::ConfigTable& table) -> Publisher::Con
     .camera_config{
         .camera_name_hint = table.readOrThrow<std::string>("camera_name"),
         .image_size{
-            .width = static_cast<std::uint16_t>(table.readOrThrow<int>("image_width")),   //
-            .height = static_cast<std::uint16_t>(table.readOrThrow<int>("image_height"))  //
-        } },
+            .width = static_cast<std::uint16_t>(table.readOrThrow<int>("image_width")),    //
+            .height = static_cast<std::uint16_t>(table.readOrThrow<int>("image_height")),  //
+        },
+    },
     .pub_topic = table.readOrThrow<std::string>("pub_topic"),
-    .compression_speed = static_cast<std::uint16_t>(table.readOrThrow<int>("compression_speed"))
+    .compression_speed = static_cast<std::uint16_t>(table.readOrThrow<int>("compression_speed")),
   };
 }
 }  // namespace

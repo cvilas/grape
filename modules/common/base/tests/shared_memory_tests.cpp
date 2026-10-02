@@ -3,6 +3,7 @@
 //=================================================================================================
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstring>
 #include <random>
@@ -31,7 +32,7 @@ auto createUniqueShmName() -> std::string {
   std::uniform_int_distribution<int> dist(range.first, range.second);
 
   std::array<std::byte, TEST_SHM_SIZE> data{};
-  std::ranges::generate(data, [&dist, &gen]() noexcept { return std::byte(dist(gen)); });
+  std::ranges::generate(data, [&dist, &gen] noexcept { return std::byte(dist(gen)); });
   return data;
 }
 
@@ -130,8 +131,8 @@ TEST_CASE("SharedMemory move semantics", "[SharedMemory]") {
     REQUIRE(result1.has_value());
     REQUIRE(result2.has_value());
 
-    [[maybe_unused]] auto original_data1 = result1->data();
-    auto original_data2 = result2->data();
+    [[maybe_unused]] const auto original_data1 = result1->data();
+    const auto original_data2 = result2->data();
 
     // Move assign
     result1.value() = std::move(result2.value());

@@ -4,7 +4,7 @@
 
 OS               |  Architecture   | Toolchain
 -----------------|-----------------|----------------
-Ubuntu 26.04     | Aarch64, X86_64 | CMake-4, clang-22/libc++, gcc-16/libstdc++
+Ubuntu 26.04     | Aarch64, X86_64 | CMake-4, clang-23/libc++, gcc-16/libstdc++
 
 ## Setup development environment
 

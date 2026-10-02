@@ -48,7 +48,7 @@ auto createRandomData(std::size_t size) -> std::vector<std::byte> {
 void bmShmCreate(benchmark::State& state) {
   const auto size = static_cast<std::size_t>(state.range(0));
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
     const auto shm_name = createUniqueShmName();
     std::ignore = ShMem::remove(shm_name);
@@ -78,7 +78,7 @@ void bmShmOpen(benchmark::State& state) {
   }
   auto& created_shm = shm_create_result.value();
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
 
     auto shm_result = ShMem::open(shm_name, ShMem::Access::ReadOnly);
@@ -109,7 +109,7 @@ void bmShmWrite(benchmark::State& state) {
   }
   auto& shm = shm_result.value();
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
 
     std::memcpy(shm.data().data(), test_data.data(), size);
@@ -141,7 +141,7 @@ void bmShmRead(benchmark::State& state) {
 
   std::vector<std::byte> read_buffer(size);
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
 
     std::memcpy(read_buffer.data(), shm.data().data(), size);
@@ -179,7 +179,7 @@ void bmShmCopy(benchmark::State& state) {
   // Write test data to source
   std::memcpy(src_shm.data().data(), test_data.data(), size);
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
 
     std::memcpy(dst_shm.data().data(), src_shm.data().data(), size);

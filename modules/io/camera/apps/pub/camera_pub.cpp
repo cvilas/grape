@@ -102,7 +102,7 @@ void Publisher::onCompressedFrame(std::span<const std::byte> bytes,
     syslog::Error("Publish failed: {}", toString(pub_result.error()));
   }
 
-  auto ts = std::chrono::steady_clock::now();
+  const auto ts = std::chrono::steady_clock::now();
   static auto last_ts = ts;
   const auto dt = ts - last_ts;
   last_ts = ts;

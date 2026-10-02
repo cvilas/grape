@@ -6,6 +6,7 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "grape/log/logger.h"
+#include "grape/utils/attributes.h"
 
 namespace {
 
@@ -19,7 +20,7 @@ public:
     stream_.append(std::format("{}", record.message.cStr()));
   }
 
-  [[nodiscard]] auto stream() const -> const std::string& {
+  [[nodiscard]] auto stream() const GRAPE_LIFETIMEBOUND -> const std::string& {
     return stream_;
   }
 
@@ -51,7 +52,7 @@ TEST_CASE("Basic logging api works", "[log]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Custom sink and threshold settings are respected", "[log]") {
   static constexpr auto QUEUE_CAPACITY = 10U;
-  auto sink = std::make_shared<TestLogSink>();
+  const auto sink = std::make_shared<TestLogSink>();
   auto config = grape::log::Config();
   config.sink = sink;
   config.queue_capacity = QUEUE_CAPACITY;
@@ -73,7 +74,7 @@ TEST_CASE("Queue capacity and flush period are respected", "[log]") {
   static constexpr auto FLUSH_PERIOD = 1s;
   static constexpr auto FLUSH_WAIT_PERIOD = FLUSH_PERIOD + 500ms;
   static constexpr auto QUEUE_CAPACITY = 5U;
-  auto sink = std::make_shared<TestLogSink>();
+  const auto sink = std::make_shared<TestLogSink>();
   auto config = grape::log::Config();
   config.sink = sink;
   config.queue_capacity = QUEUE_CAPACITY;

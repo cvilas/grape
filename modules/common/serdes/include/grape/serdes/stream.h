@@ -9,6 +9,7 @@
 #include <span>
 
 #include "grape/serdes/concepts.h"
+#include "grape/utils/attributes.h"
 
 namespace grape::serdes {
 
@@ -26,7 +27,7 @@ public:
     if (offset_ + len > MAX_SIZE) [[unlikely]] {
       return false;
     }
-    auto to = std::span{ buf_ }.subspan(offset_, len);
+    const auto to = std::span{ buf_ }.subspan(offset_, len);
     std::ranges::copy(data, to.begin());
     offset_ += len;
     return true;
@@ -73,7 +74,7 @@ class InStream {
 public:
   /// Initialise
   /// @param data Serialised data to decode
-  explicit constexpr InStream(std::span<const std::byte> data) : stream_(data) {
+  explicit constexpr InStream(std::span<const std::byte> data GRAPE_LIFETIMEBOUND) : stream_(data) {
   }
 
   /// Reads bytes into user-provided location

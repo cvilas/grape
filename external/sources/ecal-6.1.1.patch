@@ -21,3 +21,14 @@
  include("@PACKAGE_eCAL_install_cmake_dir@/helper_functions/ecal_add_functions.cmake")
  include("@PACKAGE_eCAL_install_cmake_dir@/helper_functions/ecal_helper_functions.cmake")
  include("@PACKAGE_eCAL_install_cmake_dir@/helper_functions/ecal_install_functions.cmake")
+
+--- ecal/core/src/io/mtx/linux/ecal_named_mutex_robust_clocklock_impl.cpp
++++ ecal/core/src/io/mtx/linux/ecal_named_mutex_robust_clocklock_impl.cpp
+@@ -29,6 +29,7 @@
+ #include <sys/mman.h>
+ #include <fcntl.h>
+ #include <pthread.h>
++#include <cerrno>
+ #include <unistd.h>
+ #include <cstdint>
+ #include <string>

@@ -26,13 +26,16 @@
 #include "grape/exception.h"                   // for panic
 #include "grape/probe/signal.h"                // for Signal
 #include "grape/probe/type_id.h"               // for TypeId, length
-#include "imgui.h"                             // for ImGuiDataType_, ImGuiIO
-#include "implot.h"                            // for ImPlotPoint, ImPlotAxi...
+#include "grape/utils/attributes.h"
+#include "imgui.h"   // for ImGuiDataType_, ImGuiIO
+#include "implot.h"  // for ImPlotPoint, ImPlotAxi...
 
 struct ImGuiContext;
 struct ImPlotContext;
 
+namespace grape::probe::detail {
 namespace {
+
 //-------------------------------------------------------------------------------------------------
 auto convert(grape::probe::TypeId tid, const std::byte* bytes) -> double {
   // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -84,11 +87,11 @@ auto toImGuiDataType(grape::probe::TypeId id) -> ImGuiDataType {
 
 }  // namespace
 
-namespace grape::probe {
-
 //=================================================================================================
 // Buffers signal data frames
-class ScrollingBuffer {  // NOLINT(misc-use-internal-linkage)
+// These types need external linkage because Monitor::Impl stores them as members.
+// NOLINTNEXTLINE(misc-use-internal-linkage)
+class ScrollingBuffer {
 public:
   /// identifies a signal and a specific trace in that signal (if the signal is multivariate)
   struct TraceID {
@@ -111,7 +114,8 @@ public:
   [[nodiscard]] auto markedTrace() const -> TraceID;
 
   /// @return Information about layout of signals in a snapshot frame
-  [[nodiscard]] auto signalsInfo() const -> const std::vector<grape::probe::Signal>&;
+  [[nodiscard]] auto signalsInfo() const GRAPE_LIFETIMEBOUND
+      -> const std::vector<grape::probe::Signal>&;
 
   /// @return Number of snapshot frames the buffer can hold
   [[nodiscard]] auto length() const -> std::size_t;
@@ -119,10 +123,11 @@ public:
   /// Returns pointer to raw frame data for a specified index
   /// @param idx Index in range [0, length()]
   /// @return Pointer to raw frame data
-  [[nodiscard]] auto frameData(std::size_t idx) const -> std::byte const*;
+  [[nodiscard]] auto frameData(std::size_t idx) const GRAPE_LIFETIMEBOUND -> std::byte const*;
 
   /// @return Array containing locations of signal data within a single snapshot frame
-  [[nodiscard]] auto signalDataOffsetsWithinFrame() const -> const std::vector<std::size_t>&;
+  [[nodiscard]] auto signalDataOffsetsWithinFrame() const GRAPE_LIFETIMEBOUND
+      -> const std::vector<std::size_t>&;
 
   /// @return Location of timestamp data within a single snapshot frame
   [[nodiscard]] auto timestampDataOffsetWithinFrame() const -> std::size_t;
@@ -220,7 +225,9 @@ auto ScrollingBuffer::timestampDataType() const -> grape::probe::TypeId {
 
 //=================================================================================================
 // Storage for control variable updates
-class Controllables {  // NOLINT(misc-use-internal-linkage)
+// These types need external linkage because Monitor::Impl stores them as members.
+// NOLINTNEXTLINE(misc-use-internal-linkage)
+class Controllables {
 public:
   struct Item {
     grape::probe::Signal info;
@@ -229,7 +236,7 @@ public:
 
   Controllables(std::span<const grape::probe::Signal> signals_info,
                 std::span<const std::byte> frame);
-  auto items() -> std::vector<Item>&;
+  auto items() GRAPE_LIFETIMEBOUND -> std::vector<Item>&;
 
 private:
   std::vector<Item> items_;
@@ -255,13 +262,12 @@ auto Controllables::items() -> std::vector<Item>& {
   return items_;
 }
 
-}  // namespace grape::probe
-
 namespace {
+
 //-------------------------------------------------------------------------------------------------
 auto signalDataGetter(int idx, void* buf) -> ImPlotPoint {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  auto* const buffer = reinterpret_cast<grape::probe::ScrollingBuffer*>(buf);
+  const auto* const buffer = reinterpret_cast<ScrollingBuffer*>(buf);
   if (buffer == nullptr) {
     return {};
   }
@@ -287,6 +293,8 @@ auto signalDataGetter(int idx, void* buf) -> ImPlotPoint {
 
 }  // namespace
 
+}  // namespace grape::probe::detail
+
 namespace grape::probe {
 
 struct Monitor::Impl {
@@ -296,9 +304,9 @@ struct Monitor::Impl {
   ImPlotContext* implot_ctx{ nullptr };
   Monitor::Sender sender{ nullptr };
   std::shared_mutex signals_lock;
-  std::unique_ptr<ScrollingBuffer> signals_buffer;
+  std::unique_ptr<detail::ScrollingBuffer> signals_buffer;
   std::shared_mutex controllables_lock;
-  std::unique_ptr<Controllables> controllables;
+  std::unique_ptr<detail::Controllables> controllables;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -329,7 +337,7 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
     panic(std::format("ImGui::CreateContext: {}", toString(Error::Renderer)));
   }
   ImGuiIO& io = ImGui::GetIO();
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // NOLINT(hicpp-signed-bitwise)
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // NOLINT(bugprone-signed-bitwise)
 
   ImGui::StyleColorsDark();
 
@@ -408,9 +416,9 @@ void Monitor::recv(std::span<const grape::probe::Signal> signals,
   const std::unique_lock signals_lock(impl_->signals_lock);
   if (impl_->signals_buffer == nullptr) {
     static constexpr auto BUFFER_MAX_SIZE = 2000U;
-    impl_->signals_buffer = std::make_unique<ScrollingBuffer>(BUFFER_MAX_SIZE, signals);
+    impl_->signals_buffer = std::make_unique<detail::ScrollingBuffer>(BUFFER_MAX_SIZE, signals);
     const std::unique_lock ctrl_lock(impl_->controllables_lock);
-    impl_->controllables = std::make_unique<Controllables>(signals, frame);
+    impl_->controllables = std::make_unique<detail::Controllables>(signals, frame);
   }
   impl_->signals_buffer->addFrame(frame);
 }
@@ -445,26 +453,24 @@ void Monitor::drawPlots() {
     if (signal.role == Signal::Role::Timestamp) {
       continue;
     }
-    if (signal.role == Signal::Role::Watch) {
-      if (ImPlot::BeginPlot(signal_name, PLOT_SIZE)) {
-        ImPlot::SetupAxes(nullptr, nullptr, AXIS_FLAGS_X, AXIS_FLAGS_Y);
-        ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, PLOT_FILL_ALPHA);
-        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
-        // TODO(vilas): X axis limits must come from time in data history rather than t
-        ImPlot::SetupAxisLimits(ImAxis_X1, ts - static_cast<double>(history), ts, ImGuiCond_Always);
-        for (auto trace_number = 0U; trace_number < signal.num_elements; ++trace_number) {
-          auto trace_name = std::string(signal_name);
-          if (signal.num_elements > 1) {
-            trace_name += "[" + std::to_string(trace_number) + "]";
-          }
-          impl_->signals_buffer->markTrace({ .index = signal_number, .sub_index = trace_number });
-          ImPlot::PlotLineG(trace_name.c_str(), signalDataGetter, impl_->signals_buffer.get(),
-                            static_cast<int>(impl_->signals_buffer->length()),
-                            /*ImPlotLineFlags*/ 0);
-          // TODO(vilas): use PlotLineEx directly when reading off separate timestamp and signals
+    if (signal.role == Signal::Role::Watch && ImPlot::BeginPlot(signal_name, PLOT_SIZE)) {
+      ImPlot::SetupAxes(nullptr, nullptr, AXIS_FLAGS_X, AXIS_FLAGS_Y);
+      ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, PLOT_FILL_ALPHA);
+      ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
+      // TODO(vilas): X axis limits must come from time in data history rather than t
+      ImPlot::SetupAxisLimits(ImAxis_X1, ts - static_cast<double>(history), ts, ImGuiCond_Always);
+      for (auto trace_number = 0U; trace_number < signal.num_elements; ++trace_number) {
+        auto trace_name = std::string(signal_name);
+        if (signal.num_elements > 1) {
+          trace_name += "[" + std::to_string(trace_number) + "]";
         }
-        ImPlot::EndPlot();
+        impl_->signals_buffer->markTrace({ .index = signal_number, .sub_index = trace_number });
+        ImPlot::PlotLineG(trace_name.c_str(), detail::signalDataGetter, impl_->signals_buffer.get(),
+                          static_cast<int>(impl_->signals_buffer->length()),
+                          /*ImPlotLineFlags*/ 0);
+        // TODO(vilas): use PlotLineEx directly when reading off separate timestamp and signals
       }
+      ImPlot::EndPlot();
     }
   }
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -489,21 +495,19 @@ void Monitor::drawControls() {
     const auto signal_name = std::string(signal_info.name.str());
     ImGui::AlignTextToFramePadding();
 
-    ImGui::Text("%s", signal_name.c_str());  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    ImGui::TextUnformatted(signal_name.c_str());
 
     ImGui::SameLine();
     const auto trace_name = std::string("##") + signal_name;
-    ImGui::InputScalarN(trace_name.c_str(), toImGuiDataType(signal_info.type), data_ptr,
+    ImGui::InputScalarN(trace_name.c_str(), detail::toImGuiDataType(signal_info.type), data_ptr,
                         static_cast<int>(signal_info.num_elements));
 
     ImGui::SameLine();
     const auto button_name = std::string("Apply##") + signal_name;
     const auto is_value_changed = ImGui::Button(button_name.c_str());
 
-    if (is_value_changed) {
-      if (impl_->sender != nullptr) {
-        impl_->sender(signal_info.name.str(), item.data);
-      }
+    if (is_value_changed && impl_->sender != nullptr) {
+      impl_->sender(signal_info.name.str(), item.data);
     }
   }  // each signal
   ImGui::End();

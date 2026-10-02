@@ -11,7 +11,7 @@
 
 namespace {
 
-using Display = grape::rpi::sense_hat::Display;
+using grape::rpi::sense_hat::Display;
 using RGB565 = Display::RGB565;
 using RGB888 = Display::RGB888;
 

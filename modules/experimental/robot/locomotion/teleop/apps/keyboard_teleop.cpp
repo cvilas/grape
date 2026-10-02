@@ -138,7 +138,7 @@ auto main(int argc, const char* argv[]) -> int {
     auto move_cmd = grape::locomotion::Move3DCmd{};
     auto speed_scale = 0.F;
 
-    auto key_handler = ftxui::CatchEvent([&](const ftxui::Event& event) -> bool {
+    const auto key_handler = ftxui::CatchEvent([&](const ftxui::Event& event) -> bool {
       speed_scale = std::min(std::max(speed_scale, 0.F), 1.F);
       const auto linear_speed = speed_scale * MAX_LINEAR_SPEED;
       const auto turn_speed = speed_scale * MAX_TURN_SPEED;
@@ -196,7 +196,7 @@ auto main(int argc, const char* argv[]) -> int {
     });
 
     // Main UI renderer
-    auto main_component = ftxui::Renderer([&] {
+    const auto main_component = ftxui::Renderer([&] {
       const auto [status_ui, error_ui] = toStatusUi(robot_name, teleop_enable, state);
       const auto cmd_ui = ftxui::hbox({
           ftxui::text(toString(move_cmd)) |
@@ -238,8 +238,8 @@ auto main(int argc, const char* argv[]) -> int {
       screen.PostEvent(ftxui::Event::Custom);
       move_cmd = {};
 
-      auto elapsed = std::chrono::steady_clock::now() - start_update_ts;
-      auto sleep_time = CONTROL_PERIOD - elapsed;
+      const auto elapsed = std::chrono::steady_clock::now() - start_update_ts;
+      const auto sleep_time = CONTROL_PERIOD - elapsed;
       if (sleep_time > std::chrono::milliseconds(0)) {
         std::this_thread::sleep_for(sleep_time);
       }

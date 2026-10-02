@@ -6,6 +6,7 @@
 
 #include <array>
 #include <chrono>
+#include <span>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -13,6 +14,7 @@
 #include <vector>
 
 #include "grape/serdes/concepts.h"
+#include "grape/utils/attributes.h"
 
 namespace grape::serdes {
 
@@ -21,7 +23,7 @@ namespace detail {
 /// Concept defines aggregate types on which variadic structured bindings can be applied
 template <typename T>
 concept SerializableAggregate = std::is_aggregate_v<std::remove_cvref_t<T>> && requires(T&& value) {
-  []<typename U>(U & obj) constexpr {
+  []<typename U>(U& obj) constexpr {
     auto&& [... fields] = obj;
     ((void)fields, ...);
   }(std::forward<T>(value));
@@ -33,10 +35,8 @@ template <SerializableAggregate T>
   auto process = std::forward<decltype(fn)>(fn);
   return [&process]<typename U>(U& obj) constexpr -> bool {
     auto&& [... fields] = obj;
-    auto ok = true;
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
-    ((ok = ok && process(fields)), ...);
-    return ok;
+    return (... && process(fields));
   }(std::forward<T>(value));
 }
 
@@ -50,7 +50,7 @@ class Serialiser {
 public:
   /// Initialise with a stream buffer
   /// @param stream The output stream buffer to encode data into
-  explicit constexpr Serialiser(Stream& stream) : stream_(stream) {
+  explicit constexpr Serialiser(Stream& stream GRAPE_LIFETIMEBOUND) : stream_(stream) {
   }
 
   [[nodiscard]] constexpr auto pack(const std::string& value) -> bool {
@@ -118,8 +118,7 @@ private:
 
   template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto pack(std::span<const T> data) -> bool {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    return stream_.write({ reinterpret_cast<const std::byte*>(data.data()), data.size_bytes() });
+    return stream_.write(std::as_bytes(data));
   }
 
   Stream& stream_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
@@ -132,7 +131,7 @@ class Deserialiser {
 public:
   /// Initialise
   /// @param stream Serialised data to decode
-  explicit constexpr Deserialiser(Stream& stream) : stream_(stream) {
+  explicit constexpr Deserialiser(Stream& stream GRAPE_LIFETIMEBOUND) : stream_(stream) {
   }
 
   [[nodiscard]] constexpr auto unpack(std::string& str) -> bool {
@@ -140,11 +139,12 @@ public:
     if (not unpack(sz)) {
       return false;
     }
-    str.resize(sz);
-    if (not unpack(std::span<char>{ str.data(), sz })) {
+    auto decoded = std::string(sz, '\0');
+    if (not unpack(std::span<char>{ decoded.data(), sz })) {
       stream_.rewind(sizeof(std::size_t));  // undo decoding size
       return false;
     }
+    str = std::move(decoded);
     return true;
   }
 
@@ -191,11 +191,12 @@ public:
     if (not unpack(sz)) {
       return false;
     }
-    data.resize(sz);
-    if (not unpack(std::span<T>{ data.data(), sz })) {
+    auto decoded = std::vector<T>(sz);
+    if (not unpack(std::span<T>{ decoded.data(), sz })) {
       stream_.rewind(sizeof(std::size_t));  // undo decoding size
       return false;
     }
+    data = std::move(decoded);
     return true;
   }
 
@@ -221,7 +222,7 @@ public:
     // create function pointer array for O(1) dispatch
     static constexpr auto DISPATCH_TABLE =
         []<std::size_t... Is>(std::index_sequence<Is...>) constexpr {
-          return std::array<UnpackFn, sizeof...(Types)>{ []<std::size_t I>() constexpr -> UnpackFn {
+          return std::array<UnpackFn, sizeof...(Types)>{ []<std::size_t I> constexpr -> UnpackFn {
             return [](Deserialiser* self, VariantType* var) -> bool {
               using T = std::variant_alternative_t<I, VariantType>;
               T val{};
@@ -253,8 +254,7 @@ public:
 private:
   template <PrimitiveValueType T>
   [[nodiscard]] constexpr auto unpack(std::span<T> data) -> bool {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    return stream_.read({ reinterpret_cast<std::byte*>(data.data()), data.size_bytes() });
+    return stream_.read(std::as_writable_bytes(data));
   }
 
   Stream& stream_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)

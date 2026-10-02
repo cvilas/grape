@@ -59,7 +59,7 @@ auto main() -> int {
 
     const auto params = std::string("key=value");
     const auto topic = grape::ipc::ex::ExampleTopicAttributes{};
-    auto server = ParameterPublisher(topic, params);
+    const auto server = ParameterPublisher(topic, params);
 
     std::println("Press ctrl-c to exit");
     s_exit.wait(false);

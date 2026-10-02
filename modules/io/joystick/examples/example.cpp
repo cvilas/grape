@@ -80,7 +80,7 @@ auto main() -> int {
     }
     printDeviceInfo(devices);
 
-    auto js = grape::joystick::Joystick(callback);
+    const auto js = grape::joystick::Joystick(callback);
 
     static constexpr auto EVENT_WAIT_TIMEOUT = std::chrono::milliseconds(100);
     static constexpr auto RECONNECTION_DELAY = std::chrono::milliseconds(1000);

@@ -145,7 +145,7 @@ auto sdlCheck(bool ok, const char* expr) -> bool {
 //-------------------------------------------------------------------------------------------------
 /// Throw on SDL/TTF error or return the original pointer when a pointer-returning call fails.
 template <typename T>
-auto sdlCheck(T* ptr, const char* expr) -> T* {
+auto sdlCheck(T* ptr GRAPE_LIFETIMEBOUND, const char* expr) -> T* {
   if (ptr == nullptr) {
     grape::panic<grape::Exception>(std::format("{}: {}", expr, SDL_GetError()));
   }
@@ -164,7 +164,7 @@ using TTFTextPtr = std::unique_ptr<TTF_Text, void (*)(TTF_Text*)>;
 
 //-------------------------------------------------------------------------------------------------
 struct RenderTargetGuard {
-  explicit RenderTargetGuard(SDL_Renderer* renderer) : rdr(renderer) {
+  explicit RenderTargetGuard(SDL_Renderer* renderer GRAPE_LIFETIMEBOUND) : rdr(renderer) {
   }
   ~RenderTargetGuard() {
     SDL_SetRenderTarget(rdr, nullptr);
@@ -189,8 +189,8 @@ void decimateSamples(std::vector<grape::plot::Sample>& samples, std::size_t max_
     const auto lo = (bucket * total) / max_pts;
     const auto hi = ((bucket + 1) * total) / max_pts;
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-    auto* peak = &samples[lo];    // data maximum
-    auto* trough = &samples[lo];  // data minimum
+    const auto* peak = &samples[lo];    // data maximum
+    const auto* trough = &samples[lo];  // data minimum
     for (auto i = lo + 1; i < hi; ++i) {
       if (samples[i].y > peak->y) {
         peak = &samples[i];
@@ -585,7 +585,10 @@ auto Window::Impl::rebuildLegend() -> bool {
   SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
   SDL_RenderClear(renderer.get());
   const SDL_FRect full{
-    .x = 0.F, .y = 0.F, .w = static_cast<float>(tex_w), .h = static_cast<float>(tex_h)
+    .x = 0.F,
+    .y = 0.F,
+    .w = static_cast<float>(tex_w),
+    .h = static_cast<float>(tex_h),
   };
   static constexpr SDL_Color BGD_COLOR{ .r = 18, .g = 18, .b = 18, .a = 216 };
   SDL_SetRenderDrawColor(renderer.get(), BGD_COLOR.r, BGD_COLOR.g, BGD_COLOR.b, BGD_COLOR.a);
@@ -644,19 +647,22 @@ void Window::Impl::drawPointSymbol(PointStyle ps, const SDL_FPoint& pos,
   SDL_SetRenderDrawColor(rdr, col.r, col.g, col.b, col.a);
   static constexpr auto EXTENT = 4.F;
 
-  const auto draw_cross = [&]() {
+  const auto draw_cross = [&] {
     SDL_RenderLine(rdr, pos.x - EXTENT, pos.y - EXTENT, pos.x + EXTENT, pos.y + EXTENT);
     SDL_RenderLine(rdr, pos.x + EXTENT, pos.y - EXTENT, pos.x - EXTENT, pos.y + EXTENT);
   };
 
-  const auto draw_plus = [&]() {
+  const auto draw_plus = [&] {
     SDL_RenderLine(rdr, pos.x - EXTENT, pos.y, pos.x + EXTENT, pos.y);
     SDL_RenderLine(rdr, pos.x, pos.y - EXTENT, pos.x, pos.y + EXTENT);
   };
 
-  const auto draw_square = [&]() {
+  const auto draw_square = [&] {
     const SDL_FRect rect{
-      .x = pos.x - EXTENT, .y = pos.y - EXTENT, .w = 2.F * EXTENT, .h = 2.F * EXTENT
+      .x = pos.x - EXTENT,
+      .y = pos.y - EXTENT,
+      .w = 2.F * EXTENT,
+      .h = 2.F * EXTENT,
     };
     SDL_RenderRect(rdr, &rect);
   };
@@ -670,7 +676,10 @@ void Window::Impl::drawPointSymbol(PointStyle ps, const SDL_FPoint& pos,
       static constexpr auto DOT_SIZE = 3.0F;
       static constexpr auto HALF_DOT_SIZE = 0.5F * DOT_SIZE;
       const auto dot = SDL_FRect{
-        .x = pos.x - HALF_DOT_SIZE, .y = pos.y - HALF_DOT_SIZE, .w = DOT_SIZE, .h = DOT_SIZE
+        .x = pos.x - HALF_DOT_SIZE,
+        .y = pos.y - HALF_DOT_SIZE,
+        .w = DOT_SIZE,
+        .h = DOT_SIZE,
       };
       SDL_RenderFillRect(rdr, &dot);
       break;
@@ -762,7 +771,7 @@ void Window::Impl::drawAxes() const {
   const std::array<SDL_FPoint, 3> pts{
     SDL_FPoint{ .x = plot_area.x, .y = plot_area.y },
     SDL_FPoint{ .x = plot_area.x, .y = plot_area.y + plot_area.h },
-    SDL_FPoint{ .x = plot_area.x + plot_area.w, .y = plot_area.y + plot_area.h }
+    SDL_FPoint{ .x = plot_area.x + plot_area.w, .y = plot_area.y + plot_area.h },
   };
   SDL_RenderLines(rdr, pts.data(), static_cast<int>(pts.size()));
 }
@@ -775,10 +784,12 @@ void Window::Impl::drawTraces() const {
 
   auto* rdr = renderer.get();
 
-  const SDL_Rect clip{ .x = static_cast<int>(plot_area.x),
-                       .y = static_cast<int>(plot_area.y),
-                       .w = static_cast<int>(plot_area.w),
-                       .h = static_cast<int>(plot_area.h) };
+  const SDL_Rect clip{
+    .x = static_cast<int>(plot_area.x),
+    .y = static_cast<int>(plot_area.y),
+    .w = static_cast<int>(plot_area.w),
+    .h = static_cast<int>(plot_area.h),
+  };
   SDL_SetRenderClipRect(rdr, &clip);
 
   auto& pts = pts_scratch;
@@ -887,8 +898,10 @@ void Window::Impl::drawTicks() const {
     int tw = 0;
     int th = 0;
     TTF_GetStringSize(tfont, lbl.data(), 0, &tw, &th);
-    const SDL_FPoint pos = { .x = plot_area.x - TICK_LEN - static_cast<float>(tw) - MARGIN_SZ,
-                             .y = sy - (HALF * static_cast<float>(th)) };
+    const SDL_FPoint pos = {
+      .x = plot_area.x - TICK_LEN - static_cast<float>(tw) - MARGIN_SZ,
+      .y = sy - (HALF * static_cast<float>(th)),
+    };
     renderTickText(lbl.data(), pos, TICK_COLOR);
   }
 
@@ -909,8 +922,10 @@ void Window::Impl::drawTicks() const {
     int tw = 0;
     int th = 0;
     TTF_GetStringSize(tfont, lbl.data(), 0, &tw, &th);
-    const SDL_FPoint pos = { .x = sx - (HALF * static_cast<float>(tw)),
-                             .y = base_y + TICK_LEN + MARGIN_SZ };
+    const SDL_FPoint pos = {
+      .x = sx - (HALF * static_cast<float>(tw)),
+      .y = base_y + TICK_LEN + MARGIN_SZ,
+    };
     renderTickText(lbl.data(), pos, TICK_COLOR);
   }
 }
@@ -918,18 +933,21 @@ void Window::Impl::drawTicks() const {
 //-------------------------------------------------------------------------------------------------
 void Window::Impl::drawAxisLabels() const {
   if (!x_label_tex.empty()) {
-    const SDL_FRect dst{ .x = plot_area.x + plot_area.w - static_cast<float>(x_label_tex.w),
-                         .y = static_cast<float>(window_h) - BORDER_SZ -
-                              static_cast<float>(x_label_tex.h),
-                         .w = static_cast<float>(x_label_tex.w),
-                         .h = static_cast<float>(x_label_tex.h) };
+    const SDL_FRect dst{
+      .x = plot_area.x + plot_area.w - static_cast<float>(x_label_tex.w),
+      .y = static_cast<float>(window_h) - BORDER_SZ - static_cast<float>(x_label_tex.h),
+      .w = static_cast<float>(x_label_tex.w),
+      .h = static_cast<float>(x_label_tex.h),
+    };
     SDL_CHECK(SDL_RenderTexture(renderer.get(), x_label_tex.texture.get(), nullptr, &dst));
   }
   if (!y_label_tex.empty()) {
-    const SDL_FRect dst{ .x = plot_area.x - static_cast<float>(y_label_tex.w) - MARGIN_SZ,
-                         .y = plot_area.y - static_cast<float>(y_label_tex.h),
-                         .w = static_cast<float>(y_label_tex.w),
-                         .h = static_cast<float>(y_label_tex.h) };
+    const SDL_FRect dst{
+      .x = plot_area.x - static_cast<float>(y_label_tex.w) - MARGIN_SZ,
+      .y = plot_area.y - static_cast<float>(y_label_tex.h),
+      .w = static_cast<float>(y_label_tex.w),
+      .h = static_cast<float>(y_label_tex.h),
+    };
     SDL_CHECK(SDL_RenderTexture(renderer.get(), y_label_tex.texture.get(), nullptr, &dst));
   }
 }
@@ -981,10 +999,12 @@ void Window::Impl::drawTitle() const {
     return;
   }
   static constexpr auto HALF = 0.5F;
-  const SDL_FRect dst{ .x = plot_area.x + (HALF * (plot_area.w - static_cast<float>(title_tex.w))),
-                       .y = BORDER_SZ,
-                       .w = static_cast<float>(title_tex.w),
-                       .h = static_cast<float>(title_tex.h) };
+  const SDL_FRect dst{
+    .x = plot_area.x + (HALF * (plot_area.w - static_cast<float>(title_tex.w))),
+    .y = BORDER_SZ,
+    .w = static_cast<float>(title_tex.w),
+    .h = static_cast<float>(title_tex.h),
+  };
   SDL_CHECK(SDL_RenderTexture(renderer.get(), title_tex.texture.get(), nullptr, &dst));
 }
 
@@ -1191,12 +1211,10 @@ void Window::Impl::onMouseWheel(const SDL_MouseWheelEvent& ev) {
     const double cur = (view.x_range_width > 0.0) ? view.x_range_width : total_x;
     static constexpr auto MIN_ZOOM_FRAC = 0.01;
     view.x_range_width = std::max(cur * ZOOM_IN, total_x * MIN_ZOOM_FRAC);
-  } else if (ev.y < 0) {
+  } else if (ev.y < 0 && !zoom_history.empty()) {
     // X zoom out — restore the previous zoom-in step
-    if (!zoom_history.empty()) {
-      view = zoom_history.back();
-      zoom_history.pop_back();
-    }
+    view = zoom_history.back();
+    zoom_history.pop_back();
   }
 }
 

@@ -39,14 +39,14 @@ void raiseMatchEvent(const eCAL::STopicId& topic_id, const eCAL::SPubEventCallba
                                     .id = topic_id.topic_id.entity_id, },
                  .status = grape::ipc::Match::Status::Matched,
                  .topic = { .name = topic_id.topic_name,
-                            .type_name = event_data.subscriber_datatype.name } });
+                            .type_name = event_data.subscriber_datatype.name, }, });
       return;
     case eCAL::ePublisherEvent::disconnected:
       match_cb({ .remote_entity = { .host = topic_id.topic_id.host_name,
                                     .id = topic_id.topic_id.entity_id, },
                  .status = grape::ipc::Match::Status::Unmatched,
                  .topic = { .name = topic_id.topic_name,
-                            .type_name = event_data.subscriber_datatype.name } });
+                            .type_name = event_data.subscriber_datatype.name, }, });
       return;
   }
 }
@@ -88,10 +88,9 @@ RawPublisher::RawPublisher(RawPublisher&&) noexcept = default;
 
 //-------------------------------------------------------------------------------------------------
 auto RawPublisher::publish(std::span<const std::byte> bytes) const -> std::expected<void, Error> {
-  if (not impl_->Send(bytes.data(), bytes.size(), WallClock::toMicros(WallClock::now()))) {
-    if (impl_->GetSubscriberCount() > 0U) {
-      return std::unexpected{ Error::PublishFailed };
-    }
+  if (not impl_->Send(bytes.data(), bytes.size(), WallClock::toMicros(WallClock::now())) &&
+      impl_->GetSubscriberCount() > 0U) {
+    return std::unexpected{ Error::PublishFailed };
   }
   return {};
 }

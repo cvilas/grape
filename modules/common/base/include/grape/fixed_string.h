@@ -7,7 +7,10 @@
 #include <algorithm>
 #include <array>
 #include <format>
+#include <span>
 #include <string_view>
+
+#include "grape/utils/attributes.h"
 
 namespace grape {
 
@@ -58,11 +61,11 @@ public:
     data_.at(std::min(N - 1, static_cast<std::size_t>(result.size))) = '\0';
   }
 
-  [[nodiscard]] constexpr auto cStr() const noexcept -> const CharT* {
+  [[nodiscard]] constexpr auto cStr() const noexcept GRAPE_LIFETIMEBOUND -> const CharT* {
     return data_.data();
   }
 
-  [[nodiscard]] constexpr auto data() const noexcept -> const CharT* {
+  [[nodiscard]] constexpr auto data() const noexcept GRAPE_LIFETIMEBOUND -> const CharT* {
     return data_.data();
   }
 
@@ -93,8 +96,9 @@ public:
   constexpr void append(const CharT* str, std::size_t len) {
     const auto current_length = length();
     const auto length_to_copy = std::min(len, (N - 1 - current_length));
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::copy(str, str + length_to_copy, data_.data() + current_length);
+    const auto source = std::span<const CharT>{ str, length_to_copy };
+    const auto destination = std::span{ data_ }.subspan(current_length, length_to_copy);
+    std::ranges::copy(source, destination.begin());
     data_.at(current_length + length_to_copy) = '\0';
   }
 
