@@ -6,6 +6,7 @@
 
 #include "grape/locomotion/arbiter_status.h"
 #include "grape/locomotion/command.h"
+#include "grape/utils/attributes.h"
 
 namespace grape::locomotion {
 
@@ -18,7 +19,7 @@ public:
   explicit AlternateCommandTopic(const std::string& robot_name)
     : topic_name_(robot_name + "/locomotion/command/alternate") {
   }
-  [[nodiscard]] auto topicName() const -> const std::string& {
+  [[nodiscard]] auto topicName() const GRAPE_LIFETIMEBOUND -> const std::string& {
     return topic_name_;
   }
 
@@ -35,7 +36,7 @@ public:
   explicit ArbiterStatusTopic(const std::string& robot_name)
     : topic_name_(robot_name + "/locomotion/arbiter/status") {
   }
-  [[nodiscard]] auto topicName() const -> const std::string& {
+  [[nodiscard]] auto topicName() const GRAPE_LIFETIMEBOUND -> const std::string& {
     return topic_name_;
   }
 

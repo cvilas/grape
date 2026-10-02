@@ -25,7 +25,7 @@ TEST_CASE("[Controller is configured correctly]", "[controller]") {
                   .pin("frequency", frequency, Role::Control)    //
                   .pin("waveforms", std::span<const double>{ waveforms }, Role::Watch);
 
-  using Signal = grape::probe::Signal;
+  using grape::probe::Signal;
   const auto controllables = pins.sort();
   CHECK(controllables.size() == 2);
   const auto& signals = pins.signals();

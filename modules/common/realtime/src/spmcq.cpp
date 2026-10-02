@@ -88,7 +88,7 @@ auto Writer::create(std::string_view name, const Config& config,
 
   // initialise the shared memory region
   auto impl = std::make_unique<Writer::Impl>(std::move(maybe_shm.value()));
-  auto shm = impl->data();
+  const auto shm = impl->data();
 
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   auto* ctrl = reinterpret_cast<Control*>(shm.data());
@@ -152,7 +152,7 @@ auto Reader::connect(std::string_view name) -> std::expected<Reader, Error> {
   }
 
   auto impl = std::make_unique<Reader::Impl>(std::move(maybe_shm.value()));
-  auto shm = impl->data();
+  const auto shm = impl->data();
 
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   auto* ctrl = reinterpret_cast<Control*>(shm.data());
@@ -166,7 +166,8 @@ auto Reader::connect(std::string_view name) -> std::expected<Reader, Error> {
   const auto expected_size = ctrl->frames_offset + frames_len;
   if (shm.size_bytes() < expected_size) {
     return std::unexpected{ Error{
-        std::format("'{}' has unexpected data size (too small)", name) } };
+        std::format("'{}' has unexpected data size (too small)", name),
+    } };
   }
 
   const auto control_len = sizeof(Control);

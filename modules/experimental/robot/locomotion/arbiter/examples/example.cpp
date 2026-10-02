@@ -56,7 +56,7 @@ auto main(int argc, const char* argv[]) -> int {
     // Create a dummy robot platform and hook command arbitrator to it
     auto robot = DummyRobot(robot_name);
     const auto robot_cb = [&robot](const grape::locomotion::Command& cmd) { robot.move(cmd); };
-    auto loco_service = grape::locomotion::Arbiter(robot_name, robot_cb);
+    const auto loco_service = grape::locomotion::Arbiter(robot_name, robot_cb);
 
     // That's it. Run the teleop client example to interact
     std::println("[{}] Locomotion service started. Press ctrl-c to exit.", robot_name);

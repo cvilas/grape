@@ -65,7 +65,7 @@ TEST_CASE("Locomotion command arbiter behaviours", "[Arbiter]") {
   grape::ipc::init(ipc_config);
   auto received_cmds = std::vector<grape::locomotion::Command>{};
   const auto robot_cb = [&received_cmds](const auto& cmd) { received_cmds.push_back(cmd); };
-  auto test_service = grape::locomotion::Arbiter(robot_name, robot_cb);
+  const auto test_service = grape::locomotion::Arbiter(robot_name, robot_cb);
   const auto on_loco_status = [](const auto&) {};
   auto test_client = TeleopEmulator(robot_name, on_loco_status);
 

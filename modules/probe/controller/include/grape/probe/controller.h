@@ -15,6 +15,7 @@
 #include "grape/fifo_buffer.h"
 #include "grape/probe/signal.h"
 #include "grape/probe/type_id.h"  // for NumericType, toTypeId
+#include "grape/utils/attributes.h"
 #include "grape/utils/enums.h"
 
 namespace grape::probe {
@@ -28,17 +29,19 @@ public:
   /// @param var The reference to the variable
   /// @param role whether monitored for logging-only or logging and control
   template <NumericType T>
-  auto pin(std::string_view name, const T& var, Signal::Role role) -> PinConfig&;
+  auto pin(std::string_view name, const T& var, Signal::Role role) GRAPE_LIFETIMEBOUND
+      -> PinConfig&;
 
   /// Pin a sequence variable (eg: vector, array) for monitoring
   /// @param name An identifier name for the variable
   /// @param var The reference to the variable
   /// @param role whether monitored for logging-only or logging and control
   template <NumericType T>
-  auto pin(std::string_view name, std::span<const T> var, Signal::Role role) -> PinConfig&;
+  auto pin(std::string_view name, std::span<const T> var, Signal::Role role) GRAPE_LIFETIMEBOUND
+      -> PinConfig&;
 
   /// @return Reference to internal array of pinned signals
-  [[nodiscard]] auto signals() const -> const std::vector<Signal>&;
+  [[nodiscard]] auto signals() const GRAPE_LIFETIMEBOUND -> const std::vector<Signal>&;
 
   /// Reorder the signals array by their location in the process address space but partition it to
   /// put watchables first and controllables after.
@@ -141,14 +144,15 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto PinConfig::pin(std::string_view name, const T& var, Signal::Role role) -> PinConfig& {
+auto PinConfig::pin(std::string_view name, const T& var, Signal::Role role) GRAPE_LIFETIMEBOUND
+    -> PinConfig& {
   return pin<T>(name, { &var, 1 }, role);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <NumericType T>
-auto PinConfig::pin(std::string_view name, std::span<const T> var, Signal::Role role)
-    -> PinConfig& {
+auto PinConfig::pin(std::string_view name, std::span<const T> var,
+                    Signal::Role role) GRAPE_LIFETIMEBOUND -> PinConfig& {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto addr = reinterpret_cast<std::uintptr_t>(var.data());
 

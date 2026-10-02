@@ -1,7 +1,7 @@
 # How to build GCC from source
 
 ```bash
-GCC_VERSION=16.0.1
+GCC_VERSION=16.2.0
 INSTALL_DIR=$HOME/programs/gcc-$GCC_VERSION
 
 # Download sources

@@ -62,8 +62,8 @@ void requestComplete(libcamera::Request* request) {
   // This allows a viewfinder and a still image to be processed at the same time, or to allow
   // obtaining the RAW capture buffer from the sensor along with the image as processed by the ISP.
   const auto& buffers = request->buffers();
-  for (auto buffer_pair : buffers) {
-    auto* buffer = buffer_pair.second;
+  for (const auto& buffer_pair : buffers) {
+    const auto* const buffer = buffer_pair.second;
     const auto& metadata = buffer->metadata();
 
     std::print(" seq: {}  bytes used: ", metadata.sequence);
@@ -215,7 +215,7 @@ auto main() -> int {
     // using a FrameBufferAllocator instance and referencing a configured Camera to determine the
     // appropriate buffer size and types to create.
     auto allocator = std::make_unique<libcamera::FrameBufferAllocator>(camera);
-    for (auto& cfg : *config) {
+    for (const auto& cfg : *config) {
       if (allocator->allocate(cfg.stream()) < 0) {
         std::println("Can't allocate buffers");
         return EXIT_FAILURE;
@@ -286,7 +286,7 @@ auto main() -> int {
     // For each delivered frame, the Slot connected to the Camera::requestCompleted Signal is
     // called.
     camera->start();
-    for (auto& request : requests) {
+    for (const auto& request : requests) {
       camera->queueRequest(request.get());
     }
 

@@ -53,7 +53,7 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
 
   // create pub/sub
   auto publisher = grape::ipc::Publisher(TestTopicAttributes{});
-  auto subscriber = grape::ipc::Subscriber(TestTopicAttributes{}, data_cb);
+  const auto subscriber = grape::ipc::Subscriber(TestTopicAttributes{}, data_cb);
 
   // wait for match
   constexpr auto RETRY_COUNT = 10U;

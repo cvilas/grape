@@ -57,7 +57,7 @@ auto readFromFile(const std::string& filename) -> std::optional<std::vector<std:
 
 constexpr auto BUF_SIZE = 1024U;
 using OutStream = grape::serdes::OutStream<BUF_SIZE>;
-using InStream = grape::serdes::InStream;
+using grape::serdes::InStream;
 using Serialiser = grape::serdes::Serialiser<OutStream>;
 using Deserialiser = grape::serdes::Deserialiser<InStream>;
 

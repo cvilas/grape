@@ -18,7 +18,7 @@ auto main() -> int {
     auto cm = std::make_unique<libcamera::CameraManager>();
     cm->start();
 
-    auto cameras = cm->cameras();
+    const auto cameras = cm->cameras();
     if (cameras.empty()) {
       grape::syslog::Critical("No cameras found.");
       cm->stop();
@@ -29,7 +29,7 @@ auto main() -> int {
       const auto& props = device->properties();
       const auto& model = props.get(libcamera::properties::Model);
       const auto& id = device->id();
-      auto camera = cm->get(id);
+      const auto camera = cm->get(id);
       grape::syslog::Note("{}\t({})", (model ? *model : "NoName"), id);
       const auto stream_configs =
           camera->generateConfiguration({ libcamera::StreamRole::Viewfinder });

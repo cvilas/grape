@@ -61,7 +61,7 @@ auto main() -> int {
     static constexpr auto PROCESS_INTERVAL = std::chrono::microseconds(2000);
     task_config.interval = PROCESS_INTERVAL;
 
-    task_config.setup = []() -> bool {
+    task_config.setup = [] -> bool {
       const auto is_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
       if (not is_cpu_set) {
         std::println("Unable to set CPU affinity (thread): {}", is_cpu_set.error().message());
@@ -77,7 +77,7 @@ auto main() -> int {
       return true;
     };
 
-    task_config.process = [&imu, &sample_buffer]() -> bool {
+    task_config.process = [&imu, &sample_buffer] -> bool {
       // read the IMU
       auto maybe_sample = imu.read();
       if (not maybe_sample) {

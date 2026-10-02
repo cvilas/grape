@@ -35,7 +35,7 @@ struct PoseStamped {
 
 constexpr auto BUFFER_INIT_SIZE = 1024U;
 using OutStream = grape::serdes::OutStream<BUFFER_INIT_SIZE>;
-using InStream = grape::serdes::InStream;
+using grape::serdes::InStream;
 using Serialiser = grape::serdes::Serialiser<OutStream>;
 using Deserialiser = grape::serdes::Deserialiser<InStream>;
 
@@ -45,7 +45,7 @@ void bmSerialize(benchmark::State& state) {
   auto buf = OutStream();
   auto serializer = Serialiser(buf);
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
     buf.reset();
     if (not serializer.pack(pos)) {
@@ -67,7 +67,7 @@ void bmDeserialize(benchmark::State& state) {
   }
 
   PoseStamped deserialized_pose;
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
     auto ibuf = InStream(obuf.data());
     auto deserializer = Deserialiser(ibuf);

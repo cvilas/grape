@@ -15,7 +15,7 @@
 
 namespace {
 
-using Signal = grape::probe::Signal;
+using grape::probe::Signal;
 
 //-------------------------------------------------------------------------------------------------
 /// Calculates memory size required to capture a snapshot frame
@@ -93,7 +93,7 @@ auto Controller::snap() -> Error {
     const auto buffer_size = buffer.size_bytes();
     for (const auto& sig : signals) {
       const auto count = length(sig.type) * sig.num_elements;
-      auto subspan = std::span(buffer).subspan(offset);
+      const auto subspan = std::span(buffer).subspan(offset);
       auto* dest = static_cast<void*>(subspan.data());
       offset += count;
       if (offset > buffer_size) {
@@ -136,7 +136,7 @@ void Controller::sync() {
       // this should never happen
       panic("Sync buffer too small");
     }
-    auto subspan = std::span(buffer).subspan(offset_size, count);
+    const auto subspan = std::span(buffer).subspan(offset_size, count);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     std::memcpy(std::bit_cast<void*>(it->address), subspan.data(), subspan.size_bytes());
   };

@@ -2,6 +2,7 @@
 // Copyright (C) 2026 GRAPE Contributors
 //=================================================================================================
 
+#include <atomic>
 #include <csignal>
 #include <print>
 #include <thread>
@@ -51,10 +52,10 @@ auto main() -> int {
     static constexpr auto CLOCK_NAME = "example_clock";
 
     // create and run master clock
-    auto master = std::jthread(masterClock, CLOCK_NAME);
+    const auto master = std::jthread(masterClock, CLOCK_NAME);
 
     // create and run follower clock
-    auto clk = grape::clock::FollowerClock(CLOCK_NAME);
+    const auto clk = grape::clock::FollowerClock(CLOCK_NAME);
 
     // wait for signs of life from broadcaster
     static constexpr auto STARTUP_TIMEOUT = std::chrono::milliseconds(5000);

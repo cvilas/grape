@@ -28,7 +28,7 @@ FollowerClock::FollowerClock(std::string_view source_name)
 
 //-------------------------------------------------------------------------------------------------
 auto FollowerClock::waitForNextTick(std::chrono::milliseconds timeout) const -> bool {
-  auto& tick = impl_->tick();
+  const auto& tick = impl_->tick();
   const auto result = tick.wait(tick.get(), timeout);
   return result.has_value() && result.value();
 }
@@ -40,7 +40,7 @@ auto FollowerClock::now() const noexcept -> FollowerClock::TimePoint {
 
 //-------------------------------------------------------------------------------------------------
 void FollowerClock::sleepUntil(const FollowerClock::TimePoint& tp) const {
-  auto& tick = impl_->tick();
+  const auto& tick = impl_->tick();
 
   static constexpr auto TICK_WAIT_TIMEOUT = std::chrono::milliseconds(500);
   auto current_nanos = tick.get();

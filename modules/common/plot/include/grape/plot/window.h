@@ -8,6 +8,8 @@
 #include <memory>
 #include <string>
 
+#include "grape/utils/attributes.h"
+
 namespace grape::plot {
 
 class Trace;
@@ -41,11 +43,11 @@ public:
   // Traces
   /// Create a named trace and return a reference to it.
   /// @return Reference to the newly created (or existing) trace.
-  [[nodiscard]] auto createTrace(const std::string& name) -> Trace&;
+  [[nodiscard]] auto createTrace(const std::string& name) GRAPE_LIFETIMEBOUND -> Trace&;
 
   /// Look up an existing trace by name.
   /// @return pointer to trace or nullptr if the name is not found.
-  [[nodiscard]] auto trace(const std::string& name) const -> Trace*;
+  [[nodiscard]] auto trace(const std::string& name) const GRAPE_LIFETIMEBOUND -> Trace*;
 
   /// Process events.
   /// @return False when the window has been closed.

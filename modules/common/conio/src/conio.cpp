@@ -34,8 +34,9 @@ auto getch() -> int {
   tcgetattr(STDIN_FILENO, &oldt);  // grab old terminal io settings
   struct termios newt = oldt;
   // disable buffered io
-  newt.c_lflag &= static_cast<tcflag_t>(~(ICANON | ECHO));  // NOLINT(hicpp-signed-bitwise)
-  tcsetattr(STDERR_FILENO, TCSANOW, &newt);                 // new settings set
+  const auto flags_to_disable = static_cast<tcflag_t>(ICANON | ECHO);
+  newt.c_lflag &= ~flags_to_disable;
+  tcsetattr(STDERR_FILENO, TCSANOW, &newt);  // new settings set
   const int ch = getchar();
   tcsetattr(STDERR_FILENO, TCSANOW, &oldt);  // terminal settings restored
   return ch;

@@ -14,9 +14,9 @@
 
 namespace {
 
-using Config = grape::spmcq::Config;
-using Reader = grape::spmcq::Reader;
-using Writer = grape::spmcq::Writer;
+using grape::spmcq::Config;
+using grape::spmcq::Reader;
+using grape::spmcq::Writer;
 
 //-------------------------------------------------------------------------------------------------
 auto uniqueShmName() -> std::string {
@@ -42,7 +42,7 @@ void bmSpmcqWrite(benchmark::State& state) {
     return true;
   };
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
     writer.visit(writer_fn);
     benchmark::ClobberMemory();
@@ -85,7 +85,7 @@ void bmSpmcqRead(benchmark::State& state) {
     return true;
   };
 
-  for (auto st : state) {
+  for (const auto st : state) {
     (void)st;
     auto status = reader.visit(reader_fn);
     benchmark::DoNotOptimize(status);

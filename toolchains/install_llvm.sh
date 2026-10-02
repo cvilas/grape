@@ -6,7 +6,7 @@
 
 set -e
 
-LLVM_VERSION=22
+LLVM_VERSION=23
 
 sudo apt-get install -y wget gnupg lsb-release software-properties-common
 

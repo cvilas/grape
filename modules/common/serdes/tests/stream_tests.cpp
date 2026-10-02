@@ -2,6 +2,10 @@
 // Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
+#include <algorithm>
+#include <span>
+#include <string>
+
 #include "catch2/catch_test_macros.hpp"
 #include "grape/serdes/stream.h"
 
@@ -10,18 +14,17 @@ namespace {
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 [[nodiscard]] constexpr auto toSpan(const std::string& str) -> std::span<const std::byte> {
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return { reinterpret_cast<const std::byte*>(str.data()), str.size() };
+  return std::as_bytes(std::span{ str });
 }
 
 [[nodiscard]] constexpr auto toSpan(std::string& str) -> std::span<std::byte> {
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return { reinterpret_cast<std::byte*>(str.data()), str.size() };
+  return std::as_writable_bytes(std::span{ str });
 }
 
 [[nodiscard]] auto toString(std::span<const std::byte> bytes) -> std::string {
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return { reinterpret_cast<const char*>(bytes.data()), bytes.size() };
+  auto str = std::string(bytes.size(), '\0');
+  std::ranges::copy(bytes, std::as_writable_bytes(std::span{ str }).begin());
+  return str;
 }
 
 //-------------------------------------------------------------------------------------------------

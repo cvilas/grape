@@ -58,7 +58,7 @@ struct WallClock {
 template <>
 struct std::formatter<grape::WallClock::Duration> : std::formatter<std::int64_t> {
   auto format(const grape::WallClock::Duration& dt, std::format_context& ctx) const {
-    auto it = std::formatter<std::int64_t>::format(dt.count(), ctx);
+    const auto it = std::formatter<std::int64_t>::format(dt.count(), ctx);
     return std::format_to(it, "ns");
   }
 };

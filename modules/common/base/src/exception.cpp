@@ -5,8 +5,13 @@
 
 #include "grape/exception.h"
 
+#include <array>
+#include <charconv>
+#include <concepts>
 #include <cstdio>
 #include <exception>
+#include <iterator>
+#include <limits>
 #include <span>
 #include <string_view>
 
@@ -14,9 +19,26 @@
 
 namespace grape {
 
+namespace {
+
+void write(std::string_view text) noexcept {
+  (void)std::fwrite(text.data(), sizeof(char), text.size(), stderr);
+}
+
+template <std::integral Integer>
+void write(Integer value) noexcept {
+  auto buffer = std::array<char, std::numeric_limits<Integer>::digits10 + 3U>{};
+  const auto result = std::to_chars(buffer.data(), std::next(buffer.data(), buffer.size()), value);
+  if (result.ec == std::errc{}) {
+    (void)std::fwrite(buffer.data(), sizeof(char),
+                      static_cast<std::size_t>(result.ptr - buffer.data()), stderr);
+  }
+}
+
+}  // namespace
+
 //-------------------------------------------------------------------------------------------------
 void Exception::print() noexcept {
-  // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
   try {
     if (std::current_exception() != nullptr) {
       throw;
@@ -24,19 +46,29 @@ void Exception::print() noexcept {
   } catch (const grape::Exception& ex) {
     const auto& loc = ex.location();
     const auto loc_fname = utils::truncate(loc.file_name(), "modules");
-    (void)fprintf(stderr, "\nException: %s\nin\n%s\nat\n%.*s:%u", ex.what(), loc.function_name(),
-                  static_cast<int>(loc_fname.length()), loc_fname.data(), loc.line());
-    (void)fprintf(stderr, "\nBacktrace:");
+    write("\nException: ");
+    write(ex.what());
+    write("\nin\n");
+    write(loc.function_name());
+    write("\nat\n");
+    write(loc_fname);
+    write(":");
+    write(loc.line());
+    write("\nBacktrace:");
     auto idx = 0U;
     for (const auto& trace : ex.trace().trace()) {
-      (void)fprintf(stderr, "\n#%u: %s", idx++, trace.c_str());
+      write("\n#");
+      write(idx++);
+      write(": ");
+      write(trace);
     }
   } catch (const std::exception& ex) {
-    (void)fprintf(stderr, "\nException: %s\n", ex.what());
+    write("\nException: ");
+    write(ex.what());
+    write("\n");
   } catch (...) {
-    (void)fputs("\nUnknown exception\n", stderr);
+    write("\nUnknown exception\n");
   }
-  // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 }
 
 }  // namespace grape

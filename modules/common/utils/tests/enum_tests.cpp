@@ -5,9 +5,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "grape/utils/enums.h"
 
-// NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange,misc-use-internal-linkage)
-
 // Test-case enumeration with customised range
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 enum class Color : std::int8_t { Red = -2, Green = 0, Blue = 1, Black = 2, White = 4 };
 
 template <>
@@ -28,14 +27,18 @@ TEST_CASE("Enum names are extracted correctly", "[enums]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Values outside enum range return empty string", "[enums]") {
+  // NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange)
   REQUIRE(grape::enums::name(static_cast<Color>(-3)).empty());
   REQUIRE(grape::enums::name(static_cast<Color>(5)).empty());
+  // NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Invalid values within enum range return empty string", "[enums]") {
+  // NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange)
   REQUIRE(grape::enums::name(static_cast<Color>(-1)).empty());
   REQUIRE(grape::enums::name(static_cast<Color>(3)).empty());
+  // NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -63,5 +66,3 @@ TEST_CASE("Invalid string name cannot be cast back to enum", "[enums]") {
 }
 
 }  // namespace
-
-// NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange,misc-use-internal-linkage)

@@ -65,4 +65,5 @@ add_executable(implot_example EXCLUDE_FROM_ALL ${IMPLOT_SOURCES_DIR}/examples/im
 apply_clang_format(implot_example)
 add_dependencies(examples implot_example)
 target_include_directories(implot_example SYSTEM PRIVATE ${IMPLOT_SOURCES_DIR} ${IMGUI_SOURCES_DIR})
-target_link_libraries(implot_example PRIVATE implotlib imguilib)
+target_link_libraries(implot_example PRIVATE implotlib imguilib grape::utils)
+set_target_properties(implot_example PROPERTIES CXX_CLANG_TIDY "")

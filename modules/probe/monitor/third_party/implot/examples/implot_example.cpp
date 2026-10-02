@@ -11,6 +11,7 @@
 
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+#include "grape/utils/attributes.h"
 #include "imgui.h"
 #include "implot.h"
 
@@ -145,7 +146,7 @@ public:
     }
   }
 
-  [[nodiscard]] auto data() const -> const ImVector<ImVec2>& {
+  [[nodiscard]] auto data() const GRAPE_LIFETIMEBOUND -> const ImVector<ImVec2>& {
     return data_;
   }
 

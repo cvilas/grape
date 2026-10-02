@@ -33,7 +33,7 @@ void init(const Config& config) {
       break;
   }
   eCAL::Initialize(ecal_config, config.name);
-  std::ignore = std::atexit([]() { eCAL::Finalize(); });
+  std::ignore = std::atexit([] { eCAL::Finalize(); });
 }
 
 //-------------------------------------------------------------------------------------------------

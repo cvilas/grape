@@ -49,7 +49,7 @@ auto main() -> int {
       }
     };
 
-    const auto consumer = [&mpscq]() -> void {
+    const auto consumer = [&mpscq] -> void {
       static constexpr auto REST_PERIOD = std::chrono::seconds(1);
       while (!s_exit) {
         if (mpscq.count() > 0) {

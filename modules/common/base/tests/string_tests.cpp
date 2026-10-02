@@ -50,7 +50,7 @@ TEST_CASE("Construction from const buffer", "[FixedString]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Copy construction", "[FixedString]") {
   constexpr FixedString8 STR{ "abc" };
-  auto str_copy = STR;
+  const auto str_copy = STR;
 
   CHECK(str_copy.length() == STR.length());
   CHECK_FALSE(STR.empty());

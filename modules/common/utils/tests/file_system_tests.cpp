@@ -74,7 +74,6 @@ auto executeAndCapture(const std::filesystem::path& program,
 }
 
 // NOLINTBEGIN(clang-analyzer-optin.core.EnumCastOutOfRange)
-
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Resolves file path in the right order", "[file_system]") {
   const auto user_data_path = grape::utils::getUserHomePath() / ".grape";
@@ -100,7 +99,7 @@ TEST_CASE("Resolves file path in the right order", "[file_system]") {
   // Try to open test file. It should be found in the current path
   const auto found_file = grape::utils::resolveFilePath(file_to_search);
   REQUIRE(found_file.has_value());
-  REQUIRE(*found_file == local_file_path);  // NOLINT(bugprone-unchecked-optional-access)
+  REQUIRE(found_file == local_file_path);
 
   // Remove the local file
   REQUIRE(std::filesystem::remove(local_file_path));
@@ -108,7 +107,7 @@ TEST_CASE("Resolves file path in the right order", "[file_system]") {
   // Try to open test file again. This time it should be found in the user data path
   const auto found_file2 = grape::utils::resolveFilePath(file_to_search);
   REQUIRE(found_file2.has_value());
-  REQUIRE(*found_file2 == user_file_path);  // NOLINT(bugprone-unchecked-optional-access)
+  REQUIRE(found_file2 == user_file_path);
 
   // Remove the user data file
   REQUIRE(std::filesystem::remove(user_file_path));
@@ -117,6 +116,7 @@ TEST_CASE("Resolves file path in the right order", "[file_system]") {
   const auto found_file3 = grape::utils::resolveFilePath(file_to_search);
   REQUIRE_FALSE(found_file3.has_value());
 }
+// NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Resolves system name in the right order", "[file_system]") {
@@ -156,7 +156,5 @@ TEST_CASE("Resolves system name in the right order", "[file_system]") {
     CHECK(std::filesystem::remove(data_path));
   }
 }
-
-// NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange)
 
 }  // namespace

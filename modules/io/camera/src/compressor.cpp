@@ -33,7 +33,7 @@ auto Compressor::compress(const ImageFrame& image) -> bool {
     buffer_.resize(max_dst_size);
   }
 
-  std::memcpy(buffer_.data(), &(image.header), HDR_SIZE);
+  std::memcpy(buffer_.data(), &image.header, HDR_SIZE);
 
   // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
   const auto compressed_data_size =

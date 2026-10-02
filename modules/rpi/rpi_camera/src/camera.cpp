@@ -228,7 +228,7 @@ void Camera::Impl::startCapture() {
   camera_started.store(true, std::memory_order_release);
 
   // Queue initial requests
-  for (auto& request : requests) {
+  for (const auto& request : requests) {
     if (queueRequest(request.get()) != 0) {
       panic("Failed to queue initial request");
     }
@@ -310,7 +310,7 @@ void Camera::acquire() {
   }
 
   // Get the buffer
-  auto* const buffer = request->findBuffer(impl_->stream);
+  const auto* const buffer = request->findBuffer(impl_->stream);
   if (buffer == nullptr) {
     syslog::Warn("No buffer found in request");
     request->reuse(libcamera::Request::ReuseBuffers);
@@ -345,10 +345,10 @@ void Camera::acquire() {
                     .width = static_cast<std::uint16_t>(stream_config.size.width),
                     .height = static_cast<std::uint16_t>(stream_config.size.height),
                   },
-                  .pixel_format = sdl_format
+                  .pixel_format = sdl_format,
                 },
               },
-    .pixels = { static_cast<std::byte*>(data), length }
+    .pixels = { static_cast<std::byte*>(data), length },
   };
 
   syslog::Debug("Image stride: {}, width: {}, height: {}", pitch, stream_config.size.width,

@@ -93,7 +93,7 @@ inline Thread::~Thread() {
 inline void Thread::start() {
   stop();
   exit_flag_.clear();
-  thread_ = std::thread([this]() -> void { threadFunction(); });
+  thread_ = std::thread([this] -> void { threadFunction(); });
 }
 
 //-------------------------------------------------------------------------------------------------

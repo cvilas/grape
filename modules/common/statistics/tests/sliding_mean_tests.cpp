@@ -15,26 +15,26 @@ TEST_CASE("SlidingMean: Tests simple cases", "[statistics][sliding_mean]") {
   auto sliding_mean = grape::statistics::SlidingMean<double, 5>{};
 
   SECTION("First value") {
-    auto stats = sliding_mean.append(42.0);
+    const auto stats = sliding_mean.append(42.0);
     REQUIRE(stats.mean == Catch::Approx(42.0));
     REQUIRE(stats.variance == Catch::Approx(0.0));  // Single value has zero variance
   }
 
   SECTION("Zero value") {
-    auto stats = sliding_mean.append(0.0);
+    const auto stats = sliding_mean.append(0.0);
     REQUIRE(stats.mean == Catch::Approx(0.0));
     REQUIRE(stats.variance == Catch::Approx(0.0));
   }
 
   SECTION("Negative value") {
-    auto stats = sliding_mean.append(-10.5);
+    const auto stats = sliding_mean.append(-10.5);
     REQUIRE(stats.mean == Catch::Approx(-10.5));
     REQUIRE(stats.variance == Catch::Approx(0.0));
   }
 
   SECTION("Equal values") {
     std::ignore = sliding_mean.append(5.0);
-    auto stats = sliding_mean.append(5.0);
+    const auto stats = sliding_mean.append(5.0);
     REQUIRE(stats.mean == Catch::Approx(5.0));
     REQUIRE(stats.variance == Catch::Approx(0.0));
   }
@@ -45,23 +45,23 @@ TEST_CASE("SlidingMean: Tests sliding window behavior", "[statistics][sliding_me
   static constexpr auto EPSILON = 1e-6;
   auto sliding_mean = grape::statistics::SlidingMean<double, 3>{};
 
-  auto stats1 = sliding_mean.append(1.0);
+  const auto stats1 = sliding_mean.append(1.0);
   REQUIRE(stats1.mean == Catch::Approx(1.0));
   REQUIRE(stats1.variance == Catch::Approx(0.0));
 
-  auto stats2 = sliding_mean.append(2.0);
+  const auto stats2 = sliding_mean.append(2.0);
   REQUIRE(stats2.mean == Catch::Approx(1.5));
   REQUIRE(stats2.variance == Catch::Approx(0.5));
 
-  auto stats3 = sliding_mean.append(5.0);
+  const auto stats3 = sliding_mean.append(5.0);
   REQUIRE(stats3.mean == Catch::Approx(2.666666).epsilon(EPSILON));
   REQUIRE(stats3.variance == Catch::Approx(4.333333).epsilon(EPSILON));
 
-  auto stats4 = sliding_mean.append(8.0);
+  const auto stats4 = sliding_mean.append(8.0);
   REQUIRE(stats4.mean == Catch::Approx(5.0));
   REQUIRE(stats4.variance == Catch::Approx(9.0));
 
-  auto stats5 = sliding_mean.append(9.0);
+  const auto stats5 = sliding_mean.append(9.0);
   REQUIRE(stats5.mean == Catch::Approx(7.333333).epsilon(EPSILON));
   REQUIRE(stats5.variance == Catch::Approx(4.333333).epsilon(EPSILON));
 }

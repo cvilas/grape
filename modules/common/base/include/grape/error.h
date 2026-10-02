@@ -7,6 +7,7 @@
 #include <source_location>
 
 #include "grape/fixed_string.h"
+#include "grape/utils/attributes.h"
 
 namespace grape {
 
@@ -34,7 +35,7 @@ public:
   }
 
   /// @return source location captured at construction
-  [[nodiscard]] constexpr auto location() const -> const std::source_location& {
+  [[nodiscard]] constexpr auto location() const GRAPE_LIFETIMEBOUND -> const std::source_location& {
     return location_;
   }
 

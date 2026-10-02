@@ -9,6 +9,7 @@
 #include <pthread.h>
 
 #include "grape/exception.h"
+#include "grape/utils/attributes.h"
 
 namespace grape::realtime {
 
@@ -33,7 +34,7 @@ public:
   void lock();
   void unlock() noexcept;
   [[nodiscard]] auto try_lock() noexcept -> bool;
-  [[nodiscard]] auto native_handle() -> native_handle_type;
+  [[nodiscard]] auto native_handle() GRAPE_LIFETIMEBOUND -> native_handle_type;
   // NOLINTEND(readability-identifier-naming)
 private:
   pthread_mutex_t mutex_{};
@@ -93,7 +94,7 @@ inline auto Mutex::try_lock() noexcept -> bool {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto Mutex::native_handle() -> native_handle_type {
+inline auto Mutex::native_handle() GRAPE_LIFETIMEBOUND -> native_handle_type {
   return &mutex_;
 }
 

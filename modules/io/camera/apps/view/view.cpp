@@ -152,7 +152,7 @@ auto SDL_AppInit(void** appstate, int argc, char* argv[]) -> SDL_AppResult {
 
     const auto camera_name_hint = args.get<std::string>("hint");
 
-    static auto app = std::make_unique<Application>(camera_name_hint);
+    static const auto app = std::make_unique<Application>(camera_name_hint);
     *appstate = app.get();
 
     return SDL_APP_CONTINUE;

@@ -30,6 +30,7 @@
 #include <unistd.h>    // for close, read
 
 #include "grape/joystick/controls.h"
+#include "grape/utils/attributes.h"
 #include "grape/wall_clock.h"
 
 struct timeval;
@@ -68,7 +69,7 @@ public:
   }
 
   /// @return Direct access to internal buffer
-  [[nodiscard]] constexpr auto data() -> std::uint8_t* {
+  [[nodiscard]] constexpr auto data() GRAPE_LIFETIMEBOUND -> std::uint8_t* {
     return data_.data();
   }
 
@@ -85,7 +86,7 @@ private:
 //-------------------------------------------------------------------------------------------------
 [[maybe_unused]] constexpr auto toControlType(unsigned int ev_type)
     -> grape::joystick::ControlType {
-  using ControlType = grape::joystick::ControlType;
+  using grape::joystick::ControlType;
   switch (ev_type) {
       // clang-format off
     case EV_KEY: return ControlType::Button;
@@ -97,7 +98,7 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 [[nodiscard]] constexpr auto toControlId(unsigned int ev_code) -> grape::joystick::ControlId {
-  using ControlId = grape::joystick::ControlId;
+  using grape::joystick::ControlId;
   switch (ev_code) {
       // clang-format off
     case ABS_X              : return ControlId::AxisX ;
@@ -231,7 +232,7 @@ auto readDeviceInfo(const std::filesystem::path& path) -> std::expected<DeviceIn
     return std::unexpected{ std::format("Cannot open device: {}", err.message()) };
   }
 
-  auto guard = ScopeGuard([fd]() noexcept -> void { ::close(fd); });
+  const auto guard = ScopeGuard([fd] noexcept -> void { ::close(fd); });
 
   constexpr auto MAX_NAME_LEN = 256U;
   std::array<char, MAX_NAME_LEN> name = { 0 };
@@ -274,7 +275,7 @@ struct Joystick::Impl {
 
 //-------------------------------------------------------------------------------------------------
 auto Joystick::Impl::normalise(ControlId axis, std::int32_t value) const -> float {
-  auto it = range.find(axis);
+  const auto it = range.find(axis);
   if (it == range.end()) {
     return 0.F;
   }

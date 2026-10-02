@@ -14,6 +14,7 @@
 #include "grape/fifo_buffer.h"
 #include "grape/plot/snapshot_buffer.h"
 #include "grape/plot/style.h"
+#include "grape/utils/attributes.h"
 
 namespace grape::plot {
 
@@ -22,7 +23,7 @@ namespace grape::plot {
 class Trace {
 public:
   // Name
-  [[nodiscard]] auto name() const -> const std::string&;
+  [[nodiscard]] auto name() const GRAPE_LIFETIMEBOUND -> const std::string&;
 
   // line style
   void setLineStyle(LineStyle style);

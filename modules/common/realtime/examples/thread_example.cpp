@@ -9,6 +9,7 @@
 
 #include "grape/realtime/schedule.h"
 #include "grape/realtime/thread.h"
+#include "grape/utils/attributes.h"
 
 namespace {
 
@@ -32,7 +33,7 @@ public:
     double variance{};
   };
   void addSample(double sample);
-  [[nodiscard]] auto stats() const -> const Stats&;
+  [[nodiscard]] auto stats() const GRAPE_LIFETIMEBOUND -> const Stats&;
 
 private:
   Stats stats_;
@@ -79,7 +80,7 @@ auto main() -> int {
     }
 
     // set task thread to run on a specific CPU with real-time scheduling policy
-    rt_task.setup = []() -> bool {
+    rt_task.setup = [] -> bool {
       std::println("Setup started");
       const auto is_task_cpu_set = grape::realtime::setCpuAffinity(CPUS_RT);
       if (not is_task_cpu_set) {
@@ -103,7 +104,7 @@ auto main() -> int {
     Profiler profiler;
 
     // set the periodic process function for the task thread
-    rt_task.process = [&profiler]() -> bool {
+    rt_task.process = [&profiler] -> bool {
       const auto tp = grape::realtime::Thread::ProcessClock::now();
       static auto last_tp = tp;
       const auto dt = std::chrono::duration<double>(tp - last_tp).count();
@@ -118,7 +119,7 @@ auto main() -> int {
     };
 
     // set the clean up function for the task thread
-    rt_task.teardown = []() -> void { std::println("\nTeardown"); };
+    rt_task.teardown = [] -> void { std::println("\nTeardown"); };
 
     // off we go. start the task
     auto task = grape::realtime::Thread(std::move(rt_task));
@@ -158,6 +159,6 @@ inline void Profiler::addSample(double sample) {
 }
 
 //-------------------------------------------------------------------------------------------------
-inline auto Profiler::stats() const -> const Profiler::Stats& {
+inline auto Profiler::stats() const GRAPE_LIFETIMEBOUND -> const Profiler::Stats& {
   return stats_;
 }

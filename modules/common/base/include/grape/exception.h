@@ -37,12 +37,12 @@ public:
   }
 
   /// @return Location in the source where the exception occurred
-  [[nodiscard]] auto location() const noexcept -> const std::source_location& {
+  [[nodiscard]] auto location() const noexcept GRAPE_LIFETIMEBOUND -> const std::source_location& {
     return location_;
   }
 
   /// @return Backtrace leading up to exception
-  [[nodiscard]] auto trace() const noexcept -> const utils::StackTrace& {
+  [[nodiscard]] auto trace() const noexcept GRAPE_LIFETIMEBOUND -> const utils::StackTrace& {
     return trace_;
   }
 

@@ -15,9 +15,11 @@ namespace {
 //-------------------------------------------------------------------------------------------------
 auto toEndpointInfo(const eCAL::STopicId& id, const eCAL::SDataTypeInformation& type_info)
     -> grape::ipc::EndpointInfo {
-  return { .entity_id = { .host = id.topic_id.host_name, .id = id.topic_id.entity_id },
-           .type_name = type_info.name,
-           .encoding = type_info.encoding };
+  return {
+    .entity_id = { .host = id.topic_id.host_name, .id = id.topic_id.entity_id },
+    .type_name = type_info.name,
+    .encoding = type_info.encoding,
+  };
 }
 }  // namespace
 

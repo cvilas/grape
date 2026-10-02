@@ -36,7 +36,7 @@ TEST_CASE("Basic pub-sub on large message works in host-only scope", "[ipc]") {
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(CHAR_MIN, CHAR_MAX);
   std::ranges::generate(payload,
-                        [&gen, &dis]() -> std::byte { return static_cast<std::byte>(dis(gen)); });
+                        [&gen, &dis] -> std::byte { return static_cast<std::byte>(dis(gen)); });
 
   // define subscriber callback
   std::binary_semaphore is_data_received{ 0 };
@@ -56,13 +56,13 @@ TEST_CASE("Basic pub-sub on large message works in host-only scope", "[ipc]") {
   const auto pub_match_cb = [&matched_sub_id](const grape::ipc::Match& match) -> void {
     matched_sub_id = match.remote_entity.id;
   };
-  auto publisher = grape::ipc::RawPublisher(topic, pub_match_cb);
+  const auto publisher = grape::ipc::RawPublisher(topic, pub_match_cb);
 
   auto matched_pub_id = 0UL;
   const auto sub_match_cb = [&matched_pub_id](const grape::ipc::Match& match) -> void {
     matched_pub_id = match.remote_entity.id;
   };
-  auto subscriber = grape::ipc::RawSubscriber(topic, qos, recv_callback, sub_match_cb);
+  const auto subscriber = grape::ipc::RawSubscriber(topic, qos, recv_callback, sub_match_cb);
 
   // Wait for pub/sub registration
   constexpr auto RETRY_COUNT = 10U;

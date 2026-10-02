@@ -56,7 +56,7 @@ auto main() -> int {
       }
     };
 
-    const auto consumer = [&buffer]() -> void {
+    const auto consumer = [&buffer] -> void {
       static constexpr auto REST_PERIOD = std::chrono::seconds(1);
       while (!s_exit) {
         std::uint64_t value{};

@@ -21,7 +21,7 @@ struct CustomSink : public grape::log::Sink {
 // Demonstrates how to redirect logs to a custom output stream in a custom format
 auto main() -> int {
   try {
-    auto log_file = std::ofstream("logs.txt");
+    const auto log_file = std::ofstream("logs.txt");
     grape::log::Config config;
     config.sink = std::make_shared<CustomSink>();
     auto logger = grape::log::Logger(std::move(config));

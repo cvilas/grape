@@ -46,7 +46,7 @@ void Logger::sinkLoop(const std::stop_token& st) noexcept {
 //-------------------------------------------------------------------------------------------------
 void Logger::flush() noexcept {
   try {
-    auto record_reader = [this](std::span<const std::byte> frame) -> void {
+    const auto record_reader = [this](std::span<const std::byte> frame) -> void {
       assert(sizeof(Record) == frame.size_bytes());
       if (config_.sink != nullptr) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)

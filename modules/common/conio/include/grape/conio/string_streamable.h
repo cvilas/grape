@@ -7,6 +7,8 @@
 #include <sstream>
 #include <vector>
 
+#include "grape/utils/attributes.h"
+
 namespace grape::conio {
 
 //=================================================================================================
@@ -37,8 +39,8 @@ concept StringStreamable = BasicStringStreamable<T> || std::is_enum_v<T> ||
 //=================================================================================================
 /// Input stream operator for std::vector<T> - reads comma-separated values
 template <BasicStringStreamable T>
-auto operator>>(std::istream& is, std::vector<T>& vec) -> std::istream& {
-  vec.clear();
+auto operator>>(std::istream& is GRAPE_LIFETIMEBOUND, std::vector<T>& vec) -> std::istream& {
+  auto parsed_values = std::vector<T>{};
   if (std::string line; std::getline(is, line)) {
     auto iss = std::istringstream(line);
     auto token = std::string{};
@@ -48,9 +50,10 @@ auto operator>>(std::istream& is, std::vector<T>& vec) -> std::istream& {
       auto value_stream = std::istringstream(token);
       T value;
       value_stream >> value;
-      vec.emplace_back(std::move(value));
+      parsed_values.emplace_back(std::move(value));
     }
   }
+  vec = std::move(parsed_values);
   return is;
 }
 

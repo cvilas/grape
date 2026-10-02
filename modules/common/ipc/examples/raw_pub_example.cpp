@@ -25,7 +25,7 @@ auto main() -> int {
       std::println("\n{} (entity: {})", toString(match.status), toString(match.remote_entity));
     };
 
-    auto publisher = grape::ipc::RawPublisher(topic, match_cb);
+    const auto publisher = grape::ipc::RawPublisher(topic, match_cb);
 
     const auto to_bytes = [](const std::string& msg) -> std::span<const std::byte> {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)

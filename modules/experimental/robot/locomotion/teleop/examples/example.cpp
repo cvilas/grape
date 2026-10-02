@@ -52,10 +52,8 @@ auto main(int argc, const char* argv[]) -> int {
           std::println("Teleop {}", (enable ? "requested" : "request cancelled"));
         }
       }
-      if (enable) {
-        if (not teleoperator.send(grape::locomotion::KeepAliveCmd{})) {
-          std::println("Failed to send command");
-        }
+      if (enable && not teleoperator.send(grape::locomotion::KeepAliveCmd{})) {
+        std::println("Failed to send command");
       }
       std::this_thread::sleep_for(CONTROL_PERIOD);
     }

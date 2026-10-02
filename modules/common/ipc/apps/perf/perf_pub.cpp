@@ -68,7 +68,7 @@ auto main(int argc, const char* argv[]) -> int {
                    toString(match.remote_entity), match.topic.type_name);
     };
 
-    auto pub = grape::ipc::RawPublisher(grape::ipc::ex::perf::topic(), match_cb);
+    const auto pub = grape::ipc::RawPublisher(grape::ipc::ex::perf::topic(), match_cb);
     auto next_tick = std::chrono::steady_clock::now();
     std::println("Press CTRL-C to quit");
     while (grape::ipc::ok()) {

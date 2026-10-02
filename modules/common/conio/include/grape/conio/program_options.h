@@ -15,6 +15,7 @@
 
 #include "grape/conio/string_streamable.h"
 #include "grape/exception.h"
+#include "grape/utils/attributes.h"
 #include "grape/utils/enums.h"
 #include "grape/utils/utils.h"
 
@@ -113,8 +114,9 @@ constexpr ProgramDescription::ProgramDescription(std::string_view brief) {
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-constexpr auto ProgramDescription::declareOption(this auto&& self, std::string_view key,
-                                                 std::string_view brief) -> decltype(auto) {
+constexpr auto ProgramDescription::declareOption(this auto&& self GRAPE_LIFETIMEBOUND,
+                                                 std::string_view key, std::string_view brief)
+    -> decltype(auto) {
   if (key == HELP_KEY) {
     panic(std::format("'{}' is a reserved option key", key));
   }
@@ -139,9 +141,9 @@ constexpr auto ProgramDescription::declareOption(this auto&& self, std::string_v
 
 //-------------------------------------------------------------------------------------------------
 template <StringStreamable T>
-constexpr auto ProgramDescription::declareOption(this auto&& self, std::string_view key,
-                                                 std::string_view brief, const T& default_value)
-    -> decltype(auto) {
+constexpr auto ProgramDescription::declareOption(this auto&& self GRAPE_LIFETIMEBOUND,
+                                                 std::string_view key, std::string_view brief,
+                                                 const T& default_value) -> decltype(auto) {
   if (key == HELP_KEY) {
     panic(std::format("'{}' is a reserved option key", key));
   }

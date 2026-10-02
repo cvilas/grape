@@ -20,11 +20,9 @@ TEST_CASE("Baseline single producer and single consumer case", "[mpsc_queue]") {
 
   REQUIRE(queue.count() == 3U);
 
-  // NOLINTBEGIN(bugprone-unchecked-optional-access)
-  REQUIRE(queue.tryPop().value() == 1);
-  REQUIRE(queue.tryPop().value() == 2);
-  REQUIRE(queue.tryPop().value() == 3);
-  // NOLINTEND(bugprone-unchecked-optional-access)
+  REQUIRE(queue.tryPop() == 1);
+  REQUIRE(queue.tryPop() == 2);
+  REQUIRE(queue.tryPop() == 3);
 
   REQUIRE(queue.count() == 0U);
 }
@@ -40,7 +38,7 @@ TEST_CASE("Multiple producers should be able to push", "[mpsc_queue]") {
   std::vector<std::thread> producers;
   producers.reserve(NUM_PRODUCERS);
   for (std::size_t i = 0; i < NUM_PRODUCERS; ++i) {
-    producers.emplace_back([&queue, i]() -> void {
+    producers.emplace_back([&queue, i] -> void {
       for (std::size_t j = 0; j < NUM_ITEMS_PER_PRODUCER; ++j) {
         std::ignore = queue.tryPush(static_cast<int>((i * NUM_ITEMS_PER_PRODUCER) + j));
       }
