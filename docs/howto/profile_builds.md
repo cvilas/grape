@@ -1,6 +1,6 @@
 # How to profile builds
 
-To profile the build process and determine bottlenecks:
+To profile and identify bottlenecks in the build process:
 
 * Configure to use `Ninja` as the build system generator
 * Build. The profiling information gets logged in `.ninja_log` in the build directory
