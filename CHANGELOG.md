@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1](https://github.com/cvilas/grape/compare/v0.10.0...v0.10.1) (2026-10-03)
+
+
+### Bug Fixes
+
+* **docs:** fixes errors in install instructions ([4cb8731](https://github.com/cvilas/grape/commit/4cb873151f3301861475cab49109735f494f3335))
+* **many:** supports CTAD properly ([4bc4472](https://github.com/cvilas/grape/commit/4bc4472804b29b825e9fe1ddea88ef25e159e7ea))
+
 ## [0.10.0](https://github.com/cvilas/grape/compare/v0.9.0...v0.2.0) (2026-10-03)
 
 * **external:** updates SDL to v3.4.18 ([5442711](https://github.com/cvilas/grape/commit/5442711be4b75bb374bb29533098eedf1d811199))
