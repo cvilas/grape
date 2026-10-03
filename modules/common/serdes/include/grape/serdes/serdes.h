@@ -124,6 +124,9 @@ private:
   Stream& stream_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 };
 
+template <WritableStream Stream>
+Serialiser(Stream&) -> Serialiser<Stream>;
+
 //=================================================================================================
 /// Deserialises data encoded with Serialiser class
 template <ReadableStream Stream>
@@ -259,5 +262,8 @@ private:
 
   Stream& stream_;  // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 };
+
+template <ReadableStream Stream>
+Deserialiser(Stream&) -> Deserialiser<Stream>;
 
 }  // namespace grape::serdes

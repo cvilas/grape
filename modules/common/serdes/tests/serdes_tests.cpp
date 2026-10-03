@@ -2,6 +2,8 @@
 // Copyright (C) 2024 GRAPE Contributors
 //=================================================================================================
 
+#include <type_traits>
+
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "grape/serdes/serdes.h"
@@ -16,6 +18,21 @@ using OutStream = grape::serdes::OutStream<BUF_SIZE>;
 using grape::serdes::InStream;
 using Serialiser = grape::serdes::Serialiser<OutStream>;
 using Deserialiser = grape::serdes::Deserialiser<InStream>;
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Deduce serdes stream types", "[serdes]") {
+  auto ostream = OutStream();
+  auto ser = grape::serdes::Serialiser(ostream);
+  static_assert(std::is_same_v<decltype(ser), Serialiser>);
+  REQUIRE(ser.pack(std::int32_t{ 42 }));
+
+  auto istream = InStream(ostream.data());
+  auto des = grape::serdes::Deserialiser(istream);
+  static_assert(std::is_same_v<decltype(des), Deserialiser>);
+  std::int32_t value{};
+  REQUIRE(des.unpack(value));
+  REQUIRE(value == 42);
+}
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Serialise arithmetic types", "[serdes]") {

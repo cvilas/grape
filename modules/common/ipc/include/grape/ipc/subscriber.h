@@ -27,6 +27,10 @@ public:
              MatchCallback&& match_cb = nullptr);
 };
 
+template <TopicAttributes TopicAttr>
+Subscriber(const TopicAttr&, typename Subscriber<TopicAttr>::DataCallback&&,
+           MatchCallback&& = nullptr) -> Subscriber<TopicAttr>;
+
 //-------------------------------------------------------------------------------------------------
 template <TopicAttributes TopicAttr>
 Subscriber<TopicAttr>::Subscriber(const TopicAttr& topic_attr, DataCallback&& data_cb,

@@ -8,8 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # required by source analysis tools
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Baseline compiler warning settings for project and external targets
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 set(THIRD_PARTY_COMPILER_WARNINGS -Wall -Wextra -Wpedantic)
+add_compile_options(${THIRD_PARTY_COMPILER_WARNINGS} -Werror)
 
 # clang warnings
 set(CLANG_WARNINGS -Weverything
@@ -23,7 +23,6 @@ set(CLANG_WARNINGS -Weverything
   -Wno-unsafe-buffer-usage
   -Wno-padded
   -Wno-switch-default
-  -Wno-ctad-maybe-unsupported
   -Wno-global-constructors
   -Wno-weak-vtables
   -Wno-exit-time-destructors

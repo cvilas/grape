@@ -56,6 +56,9 @@ private:
   ExitFn exit_fn_;
 };
 
+template <std::invocable ExitFn>
+ScopeGuard(ExitFn&&) -> ScopeGuard<ExitFn>;
+
 //=================================================================================================
 /// Mimics std::bitset but provides a subset of functionality
 template <std::size_t N>
