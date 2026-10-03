@@ -42,6 +42,19 @@ with section("parse"):
         'PRIVATE_LINK_LIBS': '*'
       }
     },
+    'define_module_bench': {
+      'flags': [],
+      'kwargs': {
+        'NAME': '*',
+        'SOURCES': '*',
+        'PUBLIC_INCLUDE_PATHS': '*',
+        'PRIVATE_INCLUDE_PATHS': '*',
+        'SYSTEM_PUBLIC_INCLUDE_PATHS': '*',
+        'SYSTEM_PRIVATE_INCLUDE_PATHS': '*',
+        'PUBLIC_LINK_LIBS': '*',
+        'PRIVATE_LINK_LIBS': '*'
+      }
+    },
     'define_module_app': {
       'flags': [],
       'kwargs': {
@@ -303,4 +316,3 @@ with section("misc"):
   # A dictionary containing any per-command configuration overrides. Currently
   # only `command_case` is supported.
   per_command = {}
-

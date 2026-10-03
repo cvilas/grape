@@ -23,12 +23,9 @@ set(CLANG_WARNINGS -Weverything
   -Wno-unsafe-buffer-usage
   -Wno-padded
   -Wno-switch-default
-  -Wno-global-constructors
-  -Wno-weak-vtables
   -Wno-exit-time-destructors
   -Wno-documentation-unknown-command
   -Wno-reserved-macro-identifier
-  -Wno-old-style-cast
   -Wfunction-effects # https://clang.llvm.org/docs/FunctionEffectAnalysis.html
   -Wperf-constraint-implies-noexcept
   -Wno-c2y-extensions
@@ -45,7 +42,7 @@ set(GCC_WARNINGS
   -Wconversion # warn on type conversions that may lose data
   -Wsign-conversion # warn on sign conversions
   -Wnull-dereference # warn if a null dereference is detected
-  -Wdouble-promotion # warn if float is implicit promoted to double
+  -Wdouble-promotion # warn if float is implicitly promoted to double
   -Wformat=2 # warn on security issues around functions that format output (ie printf)
   -Wimplicit-fallthrough # warn on statements that fallthrough without an explicit annotation
   -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist

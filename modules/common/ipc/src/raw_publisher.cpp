@@ -60,7 +60,15 @@ struct RawPublisher::Impl : public eCAL::CPublisher {
        const eCAL::PubEventCallbackT& event_cb, const eCAL::Publisher::Configuration& config)
     : eCAL::CPublisher(topic_name, type_info, event_cb, config) {
   }
+  ~Impl() override;
+  Impl(const Impl&) = delete;
+  Impl(Impl&&) noexcept = default;
+  auto operator=(const Impl&) -> Impl& = delete;
+  auto operator=(Impl&&) noexcept -> Impl& = default;
 };
+
+//-------------------------------------------------------------------------------------------------
+RawPublisher::Impl::~Impl() = default;
 
 //-------------------------------------------------------------------------------------------------
 RawPublisher::RawPublisher(const Topic& topic, MatchCallback&& match_cb) {

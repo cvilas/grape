@@ -390,6 +390,40 @@ function(define_module_example)
 
 endfunction()
 
+#=================================================================================================
+# Set up facilities for google benchmark framework
+set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+  benchmark
+  URL ${CMAKE_SOURCE_DIR}/external/sources/benchmark-${BENCHMARK_VERSION_REQUIRED}.tar.gz
+  EXCLUDE_FROM_ALL
+  SYSTEM)
+set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "")
+FetchContent_MakeAvailable(benchmark)
+target_compile_options(benchmark PRIVATE -w)
+set_target_properties(benchmark PROPERTIES CXX_CLANG_TIDY "")
+
+#==================================================================================================
+# Function: define_module_bench
+#
+# Description:
+#   Defines a Google Benchmark executable with the same arguments and build behaviour as
+#   define_module_example. Automatically links benchmark::benchmark.
+# Note:
+#   - Benchmarks remain part of the examples target and are not installed.
+#
+function(define_module_bench)
+  cmake_parse_arguments(BENCH_ARG "" "NAME" "" ${ARGN})
+  define_module_example(${ARGN})
+
+  set(TARGET_NAME ${CMAKE_PROJECT_NAME}_${MODULE_NAME}_${BENCH_ARG_NAME})
+  target_link_libraries(${TARGET_NAME} PRIVATE benchmark::benchmark)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${TARGET_NAME} PRIVATE -Wno-global-constructors)
+  endif()
+endfunction()
+
 #==================================================================================================
 # Function: define_module_app
 #
@@ -880,16 +914,3 @@ if(NOT CMAKE_CROSSCOMPILING)
   endif(DOXYGEN_FOUND)
 endif(NOT CMAKE_CROSSCOMPILING)
 
-#=================================================================================================
-# Set up facilities for google benchmark framework
-set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
-FetchContent_Declare(
-  benchmark
-  URL ${CMAKE_SOURCE_DIR}/external/sources/benchmark-${BENCHMARK_VERSION_REQUIRED}.tar.gz
-  EXCLUDE_FROM_ALL
-  SYSTEM)
-set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "")
-set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "")
-FetchContent_MakeAvailable(benchmark)
-target_compile_options(benchmark PRIVATE -w)
-set_target_properties(benchmark PROPERTIES CXX_CLANG_TIDY "")
