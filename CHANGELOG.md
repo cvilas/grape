@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/cvilas/grape/compare/v0.9.0...v0.10.0) (2026-10-03)
+
+
+### Features
+
+* **external:** updates SDL to v3.4.18 ([5442711](https://github.com/cvilas/grape/commit/5442711be4b75bb374bb29533098eedf1d811199))
+
 ## [0.9.0](https://github.com/cvilas/grape/compare/v0.8.0...v0.9.0) (2026-10-02)
 
 
