@@ -1,9 +1,6 @@
-# Graphics
+# Graphics: Why SDL3
 
-## SDL vs GLFW
-
-- GLFW is much simpler and mostly sufficient for our needs
-- GLFW is required for MuJoCo
+GLFW is much simpler and mostly sufficient for our needs
 
 However, SDL3 offers the following advantages
 - Platform independent camera support

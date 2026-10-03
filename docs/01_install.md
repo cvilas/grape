@@ -45,8 +45,8 @@ Using Clang toolchain:
 
 ```bash
 git clone git@github.com:cvilas/grape
-cmake --preset clang
-cmake --build build/clang --target all examples check
+cmake --preset llvm
+cmake --build build/llvm --target all examples check
 ```
 
 Using GCC:
