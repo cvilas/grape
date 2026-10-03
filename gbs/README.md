@@ -37,6 +37,7 @@ Modules can be fully self-contained, or depend on other modules or external proj
   - Add/modify library targets with `define_module_library()`
   - Declare dependencies to other modules by modifying `declare_module()`
   - Add example programs in `examples` sub-directory with `define_module_example()`
+  - Add Google Benchmark programs with `define_module_bench()`
   - Add test programs in `tests` sub-directory with `define_module_test()`
   - Add executables in `apps` sub-directory with `define_module_app()`
   - Add documentation files in `docs` sub-directory.
@@ -128,4 +129,3 @@ cmake --build build/native --parallel --target grape_show_version
 ## Uninstalling
 
 Run `<install_prefix>/bin/uninstall.sh`.
-

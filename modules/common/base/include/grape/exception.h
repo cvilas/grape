@@ -26,7 +26,7 @@ namespace grape {
 ///
 /// @todo Integrate std::stacktrace when compiler support becomes available
 /// @include exception_example.cpp
-class Exception : std::runtime_error {
+class Exception : public std::runtime_error {
 public:
   /// @param message A context-specific description of the error
   /// @param location Source location where the error was triggered
@@ -35,6 +35,12 @@ public:
             utils::StackTrace trace)
     : std::runtime_error{ message }, location_{ location }, trace_{ std::move(trace) } {
   }
+
+  ~Exception() override;
+  Exception(const Exception&) = default;
+  Exception(Exception&&) = default;
+  auto operator=(const Exception&) -> Exception& = default;
+  auto operator=(Exception&&) -> Exception& = default;
 
   /// @return Location in the source where the exception occurred
   [[nodiscard]] auto location() const noexcept GRAPE_LIFETIMEBOUND -> const std::source_location& {

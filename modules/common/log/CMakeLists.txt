@@ -19,7 +19,7 @@ set(HEADERS
     include/grape/log/severity.h
     include/grape/log/syslog.h)
 
-set(SOURCES src/logger.cpp src/syslog.cpp)
+set(SOURCES src/logger.cpp src/sink.cpp src/syslog.cpp)
 
 # library target
 define_module_library(

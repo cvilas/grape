@@ -38,6 +38,9 @@ void write(Integer value) noexcept {
 }  // namespace
 
 //-------------------------------------------------------------------------------------------------
+Exception::~Exception() = default;
+
+//-------------------------------------------------------------------------------------------------
 void Exception::print() noexcept {
   try {
     if (std::current_exception() != nullptr) {

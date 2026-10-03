@@ -21,7 +21,7 @@ concept Formatter = requires(const Record& record) {
 //=================================================================================================
 /// Abstract interface for log sinks
 struct Sink {
-  virtual ~Sink() = default;
+  virtual ~Sink();
   virtual void write(const Record& record) = 0;
 
   Sink(Sink const&) = delete;

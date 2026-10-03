@@ -71,7 +71,15 @@ struct RawSubscriber::Impl : public eCAL::CSubscriber {
        const eCAL::SubEventCallbackT& event_cb, const eCAL::Subscriber::Configuration& config)
     : eCAL::CSubscriber(topic_name, type_info, event_cb, config) {
   }
+  ~Impl() override;
+  Impl(const Impl&) = delete;
+  Impl(Impl&&) noexcept = default;
+  auto operator=(const Impl&) -> Impl& = delete;
+  auto operator=(Impl&&) noexcept -> Impl& = default;
 };
+
+//-------------------------------------------------------------------------------------------------
+RawSubscriber::Impl::~Impl() = default;
 
 //-------------------------------------------------------------------------------------------------
 RawSubscriber::RawSubscriber(const Topic& topic, QoS qos, RawSubscriber::DataCallback&& data_cb,

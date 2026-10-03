@@ -25,6 +25,7 @@ namespace grape::syslog {
 void init(log::Config&& config);
 
 /// @return system logger instance
+/// @note The logger is destroyed at shutdown; avoid using it from static object destructors.
 auto instance() -> log::Logger&;
 
 //-------------------------------------------------------------------------------------------------
