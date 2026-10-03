@@ -38,6 +38,9 @@ private:
   grape::ipc::Publisher<Topic> publisher_;
 };
 
+template <grape::ipc::TopicAttributes Topic>
+ParameterPublisher(const Topic&, typename Topic::DataType) -> ParameterPublisher<Topic>;
+
 //-------------------------------------------------------------------------------------------------
 std::atomic_flag s_exit = false;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 

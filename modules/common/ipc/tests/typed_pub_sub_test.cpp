@@ -6,6 +6,7 @@
 #include <random>
 #include <semaphore>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
@@ -54,6 +55,9 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   // create pub/sub
   auto publisher = grape::ipc::Publisher(TestTopicAttributes{});
   const auto subscriber = grape::ipc::Subscriber(TestTopicAttributes{}, data_cb);
+  static_assert(std::is_same_v<decltype(publisher), grape::ipc::Publisher<TestTopicAttributes>>);
+  static_assert(
+      std::is_same_v<decltype(subscriber), const grape::ipc::Subscriber<TestTopicAttributes>>);
 
   // wait for match
   constexpr auto RETRY_COUNT = 10U;

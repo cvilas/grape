@@ -26,6 +26,9 @@ private:
   serdes::Serialiser<OutStream> serialiser_;
 };
 
+template <TopicAttributes TopicAttr>
+Publisher(const TopicAttr&, MatchCallback&& = nullptr) -> Publisher<TopicAttr>;
+
 //-------------------------------------------------------------------------------------------------
 template <TopicAttributes TopicAttr>
 Publisher<TopicAttr>::Publisher(const TopicAttr& topic_attr, MatchCallback&& match_cb)
