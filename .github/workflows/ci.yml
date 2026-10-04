@@ -130,10 +130,10 @@ jobs:
           fi
       
       - name: Build (gcc)
-        run: cmake --build build/native --target all examples tests --parallel
+        run: cmake --build build/native --target all examples tests --parallel "$(nproc)"
       
       - name: Run unit tests (gcc)
-        run: cmake --build build/native --target check --parallel
+        run: cmake --build build/native --target check --parallel "$(nproc)"
 
       - name: Report ccache stats
         run: ccache -s
