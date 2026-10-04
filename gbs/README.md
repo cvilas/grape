@@ -126,6 +126,33 @@ Example 2: Build version check target:
 cmake --build build/native --parallel --target grape_show_version
 ```
 
+### GCC CI memory budget
+
+After LLVM tests, CI runs `toolchains/gcc_build_jobs.py` and exports its positive
+job count as `GCC_BUILD_JOBS` and `CMAKE_BUILD_PARALLEL_LEVEL` for GCC configuration,
+dependency builds, build, and check. LLVM concurrency is unchanged.
+
+The count is `max(1, min(nproc, floor(max(0, available - reserve) / per_job)))`.
+The workflow's tunable integer-GiB parameters are `GCC_MEMORY_RESERVE_GIB` (default
+1, allows zero) and `GCC_MEMORY_PER_JOB_GIB` (default 2, must be positive).
+They must fit in signed 64-bit bytes. These are conservative heuristics, **not
+measured compiler usage**.
+
+Available memory is Linux `/proc/meminfo`'s `MemAvailable` (kB interpreted as KiB,
+excluding swap), capped by finite cgroup v2/v1 limits minus current usage for the
+process's memory cgroup and visible ancestors, located via `/proc/self/cgroup`
+and `/proc/self/mountinfo`. Hidden ancestors cannot be inspected. Missing or
+malformed detection/parameters fall back to one job and log the reason; insufficient
+memory also selects one job. One translation unit, overlapping dependency builds,
+or other concurrent workloads can exceed the budget: this reduces memory pressure,
+but does not guarantee against OOM or diagnose the reported runner failure.
+
+Run fixture tests without allocating real memory:
+
+```sh
+python3 -B -m unittest discover -s toolchains/tests -v
+```
+
 ## Uninstalling
 
 Run `<install_prefix>/bin/uninstall.sh`.

@@ -120,6 +120,17 @@ jobs:
       - name: Run unit tests (llvm)
         run: cmake --build build/llvm --target check --parallel
 
+      - name: Determine GCC build concurrency
+        env:
+          # Tunable conservative heuristics, not measured compiler usage (integer GiB).
+          GCC_MEMORY_RESERVE_GIB: "1"
+          GCC_MEMORY_PER_JOB_GIB: "2"
+        run: |
+          python3 -B -m unittest discover -s toolchains/tests -v
+          GCC_BUILD_JOBS="$(python3 toolchains/gcc_build_jobs.py)"
+          echo "GCC_BUILD_JOBS=${GCC_BUILD_JOBS}" >> "$GITHUB_ENV"
+          echo "CMAKE_BUILD_PARALLEL_LEVEL=${GCC_BUILD_JOBS}" >> "$GITHUB_ENV"
+
       - name: Configure (gcc)
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -130,10 +141,10 @@ jobs:
           fi
       
       - name: Build (gcc)
-        run: cmake --build build/native --target all examples tests --parallel
+        run: cmake --build build/native --target all examples tests --parallel "$GCC_BUILD_JOBS"
       
       - name: Run unit tests (gcc)
-        run: cmake --build build/native --target check --parallel
+        run: cmake --build build/native --target check --parallel "$GCC_BUILD_JOBS"
 
       - name: Report ccache stats
         run: ccache -s
