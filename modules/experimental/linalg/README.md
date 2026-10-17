@@ -41,6 +41,7 @@ A simple linear algebra library for robotic applications
   - [ ] invert
 - [ ] Quaternion class and supporting free functions
 - [ ] [Automatic differentiation](https://solidean.com/blog/2026/fwd-diff-autodiff-cpp/)
+- [ ] refator to combine math functions from experimental/splat
 
 ## References
 
