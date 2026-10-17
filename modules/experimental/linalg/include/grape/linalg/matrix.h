@@ -16,13 +16,9 @@ template <std::size_t NumRows, std::size_t NumColumns, typename Scalar = double>
   requires std::integral<Scalar> || std::floating_point<Scalar>
 class Matrix {
 public:
-  constexpr auto operator[](std::size_t row, std::size_t col) GRAPE_LIFETIMEBOUND->Scalar& {
-    return storage_.at((row * NumColumns) + col);
-  }
-
-  constexpr auto operator[](std::size_t row,
-                            std::size_t col) const GRAPE_LIFETIMEBOUND->const Scalar& {
-    return storage_.at((row * NumColumns) + col);
+  constexpr auto operator[](this auto&& self GRAPE_LIFETIMEBOUND, std::size_t row, std::size_t col)
+      -> decltype(auto) {
+    return self.storage_.at((row * NumColumns) + col);
   }
 
   // todo - make this clear

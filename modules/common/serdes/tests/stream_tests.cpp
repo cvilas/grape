@@ -40,6 +40,11 @@ TEST_CASE("OutStream functionality", "[OutStream]") {
     REQUIRE(out.write(toSpan("Hello")));
     REQUIRE(out.size() == 5);
     REQUIRE(toString(out.data()) == "Hello");
+    out.data().at(0) = std::byte{ 'J' };
+    REQUIRE(toString(out.data()) == "Jello");
+
+    const auto& const_out = out;
+    REQUIRE(toString(const_out.data()) == "Jello");
   }
 
   SECTION("Write beyond capacity") {

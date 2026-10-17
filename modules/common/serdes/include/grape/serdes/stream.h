@@ -33,14 +33,9 @@ public:
     return true;
   }
 
-  /// @return Pointer to the stream buffer
-  [[nodiscard]] constexpr auto data() -> std::span<std::byte> {
-    return { buf_.data(), offset_ };
-  }
-
-  /// @return Immutable pointer to the stream buffer
-  [[nodiscard]] constexpr auto data() const -> std::span<const std::byte> {
-    return { buf_.data(), offset_ };
+  /// @return Span over the bytes written so far
+  [[nodiscard]] constexpr auto data(this auto&& self) {
+    return std::span{ self.buf_ }.first(self.offset_);
   }
 
   /// @return Number of bytes written so far in the stream buffer

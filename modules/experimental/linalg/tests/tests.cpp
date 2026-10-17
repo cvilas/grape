@@ -4,6 +4,7 @@
 
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "grape/linalg/matrix.h"
 #include "grape/linalg/quaternion.h"
 
 namespace {
@@ -99,6 +100,15 @@ TEST_CASE("Identity quaternion produces the identity rotation matrix", "[linalg]
   REQUIRE(matrix[2, 0] == Approx(0.0));
   REQUIRE(matrix[2, 1] == Approx(0.0));
   REQUIRE(matrix[2, 2] == Approx(1.0));
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Matrix indexing preserves object constness", "[linalg]") {
+  auto matrix = grape::linalg::Matrix<2, 2>{};
+  matrix[0, 0] = 1;
+
+  const auto& const_matrix = matrix;
+  REQUIRE(const_matrix[0, 0] == 1);
 }
 
 //-------------------------------------------------------------------------------------------------
