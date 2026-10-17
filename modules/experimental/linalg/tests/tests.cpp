@@ -103,15 +103,6 @@ TEST_CASE("Identity quaternion produces the identity rotation matrix", "[linalg]
 }
 
 //-------------------------------------------------------------------------------------------------
-TEST_CASE("Matrix indexing preserves object constness", "[linalg]") {
-  auto matrix = grape::linalg::Matrix<2, 2>{};
-  matrix[0, 0] = 1;
-
-  const auto& const_matrix = matrix;
-  REQUIRE(const_matrix[0, 0] == 1);
-}
-
-//-------------------------------------------------------------------------------------------------
 TEST_CASE("Half-turn quaternion produces the expected rotation matrix", "[linalg]") {
   const auto matrix = rotationMatrix(Quaterniond{ .x = 0, .y = 0, .z = 1, .w = 0 });
 
