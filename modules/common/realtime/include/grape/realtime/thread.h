@@ -92,13 +92,13 @@ inline Thread::~Thread() {
 //-------------------------------------------------------------------------------------------------
 inline void Thread::start() {
   stop();
-  exit_flag_.clear();
+  exit_flag_.clear(std::memory_order_relaxed);
   thread_ = std::thread([this] -> void { threadFunction(); });
 }
 
 //-------------------------------------------------------------------------------------------------
 inline void Thread::stop() noexcept {
-  exit_flag_.test_and_set();
+  exit_flag_.test_and_set(std::memory_order_relaxed);
   if (thread_.joinable()) {
     thread_.join();
   }
@@ -120,7 +120,7 @@ inline void Thread::threadFunction() noexcept {
 
     bool continue_process = true;
     auto wakeup_tp = ProcessClock::now();
-    while (continue_process and not exit_flag_.test()) {
+    while (continue_process and not exit_flag_.test(std::memory_order_relaxed)) {
       continue_process = config_.process();
       const auto now_tp = ProcessClock::now();
       const auto dt = now_tp - wakeup_tp;

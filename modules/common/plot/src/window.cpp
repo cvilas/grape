@@ -1098,7 +1098,7 @@ auto Window::isLegendEnabled() const -> bool {
 
 //-------------------------------------------------------------------------------------------------
 bool Window::isOpen() const {
-  return impl_->open;
+  return impl_->open.load(std::memory_order_relaxed);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1224,12 +1224,12 @@ auto Window::processEvents() -> bool {
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
       case SDL_EVENT_QUIT:
-        impl_->open = false;
+        impl_->open.store(false, std::memory_order_relaxed);
         break;
 
       case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
         if (event.window.windowID == impl_->window_id) {
-          impl_->open = false;
+          impl_->open.store(false, std::memory_order_relaxed);
         }
         break;
 
@@ -1268,7 +1268,7 @@ auto Window::processEvents() -> bool {
         break;
     }
   }
-  return impl_->open;
+  return impl_->open.load(std::memory_order_relaxed);
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -80,7 +80,7 @@ Display::~Display() = default;
 
 //-------------------------------------------------------------------------------------------------
 void Display::showTimestamp(bool en) {
-  show_timestamp_ = en;
+  show_timestamp_.store(en, std::memory_order_relaxed);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ void Display::render(const ImageFrame& frame) {
   }
 
   // render OSD
-  if (show_timestamp_) {
+  if (show_timestamp_.load(std::memory_order_relaxed)) {
     // set font color
     static constexpr auto COLOR = std::array<Uint8, 4>{ 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE };
     if (not SDL_SetRenderDrawColor(renderer, COLOR.at(0), COLOR.at(1), COLOR.at(2), COLOR.at(3))) {
