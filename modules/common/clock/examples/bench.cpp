@@ -2,6 +2,9 @@
 // Copyright (C) 2025 GRAPE Contributors
 //=================================================================================================
 
+#include <chrono>
+#include <thread>
+
 #include <benchmark/benchmark.h>
 
 #include "grape/clock/clock_broadcaster.h"
@@ -9,6 +12,9 @@
 #include "grape/wall_clock.h"
 
 namespace {
+
+constexpr auto TICK_PERIOD =
+    std::chrono::milliseconds(10);  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
 //-------------------------------------------------------------------------------------------------
 void bmClockBroadcasterPost(benchmark::State& state) {
@@ -19,6 +25,7 @@ void bmClockBroadcasterPost(benchmark::State& state) {
 
   for (const auto unused : state) {
     (void)unused;
+    tp += TICK_PERIOD;
     broadcaster.post(tp);
     benchmark::DoNotOptimize(tp);
   }
@@ -29,9 +36,20 @@ BENCHMARK(bmClockBroadcasterPost)->Unit(benchmark::kNanosecond);
 
 //-------------------------------------------------------------------------------------------------
 void bmFollowerClockNow(benchmark::State& state) {
-  const auto* const clock_name = "bm_clock";
+  static constexpr auto CLOCK_NAME = "bm_clock_now";
 
-  const auto clock = grape::clock::FollowerClock(clock_name);
+  auto broadcaster = grape::clock::ClockBroadcaster({ .name = CLOCK_NAME });
+  const auto clock = grape::clock::FollowerClock(CLOCK_NAME);
+  auto tp = grape::clock::FollowerClock::TimePoint{};
+  broadcaster.post(tp);
+  const auto tick_thread =
+      std::jthread([&broadcaster, tp](const std::stop_token& stop_token) mutable {
+        while (not stop_token.stop_requested()) {
+          tp += TICK_PERIOD;
+          broadcaster.post(tp);
+          std::this_thread::sleep_for(TICK_PERIOD);
+        }
+      });
 
   for (const auto unused : state) {
     (void)unused;

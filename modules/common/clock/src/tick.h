@@ -88,12 +88,12 @@ struct ShmTick : SharedMemory {
 
 //-------------------------------------------------------------------------------------------------
 inline auto Tick::get() const -> std::int64_t {
-  return nanos_.load(std::memory_order_acquire);
+  return nanos_.load(std::memory_order_relaxed);
 }
 
 //-------------------------------------------------------------------------------------------------
 inline void Tick::post(std::int64_t value) {
-  nanos_.store(value, std::memory_order_release);
+  nanos_.store(value, std::memory_order_relaxed);
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
   const auto result = syscall(SYS_futex, &nanos_, FUTEX_WAKE, INT_MAX, nullptr, nullptr, 0);
   if (result == -1) {
