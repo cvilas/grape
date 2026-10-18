@@ -2,12 +2,45 @@
 // Copyright (C) 2018 GRAPE Contributors
 //=================================================================================================
 
+#include <stdexcept>
 #include <thread>
+#include <utility>
 
 #include "catch2/catch_test_macros.hpp"
 #include "grape/realtime/mpsc_queue.h"
 
 namespace {
+
+// NOLINTBEGIN(cppcoreguidelines-special-member-functions, bugprone-exception-escape,
+//             cppcoreguidelines-noexcept-move-operations)
+struct ThrowOnMove {
+  int value{};
+  static inline auto throw_on_move = false;
+
+  ThrowOnMove() = default;
+  explicit ThrowOnMove(int val) : value(val) {
+  }
+  ~ThrowOnMove() = default;
+  ThrowOnMove(const ThrowOnMove&) = delete;
+  auto operator=(const ThrowOnMove&) -> ThrowOnMove& = delete;
+
+  ThrowOnMove(ThrowOnMove&& other) {
+    if (std::exchange(throw_on_move, false)) {
+      throw std::runtime_error("move");
+    }
+    value = std::exchange(other.value, 0);
+  }
+
+  auto operator=(ThrowOnMove&& other) -> ThrowOnMove& {
+    if (std::exchange(throw_on_move, false)) {
+      throw std::runtime_error("move");
+    }
+    value = std::exchange(other.value, 0);
+    return *this;
+  }
+};
+// NOLINTEND(cppcoreguidelines-special-member-functions, bugprone-exception-escape,
+//           cppcoreguidelines-noexcept-move-operations)
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Baseline single producer and single consumer case", "[mpsc_queue]") {
@@ -79,6 +112,24 @@ TEST_CASE("Popping empty queue should return false", "[mpsc_queue]") {
   grape::realtime::MPSCQueue<int> queue(CAPACITY);
 
   REQUIRE_FALSE(queue.tryPop().has_value());
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("A failed pop keeps the item available for retry", "[mpsc_queue]") {
+  static constexpr auto EXPECTED = 42;
+  grape::realtime::MPSCQueue<ThrowOnMove> queue(1U);
+  REQUIRE(queue.tryPush(ThrowOnMove{ EXPECTED }));
+
+  ThrowOnMove::throw_on_move = true;
+  REQUIRE_THROWS_AS(queue.tryPop(), std::runtime_error);
+  REQUIRE(queue.count() == 1U);
+
+  const auto item = queue.tryPop();
+  REQUIRE(item.has_value());
+  if (item.has_value()) {
+    REQUIRE(item->value == EXPECTED);
+  }
+  REQUIRE(queue.count() == 0U);
 }
 
 }  // namespace

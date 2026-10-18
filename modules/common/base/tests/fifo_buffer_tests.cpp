@@ -2,6 +2,8 @@
 // Copyright (C) 2018 GRAPE Contributors
 //=================================================================================================
 
+#include <stdexcept>
+
 #include "catch2/catch_test_macros.hpp"
 #include "grape/fifo_buffer.h"
 
@@ -65,6 +67,26 @@ TEST_CASE("Attempt to read from an empty buffer should fail", "[FIFOBuffer]") {
     // Attempting to read from an empty buffer
   }));
   REQUIRE(buffer.count() == 0);
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("A failed read keeps the frame available for retry", "[FIFOBuffer]") {
+  constexpr grape::FIFOBuffer::Config CONFIG{ .frame_length = 1U, .num_frames = 1U };
+  grape::FIFOBuffer buffer(CONFIG);
+  REQUIRE(buffer.visitToWrite(
+      [](std::span<std::byte> frame) -> void { frame.front() = std::byte{ 42 }; }));
+
+  REQUIRE_THROWS_AS(buffer.visitToRead([](std::span<const std::byte>) -> void {
+    throw std::runtime_error("read");
+  }),
+                    std::runtime_error);
+  REQUIRE(buffer.count() == 1U);
+
+  auto value = std::byte{};
+  REQUIRE(buffer.visitToRead(
+      [&value](std::span<const std::byte> frame) -> void { value = frame.front(); }));
+  REQUIRE(value == std::byte{ 42 });
+  REQUIRE(buffer.count() == 0U);
 }
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

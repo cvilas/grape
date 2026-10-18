@@ -94,11 +94,12 @@ auto FIFOBuffer::visitToRead(F&& func) -> bool {
     return false;
   }
 
-  // read frame
-  readability_flag.clear(std::memory_order_release);
+  // read frame before allowing a producer to reuse this slot
   const auto frame_offset = tail_ * config_.frame_length;
   const auto frame_start = std::next(std::begin(buffer_), static_cast<std::int64_t>(frame_offset));
   std::forward<F>(func)(std::span{ frame_start, config_.frame_length });
+
+  readability_flag.clear(std::memory_order_release);
 
   if (++tail_ >= config_.num_frames) {
     tail_ = 0;
