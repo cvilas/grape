@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.12.0](https://github.com/cvilas/grape/compare/v0.11.0...v0.12.0) (2026-10-25)
+
+* **gui:** packages imgui and implot separately ([4ecef5d](https://github.com/cvilas/grape/commit/4ecef5d0f3573e266b5188001e0e66f5f1acd177))
+
 ## [0.11.0](https://github.com/cvilas/grape/compare/v0.10.0...v0.11.0) (2026-10-17)
 
 * **external:** updates catch2 to v3.16.1 ([a38757b](https://github.com/cvilas/grape/commit/a38757be81539993790b0ebacbd268a449069349))
