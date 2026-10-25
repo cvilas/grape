@@ -15,20 +15,20 @@
 #include <utility>       // for unreachable, move
 #include <vector>
 
-#include <SDL3/SDL_error.h>   // for SDL_GetError
-#include <SDL3/SDL_events.h>  // for SDL_EventType, SDL_Pol...
-#include <SDL3/SDL_init.h>    // for SDL_INIT_VIDEO, SDL_Init
-#include <SDL3/SDL_render.h>  // for SDL_CreateRenderer
-#include <SDL3/SDL_video.h>   // for SDL_CreateWindow, SDL_...
+#include <SDL3/SDL_error.h>                          // for SDL_GetError
+#include <SDL3/SDL_events.h>                         // for SDL_EventType, SDL_Pol...
+#include <SDL3/SDL_init.h>                           // for SDL_INIT_VIDEO, SDL_Init
+#include <SDL3/SDL_render.h>                         // for SDL_CreateRenderer
+#include <SDL3/SDL_video.h>                          // for SDL_CreateWindow, SDL_...
+#include <imgui/backends/imgui_impl_sdl3.h>          // for ImGui_ImplSDL3_InitFor...
+#include <imgui/backends/imgui_impl_sdlrenderer3.h>  // for ImGui_ImplSDLRenderer3...
+#include <imgui/imgui.h>                             // for ImGuiDataType_, ImGuiIO
+#include <implot/implot.h>                           // for ImPlotPoint, ImPlotAxi...
 
-#include "backends/imgui_impl_sdl3.h"          // for ImGui_ImplSDL3_InitFor...
-#include "backends/imgui_impl_sdlrenderer3.h"  // for ImGui_ImplSDLRenderer3...
-#include "grape/exception.h"                   // for panic
-#include "grape/probe/signal.h"                // for Signal
-#include "grape/probe/type_id.h"               // for TypeId, length
+#include "grape/exception.h"      // for panic
+#include "grape/probe/signal.h"   // for Signal
+#include "grape/probe/type_id.h"  // for TypeId, length
 #include "grape/utils/attributes.h"
-#include "imgui.h"   // for ImGuiDataType_, ImGuiIO
-#include "implot.h"  // for ImPlotPoint, ImPlotAxi...
 
 struct ImGuiContext;
 struct ImPlotContext;
@@ -349,6 +349,7 @@ Monitor::Monitor() : impl_{ std::make_unique<Impl>() } {
     panic(std::format("Error: ImGui_ImplSDLRenderer3_Init: {}", SDL_GetError()));
   }
 
+  ImPlot::SetImGuiContext(impl_->imgui_ctx);
   impl_->implot_ctx = ImPlot::CreateContext();
   if (nullptr == impl_->implot_ctx) {
     std::ignore = std::fputs("Error: ImPlot::CreateContext\n", stderr);
@@ -455,7 +456,7 @@ void Monitor::drawPlots() {
     }
     if (signal.role == Signal::Role::Watch && ImPlot::BeginPlot(signal_name, PLOT_SIZE)) {
       ImPlot::SetupAxes(nullptr, nullptr, AXIS_FLAGS_X, AXIS_FLAGS_Y);
-      ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, PLOT_FILL_ALPHA);
+      const ImPlotSpec plot_spec(ImPlotProp_FillAlpha, PLOT_FILL_ALPHA);
       ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
       // TODO(vilas): X axis limits must come from time in data history rather than t
       ImPlot::SetupAxisLimits(ImAxis_X1, ts - static_cast<double>(history), ts, ImGuiCond_Always);
@@ -466,8 +467,7 @@ void Monitor::drawPlots() {
         }
         impl_->signals_buffer->markTrace({ .index = signal_number, .sub_index = trace_number });
         ImPlot::PlotLineG(trace_name.c_str(), detail::signalDataGetter, impl_->signals_buffer.get(),
-                          static_cast<int>(impl_->signals_buffer->length()),
-                          /*ImPlotLineFlags*/ 0);
+                          static_cast<int>(impl_->signals_buffer->length()), plot_spec);
         // TODO(vilas): use PlotLineEx directly when reading off separate timestamp and signals
       }
       ImPlot::EndPlot();
