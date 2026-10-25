@@ -5,9 +5,11 @@
 declare_module(
   NAME probe_monitor
   DEPENDS_ON_MODULES "probe_controller"
-  DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
+  DEPENDS_ON_EXTERNAL_PROJECTS "SDL3;imgui;implot")
 
 find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
+find_package(imgui ${IMGUI_VERSION_REQUIRED} EXACT REQUIRED CONFIG)
+find_package(implot ${IMPLOT_VERSION_REQUIRED} EXACT REQUIRED CONFIG)
 
 # library sources
 set(HEADERS include/grape/probe/monitor.h)
@@ -17,14 +19,9 @@ set(SOURCES src/monitor.cpp)
 define_module_library(
   NAME probe_monitor
   PUBLIC_LINK_LIBS "grape::probe_controller"
-  PRIVATE_LINK_LIBS $<BUILD_LOCAL_INTERFACE:imguilib> $<BUILD_LOCAL_INTERFACE:implotlib>
+  PRIVATE_LINK_LIBS "implot::implot;imgui::sdl3;imgui::sdlrenderer3"
   SOURCES ${SOURCES}
-  PUBLIC_HEADERS ${HEADERS}
-  PRIVATE_INCLUDE_PATHS ""
-  SYSTEM_PRIVATE_INCLUDE_PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/ ${CMAKE_CURRENT_SOURCE_DIR}/third_party/implot/
-    ${CMAKE_BINARY_DIR}/external/deploy/include)
+  PUBLIC_HEADERS ${HEADERS})
 
 # Subprojects
-add_subdirectory(third_party)
 add_subdirectory(examples)

@@ -77,6 +77,13 @@ endif()
 
 # -------------------------------------------------------------------------------------------------
 # SDL3
+if(implot IN_LIST EXTERNAL_PROJECTS_LIST)
+  list(APPEND EXTERNAL_PROJECTS_LIST imgui)
+endif()
+if(imgui IN_LIST EXTERNAL_PROJECTS_LIST)
+  list(APPEND EXTERNAL_PROJECTS_LIST SDL3)
+endif()
+
 if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
   find_package(SDL3 ${SDL3_VERSION_REQUIRED} QUIET)
   if(SDL3_FOUND)
@@ -102,6 +109,76 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
       SDL3
       URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL-release-${SDL3_VERSION_REQUIRED}.tar.gz
       CMAKE_ARGS ${SDL3_CMAKE_ARGS})
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# ImGui (SDL3 platform, SDL_Renderer and SDL_GPU backends)
+set(GUI_LIBRARY_TYPE STATIC_LIBRARY)
+if(BUILD_SHARED_LIBS)
+  set(GUI_LIBRARY_TYPE SHARED_LIBRARY)
+endif()
+
+if(imgui IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(imgui ${IMGUI_VERSION_REQUIRED} EXACT QUIET CONFIG)
+  set(IMGUI_LIBRARY_TYPE "")
+  if(TARGET imgui::imgui)
+    get_target_property(IMGUI_LIBRARY_TYPE imgui::imgui TYPE)
+  endif()
+  if(imgui_FOUND AND TARGET imgui::sdl3
+      AND TARGET imgui::sdlrenderer3 AND TARGET imgui::sdlgpu3
+      AND IMGUI_LIBRARY_TYPE STREQUAL GUI_LIBRARY_TYPE)
+    message(STATUS "imgui: Using version ${imgui_VERSION} from ${imgui_DIR}")
+    set(IMGUI_PACKAGE_DIR ${imgui_DIR})
+    add_dummy_target(imgui)
+  else()
+    message(STATUS "imgui: Building ${IMGUI_VERSION_REQUIRED} from source")
+    set(IMGUI_PACKAGE_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/cmake/imgui)
+    ExternalProject_Add(
+      imgui
+      URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/imgui-${IMGUI_VERSION_REQUIRED}.tar.gz
+      CONFIGURE_COMMAND
+        ${CMAKE_COMMAND}
+        -G ${CMAKE_GENERATOR}
+        -S ${CMAKE_CURRENT_SOURCE_DIR}/wrappers/imgui
+        -B <BINARY_DIR>
+        ${EP_CMAKE_EXTRA_ARGS}
+        -DIMGUI_SOURCE_DIR=<SOURCE_DIR>
+        -DIMGUI_PACKAGE_VERSION=${IMGUI_VERSION_REQUIRED}
+        -DSDL3_VERSION_REQUIRED=${SDL3_VERSION_REQUIRED}
+      DEPENDS SDL3)
+  endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# ImPlot
+if(implot IN_LIST EXTERNAL_PROJECTS_LIST)
+  find_package(implot ${IMPLOT_VERSION_REQUIRED} EXACT QUIET CONFIG)
+  set(IMPLOT_LIBRARY_TYPE "")
+  if(TARGET implot::implot)
+    get_target_property(IMPLOT_LIBRARY_TYPE implot::implot TYPE)
+  endif()
+  if(implot_FOUND AND TARGET implot::implot
+      AND IMPLOT_LIBRARY_TYPE STREQUAL GUI_LIBRARY_TYPE
+      AND IMGUI_LIBRARY_TYPE STREQUAL GUI_LIBRARY_TYPE)
+    message(STATUS "implot: Using version ${implot_VERSION} from ${implot_DIR}")
+    add_dummy_target(implot)
+  else()
+    message(STATUS "implot: Building ${IMPLOT_VERSION_REQUIRED} from source")
+    ExternalProject_Add(
+      implot
+      URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/implot-${IMPLOT_VERSION_REQUIRED}.tar.gz
+      CONFIGURE_COMMAND
+        ${CMAKE_COMMAND}
+        -G ${CMAKE_GENERATOR}
+        -S ${CMAKE_CURRENT_SOURCE_DIR}/wrappers/implot
+        -B <BINARY_DIR>
+        ${EP_CMAKE_EXTRA_ARGS}
+        -DIMPLOT_SOURCE_DIR=<SOURCE_DIR>
+        -DIMPLOT_PACKAGE_VERSION=${IMPLOT_VERSION_REQUIRED}
+        -DIMGUI_VERSION_REQUIRED=${IMGUI_VERSION_REQUIRED}
+        -Dimgui_DIR=${IMGUI_PACKAGE_DIR}
+      DEPENDS imgui)
   endif()
 endif()
 

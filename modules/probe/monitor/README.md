@@ -17,7 +17,6 @@ Provide more details on the functionality, API usage, etc
 ## TODO
 
 - Refine and integrate [concept](../concept/README.md) with this README
-- Refactor imgui and implot out as a separate static-only library. Make it usable in other modules
 - Implement pub (Controller) and sub (Monitor)
 - Incorporate changes to PoC.
   - :done: Make it easy to identify timestamp field with `Signal::Role::Timestamp`  

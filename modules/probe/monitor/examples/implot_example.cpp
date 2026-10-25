@@ -8,12 +8,12 @@
 #include <string>
 
 #include <SDL3/SDL.h>
+#include <imgui/backends/imgui_impl_sdl3.h>
+#include <imgui/backends/imgui_impl_sdlrenderer3.h>
+#include <imgui/imgui.h>
+#include <implot/implot.h>
 
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
 #include "grape/utils/attributes.h"
-#include "imgui.h"
-#include "implot.h"
 
 namespace {
 //=================================================================================================
@@ -75,6 +75,7 @@ ImplotExample::ImplotExample() {
     std::println("Error: ImGui_ImplSDLRenderer3_Init");
   }
 
+  ImPlot::SetImGuiContext(ImGui::GetCurrentContext());
   if (ImPlot::CreateContext() == nullptr) {
     std::println("Error: ImPlot::CreateContext");
   }
@@ -182,12 +183,14 @@ void ImplotExample::demoRealtimePlot() {
     ImPlot::SetupAxisLimits(ImAxis_X1, static_cast<double>(ts - history), static_cast<double>(ts),
                             ImGuiCond_Always);
     ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
-    ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5F);
+    const ImPlotSpec x_spec(ImPlotProp_FillAlpha, 0.5F, ImPlotProp_Offset, mxbf.offset(),
+                            ImPlotProp_Stride, 2 * sizeof(float));
+    const ImPlotSpec y_spec(ImPlotProp_Offset, mybf.offset(), ImPlotProp_Stride, 2 * sizeof(float));
     const auto& mx = mxbf.data();
     const auto& my = mybf.data();
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-    ImPlot::PlotLine("Mouse X", &mx[0].x, &mx[0].y, mx.size(), 0, mxbf.offset(), 2 * sizeof(float));
-    ImPlot::PlotLine("Mouse Y", &my[0].x, &my[0].y, my.size(), 0, mybf.offset(), 2 * sizeof(float));
+    ImPlot::PlotLine("Mouse X", &mx[0].x, &mx[0].y, mx.size(), x_spec);
+    ImPlot::PlotLine("Mouse Y", &my[0].x, &my[0].y, my.size(), y_spec);
     // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     ImPlot::EndPlot();
   }

@@ -24,11 +24,10 @@
 #include <print>
 
 #include <SDL3/SDL.h>
-
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
-#include "imgui.h"
-#include "implot.h"
+#include <imgui/backends/imgui_impl_sdl3.h>
+#include <imgui/backends/imgui_impl_sdlrenderer3.h>
+#include <imgui/imgui.h>
+#include <implot/implot.h>
 
 int main() {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -68,6 +67,7 @@ int main() {
   ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
   ImGui_ImplSDLRenderer3_Init(renderer);
 
+  ImPlot::SetImGuiContext(ImGui::GetCurrentContext());
   ImPlot::CreateContext();
 
   // Our state
