@@ -5,3 +5,4 @@
 .DS_Store
 **/CMakeLists.txt.user
 *-workspace
+__pycache__/
