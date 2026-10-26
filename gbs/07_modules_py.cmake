@@ -102,7 +102,8 @@ function(define_module_pybinding)
   add_custom_command(
     TARGET ${PY_MODULE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PY_MODULE_NAME}> ${PY_BINDINGS_DIR}/
-    COMMAND ${UV_EXECUTABLE} build --wheel --no-build-isolation -q --out-dir ${PY_WHEELS_DIR}
+    COMMAND ${UV_EXECUTABLE} build --wheel --no-build-isolation --python ${Python_EXECUTABLE} -q
+            --out-dir ${PY_WHEELS_DIR}
     WORKING_DIRECTORY ${PY_BUILD_DIR}
     COMMENT "Building Python wheel for ${PY_MODULE_NAME}")
     
