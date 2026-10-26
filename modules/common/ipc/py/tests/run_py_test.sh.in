@@ -5,8 +5,8 @@
 # Script to run Python test for grape_ipc_py in an isolated virtual environment.
 # Requires uv (https://docs.astral.sh/uv/). Install via toolchains/install_base.sh.
 
-WHEELS_DIR=@PY_WHEELS_DIR@
-TEST_SCRIPT=@CMAKE_CURRENT_SOURCE_DIR@/host_raw_pub_sub_test.py
+WHEELS_DIR="@PY_WHEELS_DIR@"
+TEST_SCRIPT="@CMAKE_CURRENT_SOURCE_DIR@/host_raw_pub_sub_test.py"
 VENV_DIR="/tmp/grape_ipc_py_test_venv_$$"
 TEST_RESULT=0
 
@@ -31,9 +31,17 @@ if [[ -z "${WHEEL_PATH}" ]]; then
 fi
 echo "Found wheel: $(basename "${WHEEL_PATH}")"
 
-# Create virtual environment and install wheel
-@UV_EXECUTABLE@ venv --quiet "${VENV_DIR}"
-@UV_EXECUTABLE@ pip install --quiet --python "${VENV_DIR}/bin/python" "${WHEEL_PATH}"
+# Use the same interpreter that compiled and packaged the extension.
+"@UV_EXECUTABLE@" venv --quiet --python "@Python_EXECUTABLE@" "${VENV_DIR}" || {
+    TEST_RESULT=$?
+    echo "ERROR: Failed to create Python test environment"
+    exit "${TEST_RESULT}"
+}
+"@UV_EXECUTABLE@" pip install --quiet --python "${VENV_DIR}/bin/python" "${WHEEL_PATH}" || {
+    TEST_RESULT=$?
+    echo "ERROR: Failed to install grape_ipc_py wheel"
+    exit "${TEST_RESULT}"
+}
 
 echo "Running test..."
 "${VENV_DIR}/bin/python" "${TEST_SCRIPT}"
