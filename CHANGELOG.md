@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/cvilas/grape/compare/v0.12.0...v0.13.0) (2026-11-04)
+
+
+### Features
+
+* **external:** updates SDL to v3.4.20 ([06ea9e1](https://github.com/cvilas/grape/commit/06ea9e16c1ff7a1606d879edfaf3343531271b76))
+
 ## [0.12.0](https://github.com/cvilas/grape/compare/v0.11.0...v0.12.0) (2026-10-25)
 
 * **gui:** packages imgui and implot separately ([4ecef5d](https://github.com/cvilas/grape/commit/4ecef5d0f3573e266b5188001e0e66f5f1acd177))
