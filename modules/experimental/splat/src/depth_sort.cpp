@@ -20,7 +20,7 @@ auto sortBackToFront(std::span<const Splat> splats, const Mat4& view)
 
   // View-space depth (distance along viewing direction) of each splat. Only the third row of the
   // view transform is needed: depth = -(row·p + offset), since the camera looks along -Z.
-  const auto row = Vec3{ .x = view.at(2, 0), .y = view.at(2, 1), .z = view.at(2, 2) };
+  const auto row = Vec3{ view.at(2, 0), view.at(2, 1), view.at(2, 2) };
   const auto offset = view.at(2, 3);
   auto depths = std::vector<float>(splats.size());
   auto min_depth = std::numeric_limits<float>::max();

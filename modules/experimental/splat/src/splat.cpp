@@ -5,7 +5,6 @@
 #include "grape/splat/splat.h"
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <vector>
 
@@ -19,25 +18,18 @@ auto covariance(const Splat& splat) -> Covariance {
   // the standard deviations in S, then rotate it by R. The product of a matrix with its own
   // transpose is always symmetric and positive semi-definite, which is exactly what a covariance
   // must be. That is why splats store (scale, rotation) rather than Σ directly.
-  const auto rot = toMatrix(normalize(splat.rotation));
-  const auto scale = std::array{ splat.scale.x, splat.scale.y, splat.scale.z };
+  const auto rot = rotationOf(normalize(splat.rotation));
 
   // M = R·S: S is diagonal, so this scales column j of R by scale[j]
-  auto mat = Mat3{};
-  for (auto row = 0U; row < 3U; ++row) {
-    for (auto col = 0U; col < 3U; ++col) {
-      mat.at(row).at(col) = rot.at(row).at(col) * scale.at(col);
+  auto mat = rot;
+  for (auto col = 0UZ; col < 3UZ; ++col) {
+    for (auto row = 0UZ; row < 3UZ; ++row) {
+      mat[row, col] *= splat.scale[col];
     }
   }
 
-  // Σ[i][j] = Σ_k M[i][k]·M[j][k], i.e. the dot product of rows i and j of M
-  const auto row_of = [&mat](std::size_t idx) {
-    return Vec3{ .x = mat.at(idx).at(0), .y = mat.at(idx).at(1), .z = mat.at(idx).at(2) };
-  };
-  const auto sigma = [&row_of](std::size_t row, std::size_t col) {
-    return dot(row_of(row), row_of(col));
-  };
-  return { sigma(0, 0), sigma(0, 1), sigma(0, 2), sigma(1, 1), sigma(1, 2), sigma(2, 2) };
+  const auto sigma = mat * linalg::transpose(mat);
+  return { sigma[0, 0], sigma[0, 1], sigma[0, 2], sigma[1, 1], sigma[1, 2], sigma[2, 2] };
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -54,14 +46,15 @@ auto computeBounds(std::span<const Splat> splats, float percentile) -> Sphere {
     return values.at(mid);
   };
   const auto center = Vec3{
-    .x = median([](const Splat& splat) { return splat.position.x; }),
-    .y = median([](const Splat& splat) { return splat.position.y; }),
-    .z = median([](const Splat& splat) { return splat.position.z; }),
+    median([](const Splat& splat) { return splat.position[0]; }),
+    median([](const Splat& splat) { return splat.position[1]; }),
+    median([](const Splat& splat) { return splat.position[2]; }),
   };
 
   auto distances = std::vector<float>(count);
-  std::ranges::transform(splats, distances.begin(),
-                         [&center](const Splat& splat) { return length(splat.position - center); });
+  std::ranges::transform(splats, distances.begin(), [&center](const Splat& splat) {
+    return linalg::norm(splat.position - center);
+  });
   const auto frac = std::clamp(percentile, 0.F, 1.F);
   const auto nth = std::min(count - 1, static_cast<std::size_t>(frac * static_cast<float>(count)));
   std::ranges::nth_element(distances, distances.begin() + static_cast<std::ptrdiff_t>(nth));

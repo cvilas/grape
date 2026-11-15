@@ -37,7 +37,7 @@ public:
     int width{ DEFAULT_WIDTH };    //!< Initial window width (screen coordinates)
     int height{ DEFAULT_HEIGHT };  //!< Initial window height (screen coordinates)
     std::string title{ "Splat Viewer" };
-    Vec3 up{ .x = 0.F, .y = -1.F, .z = 0.F };  //!< World direction shown as screen-up in home view
+    Vec3 up{ 0.F, -1.F, 0.F };  //!< World direction shown as screen-up in home view
     float fov_y{ ExaminerCamera::DEFAULT_FOV_Y };  //!< Initial vertical field of view (radians)
   };
 

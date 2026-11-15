@@ -4,8 +4,13 @@
 
 declare_module(
   NAME splat
-  DEPENDS_ON_MODULES "base;conio"
+  DEPENDS_ON_MODULES "base;conio;linalg"
   DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
+
+# Unity builds compile a generated source in the build tree, which clang-tidy would otherwise lint
+# against the top-level config. Mirror this module's lint config next to the generated sources.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy ${CMAKE_CURRENT_BINARY_DIR}/.clang-tidy
+               COPYONLY)
 
 find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 
@@ -50,7 +55,7 @@ define_module_library(
   SOURCES ${SOURCES}
   PUBLIC_HEADERS ${HEADERS}
   SYSTEM_PRIVATE_INCLUDE_PATHS ${SHADER_OUTPUT_DIR}
-  PUBLIC_LINK_LIBS "grape::base;SDL3::SDL3")
+  PUBLIC_LINK_LIBS "grape::base;grape::linalg;SDL3::SDL3")
 add_dependencies(${CMAKE_PROJECT_NAME}_splat ${CMAKE_PROJECT_NAME}_splat_shaders)
 
 add_subdirectory(apps)

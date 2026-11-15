@@ -22,7 +22,9 @@
 namespace {
 
 using Catch::Approx;
+using grape::splat::Quat;
 using grape::splat::Splat;
+using grape::splat::Vec3;
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
@@ -41,17 +43,19 @@ void append(std::vector<std::byte>& data, const T& value) {
 
 //-------------------------------------------------------------------------------------------------
 auto makeTestSplats() -> std::vector<Splat> {
+  constexpr auto IDENTITY_ROTATION = Quat{};
   return {
     {
-        .position = { .x = 1.F, .y = -2.F, .z = 3.5F },
-        .scale = { .x = 0.1F, .y = 0.2F, .z = 0.3F },
-        .rotation = grape::splat::fromAxisAngle({ .x = 1.F, .y = 1.F, .z = 0.F }, 0.7F),
+        .position = Vec3{ 1.F, -2.F, 3.5F },
+        .scale = Vec3{ 0.1F, 0.2F, 0.3F },
+        .rotation =
+            grape::linalg::fromAxisAngle(grape::splat::normalize(Vec3{ 1.F, 1.F, 0.F }), 0.7F),
         .color = { .r = 10, .g = 128, .b = 250, .a = 200 },
     },
     {
-        .position = { .x = -0.25F, .y = 0.F, .z = 100.F },
-        .scale = { .x = 1.F, .y = 1.F, .z = 0.001F },
-        .rotation = { .w = 1.F, .x = 0.F, .y = 0.F, .z = 0.F },
+        .position = Vec3{ -0.25F, 0.F, 100.F },
+        .scale = Vec3{ 1.F, 1.F, 0.001F },
+        .rotation = IDENTITY_ROTATION,
         .color = { .r = 255, .g = 0, .b = 1, .a = 255 },
     },
   };
@@ -165,12 +169,12 @@ TEST_CASE("PLY decoder reads 3DGS training output", "[file_io]") {
   REQUIRE(decoded->size() == 2);
 
   const auto& s0 = decoded->at(0);
-  CHECK(s0.position.x == Approx(1.F));
-  CHECK(s0.position.y == Approx(2.F));
-  CHECK(s0.position.z == Approx(3.F));
-  CHECK(s0.scale.x == Approx(1.F));
-  CHECK(s0.scale.y == Approx(std::exp(-1.F)));
-  CHECK(s0.scale.z == Approx(std::numbers::e_v<float>));
+  CHECK(s0.position[0] == Approx(1.F));
+  CHECK(s0.position[1] == Approx(2.F));
+  CHECK(s0.position[2] == Approx(3.F));
+  CHECK(s0.scale[0] == Approx(1.F));
+  CHECK(s0.scale[1] == Approx(std::exp(-1.F)));
+  CHECK(s0.scale[2] == Approx(std::numbers::e_v<float>));
   CHECK(s0.rotation.w == Approx(1.F));
   CHECK(s0.color.r == 128);  // 0.5 + SH_C0 * 0
   CHECK(s0.color.g == 255);  // 0.5 + SH_C0 * 1.77 ≈ 0.999
@@ -178,7 +182,7 @@ TEST_CASE("PLY decoder reads 3DGS training output", "[file_io]") {
   CHECK(s0.color.a == 128);  // sigmoid(0)
 
   const auto& s1 = decoded->at(1);
-  CHECK(s1.position.x == Approx(-1.F));
+  CHECK(s1.position[0] == Approx(-1.F));
   CHECK(s1.rotation.z == Approx(1.F));
   CHECK(s1.color.a == 255);  // sigmoid(10)
 }

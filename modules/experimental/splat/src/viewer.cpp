@@ -91,7 +91,7 @@ auto toGpuSplat(const Splat& splat) -> GpuSplat {
                     (static_cast<std::uint32_t>(splat.color.b) << 16U) |
                     (static_cast<std::uint32_t>(splat.color.a) << 24U);
   return {
-    .position = { splat.position.x, splat.position.y, splat.position.z },
+    .position = { splat.position[0], splat.position[1], splat.position[2] },
     .rgba = rgba,
     .cov_a = { cov.at(0), cov.at(1), cov.at(2) },
     .pad0 = 0.F,
@@ -331,13 +331,13 @@ auto Viewer::Impl::pick(float px, float py) const -> std::optional<Vec3> {
       continue;
     }
     const auto pt = transformPoint(view, splat.position);
-    const auto depth = -pt.z;
+    const auto depth = -pt[2];
     if (depth <= 0.F or depth >= best_depth) {
       continue;
     }
-    const auto dx = (focal * pt.x / depth) - target_x;
-    const auto dy = (focal * pt.y / depth) - target_y;
-    const auto max_scale = std::max({ splat.scale.x, splat.scale.y, splat.scale.z });
+    const auto dx = (focal * pt[0] / depth) - target_x;
+    const auto dy = (focal * pt[1] / depth) - target_y;
+    const auto max_scale = std::max({ splat.scale[0], splat.scale[1], splat.scale[2] });
     const auto radius = std::max(PICK_RADIUS_PX, focal * max_scale / depth);
     if ((dx * dx) + (dy * dy) <= radius * radius) {
       best = splat.position;
@@ -421,8 +421,8 @@ void Viewer::Impl::onMouseMotion(const SDL_MouseMotionEvent& event) {
       const auto delta = camera.trackball(x0, y0, x1, y1, width / height);
       // Track angular velocity for spinning after release
       const auto angle = 2.F * std::acos(std::clamp(delta.w, -1.F, 1.F));
-      spin_axis = Vec3{ .x = delta.x, .y = delta.y, .z = delta.z };
-      spin_rate = (dt > 0.F and length(spin_axis) > 0.F) ? angle / dt : 0.F;
+      spin_axis = Vec3{ delta.x, delta.y, delta.z };
+      spin_rate = (dt > 0.F and norm(spin_axis) > 0.F) ? angle / dt : 0.F;
     } break;
     case DragMode::Pan:
       camera.pan(event.xrel, event.yrel, windowSize().second);
@@ -464,7 +464,8 @@ void Viewer::Impl::updateSpin(double dt) {
   if (spin_rate < MIN_SPIN_RATE or drag != DragMode::None) {
     return;
   }
-  camera.spin(fromAxisAngle(spin_axis, spin_rate * static_cast<float>(dt)));
+  camera.spin(
+      grape::linalg::fromAxisAngle(normalize(spin_axis), spin_rate * static_cast<float>(dt)));
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -36,19 +36,23 @@ auto makeScene() -> std::vector<grape::splat::Splat> {
     for (auto j = 0; j < NUM_LON; ++j) {
       const auto lon = 2.F * pi_v<float> * static_cast<float>(j) / static_cast<float>(NUM_LON);
       const auto normal = Vec3{
-        .x = std::sin(lat) * std::cos(lon),
-        .y = std::cos(lat),
-        .z = std::sin(lat) * std::sin(lon),
+        std::sin(lat) * std::cos(lon),
+        std::cos(lat),
+        std::sin(lat) * std::sin(lon),
       };
-      // Rotate local Z onto the surface normal, so the flat axis faces outwards
-      const auto axis = cross(Vec3{ .z = 1.F }, normal);
-      const auto angle = std::acos(normal.z);
+      // Rotate local Z onto the surface normal, so the flat axis faces outwards. At the poles the
+      // normal is already along Z and the rotation axis degenerates to zero: use identity.
+      const auto axis = cross(Vec3{ 0.F, 0.F, 1.F }, normal);
+      const auto axis_len = norm(axis);
+      const auto angle = std::acos(normal[2]);
+      const auto rotation =
+          (axis_len > 0.F) ? grape::linalg::fromAxisAngle(axis * (1.F / axis_len), angle) : Quat{};
       const auto hue = static_cast<float>(i) / static_cast<float>(NUM_LAT);
       const auto tangent_scale = 0.6F * RADIUS * pi_v<float> / static_cast<float>(NUM_LAT);
       splats.push_back({
           .position = RADIUS * normal,
-          .scale = { .x = tangent_scale, .y = tangent_scale, .z = 0.005F },
-          .rotation = fromAxisAngle(axis, angle),
+          .scale = Vec3{ tangent_scale, tangent_scale, 0.005F },
+          .rotation = rotation,
           .color = {
               .r = static_cast<std::uint8_t>(255.F * hue),
               .g = static_cast<std::uint8_t>(255.F * (1.F - hue)),
@@ -59,12 +63,13 @@ auto makeScene() -> std::vector<grape::splat::Splat> {
     }
   }
   static constexpr auto NUM_RING = 120;
+  constexpr auto IDENTITY_ROTATION = Quat{};
   for (auto k = 0; k < NUM_RING; ++k) {
     const auto theta = 2.F * pi_v<float> * static_cast<float>(k) / static_cast<float>(NUM_RING);
     splats.push_back({
-        .position = { .x = 1.6F * std::cos(theta), .y = -1.F, .z = 1.6F * std::sin(theta) },
-        .scale = { .x = 0.05F, .y = 0.05F, .z = 0.05F },
-        .rotation = Quat{ .w = 1.F, .x = 0.F, .y = 0.F, .z = 0.F },
+        .position = Vec3{ 1.6F * std::cos(theta), -1.F, 1.6F * std::sin(theta) },
+        .scale = Vec3{ 0.05F, 0.05F, 0.05F },
+        .rotation = IDENTITY_ROTATION,
         .color = Rgba{ .r = 255, .g = 220, .b = 120, .a = 255 },
     });
   }
@@ -79,7 +84,7 @@ auto makeScene() -> std::vector<grape::splat::Splat> {
 auto main() -> int {
   try {
     auto viewer = grape::splat::Viewer(
-        { .title = "Splat viewer example", .up = { .x = 0.F, .y = 1.F, .z = 0.F } });
+        { .title = "Splat viewer example", .up = grape::splat::Vec3{ 0.F, 1.F, 0.F } });
     viewer.setScene(makeScene());
     while (viewer.processEvents()) {
       viewer.render();
