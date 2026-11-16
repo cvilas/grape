@@ -46,7 +46,9 @@ auto makeScene() -> std::vector<grape::splat::Splat> {
       const auto axis_len = norm(axis);
       const auto angle = std::acos(normal[2]);
       const auto rotation =
-          (axis_len > 0.F) ? grape::linalg::fromAxisAngle(axis * (1.F / axis_len), angle) : Quat{};
+          (axis_len > 0.F) ?
+              grape::linalg::Quaternionf::fromAxisAngle(axis * (1.F / axis_len), angle) :
+              Quat{};
       const auto hue = static_cast<float>(i) / static_cast<float>(NUM_LAT);
       const auto tangent_scale = 0.6F * RADIUS * pi_v<float> / static_cast<float>(NUM_LAT);
       splats.push_back({

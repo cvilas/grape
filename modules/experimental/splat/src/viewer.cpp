@@ -464,8 +464,8 @@ void Viewer::Impl::updateSpin(double dt) {
   if (spin_rate < MIN_SPIN_RATE or drag != DragMode::None) {
     return;
   }
-  camera.spin(
-      grape::linalg::fromAxisAngle(normalize(spin_axis), spin_rate * static_cast<float>(dt)));
+  camera.spin(grape::linalg::Quaternionf::fromAxisAngle(normalize(spin_axis),
+                                                        spin_rate * static_cast<float>(dt)));
 }
 
 //-------------------------------------------------------------------------------------------------

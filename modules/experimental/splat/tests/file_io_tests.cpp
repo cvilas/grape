@@ -48,8 +48,8 @@ auto makeTestSplats() -> std::vector<Splat> {
     {
         .position = Vec3{ 1.F, -2.F, 3.5F },
         .scale = Vec3{ 0.1F, 0.2F, 0.3F },
-        .rotation =
-            grape::linalg::fromAxisAngle(grape::splat::normalize(Vec3{ 1.F, 1.F, 0.F }), 0.7F),
+        .rotation = grape::linalg::Quaternionf::fromAxisAngle(
+            grape::splat::normalize(Vec3{ 1.F, 1.F, 0.F }), 0.7F),
         .color = { .r = 10, .g = 128, .b = 250, .a = 200 },
     },
     {

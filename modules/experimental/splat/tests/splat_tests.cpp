@@ -46,8 +46,8 @@ TEST_CASE("Covariance of axis aligned splat is diagonal", "[splat]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Covariance follows splat rotation", "[splat]") {
   // 90 deg about Z maps local X to world Y
-  const auto rotation =
-      grape::linalg::fromAxisAngle(Vec3{ 0.F, 0.F, 1.F }, 0.5F * std::numbers::pi_v<float>);
+  const auto rotation = grape::linalg::Quaternionf::fromAxisAngle(Vec3{ 0.F, 0.F, 1.F },
+                                                                  0.5F * std::numbers::pi_v<float>);
   const auto splat = makeSplat(ORIGIN, Vec3{ 1.F, 2.F, 3.F }, rotation);
   const auto cov = covariance(splat);
   CHECK(cov.at(0) == Approx(4.F));

@@ -7,6 +7,7 @@
 #include <concepts>
 #include <limits>
 #include <optional>
+#include <type_traits>
 
 #include "grape/linalg/matrix.h"
 #include "grape/linalg/quaternion.h"
@@ -19,7 +20,7 @@ namespace grape::linalg {
 //
 // Frame and point semantics are encoded in types, so mixing incompatible frames fails to compile.
 // Tags occupy no storage. Conventions follow P. Furgale, "Representing Robot Pose: The Good, the
-// Bad, and the Ugly" (https://rpg.ifi.uzh.ch/docs/teaching/2025/FurgaleTutorial.pdf):
+// Bad, and the Ugly" (see docs):
 //
 //   Math       | C++                     | Meaning
 //   -----------|-------------------------|------------------------------------------------------
@@ -102,16 +103,22 @@ constexpr auto rz(Scalar angle) -> Matrix<3, 3, Scalar> {
   };
 }
 
-//=================================================================================================
-/// Free vector (direction, velocity, angular rate, etc.) expressed in frame ExpressedIn. Has
-/// magnitude and direction but no anchor point.
-template <FrameType ExpressedIn, std::floating_point Scalar = double>
-class Vector3 {
+namespace detail {
+
+//-------------------------------------------------------------------------------------------------
+/// Storage and construction shared by the frame-tagged 3D types below. Each tagged type inherits
+/// the constructors; the language excludes the base's copy constructor from inheritance, so a
+/// tagged object can never be constructed from a differently-tagged one, only from raw
+/// coordinates through an explicit constructor.
+template <std::floating_point Scalar>
+class TaggedCoordinates {
 public:
-  constexpr Vector3() = default;
-  constexpr explicit Vector3(const Vector<3, Scalar>& coordinates) : coordinates_(coordinates) {
+  constexpr TaggedCoordinates() = default;
+  constexpr explicit TaggedCoordinates(const Vector<3, Scalar>& coordinates)
+    : coordinates_(coordinates) {
   }
-  constexpr Vector3(Scalar cx, Scalar cy, Scalar cz) : coordinates_{ cx, cy, cz } {
+  constexpr explicit TaggedCoordinates(Scalar cx, Scalar cy, Scalar cz)
+    : coordinates_{ cx, cy, cz } {
   }
 
   /// @return Raw coordinates. Reconstructing a differently-tagged object from these is a
@@ -122,6 +129,17 @@ public:
 
 private:
   Vector<3, Scalar> coordinates_{};
+};
+
+}  // namespace detail
+
+//=================================================================================================
+/// Free vector (direction, velocity, angular rate, etc.) expressed in frame ExpressedIn. Has
+/// magnitude and direction but no anchor point.
+template <FrameType ExpressedIn, std::floating_point Scalar = double>
+class Vector3 : public detail::TaggedCoordinates<Scalar> {
+public:
+  using detail::TaggedCoordinates<Scalar>::TaggedCoordinates;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -150,17 +168,25 @@ constexpr auto operator-(const Vector3<ExpressedIn, Scalar>& lhs,
 //-------------------------------------------------------------------------------------------------
 /// @return Free vector scaled by factor
 template <FrameType ExpressedIn, std::floating_point Scalar>
-constexpr auto operator*(const Vector3<ExpressedIn, Scalar>& vec, Scalar factor)
-    -> Vector3<ExpressedIn, Scalar> {
+constexpr auto operator*(const Vector3<ExpressedIn, Scalar>& vec,
+                         std::type_identity_t<Scalar> factor) -> Vector3<ExpressedIn, Scalar> {
   return Vector3<ExpressedIn, Scalar>{ vec.coordinates() * factor };
 }
 
 //-------------------------------------------------------------------------------------------------
 /// @return Free vector scaled by factor
 template <FrameType ExpressedIn, std::floating_point Scalar>
-constexpr auto operator*(Scalar factor, const Vector3<ExpressedIn, Scalar>& vec)
-    -> Vector3<ExpressedIn, Scalar> {
+constexpr auto operator*(std::type_identity_t<Scalar> factor,
+                         const Vector3<ExpressedIn, Scalar>& vec) -> Vector3<ExpressedIn, Scalar> {
   return vec * factor;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// @return Free vector divided by divisor
+template <FrameType ExpressedIn, std::floating_point Scalar>
+constexpr auto operator/(const Vector3<ExpressedIn, Scalar>& vec,
+                         std::type_identity_t<Scalar> divisor) -> Vector3<ExpressedIn, Scalar> {
+  return Vector3<ExpressedIn, Scalar>{ vec.coordinates() / divisor };
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -184,22 +210,9 @@ constexpr auto cross(const Vector3<ExpressedIn, Scalar>& lhs,
 /// ordered head-to-tail chaining rather than every commuted form of addition.
 template <FrameType ExpressedIn, PointType Tail, PointType Head,
           std::floating_point Scalar = double>
-class Displacement {
+class Displacement : public detail::TaggedCoordinates<Scalar> {
 public:
-  constexpr Displacement() = default;
-  constexpr explicit Displacement(const Vector<3, Scalar>& coordinates)
-    : coordinates_(coordinates) {
-  }
-  constexpr Displacement(Scalar cx, Scalar cy, Scalar cz) : coordinates_{ cx, cy, cz } {
-  }
-
-  /// @return Raw coordinates
-  [[nodiscard]] constexpr auto coordinates() const GRAPE_LIFETIMEBOUND -> const Vector<3, Scalar>& {
-    return coordinates_;
-  }
-
-private:
-  Vector<3, Scalar> coordinates_{};
+  using detail::TaggedCoordinates<Scalar>::TaggedCoordinates;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -234,21 +247,9 @@ constexpr auto operator-(const Displacement<ExpressedIn, Tail, Head, Scalar>& lh
 /// _E r_EP: Position of point P relative to the origin of frame ExpressedIn, expressed in
 /// ExpressedIn. Positions cannot be added or implicitly treated as vectors.
 template <FrameType ExpressedIn, PointType Point, std::floating_point Scalar = double>
-class Position {
+class Position : public detail::TaggedCoordinates<Scalar> {
 public:
-  constexpr Position() = default;
-  constexpr explicit Position(const Vector<3, Scalar>& coordinates) : coordinates_(coordinates) {
-  }
-  constexpr Position(Scalar cx, Scalar cy, Scalar cz) : coordinates_{ cx, cy, cz } {
-  }
-
-  /// @return Raw coordinates
-  [[nodiscard]] constexpr auto coordinates() const GRAPE_LIFETIMEBOUND -> const Vector<3, Scalar>& {
-    return coordinates_;
-  }
-
-private:
-  Vector<3, Scalar> coordinates_{};
+  using detail::TaggedCoordinates<Scalar>::TaggedCoordinates;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -296,8 +297,8 @@ public:
   /// geometric assumption, not a fact inferred about the system.
   constexpr Rotation() = default;
 
-  /// Creates a rotation from a direction cosine matrix after validating it is orthonormal with
-  /// determinant +1 (within tolerance) and contains only finite values.
+  /// Creates a rotation from a direction cosine matrix after validating it is orthonormal (within
+  /// tolerance) with determinant +1 and contains only finite values.
   /// @return Validated rotation, or std::nullopt if mat is not a rotation matrix
   static constexpr auto fromMatrix(const Matrix<3, 3, Scalar>& mat,
                                    Scalar tolerance = DEFAULT_TOLERANCE)
@@ -312,7 +313,8 @@ public:
         }
       }
     }
-    if (!(detail::absolute(determinant(mat) - Scalar{ 1 }) <= tolerance)) {
+    // An orthonormal matrix has determinant +1 (rotation) or -1 (reflection); the sign suffices
+    if (!(determinant(mat) > Scalar{ 0 })) {
       return std::nullopt;
     }
     return Rotation{ mat };
@@ -320,9 +322,10 @@ public:
 
   /// Creates the rotation from the quaternion that rotates frame From into frame To (Trawny
   /// convention): the result is C(q) of rotationMatrix(), mapping From coordinates to To
-  /// coordinates. Precondition: q is a unit quaternion.
+  /// coordinates. q is normalised first, so the result is a rotation matrix even when q has
+  /// drifted from unit norm (e.g. after integration). Precondition: q is nonzero and finite.
   static constexpr auto fromQuaternion(const Quaternion<Scalar>& quat) -> Rotation {
-    return Rotation{ rotationMatrix(quat) };
+    return Rotation{ rotationMatrix(normalized(quat)) };
   }
 
   /// @return Rotation for frame To reached by rotating frame From by angle (radians) about its

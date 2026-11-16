@@ -1,21 +1,4 @@
-# Linear algebra for rigid body motion: a primer
-
-This primer explains the design of the `linalg` module from first principles. It assumes secondary
-school linear algebra (matrix multiplication, determinants) and nothing about robotics conventions.
-Each section links to the code that implements it, so you can read the two together.
-
-Suggested reading order:
-
-1. Sections 1 to 3 (matrices and the numerical techniques), with
-   [`matrix.h`](../include/grape/linalg/matrix.h)
-2. Section 4 (rotations), with [`quaternion.h`](../include/grape/linalg/quaternion.h) and the top
-   of [`frames.h`](../include/grape/linalg/frames.h)
-3. Sections 5 and 6 (coordinate frames as types), with the rest of
-   [`frames.h`](../include/grape/linalg/frames.h) and
-   [`frames_tests.cpp`](../tests/frames_tests.cpp)
-4. Section 8 (experiments to try)
-
----
+# Design notes: Linear algebra library
 
 ## 1. The big idea
 
@@ -28,41 +11,14 @@ bookkeeping.
 
 The numbers cannot catch these errors, but the *types* can. This module is built in two layers:
 
-- **A numeric kernel** ([`matrix.h`](../include/grape/linalg/matrix.h),
-  [`quaternion.h`](../include/grape/linalg/quaternion.h)): plain matrices, vectors and quaternions
-  with carefully implemented arithmetic. Dimensions are template parameters, so a 3x4 times 2x2
-  multiplication is a compile error.
-- **A frame-aware layer** ([`frames.h`](../include/grape/linalg/frames.h)): wrappers that add
-  *which frame, which points* to each quantity as zero-cost type tags. Mixing incompatible frames
-  becomes a compile error too.
+- **A numeric kernel**: plain matrices, vectors and quaternions templated over their dimensions. 
+  Operations between incompatible types (eg: 3x4 matrix times 2x2 matrix) are compile-time errors.
+- **A frame-aware layer**: wrappers that add *which frame, which points* to each quantity as 
+  zero-cost type tags. Mixing incompatible frames are compile-time errors.
 
-Everything is `constexpr`: the compiler can evaluate entire computations at compile time, which is
-used in the tests ([`matrix_tests.cpp`](../tests/matrix_tests.cpp)) to verify results with
-`static_assert` — a failed check stops the build, not the robot.
-
-The conventions follow P. Furgale, *Representing Robot Pose: The Good, the Bad, and the Ugly*
-(section 5). Prior art for the idea includes
-[wave_geometry](https://github.com/wavelab/wave_geometry/blob/master/docs/frame_semantics.md) and
-[refx](https://github.com/mosaico-labs/refx).
+The conventions follow [P. Furgale, *Representing Robot Pose: The Good, the Bad, and the Ugly*](./furgale.pdf).
 
 ## 2. Matrices from first principles
-
-A `Matrix<NumRows, NumColumns, Scalar>` ([`matrix.h`](../include/grape/linalg/matrix.h)) stores its
-elements in one flat `std::array`, row by row ('row-major'). Element (r, c) lives at flat index
-`r * NumColumns + c`. There is no heap allocation, no pointer chasing, and the size is part of the
-type:
-
-- The compiler knows every loop bound, so it can unroll and vectorise freely. For the 3x3 and 4x4
-  matrices of rigid body motion, the generated code is a handful of instructions.
-- Shape errors are compile errors: `operator*` only accepts a right operand whose row count equals
-  the left operand's column count.
-- A `Vector<N>` is just a `Matrix<N, 1>` — one definition, one set of operations (the README's
-  'defined in terms of Matrix').
-
-Element access `mat[row, col]` (a C++23 multidimensional subscript) is bounds-checked on *each
-axis*: a column index past the end would otherwise wrap around to the next row — within the flat
-array, and therefore invisible to a flat bounds check (`flatIndex()` in
-[`matrix.h`](../include/grape/linalg/matrix.h)).
 
 Matrix multiplication (`operator*`) iterates in `i-k-j` order rather than the textbook `i-j-k`.
 Both compute the same sum; the difference is memory access. With `j` innermost, both `result[i, j]`
@@ -71,10 +27,6 @@ jump a whole row ahead on every step. For the small matrices here either is fast
 when the same code grows blocks, tiles, and SIMD (see the 'Stellar' lecture in section 9).
 
 ## 3. Numerical care
-
-Floating point numbers have finite precision, and the error of a long computation is dominated by a
-few well-known traps. Three techniques, all in [`matrix.h`](../include/grape/linalg/matrix.h),
-avoid them:
 
 **Fused multiply-add** (`detail::multiplyAdd()`). Hardware FMA computes `a*b + c` with a *single*
 rounding instead of two, halving the error of every accumulation and running at least as fast.
@@ -94,9 +46,16 @@ a worked example.
 ('pivot') element. Dividing by a tiny pivot multiplies every rounding error already present by a
 huge factor. Partial pivoting swaps rows so the division is always by the largest available
 magnitude — each row swap flips the determinant's sign, which the code tracks. A pivot of exactly
-zero after swapping means the matrix is singular: `determinant()` returns 0 and `inverse()` returns
-`std::nullopt`, forcing the caller to handle the case ('correct by construction' — there is no
-garbage result to use by accident).
+zero after swapping means the matrix is singular, and `determinant()` returns 0.
+
+Exact zeros are rare in floating point, though: a matrix that is singular on paper usually leaves a
+pivot of rounding-noise size (try `[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]]`), and
+dividing by it produces an 'inverse' with entries around 10^15. So `inverse()` treats a pivot as
+zero when it is within rounding error of zero *relative to the matrix's size*:
+`|pivot| <= n * epsilon * ||A||_inf`, and returns `std::nullopt`, forcing the caller to handle the
+case ('correct by construction' — there is no garbage result to use by accident). Because the test
+is relative to the whole matrix, a badly scaled matrix such as `diag(1, 1e-300)` is also rejected;
+keep rows and columns at comparable magnitudes (consistent units) before inverting.
 
 A related subtlety: NaN compares false with *everything*. Validation code is therefore written as
 `if (!(error <= tolerance)) reject;` rather than `if (error > tolerance) reject;` — the two differ
@@ -183,13 +142,6 @@ The permitted operations are the ones that make geometric sense, and only those:
 `static_assert`s too: concepts like `Addable` probe whether an expression compiles, so the type
 system's refusals are themselves regression-tested.
 
-### What the compiler cannot do
-
-The compiler proves compatibility of *declared* semantics, not physical truth. It cannot know that
-raw coordinates passed to the `Vector3<World>` constructor actually came from the camera. Raw
-numbers enter through explicit constructors and leave through `coordinates()` — a deliberate,
-visible escape hatch at the boundary of the typed world.
-
 ## 6. Rigid transforms
 
 A rigid body pose combines a rotation and a translation. `Transform<A, B>` stores `C_AB` and the
@@ -232,26 +184,8 @@ everywhere else — is the classic 'points transform, vectors rotate' rule of co
 | Forbidden operations as tests             | `Addable`/`Multipliable` probes in [`frames_tests.cpp`](../tests/frames_tests.cpp) |
 | Worked scenario                           | [`example.cpp`](../examples/example.cpp)                             |
 
-## 8. Experiments
 
-Change one thing, rebuild, and observe. Each isolates an idea from above.
-
-1. **Break the frame chain.** In [`example.cpp`](../examples/example.cpp), change `pose_wb *
-   pose_bc` to `pose_bc * pose_wb` and read the compile error. This is the bug the module exists to
-   catch; note that it is caught before the program ever runs.
-2. **See catastrophic cancellation.** Compute `a*b - c*d` naively for `a = 1 + 2e-8`, `b = 1 -
-   2e-8`, `c = d = 1` in `float`, and compare with `differenceOfProducts()`. The naive answer loses
-   most of its digits.
-3. **Feel the pivoting.** In `inverse()`, replace pivot selection with `pivot_row = col` (no
-   search) and run the 'pivots rows' test in [`matrix_tests.cpp`](../tests/matrix_tests.cpp): a
-   perfectly invertible matrix is now rejected because of a zero on the diagonal.
-4. **Prove it at compile time.** Add
-   `static_assert(trace(identity<5, int>()) == 5);` anywhere. The computation — loops and all —
-   runs inside the compiler.
-5. **Catch a reflection.** Build a rotation matrix with one axis negated and pass it to
-   `Rotation::fromMatrix()`. Orthonormal, but determinant -1: rejected.
-
-## 9. Further reading
+## Further reading
 
 - P. Furgale, "Representing Robot Pose: The Good, the Bad, and the Ugly", tutorial, 2014-2025.
   <https://rpg.ifi.uzh.ch/docs/teaching/2025/FurgaleTutorial.pdf>. The notation and discipline

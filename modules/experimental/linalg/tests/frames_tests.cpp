@@ -2,6 +2,7 @@
 // Copyright (C) 2026 GRAPE Contributors
 //=================================================================================================
 
+#include <concepts>
 #include <cstddef>
 #include <numbers>
 
@@ -82,6 +83,23 @@ static_assert(not Multipliable<Rotation<World, Body>, Position<Body, Landmark>>)
 static_assert(
     not Addable<Displacement<World, Body, Landmark>, Displacement<World, Body, Landmark>>);
 
+// Raw coordinates acquire a frame only through an explicit constructor: a braced list cannot
+// silently take on whatever frame a function parameter happens to declare
+template <typename T>
+concept ImplicitFromCoordinates = requires(void (*accept)(T)) { accept({ 0., 0., 0. }); };
+static_assert(std::constructible_from<Vector3<World>, double, double, double>);
+static_assert(not ImplicitFromCoordinates<Vector3<World>>);
+static_assert(not ImplicitFromCoordinates<Displacement<World, Body, Landmark>>);
+static_assert(not ImplicitFromCoordinates<Position<World, Landmark>>);
+
+// Tagged types share a storage base, but one tag can never be constructed from another
+static_assert(not std::constructible_from<Vector3<Body>, Vector3<World>>);
+static_assert(not std::constructible_from<Displacement<World, Landmark, Body>,
+                                          Displacement<World, Body, Landmark>>);
+static_assert(not std::constructible_from<Position<Body, Landmark>, Position<World, Landmark>>);
+static_assert(
+    not std::constructible_from<Position<World, Landmark>, Displacement<World, World, Landmark>>);
+
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 //-------------------------------------------------------------------------------------------------
@@ -89,6 +107,8 @@ static_assert(
 static_assert((Vector3<World>{ 1., 2., 3. } + Vector3<World>{ 3., 2., 1. }).coordinates() ==
               Vector<3>{ 4., 4., 4. });
 static_assert(dot(Vector3<World>{ 1., 0., 0. }, Vector3<World>{ 0., 1., 0. }) == 0.);
+static_assert((Vector3<World>{ 1., 2., 3. } * 2).coordinates() == Vector<3>{ 2., 4., 6. });
+static_assert((Vector3<World>{ 2., 4., 6. } / 2).coordinates() == Vector<3>{ 1., 2., 3. });
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Elementary rotations match the equivalent quaternion rotation matrix", "[linalg]") {
@@ -150,6 +170,18 @@ TEST_CASE("Rotation from quaternion matches the elementary rotation", "[linalg]"
       Quaterniond{ .x = 0., .y = 0., .z = std::sin(angle / 2), .w = std::cos(angle / 2) };
   const auto from_quat = Rotation<Body, World>::fromQuaternion(quat);
   requireRotationsApprox(from_quat.matrix(), Rotation<Body, World>::aboutZ(angle).matrix());
+}
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Rotation from a non-unit quaternion is still a rotation", "[linalg]") {
+  // rotationMatrix() of a quaternion with norm 2 would scale by up to 7; the Rotation invariant
+  // (orthonormal, det +1) must hold regardless
+  const auto angle = 1.2;
+  const auto scaled =
+      Quaterniond{ .x = 0., .y = 0., .z = 2. * std::sin(angle / 2), .w = 2. * std::cos(angle / 2) };
+  const auto from_quat = Rotation<Body, World>::fromQuaternion(scaled);
+  requireRotationsApprox(from_quat.matrix(), Rotation<Body, World>::aboutZ(angle).matrix());
+  REQUIRE(Rotation<Body, World>::fromMatrix(from_quat.matrix()).has_value());
 }
 
 //-------------------------------------------------------------------------------------------------

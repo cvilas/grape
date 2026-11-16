@@ -33,11 +33,11 @@ auto lookRotation(const Vec3& back, const Vec3& up_hint) -> Quat {
   const auto bx = grape::splat::normalize(right);
   const auto by = cross(bz, bx);
   // The camera axes expressed in world coordinates are the columns of the camera-to-world matrix,
-  // equivalently the rows of the world-to-camera matrix C(q) that toQuaternion() inverts
+  // equivalently the rows of the world-to-camera matrix C(q) that Quaternion::fromMatrix() inverts
   const auto world_to_camera = Mat3{ bx[0], bx[1], bx[2],  //
                                      by[0], by[1], by[2],  //
                                      bz[0], bz[1], bz[2] };
-  return grape::linalg::toQuaternion(world_to_camera);
+  return grape::linalg::Quaternionf::fromMatrix(world_to_camera);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -86,7 +86,8 @@ auto ExaminerCamera::trackball(float from_x, float from_y, float to_x, float to_
   const auto len = norm(axis);
   const auto angle = std::atan2(len, dot(p0, p1));
   // a degenerate axis (no pointer motion, or antipodal projections) means no rotation
-  const auto delta = (len > 0.F) ? grape::linalg::fromAxisAngle(axis * (1.F / len), angle) : Quat{};
+  const auto delta =
+      (len > 0.F) ? grape::linalg::Quaternionf::fromAxisAngle(axis * (1.F / len), angle) : Quat{};
   spin(delta);
   return delta;
 }
