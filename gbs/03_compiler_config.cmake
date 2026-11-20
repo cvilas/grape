@@ -49,6 +49,22 @@ set(GCC_WARNINGS
   -Wpointer-arith
 )
 
+# Target instruction set baseline. Exploit SIMD and vectorization available in recent processors
+#   x86-64-v4 : Skylake (2015) / Zen 2 (2019) and later - AVX2, FMA, BMI2
+#   armv8.2-a : Cortex-A55/A76 and later (e.g. Raspberry Pi 5, Jetson Orin). 
+#               set armv8-a for older cores such as Raspberry Pi 4.
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+  set(TARGET_ARCH_DEFAULT "x86-64-v4")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
+  set(TARGET_ARCH_DEFAULT "armv8.2-a")
+else()
+  set(TARGET_ARCH_DEFAULT "")
+endif()
+set(TARGET_ARCH "${TARGET_ARCH_DEFAULT}" CACHE STRING "Value passed to -march (empty: compiler default)")
+if(TARGET_ARCH)
+  add_compile_options(-march=${TARGET_ARCH})
+endif()
+
 option(ENABLE_HARDENING "Enable compiler and standard library hardening" OFF)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
@@ -197,6 +213,7 @@ endif()
 message(STATUS "Compiler configuration:")
 message(STATUS "\tCompiler          : ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "\tBUILD_SHARED_LIBS : ${BUILD_SHARED_LIBS}")
+message(STATUS "\tTARGET_ARCH       : ${TARGET_ARCH}")
 message(STATUS "\tENABLE_CACHE      : ${ENABLE_CACHE} (${CACHE_BIN})")
 message(STATUS "\tENABLE_IPO        : ${ENABLE_IPO} (supported: ${is_ipo_supported})")
 message(STATUS "\tENABLE_HARDENING  : ${ENABLE_HARDENING}")
