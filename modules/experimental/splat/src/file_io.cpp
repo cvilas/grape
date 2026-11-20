@@ -22,8 +22,10 @@
 
 namespace {
 
+using grape::splat::normalize;
 using grape::splat::Quat;
 using grape::splat::Splat;
+using grape::splat::Vec3;
 
 static_assert(std::endian::native == std::endian::little,
               "File decoders assume a little-endian host");
@@ -71,11 +73,12 @@ auto decodeQuantisedQuat(std::array<std::uint8_t, 4> bytes) -> Quat {
   const auto unpack = [](std::uint8_t byte) {
     return (static_cast<float>(byte) - QUAT_SCALE) / QUAT_SCALE;
   };
+  // the record stores components in w, x, y, z order
   return normalize(Quat{
-      .w = unpack(bytes.at(0)),
       .x = unpack(bytes.at(1)),
       .y = unpack(bytes.at(2)),
       .z = unpack(bytes.at(3)),
+      .w = unpack(bytes.at(0)),
   });
 }
 
@@ -340,8 +343,8 @@ auto decodeSplat(std::span<const std::byte> data)
     const auto color = readAs<std::array<std::uint8_t, 4>>(record, SPLAT_COLOR_OFFSET);
     const auto rot = readAs<std::array<std::uint8_t, 4>>(record, SPLAT_ROTATION_OFFSET);
     splats.push_back({
-        .position = { .x = pos.at(0), .y = pos.at(1), .z = pos.at(2) },
-        .scale = { .x = scale.at(0), .y = scale.at(1), .z = scale.at(2) },
+        .position = Vec3{ pos.at(0), pos.at(1), pos.at(2) },
+        .scale = Vec3{ scale.at(0), scale.at(1), scale.at(2) },
         .rotation = decodeQuantisedQuat(rot),
         .color = { .r = color.at(0), .g = color.at(1), .b = color.at(2), .a = color.at(3) },
     });
@@ -357,8 +360,9 @@ auto encodeSplat(std::span<const Splat> splats) -> std::vector<std::byte> {
     const auto& splat = splats.at(i);
     const auto record = out.subspan(i * SPLAT_RECORD_SIZE, SPLAT_RECORD_SIZE);
     writeAs(record, SPLAT_POSITION_OFFSET,
-            std::array{ splat.position.x, splat.position.y, splat.position.z });
-    writeAs(record, SPLAT_SCALE_OFFSET, std::array{ splat.scale.x, splat.scale.y, splat.scale.z });
+            std::array{ splat.position[0], splat.position[1], splat.position[2] });
+    writeAs(record, SPLAT_SCALE_OFFSET,
+            std::array{ splat.scale[0], splat.scale[1], splat.scale[2] });
     writeAs(record, SPLAT_COLOR_OFFSET,
             std::array{ splat.color.r, splat.color.g, splat.color.b, splat.color.a });
     writeAs(record, SPLAT_ROTATION_OFFSET, encodeQuantisedQuat(splat.rotation));
@@ -428,10 +432,11 @@ auto decodePly(std::span<const std::byte> data) -> std::expected<std::vector<Spl
     //   SH_C0·f_dc, offset by 0.5 so that a zero coefficient is mid-grey.
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     splats.push_back({
-        .position = { .x = values[0], .y = values[1], .z = values[2] },
-        .scale = { .x = std::exp(values[7]), .y = std::exp(values[8]), .z = std::exp(values[9]) },
+        .position = Vec3{ values[0], values[1], values[2] },
+        .scale = Vec3{ std::exp(values[7]), std::exp(values[8]), std::exp(values[9]) },
+        // the PLY stores quaternion components in w, x, y, z order
         .rotation =
-            normalize(Quat{ .w = values[10], .x = values[11], .y = values[12], .z = values[13] }),
+            normalize(Quat{ .x = values[11], .y = values[12], .z = values[13], .w = values[10] }),
         .color = { .r = toUnorm8(0.5F + (SH_C0 * values[3])),
                    .g = toUnorm8(0.5F + (SH_C0 * values[4])),
                    .b = toUnorm8(0.5F + (SH_C0 * values[5])),

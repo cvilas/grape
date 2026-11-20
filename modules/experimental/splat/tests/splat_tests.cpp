@@ -33,7 +33,7 @@ auto makeSplat(const Vec3& position, const Vec3& scale, const Quat& rotation) ->
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Covariance of axis aligned splat is diagonal", "[splat]") {
-  const auto splat = makeSplat(ORIGIN, { .x = 1.F, .y = 2.F, .z = 3.F }, IDENTITY);
+  const auto splat = makeSplat(ORIGIN, Vec3{ 1.F, 2.F, 3.F }, IDENTITY);
   const auto cov = covariance(splat);
   CHECK(cov.at(0) == Approx(1.F));
   CHECK(cov.at(1) == Approx(0.F).margin(1e-6));
@@ -46,9 +46,9 @@ TEST_CASE("Covariance of axis aligned splat is diagonal", "[splat]") {
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Covariance follows splat rotation", "[splat]") {
   // 90 deg about Z maps local X to world Y
-  const auto rotation =
-      grape::splat::fromAxisAngle(Vec3{ .z = 1.F }, 0.5F * std::numbers::pi_v<float>);
-  const auto splat = makeSplat(ORIGIN, { .x = 1.F, .y = 2.F, .z = 3.F }, rotation);
+  const auto rotation = grape::linalg::Quaternionf::fromAxisAngle(Vec3{ 0.F, 0.F, 1.F },
+                                                                  0.5F * std::numbers::pi_v<float>);
+  const auto splat = makeSplat(ORIGIN, Vec3{ 1.F, 2.F, 3.F }, rotation);
   const auto cov = covariance(splat);
   CHECK(cov.at(0) == Approx(4.F));
   CHECK(cov.at(1) == Approx(0.F).margin(1e-5));
@@ -60,13 +60,12 @@ TEST_CASE("Covariance follows splat rotation", "[splat]") {
 TEST_CASE("Scene bounds ignore far outliers", "[splat]") {
   auto splats = std::vector<Splat>{};
   for (auto i = -10; i <= 10; ++i) {
-    splats.push_back(
-        makeSplat({ .x = static_cast<float>(i) * 0.1F, .y = 5.F, .z = 0.F }, ORIGIN, IDENTITY));
+    splats.push_back(makeSplat(Vec3{ static_cast<float>(i) * 0.1F, 5.F, 0.F }, ORIGIN, IDENTITY));
   }
-  splats.push_back(makeSplat({ .x = 1000.F, .y = 5.F, .z = 0.F }, ORIGIN, IDENTITY));
+  splats.push_back(makeSplat(Vec3{ 1000.F, 5.F, 0.F }, ORIGIN, IDENTITY));
   const auto bounds = grape::splat::computeBounds(splats, 0.9F);
-  CHECK(bounds.center.x == Approx(0.05F).margin(0.06));
-  CHECK(bounds.center.y == Approx(5.F));
+  CHECK(bounds.center[0] == Approx(0.05F).margin(0.06));
+  CHECK(bounds.center[1] == Approx(5.F));
   CHECK(bounds.radius < 1.5F);
   CHECK(bounds.radius > 0.5F);
 }
@@ -75,9 +74,9 @@ TEST_CASE("Scene bounds ignore far outliers", "[splat]") {
 TEST_CASE("Scene bounds of empty scene are empty", "[splat]") {
   const auto bounds = grape::splat::computeBounds({});
   CHECK(bounds.radius == Approx(0.F));
-  CHECK(bounds.center.x == Approx(0.F));
-  CHECK(bounds.center.y == Approx(0.F));
-  CHECK(bounds.center.z == Approx(0.F));
+  CHECK(bounds.center[0] == Approx(0.F));
+  CHECK(bounds.center[1] == Approx(0.F));
+  CHECK(bounds.center[2] == Approx(0.F));
 }
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

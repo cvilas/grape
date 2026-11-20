@@ -314,7 +314,7 @@ Concept                                   | Code
 ------------------------------------------|-----
 Splat parameters                          | `Splat` in [`splat.h`](../include/grape/splat/splat.h)
 Σ = R·S·Sᵀ·Rᵀ                             | `covariance()` in [`splat.cpp`](../src/splat.cpp)
-Quaternion to rotation matrix             | `toMatrix()` in [`math.h`](../include/grape/splat/math.h)
+Quaternion to rotation matrix             | `rotationOf()` in [`math.h`](../include/grape/splat/math.h), via [grape::linalg](../../linalg/docs/frames_and_numerics.md)
 Projection Σ' = J·W·Σ·Wᵀ·Jᵀ               | Step 3 in [`splat.vert`](../src/shaders/splat.vert)
 Ellipse axes, quad                        | Steps 4 and 5 in [`splat.vert`](../src/shaders/splat.vert)
 Gaussian falloff α = o·exp(-½r²)          | [`splat.frag`](../src/shaders/splat.frag)
