@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.0](https://github.com/cvilas/grape/compare/v0.13.0...v0.14.0) (2026-11-20)
+
+
+### Features
+
+* **build:** sets baseline for CPU instruction sets ([6ff86d0](https://github.com/cvilas/grape/commit/6ff86d019ff3c5e9c035578d281b6531a3c61b80))
+
+
+### Bug Fixes
+
+* **external:** works around a bug in SDL3 cmake scripts ([608919c](https://github.com/cvilas/grape/commit/608919c9ec18ff23005303b6f92bb843756d088b))
+
 ## [0.13.0](https://github.com/cvilas/grape/compare/v0.12.0...v0.13.0) (2026-11-04)
 
 * **external:** updates SDL to v3.4.20 ([06ea9e1](https://github.com/cvilas/grape/commit/06ea9e16c1ff7a1606d879edfaf3343531271b76))
