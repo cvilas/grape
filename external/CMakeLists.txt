@@ -108,7 +108,7 @@ if(SDL3 IN_LIST EXTERNAL_PROJECTS_LIST)
     ExternalProject_Add(
       SDL3
       URL ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL-release-${SDL3_VERSION_REQUIRED}.tar.gz
-      BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/SDL3-prefix/build
+      PATCH_COMMAND patch -p0 -i ${CMAKE_CURRENT_SOURCE_DIR}/sources/SDL-release-${SDL3_VERSION_REQUIRED}.patch
       CMAKE_ARGS ${SDL3_CMAKE_ARGS})
   endif()
 endif()
