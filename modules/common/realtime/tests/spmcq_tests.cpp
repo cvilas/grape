@@ -2,10 +2,13 @@
 // Copyright (C) 2026 GRAPE Contributors
 //=================================================================================================
 
+#include <algorithm>
+#include <array>
 #include <atomic>
 #include <cstring>
 #include <format>
 #include <thread>
+#include <vector>
 
 #include "catch2/catch_test_macros.hpp"
 #include "grape/realtime/spmcq.h"
@@ -280,6 +283,68 @@ TEST_CASE("Concurrent writer and reader", "[spmcq]") {
   REQUIRE(reads == NUM_WRITES);
 
   producer.join();
+}
+
+//-------------------------------------------------------------------------------------------------
+// Stress test for the post-read lap check: a tiny ring forces the writer to constantly overwrite
+// frames being read. Each frame is filled with a single byte value, so a frame with mixed bytes is
+// torn and must never be reported as Ok. Can only detect bugs, not prove their absence; most
+// effective on weakly ordered CPUs (e.g. aarch64). Hidden from default runs; see README.
+TEST_CASE("Readers never observe torn frames as Ok", "[spmcq][.stress]") {
+  static constexpr auto FRAME_LENGTH = 4096UZ;
+  static constexpr auto NUM_FRAMES = 2UZ;
+  static constexpr auto NUM_WRITES = 2'000'000UZ;
+  static constexpr auto NUM_READERS = 3UZ;
+
+  const auto name = uniqueName();
+  auto maybe_writer =
+      Writer::create(name, Config{ .frame_length = FRAME_LENGTH, .num_frames = NUM_FRAMES });
+  REQUIRE(maybe_writer);
+  auto& writer = maybe_writer.value();
+
+  std::atomic<bool> done{ false };
+  std::atomic<std::uint64_t> num_ok{ 0 };
+  std::atomic<std::uint64_t> num_dropped{ 0 };
+  std::atomic<std::uint64_t> num_torn{ 0 };
+
+  std::vector<std::jthread> readers;
+  readers.reserve(NUM_READERS);
+  for (auto idx = 0UZ; idx < NUM_READERS; ++idx) {
+    auto maybe_reader = Reader::connect(name);
+    REQUIRE(maybe_reader);
+    readers.emplace_back([reader = std::move(maybe_reader.value()), &done, &num_ok, &num_dropped,
+                          &num_torn] mutable {
+      auto snapshot = std::array<std::byte, FRAME_LENGTH>{};
+      while (not done.load(std::memory_order_acquire)) {
+        const auto status = reader.visit([&snapshot](std::span<const std::byte> frame) {
+          std::ranges::copy(frame, snapshot.begin());
+          return true;
+        });
+        if (status == Reader::Status::Ok) {
+          num_ok.fetch_add(1, std::memory_order_relaxed);
+          const auto first = snapshot.front();
+          if (not std::ranges::all_of(snapshot, [first](auto byte) { return byte == first; })) {
+            num_torn.fetch_add(1, std::memory_order_relaxed);
+          }
+        } else if (status == Reader::Status::Dropped) {
+          num_dropped.fetch_add(1, std::memory_order_relaxed);
+        }
+      }
+    });
+  }
+
+  for (auto i = 0UZ; i < NUM_WRITES; ++i) {
+    writer.visit([i](std::span<std::byte> frame) {
+      std::ranges::fill(frame, static_cast<std::byte>(i & 0xFFU));
+      return true;
+    });
+  }
+  done.store(true, std::memory_order_release);
+  readers.clear();
+
+  CHECK(num_ok.load() > 0);
+  CHECK(num_dropped.load() > 0);
+  REQUIRE(num_torn.load() == 0);
 }
 
 //-------------------------------------------------------------------------------------------------

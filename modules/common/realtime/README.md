@@ -49,6 +49,15 @@ There is no cost to exceptions until they are thrown. Therefore, use them to sig
 errors in the task thread. The task thread will terminate on exception but the main thread will not.
 Use `grape::Exception` to capture diagnostic information during exit.
 
+## Stress tests
+
+Long-running stress tests are hidden from default test runs (and CI) using the Catch2 hidden tag 
+`[.stress]`. Run them on demand by selecting the tag explicitly:
+
+```bash
+./build/<preset>/bin/grape_realtime_tests "[stress]"
+```
+
 ## TODO
 
 - [ ] Refactor thread class out of realtime and put it in 'grape'
