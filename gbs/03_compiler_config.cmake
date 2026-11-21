@@ -50,11 +50,11 @@ set(GCC_WARNINGS
 )
 
 # Target instruction set baseline. Exploit SIMD and vectorization available in recent processors
-#   x86-64-v4 : Skylake (2015) / Zen 2 (2019) and later - AVX2, FMA, BMI2
+#   x86-64-v3 : AVX2, FMA, BMI2 (e.g. Skylake / Zen 2)
 #   armv8.2-a : Cortex-A55/A76 and later (e.g. Raspberry Pi 5, Jetson Orin). 
 #               set armv8-a for older cores such as Raspberry Pi 4.
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
-  set(TARGET_ARCH_DEFAULT "x86-64-v4")
+  set(TARGET_ARCH_DEFAULT "x86-64-v3")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
   set(TARGET_ARCH_DEFAULT "armv8.2-a")
 else()
