@@ -21,6 +21,17 @@ set_directory_properties(PROPERTIES EP_UPDATE_DISCONNECTED 1) # skip update step
 set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 
+set(TARGET_ARCH "" CACHE STRING "Value passed to -march (empty: compiler default)")
+
+set(EP_C_FLAGS "${CMAKE_C_FLAGS}")
+set(EP_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+if(TARGET_ARCH)
+  set(EP_C_FLAGS "${EP_C_FLAGS} -march=${TARGET_ARCH}")
+  set(EP_CXX_FLAGS "${EP_CXX_FLAGS} -march=${TARGET_ARCH}")
+  string(STRIP "${EP_C_FLAGS}" EP_C_FLAGS)
+  string(STRIP "${EP_CXX_FLAGS}" EP_CXX_FLAGS)
+endif()
+
 # Collect common arguments to configure external projects
 set(EP_CMAKE_EXTRA_ARGS
     -DCMAKE_BUILD_TYPE=Release
@@ -32,7 +43,9 @@ set(EP_CMAKE_EXTRA_ARGS
     -DCMAKE_INSTALL_RPATH=${CMAKE_INSTALL_RPATH}
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
-    -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
+    -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
+    "-DCMAKE_C_FLAGS=${EP_C_FLAGS}"
+    "-DCMAKE_CXX_FLAGS=${EP_CXX_FLAGS}")
 
 # helper macro useful for dependency handling
 macro(add_dummy_target)
