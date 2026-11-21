@@ -1,0 +1,11 @@
+#=================================================================================================
+# GRAPE
+#=================================================================================================
+
+# Module-local supplement to the repository rules (see top-level .clang-tidy)
+
+InheritParentConfig: true
+
+CheckOptions:
+  # grape::linalg::Matrix::operator[] is bounds-checked (throws std::out_of_range), equivalent to at()
+  - { key: cppcoreguidelines-pro-bounds-avoid-unchecked-container-access.ExcludeClasses, value: '::grape::linalg::Matrix' }
