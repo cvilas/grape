@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.14.0](https://github.com/cvilas/grape/compare/v0.13.0...v0.14.0) (2026-11-21)
+
+
+### Features
+
+* **build:** sets baseline for CPU instruction sets ([6ff86d0](https://github.com/cvilas/grape/commit/6ff86d019ff3c5e9c035578d281b6531a3c61b80))
+
+
+### Bug Fixes
+
+* **build:** downgrades to x86-64-v3 architecture as baseline ([cec939d](https://github.com/cvilas/grape/commit/cec939d7b7bc7e9beb62454e3f75a84721ef2b6f))
+* **external:** patches SDL3 source_group prefix check ([9a7706d](https://github.com/cvilas/grape/commit/9a7706d68db07ad52f6abe7d95ba5d5563ccae46))
+* **external:** works around a bug in SDL3 cmake scripts ([608919c](https://github.com/cvilas/grape/commit/608919c9ec18ff23005303b6f92bb843756d088b))
+* **realtime:** adds seqlock memory fences to spmcq ([8856b16](https://github.com/cvilas/grape/commit/8856b1664f25c99773939b8d3a2b6c41f27ebb9d))
+
 ## [0.13.0](https://github.com/cvilas/grape/compare/v0.12.0...v0.13.0) (2026-11-04)
 
 * **external:** updates SDL to v3.4.20 ([06ea9e1](https://github.com/cvilas/grape/commit/06ea9e16c1ff7a1606d879edfaf3343531271b76))
