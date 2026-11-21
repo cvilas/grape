@@ -5,6 +5,7 @@
 #include "grape/splat/depth_sort.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <limits>
 
@@ -20,7 +21,7 @@ auto sortBackToFront(std::span<const Splat> splats, const Mat4& view)
 
   // View-space depth (distance along viewing direction) of each splat. Only the third row of the
   // view transform is needed: depth = -(row·p + offset), since the camera looks along -Z.
-  const auto row = Vec3{ .x = view.at(2, 0), .y = view.at(2, 1), .z = view.at(2, 2) };
+  const auto row = Vec3{ view.at(2, 0), view.at(2, 1), view.at(2, 2) };
   const auto offset = view.at(2, 3);
   auto depths = std::vector<float>(splats.size());
   auto min_depth = std::numeric_limits<float>::max();
@@ -41,8 +42,8 @@ auto sortBackToFront(std::span<const Splat> splats, const Mat4& view)
   // 1. Count how many splats fall in each bucket
   // 2. Prefix sum: counts[b] becomes the index in the output where bucket b starts
   // 3. Place each splat at its bucket's next free slot
-  const auto range = std::max(max_depth - min_depth, std::numeric_limits<float>::min());
-  const auto scale = static_cast<float>(NUM_BUCKETS - 1) / range;
+  const auto raw_scale = static_cast<float>(NUM_BUCKETS - 1) / (max_depth - min_depth);
+  const auto scale = std::isfinite(raw_scale) ? raw_scale : 0.F;
   const auto bucket_of = [&](float depth) {
     return static_cast<std::size_t>((max_depth - depth) * scale);
   };

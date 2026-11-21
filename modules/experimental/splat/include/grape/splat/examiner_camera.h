@@ -99,7 +99,9 @@ public:
 
 private:
   Vec3 focal_point_;
-  Quat orientation_;  //!< camera-to-world rotation
+  //!< Camera-to-world rotation. Stored as the linalg (passive) quaternion whose rotationMatrix()
+  //!< is the world-to-camera DCM; rotate() by it maps camera coordinates to world coordinates.
+  Quat orientation_;
   float distance_{ 1.F };
   float fov_y_{ DEFAULT_FOV_Y };
 };
