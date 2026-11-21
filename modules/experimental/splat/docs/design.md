@@ -88,7 +88,7 @@ File                                  | Contents
 `src/viewer.cpp`                      | Frame loop, GPU pipeline, mouse and keyboard handling
 `include/grape/splat/examiner_camera.h` | OpenInventor-style orbiting camera
 `include/grape/splat/file_io.h`       | `.splat` and `.ply` reading and writing
-`include/grape/splat/math.h`          | Minimal vector, quaternion and matrix types
+`include/grape/splat/math.h`          | Rendering math built on [grape::linalg](../../linalg/README.md): type aliases, degenerate-input policies, GPU matrix layout
 `src/gpu.h`, `src/async_sorter.h`     | SDL GPU and threading plumbing
 
 ## Limitations

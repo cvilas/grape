@@ -24,12 +24,12 @@ namespace {
 auto parseAxis(std::string_view name) -> grape::splat::Vec3 {
   using grape::splat::Vec3;
   static constexpr auto AXES = std::to_array<std::pair<std::string_view, Vec3>>({
-      { "x", { .x = 1.F } },
-      { "-x", { .x = -1.F } },
-      { "y", { .y = 1.F } },
-      { "-y", { .y = -1.F } },
-      { "z", { .z = 1.F } },
-      { "-z", { .z = -1.F } },
+      { "x", Vec3{ 1.F, 0.F, 0.F } },
+      { "-x", Vec3{ -1.F, 0.F, 0.F } },
+      { "y", Vec3{ 0.F, 1.F, 0.F } },
+      { "-y", Vec3{ 0.F, -1.F, 0.F } },
+      { "z", Vec3{ 0.F, 0.F, 1.F } },
+      { "-z", Vec3{ 0.F, 0.F, -1.F } },
   });
   for (const auto& [key, axis] : AXES) {
     if (key == name) {
