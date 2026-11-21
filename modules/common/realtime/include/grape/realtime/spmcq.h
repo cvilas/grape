@@ -71,8 +71,8 @@ public:
   void visit(F&& fn);
 
   ~Writer();
-  Writer(Writer&& other) noexcept = default;
-  auto operator=(Writer&& other) noexcept -> Writer& = default;
+  Writer(Writer&& other) noexcept;
+  auto operator=(Writer&& other) noexcept -> Writer&;
   Writer(const Writer&) = delete;
   auto operator=(const Writer&) -> Writer& = delete;
 
@@ -139,8 +139,8 @@ public:
   [[nodiscard]] auto visit(F&& fn, Policy policy = Policy::Next) -> Status;
 
   ~Reader();
-  Reader(Reader&& other) noexcept = default;
-  auto operator=(Reader&& other) noexcept -> Reader& = default;
+  Reader(Reader&& other) noexcept;
+  auto operator=(Reader&& other) noexcept -> Reader&;
   Reader(const Reader&) = delete;
   auto operator=(const Reader&) -> Reader& = delete;
 
@@ -165,6 +165,10 @@ void Writer::visit(F&& fn) {
   const auto wc_ref = std::atomic_ref<std::uint64_t>{ *write_count_ptr_ };
   const auto write_count = wc_ref.load(std::memory_order_relaxed);
   const auto frame_start = (write_count % config_.num_frames) * config_.frame_length;
+
+  // Fence to ensure previous write_count increment is visible before frame write
+  std::atomic_thread_fence(std::memory_order_release);
+
   if (std::invoke(std::forward<F>(fn), frames_.subspan(frame_start, config_.frame_length))) {
     wc_ref.fetch_add(1U, std::memory_order_release);
   }
@@ -202,8 +206,10 @@ template <typename F>
     return Status::Canceled;
   }
 
-  // if writer lapped reader while calling user function, invalidate the read
-  const auto write_count_post_read = wc_ref.load(std::memory_order_acquire);
+  // if writer lapped reader while calling user function, invalidate the read.
+  // Fence to ensure frame read is complete before the count is re-checked.
+  std::atomic_thread_fence(std::memory_order_acquire);
+  const auto write_count_post_read = wc_ref.load(std::memory_order_relaxed);
   if ((write_count_post_read - read_count_) >= config_.num_frames) {
     read_count_ = write_count_post_read;
     return Status::Dropped;

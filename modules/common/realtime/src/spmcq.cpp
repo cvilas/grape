@@ -125,6 +125,11 @@ Writer::~Writer() {
 }
 
 //-------------------------------------------------------------------------------------------------
+// Defined here rather than defaulted in the header, where Impl is incomplete
+Writer::Writer(Writer&& other) noexcept = default;
+auto Writer::operator=(Writer&& other) noexcept -> Writer& = default;
+
+//-------------------------------------------------------------------------------------------------
 Writer::Writer(std::string name, std::unique_ptr<Impl> impl, const Config& config,
                std::span<std::byte> frames, std::uint64_t* write_count_ptr)
   : name_(std::move(name))
@@ -206,6 +211,11 @@ Reader::Reader(std::unique_ptr<Impl> impl, const Config& config,
 
 //-------------------------------------------------------------------------------------------------
 Reader::~Reader() = default;
+
+//-------------------------------------------------------------------------------------------------
+// Defined here rather than defaulted in the header, where Impl is incomplete
+Reader::Reader(Reader&& other) noexcept = default;
+auto Reader::operator=(Reader&& other) noexcept -> Reader& = default;
 
 //-------------------------------------------------------------------------------------------------
 auto Reader::exists(std::string_view name) -> bool {
