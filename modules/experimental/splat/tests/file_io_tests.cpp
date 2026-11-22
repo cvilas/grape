@@ -169,12 +169,12 @@ TEST_CASE("PLY decoder reads 3DGS training output", "[file_io]") {
   REQUIRE(decoded->size() == 2);
 
   const auto& s0 = decoded->at(0);
-  CHECK(s0.position[0] == Approx(1.F));
-  CHECK(s0.position[1] == Approx(2.F));
-  CHECK(s0.position[2] == Approx(3.F));
-  CHECK(s0.scale[0] == Approx(1.F));
-  CHECK(s0.scale[1] == Approx(std::exp(-1.F)));
-  CHECK(s0.scale[2] == Approx(std::numbers::e_v<float>));
+  CHECK(s0.position(0) == Approx(1.F));
+  CHECK(s0.position(1) == Approx(2.F));
+  CHECK(s0.position(2) == Approx(3.F));
+  CHECK(s0.scale(0) == Approx(1.F));
+  CHECK(s0.scale(1) == Approx(std::exp(-1.F)));
+  CHECK(s0.scale(2) == Approx(std::numbers::e_v<float>));
   CHECK(s0.rotation.w == Approx(1.F));
   CHECK(s0.color.r == 128);  // 0.5 + SH_C0 * 0
   CHECK(s0.color.g == 255);  // 0.5 + SH_C0 * 1.77 ≈ 0.999
@@ -182,7 +182,7 @@ TEST_CASE("PLY decoder reads 3DGS training output", "[file_io]") {
   CHECK(s0.color.a == 128);  // sigmoid(0)
 
   const auto& s1 = decoded->at(1);
-  CHECK(s1.position[0] == Approx(-1.F));
+  CHECK(s1.position(0) == Approx(-1.F));
   CHECK(s1.rotation.z == Approx(1.F));
   CHECK(s1.color.a == 255);  // sigmoid(10)
 }

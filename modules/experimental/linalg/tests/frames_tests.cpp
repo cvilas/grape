@@ -38,14 +38,14 @@ constexpr auto FRAMES_TEST_MARGIN = 1.0e-12;
 
 void requireCoordsApprox(const Vector<3>& actual, const Vector<3>& expected) {
   for (std::size_t i = 0UZ; i < 3UZ; ++i) {
-    REQUIRE(actual[i] == Approx(expected[i]).margin(FRAMES_TEST_MARGIN));
+    REQUIRE(actual(i) == Approx(expected(i)).margin(FRAMES_TEST_MARGIN));
   }
 }
 
 void requireRotationsApprox(const Matrix<3, 3>& actual, const Matrix<3, 3>& expected) {
   for (std::size_t row = 0UZ; row < 3UZ; ++row) {
     for (std::size_t col = 0UZ; col < 3UZ; ++col) {
-      REQUIRE(actual[row, col] == Approx(expected[row, col]).margin(FRAMES_TEST_MARGIN));
+      REQUIRE(actual(row, col) == Approx(expected(row, col)).margin(FRAMES_TEST_MARGIN));
     }
   }
 }

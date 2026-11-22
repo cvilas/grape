@@ -113,15 +113,15 @@ constexpr auto rotationMatrix(const Quaternion<ScalarType>& quat) -> Matrix<3, 3
   // ww = 2w^2 - 1 is the unit-norm form of the diagonal term
   const auto ww = multiplyAdd(TWO * quat.w, quat.w, ScalarType{ -1 });
   auto mat = Matrix<3, 3, ScalarType>{};
-  mat[0, 0] = multiplyAdd(TWO * quat.x, quat.x, ww);
-  mat[1, 1] = multiplyAdd(TWO * quat.y, quat.y, ww);
-  mat[2, 2] = multiplyAdd(TWO * quat.z, quat.z, ww);
-  mat[0, 1] = TWO * multiplyAdd(quat.w, quat.z, quat.x * quat.y);
-  mat[1, 0] = TWO * multiplyAdd(-quat.w, quat.z, quat.x * quat.y);
-  mat[0, 2] = TWO * multiplyAdd(-quat.w, quat.y, quat.x * quat.z);
-  mat[2, 0] = TWO * multiplyAdd(quat.w, quat.y, quat.x * quat.z);
-  mat[1, 2] = TWO * multiplyAdd(quat.w, quat.x, quat.y * quat.z);
-  mat[2, 1] = TWO * multiplyAdd(-quat.w, quat.x, quat.y * quat.z);
+  mat(0, 0) = multiplyAdd(TWO * quat.x, quat.x, ww);
+  mat(1, 1) = multiplyAdd(TWO * quat.y, quat.y, ww);
+  mat(2, 2) = multiplyAdd(TWO * quat.z, quat.z, ww);
+  mat(0, 1) = TWO * multiplyAdd(quat.w, quat.z, quat.x * quat.y);
+  mat(1, 0) = TWO * multiplyAdd(-quat.w, quat.z, quat.x * quat.y);
+  mat(0, 2) = TWO * multiplyAdd(-quat.w, quat.y, quat.x * quat.z);
+  mat(2, 0) = TWO * multiplyAdd(quat.w, quat.y, quat.x * quat.z);
+  mat(1, 2) = TWO * multiplyAdd(quat.w, quat.x, quat.y * quat.z);
+  mat(2, 1) = TWO * multiplyAdd(-quat.w, quat.x, quat.y * quat.z);
   return mat;
 }
 
@@ -131,7 +131,7 @@ constexpr auto Quaternion<ScalarType>::fromAxisAngle(const Vector<3, ScalarType>
                                                      ScalarType angle) -> Quaternion {
   const auto half_angle = angle / ScalarType{ 2 };
   const auto sn = std::sin(half_angle);
-  return { .x = axis[0] * sn, .y = axis[1] * sn, .z = axis[2] * sn, .w = std::cos(half_angle) };
+  return { .x = axis(0) * sn, .y = axis(1) * sn, .z = axis(2) * sn, .w = std::cos(half_angle) };
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -142,38 +142,38 @@ template <std::floating_point ScalarType>
 constexpr auto Quaternion<ScalarType>::fromMatrix(const Matrix<3, 3, ScalarType>& mat)
     -> Quaternion {
   constexpr auto ONE = ScalarType{ 1 };
-  const auto c00 = mat[0, 0];
-  const auto c11 = mat[1, 1];
-  const auto c22 = mat[2, 2];
+  const auto c00 = mat(0, 0);
+  const auto c11 = mat(1, 1);
+  const auto c22 = mat(2, 2);
   const auto tr = c00 + c11 + c22;
   auto scaled = Quaternion{};
   if ((tr >= c00) && (tr >= c11) && (tr >= c22)) {  // w largest
     scaled = {
-      .x = mat[1, 2] - mat[2, 1],
-      .y = mat[2, 0] - mat[0, 2],
-      .z = mat[0, 1] - mat[1, 0],
+      .x = mat(1, 2) - mat(2, 1),
+      .y = mat(2, 0) - mat(0, 2),
+      .z = mat(0, 1) - mat(1, 0),
       .w = ONE + tr,
     };
   } else if ((c00 >= c11) && (c00 >= c22)) {  // x largest
     scaled = {
       .x = ONE + c00 - c11 - c22,
-      .y = mat[0, 1] + mat[1, 0],
-      .z = mat[0, 2] + mat[2, 0],
-      .w = mat[1, 2] - mat[2, 1],
+      .y = mat(0, 1) + mat(1, 0),
+      .z = mat(0, 2) + mat(2, 0),
+      .w = mat(1, 2) - mat(2, 1),
     };
   } else if (c11 >= c22) {  // y largest
     scaled = {
-      .x = mat[0, 1] + mat[1, 0],
+      .x = mat(0, 1) + mat(1, 0),
       .y = ONE + c11 - c00 - c22,
-      .z = mat[1, 2] + mat[2, 1],
-      .w = mat[2, 0] - mat[0, 2],
+      .z = mat(1, 2) + mat(2, 1),
+      .w = mat(2, 0) - mat(0, 2),
     };
   } else {  // z largest
     scaled = {
-      .x = mat[0, 2] + mat[2, 0],
-      .y = mat[1, 2] + mat[2, 1],
+      .x = mat(0, 2) + mat(2, 0),
+      .y = mat(1, 2) + mat(2, 1),
       .z = ONE + c22 - c00 - c11,
-      .w = mat[0, 1] - mat[1, 0],
+      .w = mat(0, 1) - mat(1, 0),
     };
   }
   return normalized(scaled);

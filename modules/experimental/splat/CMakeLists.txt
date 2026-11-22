@@ -7,11 +7,6 @@ declare_module(
   DEPENDS_ON_MODULES "base;conio;linalg"
   DEPENDS_ON_EXTERNAL_PROJECTS "SDL3")
 
-# Unity builds compile a generated source in the build tree, which clang-tidy would otherwise lint
-# against the top-level config. Mirror this module's lint config next to the generated sources.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy ${CMAKE_CURRENT_BINARY_DIR}/.clang-tidy
-               COPYONLY)
-
 find_package(SDL3 ${SDL3_VERSION_REQUIRED} REQUIRED)
 
 # Shaders are written in GLSL and compiled to SPIR-V (for the SDL GPU Vulkan backend) at build time.

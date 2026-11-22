@@ -74,13 +74,13 @@ public:
   }
 
   /// @return Reference to element at (row, col). Throws std::out_of_range for invalid indices.
-  constexpr auto operator[](std::size_t row, std::size_t col) GRAPE_LIFETIMEBOUND->Scalar& {
+  constexpr auto operator()(std::size_t row, std::size_t col) GRAPE_LIFETIMEBOUND->Scalar& {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
     return storage_[flatIndex(row, col)];
   }
 
   /// @return Reference to element at (row, col). Throws std::out_of_range for invalid indices.
-  constexpr auto operator[](std::size_t row,
+  constexpr auto operator()(std::size_t row,
                             std::size_t col) const GRAPE_LIFETIMEBOUND->const Scalar& {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
     return storage_[flatIndex(row, col)];
@@ -88,7 +88,7 @@ public:
 
   /// @return Reference to element at index (column vectors only). Throws std::out_of_range for
   /// invalid indices.
-  constexpr auto operator[](std::size_t index) GRAPE_LIFETIMEBOUND->Scalar&
+  constexpr auto operator()(std::size_t index) GRAPE_LIFETIMEBOUND->Scalar&
     requires(NumColumns == 1UZ)
   {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
@@ -97,7 +97,7 @@ public:
 
   /// @return Reference to element at index (column vectors only). Throws std::out_of_range for
   /// invalid indices.
-  constexpr auto operator[](std::size_t index) const GRAPE_LIFETIMEBOUND->const Scalar&
+  constexpr auto operator()(std::size_t index) const GRAPE_LIFETIMEBOUND->const Scalar&
     requires(NumColumns == 1UZ)
   {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
@@ -181,7 +181,7 @@ template <std::size_t Order, NumericType Scalar = double>
 constexpr auto identity() -> Matrix<Order, Order, Scalar> {
   auto mat = Matrix<Order, Order, Scalar>{};
   for (std::size_t i = 0UZ; i < Order; ++i) {
-    mat[i, i] = Scalar{ 1 };
+    mat(i, i) = Scalar{ 1 };
   }
   return mat;
 }
@@ -284,9 +284,9 @@ constexpr auto multiply(const Matrix<NumRows, Inner, Scalar>& lhs,
     for (std::size_t row = 0UZ; row < NumRows; ++row) {
       GRAPE_LINALG_GCC_UNROLL
       for (std::size_t inner = 0UZ; inner < Inner; ++inner) {
-        const auto lhs_elem = lhs[row, inner];
+        const auto lhs_elem = lhs(row, inner);
         for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-          result[row, col] = multiplyAdd(lhs_elem, rhs[inner, col], result[row, col]);
+          result(row, col) = multiplyAdd(lhs_elem, rhs(inner, col), result(row, col));
         }
       }
     }
@@ -297,17 +297,17 @@ constexpr auto multiply(const Matrix<NumRows, Inner, Scalar>& lhs,
     auto acc = std::array<Scalar, NumColumns>{};
     GRAPE_LINALG_GCC_UNROLL
     for (std::size_t inner = 0UZ; inner < Inner; ++inner) {
-      const auto lhs_elem = lhs[row, inner];
+      const auto lhs_elem = lhs(row, inner);
       GRAPE_LINALG_GCC_UNROLL_FULL
       for (std::size_t col = 0UZ; col < NumColumns; ++col) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-        acc[col] = multiplyAdd(lhs_elem, rhs[inner, col], acc[col]);
+        acc[col] = multiplyAdd(lhs_elem, rhs(inner, col), acc[col]);
       }
     }
     GRAPE_LINALG_GCC_UNROLL_FULL
     for (std::size_t col = 0UZ; col < NumColumns; ++col) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      result[row, col] = acc[col];
+      result(row, col) = acc[col];
     }
   }
   return result;
@@ -330,7 +330,7 @@ template <std::size_t Order, NumericType Scalar>
 constexpr auto trace(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
   auto sum = Scalar{};
   for (std::size_t i = 0UZ; i < Order; ++i) {
-    sum += mat[i, i];
+    sum += mat(i, i);
   }
   return sum;
 }
@@ -343,7 +343,8 @@ constexpr auto transpose(const Matrix<NumRows, NumColumns, Scalar>& mat)
   auto result = Matrix<NumColumns, NumRows, Scalar>{};
   for (std::size_t row = 0UZ; row < NumRows; ++row) {
     for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-      result[col, row] = mat[row, col];
+      // NOLINTNEXTLINE(readability-suspicious-call-argument)
+      result(col, row) = mat(row, col);
     }
   }
   return result;
@@ -359,7 +360,7 @@ constexpr auto submatrix(const Matrix<NumRows, NumColumns, Scalar>& mat)
   auto result = Matrix<SubRows, SubColumns, Scalar>{};
   for (std::size_t row = 0UZ; row < SubRows; ++row) {
     for (std::size_t col = 0UZ; col < SubColumns; ++col) {
-      result[row, col] = mat[StartRow + row, StartColumn + col];
+      result(row, col) = mat(StartRow + row, StartColumn + col);
     }
   }
   return result;
@@ -374,7 +375,7 @@ constexpr void setSubmatrix(Matrix<NumRows, NumColumns, Scalar>& mat,
                             const Matrix<SubRows, SubColumns, Scalar>& sub) {
   for (std::size_t row = 0UZ; row < SubRows; ++row) {
     for (std::size_t col = 0UZ; col < SubColumns; ++col) {
-      mat[StartRow + row, StartColumn + col] = sub[row, col];
+      mat(StartRow + row, StartColumn + col) = sub(row, col);
     }
   }
 }
@@ -387,9 +388,9 @@ template <std::size_t Order, NumericType Scalar>
 constexpr auto findPivot(const Matrix<Order, Order, Scalar>& mat, std::size_t col)
     -> std::pair<std::size_t, Scalar> {
   auto pivot_row = col;
-  auto pivot_mag = absolute(mat[col, col]);
+  auto pivot_mag = absolute(mat(col, col));
   for (auto row = col + 1UZ; row < Order; ++row) {
-    const auto mag = absolute(mat[row, col]);
+    const auto mag = absolute(mat(row, col));
     if (mag > pivot_mag) {
       pivot_mag = mag;
       pivot_row = row;
@@ -405,7 +406,7 @@ template <std::size_t Order, NumericType Scalar>
 constexpr void swapRows(Matrix<Order, Order, Scalar>& mat, std::size_t row_a, std::size_t row_b,
                         std::size_t first_col = 0UZ) {
   for (auto j = first_col; j < Order; ++j) {
-    std::swap(mat[row_a, j], mat[row_b, j]);
+    std::swap(mat(row_a, j), mat(row_b, j));
   }
 }
 
@@ -417,7 +418,7 @@ GRAPE_ALWAYS_INLINE constexpr auto infinityNorm(const Matrix<Order, Order, Scala
   for (std::size_t row = 0UZ; row < Order; ++row) {
     auto row_sum = Scalar{ 0 };
     for (std::size_t col = 0UZ; col < Order; ++col) {
-      row_sum += absolute(mat[row, col]);
+      row_sum += absolute(mat(row, col));
     }
     result = (row_sum > result) ? row_sum : result;
   }
@@ -430,7 +431,7 @@ template <std::size_t Rows, std::size_t Cols, std::floating_point Scalar>
 constexpr auto isFinite(const Matrix<Rows, Cols, Scalar>& mat) -> bool {
   for (std::size_t row = 0UZ; row < Rows; ++row) {
     for (std::size_t col = 0UZ; col < Cols; ++col) {
-      if (!(absolute(mat[row, col]) <= std::numeric_limits<Scalar>::max())) {
+      if (!(absolute(mat(row, col)) <= std::numeric_limits<Scalar>::max())) {
         return false;
       }
     }
@@ -474,18 +475,18 @@ struct Minors4 {
 template <std::floating_point Scalar>
 GRAPE_ALWAYS_INLINE constexpr auto minors4(const Matrix<4, 4, Scalar>& mat) -> Minors4<Scalar> {
   return {
-    .up0 = differenceOfProducts(mat[0, 0], mat[1, 1], mat[0, 1], mat[1, 0]),
-    .up1 = differenceOfProducts(mat[0, 0], mat[1, 2], mat[0, 2], mat[1, 0]),
-    .up2 = differenceOfProducts(mat[0, 0], mat[1, 3], mat[0, 3], mat[1, 0]),
-    .up3 = differenceOfProducts(mat[0, 1], mat[1, 2], mat[0, 2], mat[1, 1]),
-    .up4 = differenceOfProducts(mat[0, 1], mat[1, 3], mat[0, 3], mat[1, 1]),
-    .up5 = differenceOfProducts(mat[0, 2], mat[1, 3], mat[0, 3], mat[1, 2]),
-    .lo0 = differenceOfProducts(mat[2, 0], mat[3, 1], mat[2, 1], mat[3, 0]),
-    .lo1 = differenceOfProducts(mat[2, 0], mat[3, 2], mat[2, 2], mat[3, 0]),
-    .lo2 = differenceOfProducts(mat[2, 0], mat[3, 3], mat[2, 3], mat[3, 0]),
-    .lo3 = differenceOfProducts(mat[2, 1], mat[3, 2], mat[2, 2], mat[3, 1]),
-    .lo4 = differenceOfProducts(mat[2, 1], mat[3, 3], mat[2, 3], mat[3, 1]),
-    .lo5 = differenceOfProducts(mat[2, 2], mat[3, 3], mat[2, 3], mat[3, 2]),
+    .up0 = differenceOfProducts(mat(0, 0), mat(1, 1), mat(0, 1), mat(1, 0)),
+    .up1 = differenceOfProducts(mat(0, 0), mat(1, 2), mat(0, 2), mat(1, 0)),
+    .up2 = differenceOfProducts(mat(0, 0), mat(1, 3), mat(0, 3), mat(1, 0)),
+    .up3 = differenceOfProducts(mat(0, 1), mat(1, 2), mat(0, 2), mat(1, 1)),
+    .up4 = differenceOfProducts(mat(0, 1), mat(1, 3), mat(0, 3), mat(1, 1)),
+    .up5 = differenceOfProducts(mat(0, 2), mat(1, 3), mat(0, 3), mat(1, 2)),
+    .lo0 = differenceOfProducts(mat(2, 0), mat(3, 1), mat(2, 1), mat(3, 0)),
+    .lo1 = differenceOfProducts(mat(2, 0), mat(3, 2), mat(2, 2), mat(3, 0)),
+    .lo2 = differenceOfProducts(mat(2, 0), mat(3, 3), mat(2, 3), mat(3, 0)),
+    .lo3 = differenceOfProducts(mat(2, 1), mat(3, 2), mat(2, 2), mat(3, 1)),
+    .lo4 = differenceOfProducts(mat(2, 1), mat(3, 3), mat(2, 3), mat(3, 1)),
+    .lo5 = differenceOfProducts(mat(2, 2), mat(3, 3), mat(2, 3), mat(3, 2)),
   };
 }
 
@@ -504,8 +505,8 @@ constexpr auto determinant4(const Minors4<Scalar>& minors) -> Scalar {
 template <std::floating_point Scalar>
 constexpr auto adjugate(const Matrix<2, 2, Scalar>& mat) -> Adjugate<2, Scalar> {
   return {
-    .adjugate = Matrix<2, 2, Scalar>{ mat[1, 1], -mat[0, 1], -mat[1, 0], mat[0, 0] },
-    .determinant = differenceOfProducts(mat[0, 0], mat[1, 1], mat[0, 1], mat[1, 0]),
+    .adjugate = Matrix<2, 2, Scalar>{ mat(1, 1), -mat(0, 1), -mat(1, 0), mat(0, 0) },
+    .determinant = differenceOfProducts(mat(0, 0), mat(1, 1), mat(0, 1), mat(1, 0)),
   };
 }
 
@@ -513,18 +514,18 @@ constexpr auto adjugate(const Matrix<2, 2, Scalar>& mat) -> Adjugate<2, Scalar> 
 template <std::floating_point Scalar>
 GRAPE_ALWAYS_INLINE constexpr auto adjugate(const Matrix<3, 3, Scalar>& mat)
     -> Adjugate<3, Scalar> {
-  const auto c00 = differenceOfProducts(mat[1, 1], mat[2, 2], mat[1, 2], mat[2, 1]);
-  const auto c01 = differenceOfProducts(mat[1, 2], mat[2, 0], mat[1, 0], mat[2, 2]);
-  const auto c02 = differenceOfProducts(mat[1, 0], mat[2, 1], mat[1, 1], mat[2, 0]);
-  const auto c10 = differenceOfProducts(mat[0, 2], mat[2, 1], mat[0, 1], mat[2, 2]);
-  const auto c11 = differenceOfProducts(mat[0, 0], mat[2, 2], mat[0, 2], mat[2, 0]);
-  const auto c12 = differenceOfProducts(mat[0, 1], mat[2, 0], mat[0, 0], mat[2, 1]);
-  const auto c20 = differenceOfProducts(mat[0, 1], mat[1, 2], mat[0, 2], mat[1, 1]);
-  const auto c21 = differenceOfProducts(mat[0, 2], mat[1, 0], mat[0, 0], mat[1, 2]);
-  const auto c22 = differenceOfProducts(mat[0, 0], mat[1, 1], mat[0, 1], mat[1, 0]);
+  const auto c00 = differenceOfProducts(mat(1, 1), mat(2, 2), mat(1, 2), mat(2, 1));
+  const auto c01 = differenceOfProducts(mat(1, 2), mat(2, 0), mat(1, 0), mat(2, 2));
+  const auto c02 = differenceOfProducts(mat(1, 0), mat(2, 1), mat(1, 1), mat(2, 0));
+  const auto c10 = differenceOfProducts(mat(0, 2), mat(2, 1), mat(0, 1), mat(2, 2));
+  const auto c11 = differenceOfProducts(mat(0, 0), mat(2, 2), mat(0, 2), mat(2, 0));
+  const auto c12 = differenceOfProducts(mat(0, 1), mat(2, 0), mat(0, 0), mat(2, 1));
+  const auto c20 = differenceOfProducts(mat(0, 1), mat(1, 2), mat(0, 2), mat(1, 1));
+  const auto c21 = differenceOfProducts(mat(0, 2), mat(1, 0), mat(0, 0), mat(1, 2));
+  const auto c22 = differenceOfProducts(mat(0, 0), mat(1, 1), mat(0, 1), mat(1, 0));
   return {
     .adjugate = Matrix<3, 3, Scalar>{ c00, c10, c20, c01, c11, c21, c02, c12, c22 },
-    .determinant = multiplyAdd(mat[0, 0], c00, multiplyAdd(mat[0, 1], c01, mat[0, 2] * c02)),
+    .determinant = multiplyAdd(mat(0, 0), c00, multiplyAdd(mat(0, 1), c01, mat(0, 2) * c02)),
   };
 }
 
@@ -539,22 +540,22 @@ GRAPE_ALWAYS_INLINE constexpr auto adjugate(const Matrix<4, 4, Scalar>& mat)
   return {
     .adjugate =
         Matrix<4, 4, Scalar>{
-            sumOfThreeProducts(mat[1, 1], lo5, -mat[1, 2], lo4, mat[1, 3], lo3),
-            sumOfThreeProducts(-mat[0, 1], lo5, mat[0, 2], lo4, -mat[0, 3], lo3),
-            sumOfThreeProducts(mat[3, 1], up5, -mat[3, 2], up4, mat[3, 3], up3),
-            sumOfThreeProducts(-mat[2, 1], up5, mat[2, 2], up4, -mat[2, 3], up3),
-            sumOfThreeProducts(-mat[1, 0], lo5, mat[1, 2], lo2, -mat[1, 3], lo1),
-            sumOfThreeProducts(mat[0, 0], lo5, -mat[0, 2], lo2, mat[0, 3], lo1),
-            sumOfThreeProducts(-mat[3, 0], up5, mat[3, 2], up2, -mat[3, 3], up1),
-            sumOfThreeProducts(mat[2, 0], up5, -mat[2, 2], up2, mat[2, 3], up1),
-            sumOfThreeProducts(mat[1, 0], lo4, -mat[1, 1], lo2, mat[1, 3], lo0),
-            sumOfThreeProducts(-mat[0, 0], lo4, mat[0, 1], lo2, -mat[0, 3], lo0),
-            sumOfThreeProducts(mat[3, 0], up4, -mat[3, 1], up2, mat[3, 3], up0),
-            sumOfThreeProducts(-mat[2, 0], up4, mat[2, 1], up2, -mat[2, 3], up0),
-            sumOfThreeProducts(-mat[1, 0], lo3, mat[1, 1], lo1, -mat[1, 2], lo0),
-            sumOfThreeProducts(mat[0, 0], lo3, -mat[0, 1], lo1, mat[0, 2], lo0),
-            sumOfThreeProducts(-mat[3, 0], up3, mat[3, 1], up1, -mat[3, 2], up0),
-            sumOfThreeProducts(mat[2, 0], up3, -mat[2, 1], up1, mat[2, 2], up0),
+            sumOfThreeProducts(mat(1, 1), lo5, -mat(1, 2), lo4, mat(1, 3), lo3),
+            sumOfThreeProducts(-mat(0, 1), lo5, mat(0, 2), lo4, -mat(0, 3), lo3),
+            sumOfThreeProducts(mat(3, 1), up5, -mat(3, 2), up4, mat(3, 3), up3),
+            sumOfThreeProducts(-mat(2, 1), up5, mat(2, 2), up4, -mat(2, 3), up3),
+            sumOfThreeProducts(-mat(1, 0), lo5, mat(1, 2), lo2, -mat(1, 3), lo1),
+            sumOfThreeProducts(mat(0, 0), lo5, -mat(0, 2), lo2, mat(0, 3), lo1),
+            sumOfThreeProducts(-mat(3, 0), up5, mat(3, 2), up2, -mat(3, 3), up1),
+            sumOfThreeProducts(mat(2, 0), up5, -mat(2, 2), up2, mat(2, 3), up1),
+            sumOfThreeProducts(mat(1, 0), lo4, -mat(1, 1), lo2, mat(1, 3), lo0),
+            sumOfThreeProducts(-mat(0, 0), lo4, mat(0, 1), lo2, -mat(0, 3), lo0),
+            sumOfThreeProducts(mat(3, 0), up4, -mat(3, 1), up2, mat(3, 3), up0),
+            sumOfThreeProducts(-mat(2, 0), up4, mat(2, 1), up2, -mat(2, 3), up0),
+            sumOfThreeProducts(-mat(1, 0), lo3, mat(1, 1), lo1, -mat(1, 2), lo0),
+            sumOfThreeProducts(mat(0, 0), lo3, -mat(0, 1), lo1, mat(0, 2), lo0),
+            sumOfThreeProducts(-mat(3, 0), up3, mat(3, 1), up1, -mat(3, 2), up0),
+            sumOfThreeProducts(mat(2, 0), up3, -mat(2, 1), up1, mat(2, 2), up0),
         },
     .determinant = det,
   };
@@ -567,15 +568,15 @@ GRAPE_ALWAYS_INLINE constexpr auto adjugate(const Matrix<4, 4, Scalar>& mat)
 template <std::size_t Order, std::floating_point Scalar>
 constexpr auto determinant(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
   if constexpr (Order == 1UZ) {
-    return mat[0, 0];
+    return mat(0, 0);
   } else if constexpr (Order == 2UZ) {
-    return differenceOfProducts(mat[0, 0], mat[1, 1], mat[0, 1], mat[1, 0]);
+    return differenceOfProducts(mat(0, 0), mat(1, 1), mat(0, 1), mat(1, 0));
   } else if constexpr (Order == 3UZ) {
-    const auto minor0 = differenceOfProducts(mat[1, 1], mat[2, 2], mat[1, 2], mat[2, 1]);
-    const auto minor1 = differenceOfProducts(mat[1, 0], mat[2, 2], mat[1, 2], mat[2, 0]);
-    const auto minor2 = differenceOfProducts(mat[1, 0], mat[2, 1], mat[1, 1], mat[2, 0]);
-    return detail::multiplyAdd(mat[0, 0], minor0,
-                               detail::multiplyAdd(-mat[0, 1], minor1, mat[0, 2] * minor2));
+    const auto minor0 = differenceOfProducts(mat(1, 1), mat(2, 2), mat(1, 2), mat(2, 1));
+    const auto minor1 = differenceOfProducts(mat(1, 0), mat(2, 2), mat(1, 2), mat(2, 0));
+    const auto minor2 = differenceOfProducts(mat(1, 0), mat(2, 1), mat(1, 1), mat(2, 0));
+    return detail::multiplyAdd(mat(0, 0), minor0,
+                               detail::multiplyAdd(-mat(0, 1), minor1, mat(0, 2) * minor2));
   } else if constexpr (Order == 4UZ) {
     return detail::determinant4(detail::minors4(mat));
   } else {
@@ -590,13 +591,13 @@ constexpr auto determinant(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
         detail::swapRows(lu, col, pivot_row, col);
         det = -det;
       }
-      const auto pivot = lu[col, col];
+      const auto pivot = lu(col, col);
       det *= pivot;
       // column col below the diagonal is never read again
       for (auto row = col + 1UZ; row < Order; ++row) {
-        const auto factor = lu[row, col] / pivot;
+        const auto factor = lu(row, col) / pivot;
         for (auto j = col + 1UZ; j < Order; ++j) {
-          lu[row, j] = detail::multiplyAdd(-factor, lu[col, j], lu[row, j]);
+          lu(row, j) = detail::multiplyAdd(-factor, lu(col, j), lu(row, j));
         }
       }
     }
@@ -629,33 +630,33 @@ constexpr auto inverseGaussJordan(const Matrix<Order, Order, Scalar>& mat, Scala
       swapRows(rhs, col, pivot_row);
     }
     // Local copies of the pivot row spare GCC from proving that row != col before vectorising
-    const auto inv_pivot = Scalar{ 1 } / lhs[col, col];
+    const auto inv_pivot = Scalar{ 1 } / lhs(col, col);
     auto pivot_lhs = std::array<Scalar, Order>{};
     auto pivot_rhs = std::array<Scalar, Order>{};
     for (std::size_t j = 0UZ; j < Order; ++j) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      pivot_lhs[j] = lhs[col, j] * inv_pivot;
+      pivot_lhs[j] = lhs(col, j) * inv_pivot;
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      lhs[col, j] = pivot_lhs[j];
+      lhs(col, j) = pivot_lhs[j];
     }
     for (std::size_t j = 0UZ; j < Order; ++j) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      pivot_rhs[j] = rhs[col, j] * inv_pivot;
+      pivot_rhs[j] = rhs(col, j) * inv_pivot;
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      rhs[col, j] = pivot_rhs[j];
+      rhs(col, j) = pivot_rhs[j];
     }
     for (std::size_t row = 0UZ; row < Order; ++row) {
       if (row == col) {
         continue;
       }
-      const auto factor = lhs[row, col];
+      const auto factor = lhs(row, col);
       for (std::size_t j = 0UZ; j < Order; ++j) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-        lhs[row, j] = multiplyAdd(-factor, pivot_lhs[j], lhs[row, j]);
+        lhs(row, j) = multiplyAdd(-factor, pivot_lhs[j], lhs(row, j));
       }
       for (std::size_t j = 0UZ; j < Order; ++j) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-        rhs[row, j] = multiplyAdd(-factor, pivot_rhs[j], rhs[row, j]);
+        rhs(row, j) = multiplyAdd(-factor, pivot_rhs[j], rhs(row, j));
       }
     }
   }
@@ -701,7 +702,7 @@ template <std::size_t Order, NumericType Scalar>
 constexpr auto dot(const Vector<Order, Scalar>& lhs, const Vector<Order, Scalar>& rhs) -> Scalar {
   auto sum = Scalar{};
   for (std::size_t i = 0UZ; i < Order; ++i) {
-    sum = detail::multiplyAdd(lhs[i], rhs[i], sum);
+    sum = detail::multiplyAdd(lhs(i), rhs(i), sum);
   }
   return sum;
 }
@@ -719,9 +720,9 @@ template <NumericType Scalar>
 constexpr auto cross(const Vector<3, Scalar>& lhs, const Vector<3, Scalar>& rhs)
     -> Vector<3, Scalar> {
   return Vector<3, Scalar>{
-    differenceOfProducts(lhs[1], rhs[2], lhs[2], rhs[1]),
-    differenceOfProducts(lhs[2], rhs[0], lhs[0], rhs[2]),
-    differenceOfProducts(lhs[0], rhs[1], lhs[1], rhs[0]),
+    differenceOfProducts(lhs(1), rhs(2), lhs(2), rhs(1)),
+    differenceOfProducts(lhs(2), rhs(0), lhs(0), rhs(2)),
+    differenceOfProducts(lhs(0), rhs(1), lhs(1), rhs(0)),
   };
 }
 
@@ -745,7 +746,7 @@ struct std::formatter<grape::linalg::Matrix<NumRows, NumColumns, Scalar>> : std:
       out = std::format_to(out, "[");
       for (std::size_t col = 0UZ; col < NumColumns; ++col) {
         ctx.advance_to(out);
-        out = std::formatter<Scalar>::format(mat[row, col], ctx);
+        out = std::formatter<Scalar>::format(mat(row, col), ctx);
         if (col + 1UZ < NumColumns) {
           out = std::format_to(out, ", ");
         }

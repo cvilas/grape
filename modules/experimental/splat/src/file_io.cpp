@@ -360,9 +360,9 @@ auto encodeSplat(std::span<const Splat> splats) -> std::vector<std::byte> {
     const auto& splat = splats.at(i);
     const auto record = out.subspan(i * SPLAT_RECORD_SIZE, SPLAT_RECORD_SIZE);
     writeAs(record, SPLAT_POSITION_OFFSET,
-            std::array{ splat.position[0], splat.position[1], splat.position[2] });
+            std::array{ splat.position(0), splat.position(1), splat.position(2) });
     writeAs(record, SPLAT_SCALE_OFFSET,
-            std::array{ splat.scale[0], splat.scale[1], splat.scale[2] });
+            std::array{ splat.scale(0), splat.scale(1), splat.scale(2) });
     writeAs(record, SPLAT_COLOR_OFFSET,
             std::array{ splat.color.r, splat.color.g, splat.color.b, splat.color.a });
     writeAs(record, SPLAT_ROTATION_OFFSET, encodeQuantisedQuat(splat.rotation));

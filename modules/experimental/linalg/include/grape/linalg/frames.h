@@ -277,7 +277,7 @@ public:
     const auto ident = identity<3, Scalar>();
     for (std::size_t row = 0UZ; row < 3UZ; ++row) {
       for (std::size_t col = 0UZ; col < 3UZ; ++col) {
-        if (!(detail::absolute(gram[row, col] - ident[row, col]) <= tolerance)) {
+        if (!(detail::absolute(gram(row, col) - ident(row, col)) <= tolerance)) {
           return std::nullopt;
         }
       }

@@ -24,9 +24,9 @@ constexpr auto UP_Y = Vec3{ 0.F, 1.F, 0.F };
 
 //-------------------------------------------------------------------------------------------------
 void checkNear(const Vec3& actual, const Vec3& expected, float tol = 1e-4F) {
-  CHECK(actual[0] == Approx(expected[0]).margin(tol));
-  CHECK(actual[1] == Approx(expected[1]).margin(tol));
-  CHECK(actual[2] == Approx(expected[2]).margin(tol));
+  CHECK(actual(0) == Approx(expected(0)).margin(tol));
+  CHECK(actual(1) == Approx(expected(1)).margin(tol));
+  CHECK(actual(2) == Approx(expected(2)).margin(tol));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -66,8 +66,8 @@ TEST_CASE("Trackball rotation makes the scene follow the pointer", "[examiner_ca
 
   std::ignore = camera.trackball(0.F, 0.F, 0.2F, 0.F, 1.F);  // drag right
   const auto pt = transformPoint(camera.viewMatrix(), front);
-  CHECK(pt[0] > 0.F);
-  CHECK(pt[1] == Approx(0.F).margin(1e-5));
+  CHECK(pt(0) > 0.F);
+  CHECK(pt(1) == Approx(0.F).margin(1e-5));
   // orbits the focal point at constant distance
   CHECK(norm(camera.position()) == Approx(distance));
   checkNear(camera.focalPoint(), {});
@@ -79,8 +79,8 @@ TEST_CASE("Trackball drag up tilts scene upwards", "[examiner_camera]") {
   camera.viewAll(ORIGIN, 1.F, UP_Y);
   std::ignore = camera.trackball(0.F, 0.F, 0.F, 0.3F, 1.F);
   const auto pt = transformPoint(camera.viewMatrix(), Vec3{ 0.F, 0.F, 1.F });
-  CHECK(pt[1] > 0.F);
-  CHECK(pt[0] == Approx(0.F).margin(1e-5));
+  CHECK(pt(1) > 0.F);
+  CHECK(pt(0) == Approx(0.F).margin(1e-5));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -95,9 +95,9 @@ TEST_CASE("Pan moves the focal plane with the pointer", "[examiner_camera]") {
 
   // The original focal point should now project DX right and |DY| up of the image centre
   const auto pt = transformPoint(camera.viewMatrix(), {});
-  const auto depth = -pt[2];
-  CHECK(focal_px * pt[0] / depth == Approx(DX_PX));
-  CHECK(focal_px * pt[1] / depth == Approx(-DY_PX));
+  const auto depth = -pt(2);
+  CHECK(focal_px * pt(0) / depth == Approx(DX_PX));
+  CHECK(focal_px * pt(1) / depth == Approx(-DY_PX));
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -24,12 +24,12 @@ auto covariance(const Splat& splat) -> Covariance {
   auto mat = rot;
   for (auto col = 0UZ; col < 3UZ; ++col) {
     for (auto row = 0UZ; row < 3UZ; ++row) {
-      mat[row, col] *= splat.scale[col];
+      mat(row, col) *= splat.scale(col);
     }
   }
 
   const auto sigma = mat * linalg::transpose(mat);
-  return { sigma[0, 0], sigma[0, 1], sigma[0, 2], sigma[1, 1], sigma[1, 2], sigma[2, 2] };
+  return { sigma(0, 0), sigma(0, 1), sigma(0, 2), sigma(1, 1), sigma(1, 2), sigma(2, 2) };
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -46,9 +46,9 @@ auto computeBounds(std::span<const Splat> splats, float percentile) -> Sphere {
     return values.at(mid);
   };
   const auto center = Vec3{
-    median([](const Splat& splat) { return splat.position[0]; }),
-    median([](const Splat& splat) { return splat.position[1]; }),
-    median([](const Splat& splat) { return splat.position[2]; }),
+    median([](const Splat& splat) { return splat.position(0); }),
+    median([](const Splat& splat) { return splat.position(1); }),
+    median([](const Splat& splat) { return splat.position(2); }),
   };
 
   auto distances = std::vector<float>(count);

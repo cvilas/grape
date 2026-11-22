@@ -64,8 +64,8 @@ TEST_CASE("Scene bounds ignore far outliers", "[splat]") {
   }
   splats.push_back(makeSplat(Vec3{ 1000.F, 5.F, 0.F }, ORIGIN, IDENTITY));
   const auto bounds = grape::splat::computeBounds(splats, 0.9F);
-  CHECK(bounds.center[0] == Approx(0.05F).margin(0.06));
-  CHECK(bounds.center[1] == Approx(5.F));
+  CHECK(bounds.center(0) == Approx(0.05F).margin(0.06));
+  CHECK(bounds.center(1) == Approx(5.F));
   CHECK(bounds.radius < 1.5F);
   CHECK(bounds.radius > 0.5F);
 }
@@ -74,9 +74,9 @@ TEST_CASE("Scene bounds ignore far outliers", "[splat]") {
 TEST_CASE("Scene bounds of empty scene are empty", "[splat]") {
   const auto bounds = grape::splat::computeBounds({});
   CHECK(bounds.radius == Approx(0.F));
-  CHECK(bounds.center[0] == Approx(0.F));
-  CHECK(bounds.center[1] == Approx(0.F));
-  CHECK(bounds.center[2] == Approx(0.F));
+  CHECK(bounds.center(0) == Approx(0.F));
+  CHECK(bounds.center(1) == Approx(0.F));
+  CHECK(bounds.center(2) == Approx(0.F));
 }
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
