@@ -91,7 +91,7 @@ auto toGpuSplat(const Splat& splat) -> GpuSplat {
                     (static_cast<std::uint32_t>(splat.color.b) << 16U) |
                     (static_cast<std::uint32_t>(splat.color.a) << 24U);
   return {
-    .position = { splat.position[0], splat.position[1], splat.position[2] },
+    .position = { splat.position(0), splat.position(1), splat.position(2) },
     .rgba = rgba,
     .cov_a = { cov.at(0), cov.at(1), cov.at(2) },
     .pad0 = 0.F,
@@ -331,13 +331,13 @@ auto Viewer::Impl::pick(float px, float py) const -> std::optional<Vec3> {
       continue;
     }
     const auto pt = transformPoint(view, splat.position);
-    const auto depth = -pt[2];
+    const auto depth = -pt(2);
     if (depth <= 0.F or depth >= best_depth) {
       continue;
     }
-    const auto dx = (focal * pt[0] / depth) - target_x;
-    const auto dy = (focal * pt[1] / depth) - target_y;
-    const auto max_scale = std::max({ splat.scale[0], splat.scale[1], splat.scale[2] });
+    const auto dx = (focal * pt(0) / depth) - target_x;
+    const auto dy = (focal * pt(1) / depth) - target_y;
+    const auto max_scale = std::max({ splat.scale(0), splat.scale(1), splat.scale(2) });
     const auto radius = std::max(PICK_RADIUS_PX, focal * max_scale / depth);
     if ((dx * dx) + (dy * dy) <= radius * radius) {
       best = splat.position;

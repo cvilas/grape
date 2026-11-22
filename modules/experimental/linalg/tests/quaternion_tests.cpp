@@ -57,12 +57,12 @@ TEST_CASE("Quaternion product composes rotations right-to-left, like rotation ma
   const auto expected = rotationMatrix(lhs) * rotationMatrix(rhs);
   for (std::size_t row = 0UZ; row < 3UZ; ++row) {
     for (std::size_t col = 0UZ; col < 3UZ; ++col) {
-      REQUIRE(composed[row, col] == Approx(expected[row, col]).margin(QUATERNION_EPSILON));
+      REQUIRE(composed(row, col) == Approx(expected(row, col)).margin(QUATERNION_EPSILON));
     }
   }
   // non-commutative: the reversed order gives a different rotation
   const auto reversed = rotationMatrix(rhs * lhs);
-  REQUIRE(reversed[0, 1] != Approx(expected[0, 1]).margin(1e-3));
+  REQUIRE(reversed(0, 1) != Approx(expected(0, 1)).margin(1e-3));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -123,30 +123,30 @@ TEST_CASE("Quaternion inverse reverses multiplication order", "[linalg]") {
 TEST_CASE("Identity quaternion produces the identity rotation matrix", "[linalg]") {
   const auto matrix = rotationMatrix(Quaterniond{});
 
-  REQUIRE(matrix[0, 0] == Approx(1.0));
-  REQUIRE(matrix[0, 1] == Approx(0.0));
-  REQUIRE(matrix[0, 2] == Approx(0.0));
-  REQUIRE(matrix[1, 0] == Approx(0.0));
-  REQUIRE(matrix[1, 1] == Approx(1.0));
-  REQUIRE(matrix[1, 2] == Approx(0.0));
-  REQUIRE(matrix[2, 0] == Approx(0.0));
-  REQUIRE(matrix[2, 1] == Approx(0.0));
-  REQUIRE(matrix[2, 2] == Approx(1.0));
+  REQUIRE(matrix(0, 0) == Approx(1.0));
+  REQUIRE(matrix(0, 1) == Approx(0.0));
+  REQUIRE(matrix(0, 2) == Approx(0.0));
+  REQUIRE(matrix(1, 0) == Approx(0.0));
+  REQUIRE(matrix(1, 1) == Approx(1.0));
+  REQUIRE(matrix(1, 2) == Approx(0.0));
+  REQUIRE(matrix(2, 0) == Approx(0.0));
+  REQUIRE(matrix(2, 1) == Approx(0.0));
+  REQUIRE(matrix(2, 2) == Approx(1.0));
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Half-turn quaternion produces the expected rotation matrix", "[linalg]") {
   const auto matrix = rotationMatrix(Quaterniond{ .x = 0, .y = 0, .z = 1, .w = 0 });
 
-  REQUIRE(matrix[0, 0] == Approx(-1.0));
-  REQUIRE(matrix[0, 1] == Approx(0.0));
-  REQUIRE(matrix[0, 2] == Approx(0.0));
-  REQUIRE(matrix[1, 0] == Approx(0.0));
-  REQUIRE(matrix[1, 1] == Approx(-1.0));
-  REQUIRE(matrix[1, 2] == Approx(0.0));
-  REQUIRE(matrix[2, 0] == Approx(0.0));
-  REQUIRE(matrix[2, 1] == Approx(0.0));
-  REQUIRE(matrix[2, 2] == Approx(1.0));
+  REQUIRE(matrix(0, 0) == Approx(-1.0));
+  REQUIRE(matrix(0, 1) == Approx(0.0));
+  REQUIRE(matrix(0, 2) == Approx(0.0));
+  REQUIRE(matrix(1, 0) == Approx(0.0));
+  REQUIRE(matrix(1, 1) == Approx(-1.0));
+  REQUIRE(matrix(1, 2) == Approx(0.0));
+  REQUIRE(matrix(2, 0) == Approx(0.0));
+  REQUIRE(matrix(2, 1) == Approx(0.0));
+  REQUIRE(matrix(2, 2) == Approx(1.0));
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <format>
 #include <random>
+#include <stdexcept>
 
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
@@ -37,7 +38,7 @@ void requireMatrixApprox(const Matrix<NumRows, NumColumns>& actual,
                          const Matrix<NumRows, NumColumns>& expected) {
   for (std::size_t row = 0UZ; row < NumRows; ++row) {
     for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-      REQUIRE(actual[row, col] == Approx(expected[row, col]).margin(MATRIX_TEST_MARGIN));
+      REQUIRE(actual(row, col) == Approx(expected(row, col)).margin(MATRIX_TEST_MARGIN));
     }
   }
 }
@@ -89,6 +90,8 @@ static_assert(Matrix<1, 2, int>{ 7, 9 } / 2 == Matrix<1, 2, int>{ 3, 4 });
 
 // Elements are exposed contiguously in row-major order
 static_assert(Matrix<2, 2, int>{ 1, 2, 3, 4 }.elements() == std::array{ 1, 2, 3, 4 });
+static_assert(Matrix<2, 2, int>{ 1, 2, 3, 4 }(1, 0) == 3);
+static_assert(Vector<2, int>{ 1, 2 }(1) == 2);
 
 // Closed-form determinants are exact for small integers. (Exact floating point comparisons in this
 // file use std::is_eq(a <=> b) to state that exactness is intended.)
@@ -108,10 +111,10 @@ TEST_CASE("Compile-time and runtime evaluation agree on fused arithmetic", "[lin
   static constexpr auto RHS = Vector<3>{ 1e8, 1e8 - 1, 7. };
   const auto lhs = LHS;  // not usable in constant expressions, so cross() takes the runtime path
   const auto runtime = cross(lhs, RHS);
-  REQUIRE(std::is_eq(runtime[2] <=> -1.));
+  REQUIRE(std::is_eq(runtime(2) <=> -1.));
 #ifndef __clang__  // clang cannot yet evaluate std::fma in constant expressions
   static constexpr auto COMPILE_TIME = cross(LHS, RHS);
-  static_assert(std::is_eq(COMPILE_TIME[2] <=> -1.));
+  static_assert(std::is_eq(COMPILE_TIME(2) <=> -1.));
   REQUIRE(runtime == COMPILE_TIME);
 #endif
 }
@@ -120,24 +123,33 @@ TEST_CASE("Compile-time and runtime evaluation agree on fused arithmetic", "[lin
 TEST_CASE("Matrix initialises from comma-separated values in row-major order", "[linalg]") {
   auto mat = Matrix<2, 3>{ 1., 2., 3.,  //
                            4., 5., 6. };
-  REQUIRE(mat[0, 0] == 1.);
-  REQUIRE(mat[0, 2] == 3.);
-  REQUIRE(mat[1, 0] == 4.);
-  REQUIRE(mat[1, 2] == 6.);
+  REQUIRE(mat(0, 0) == 1.);
+  REQUIRE(mat(0, 2) == 3.);
+  REQUIRE(mat(1, 0) == 4.);
+  REQUIRE(mat(1, 2) == 6.);
 
-  mat[1, 2] = 7.;
-  REQUIRE(mat[1, 2] == 7.);
+  mat(1, 2) = 7.;
+  REQUIRE(mat(1, 2) == 7.);
 
   // vectors additionally support single-index access
   const auto vec = Vector<3>{ 1., 2., 3. };
-  REQUIRE(vec[1] == 2.);
+  REQUIRE(vec(1) == 2.);
 }
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Matrix element access is bounds-checked", "[linalg]") {
   auto mat = Matrix<2, 2>{};
-  REQUIRE_THROWS(mat[2, 0]);
-  REQUIRE_THROWS(mat[0, 2]);
+  const auto& const_mat = mat;
+  auto vec = Vector<2>{};
+  const auto& const_vec = vec;
+  REQUIRE_THROWS_AS(mat(2, 0), std::out_of_range);
+  REQUIRE_THROWS_AS(mat(0, 2), std::out_of_range);
+  REQUIRE_THROWS_AS(const_mat(2, 0), std::out_of_range);
+  REQUIRE_THROWS_AS(const_mat(0, 2), std::out_of_range);
+  REQUIRE_THROWS_AS(vec(2), std::out_of_range);
+  REQUIRE_THROWS_AS(const_vec(2), std::out_of_range);
+  vec(1) = 3.;
+  REQUIRE(const_vec(1) == 3.);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -229,7 +241,7 @@ void requireClosedFormMatchesElimination(double tolerance) {
               1.0 +
               static_cast<double>(grape::linalg::detail::infinityNorm(elimination.value_or(mat)));
           const auto expected = (row == col) ? 1.0 : 0.0;
-          REQUIRE(static_cast<double>(product[row, col]) ==
+          REQUIRE(static_cast<double>(product(row, col)) ==
                   Approx(expected).margin(tolerance * scale));
         }
       }
@@ -258,7 +270,7 @@ TEST_CASE("Closed-form inverse falls back to elimination for tiny but well-condi
   REQUIRE(inv.has_value());
   const auto product = tiny * inv.value_or(tiny);
   for (std::size_t i = 0UZ; i < 4UZ; ++i) {
-    REQUIRE(product[i, i] == Approx(1.0).margin(MATRIX_TEST_MARGIN));
+    REQUIRE(product(i, i) == Approx(1.0).margin(MATRIX_TEST_MARGIN));
   }
 }
 

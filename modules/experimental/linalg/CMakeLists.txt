@@ -7,11 +7,6 @@ declare_module(
   DEPENDS_ON_MODULES "utils"
   DEPENDS_ON_EXTERNAL_PROJECTS "")
 
-# Unity builds compile a generated source in the build tree, which clang-tidy would otherwise lint
-# against the top-level config. Mirror this module's lint config next to the generated sources.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy ${CMAKE_CURRENT_BINARY_DIR}/.clang-tidy
-               COPYONLY)
-
 # library sources
 set(SOURCES)
 set(PUBLIC_HEADERS include/grape/linalg/frames.h include/grape/linalg/matrix.h

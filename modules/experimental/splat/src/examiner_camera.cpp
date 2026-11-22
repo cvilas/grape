@@ -27,16 +27,16 @@ auto lookRotation(const Vec3& back, const Vec3& up_hint) -> Quat {
   if (norm(right) < PARALLEL_TOLERANCE) {
     // up_hint is parallel to the viewing direction; choose any perpendicular
     right =
-        cross((std::abs(bz[0]) < 0.9F) ? Vec3{ 1.F, 0.F, 0.F } : Vec3{ 0.F, 1.F, 0.F },  // NOLINT
+        cross((std::abs(bz(0)) < 0.9F) ? Vec3{ 1.F, 0.F, 0.F } : Vec3{ 0.F, 1.F, 0.F },  // NOLINT
               bz);
   }
   const auto bx = grape::splat::normalize(right);
   const auto by = cross(bz, bx);
   // The camera axes expressed in world coordinates are the columns of the camera-to-world matrix,
   // equivalently the rows of the world-to-camera matrix C(q) that Quaternion::fromMatrix() inverts
-  const auto world_to_camera = Mat3{ bx[0], bx[1], bx[2],  //
-                                     by[0], by[1], by[2],  //
-                                     bz[0], bz[1], bz[2] };
+  const auto world_to_camera = Mat3{ bx(0), bx(1), bx(2),  //
+                                     by(0), by(1), by(2),  //
+                                     bz(0), bz(1), bz(2) };
   return grape::linalg::Quaternionf::fromMatrix(world_to_camera);
 }
 
@@ -69,7 +69,7 @@ void ExaminerCamera::viewAll(const Vec3& center, float radius, const Vec3& up_hi
   const auto up = grape::splat::normalize(up_hint);
   // Prefer world +X as screen-right; the camera then looks perpendicular to it
   const auto right_hint =
-      (std::abs(up[0]) < 0.9F) ? Vec3{ 1.F, 0.F, 0.F } : Vec3{ 0.F, 1.F, 0.F };  // NOLINT
+      (std::abs(up(0)) < 0.9F) ? Vec3{ 1.F, 0.F, 0.F } : Vec3{ 0.F, 1.F, 0.F };  // NOLINT
   orientation_ = lookRotation(cross(right_hint, up), up);
   focal_point_ = center;
   const auto safe_radius = std::max(radius, MIN_DISTANCE);
@@ -153,10 +153,10 @@ auto ExaminerCamera::viewMatrix() const -> Mat4 {
   auto view = Mat4{};
   for (auto row = 0UZ; row < 3; ++row) {
     for (auto col = 0UZ; col < 3; ++col) {
-      view.m.at((col * 4) + row) = world_to_camera[row, col];
+      view.m.at((col * 4) + row) = world_to_camera(row, col);
     }
     const auto axis =
-        Vec3{ world_to_camera[row, 0], world_to_camera[row, 1], world_to_camera[row, 2] };
+        Vec3{ world_to_camera(row, 0), world_to_camera(row, 1), world_to_camera(row, 2) };
     view.m.at(12 + row) = -dot(axis, pos);  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
   }
   return view;

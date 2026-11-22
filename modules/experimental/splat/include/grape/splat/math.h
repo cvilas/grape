@@ -77,9 +77,9 @@ struct Mat4 {
 /// Transform a point by an affine matrix
 [[nodiscard]] constexpr auto transformPoint(const Mat4& tf, const Vec3& pt) -> Vec3 {
   return Vec3{
-    (tf.at(0, 0) * pt[0]) + (tf.at(0, 1) * pt[1]) + (tf.at(0, 2) * pt[2]) + tf.at(0, 3),
-    (tf.at(1, 0) * pt[0]) + (tf.at(1, 1) * pt[1]) + (tf.at(1, 2) * pt[2]) + tf.at(1, 3),
-    (tf.at(2, 0) * pt[0]) + (tf.at(2, 1) * pt[1]) + (tf.at(2, 2) * pt[2]) + tf.at(2, 3),
+    (tf.at(0, 0) * pt(0)) + (tf.at(0, 1) * pt(1)) + (tf.at(0, 2) * pt(2)) + tf.at(0, 3),
+    (tf.at(1, 0) * pt(0)) + (tf.at(1, 1) * pt(1)) + (tf.at(1, 2) * pt(2)) + tf.at(1, 3),
+    (tf.at(2, 0) * pt(0)) + (tf.at(2, 1) * pt(1)) + (tf.at(2, 2) * pt(2)) + tf.at(2, 3),
   };
 }
 

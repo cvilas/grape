@@ -44,7 +44,7 @@ auto makeScene() -> std::vector<grape::splat::Splat> {
       // normal is already along Z and the rotation axis degenerates to zero: use identity.
       const auto axis = cross(Vec3{ 0.F, 0.F, 1.F }, normal);
       const auto axis_len = norm(axis);
-      const auto angle = std::acos(normal[2]);
+      const auto angle = std::acos(normal(2));
       const auto rotation =
           (axis_len > 0.F) ?
               grape::linalg::Quaternionf::fromAxisAngle(axis * (1.F / axis_len), angle) :
