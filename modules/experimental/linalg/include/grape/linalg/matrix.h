@@ -74,34 +74,25 @@ public:
   }
 
   /// @return Reference to element at (row, col). Throws std::out_of_range for invalid indices.
-  constexpr auto operator()(std::size_t row, std::size_t col) GRAPE_LIFETIMEBOUND->Scalar& {
+  constexpr auto operator()(this auto&& self GRAPE_LIFETIMEBOUND, std::size_t row, std::size_t col)
+      -> decltype(auto) {
+    if ((row >= NumRows) || (col >= NumColumns)) {
+      detail::throwOutOfRange("Matrix index out of range");
+    }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-    return storage_[flatIndex(row, col)];
+    return self.storage_[(row * NumColumns) + col];
   }
 
-  /// @return Reference to element at (row, col). Throws std::out_of_range for invalid indices.
-  constexpr auto operator()(std::size_t row,
-                            std::size_t col) const GRAPE_LIFETIMEBOUND->const Scalar& {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-    return storage_[flatIndex(row, col)];
-  }
-
-  /// @return Reference to element at index (column vectors only). Throws std::out_of_range for
-  /// invalid indices.
-  constexpr auto operator()(std::size_t index) GRAPE_LIFETIMEBOUND->Scalar&
+  /// @return Reference to element at index (column vectors only).
+  constexpr auto operator()(this auto&& self GRAPE_LIFETIMEBOUND, std::size_t index)
+      -> decltype(auto)
     requires(NumColumns == 1UZ)
   {
+    if (index >= NumRows) {
+      detail::throwOutOfRange("Matrix index out of range");
+    }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-    return storage_[flatIndex(index, 0UZ)];
-  }
-
-  /// @return Reference to element at index (column vectors only). Throws std::out_of_range for
-  /// invalid indices.
-  constexpr auto operator()(std::size_t index) const GRAPE_LIFETIMEBOUND->const Scalar&
-    requires(NumColumns == 1UZ)
-  {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-    return storage_[flatIndex(index, 0UZ)];
+    return self.storage_[index];
   }
 
   /// Exact elementwise equality. For floating point matrices, prefer comparing against a
@@ -119,13 +110,6 @@ public:
   }
 
 private:
-  static constexpr auto flatIndex(std::size_t row, std::size_t col) -> std::size_t {
-    if ((row >= NumRows) || (col >= NumColumns)) {
-      detail::throwOutOfRange("Matrix index out of range");
-    }
-    return (row * NumColumns) + col;
-  }
-
   std::array<Scalar, SIZE> storage_{};
 };
 
