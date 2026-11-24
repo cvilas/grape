@@ -10,6 +10,7 @@
 
 #include "grape/exception.h"
 #include "grape/utils/attributes.h"
+#include "grape/utils/scope_guard.h"
 
 namespace grape::realtime {
 
@@ -51,6 +52,8 @@ inline Mutex::Mutex() {
       panic(std::format("[pthread_mutexattr_init]: {}", strerror(result)));
     }
   }
+  const auto destroy_attr =
+      ScopeGuard{ [&attr] { std::ignore = pthread_mutexattr_destroy(&attr); } };
 
   {
     const auto result = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
