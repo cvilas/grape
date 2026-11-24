@@ -36,8 +36,7 @@ auto lockMemory() -> std::expected<void, Error> {
     const auto disable = -1;
     const auto code = mallopt(M_TRIM_THRESHOLD, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
-      const auto err = std::error_code(code, std::system_category());
-      return std::unexpected(Error{ "(mallopt(M_TRIM_THRESHOLD)) ", err.message() });
+      return std::unexpected(Error{ "(mallopt(M_TRIM_THRESHOLD)) ", "operation failed" });
     }
   }
 
@@ -47,8 +46,7 @@ auto lockMemory() -> std::expected<void, Error> {
     const auto disable = 0;
     const auto code = mallopt(M_MMAP_MAX, disable);  // NOLINT(concurrency-mt-unsafe)
     if (code != 1) {
-      const auto err = std::error_code(code, std::system_category());
-      return std::unexpected(Error{ "(mallopt(M_MMAP_MAX)) ", err.message() });
+      return std::unexpected(Error{ "(mallopt(M_MMAP_MAX)) ", "operation failed" });
     }
   }
   return {};
