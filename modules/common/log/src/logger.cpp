@@ -5,7 +5,9 @@
 #include "grape/log/logger.h"
 
 #include <cassert>
+#include <condition_variable>
 #include <cstdio>  // for fputs, stderr
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -17,6 +19,8 @@ namespace grape::log {
 
 struct Logger::Backend {
   std::uint32_t missed_logs{ 0 };
+  std::mutex wait_mutex;
+  std::condition_variable_any wait_condition;
   std::jthread sink_thread;
 };
 
@@ -36,8 +40,14 @@ Logger::~Logger() {
 
 //-------------------------------------------------------------------------------------------------
 void Logger::sinkLoop(const std::stop_token& st) noexcept {
-  while (not st.stop_requested()) {
-    std::this_thread::sleep_for(config_.flush_period);
+  for (;;) {
+    {
+      auto lock = std::unique_lock{ backend_->wait_mutex };
+      if (backend_->wait_condition.wait_for(lock, st, config_.flush_period,
+                                            [&st] { return st.stop_requested(); })) {
+        break;
+      }
+    }
     flush();
   }
   flush();
