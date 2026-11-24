@@ -7,6 +7,7 @@
 #include <semaphore>
 #include <thread>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
@@ -31,6 +32,12 @@ struct TestTopicAttributes {
   }
 };
 
+using TestPublisher = grape::ipc::Publisher<TestTopicAttributes>;
+static_assert(std::is_nothrow_move_constructible_v<TestPublisher>);
+static_assert(not std::is_copy_constructible_v<TestPublisher>);
+static_assert(not std::is_move_assignable_v<TestPublisher>);
+static_assert(not std::is_copy_assignable_v<TestPublisher>);
+
 }  // namespace
 
 //=================================================================================================
@@ -53,9 +60,10 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   };
 
   // create pub/sub
-  auto publisher = grape::ipc::Publisher(TestTopicAttributes{});
+  auto publisher = TestPublisher(TestTopicAttributes{});
+  auto moved_publisher = std::move(publisher);
   const auto subscriber = grape::ipc::Subscriber(TestTopicAttributes{}, data_cb);
-  static_assert(std::is_same_v<decltype(publisher), grape::ipc::Publisher<TestTopicAttributes>>);
+  static_assert(std::is_same_v<decltype(moved_publisher), TestPublisher>);
   static_assert(
       std::is_same_v<decltype(subscriber), const grape::ipc::Subscriber<TestTopicAttributes>>);
 
@@ -73,7 +81,7 @@ TEST_CASE("Basic functionality of pub-sub templated on topic attributes", "[ipc]
   const auto test_data = TestDataType{ .id = 42, .message = "Custom struct message" };
 
   // publish it
-  REQUIRE(publisher.publish(test_data).has_value());
+  REQUIRE(std::as_const(moved_publisher).publish(test_data).has_value());
 
   // wait for subscriber to receive it with timeout
   constexpr auto RECV_WAIT_TIME = std::chrono::milliseconds(1000);
