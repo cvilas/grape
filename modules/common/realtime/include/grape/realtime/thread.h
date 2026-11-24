@@ -4,9 +4,11 @@
 
 #pragma once
 
-#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <functional>
+#include <mutex>
+#include <stop_token>
 #include <string>
 #include <thread>
 #ifdef __linux__
@@ -73,11 +75,12 @@ public:
   auto operator=(const Thread&&) -> Thread& = delete;
 
 private:
-  void threadFunction() noexcept;
+  void threadFunction(const std::stop_token& stop_token) noexcept;
 
   Config config_;
-  std::atomic_flag exit_flag_{ false };
-  std::thread thread_;
+  std::mutex wait_mutex_;
+  std::condition_variable_any wait_condition_;
+  std::jthread thread_;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -92,20 +95,19 @@ inline Thread::~Thread() {
 //-------------------------------------------------------------------------------------------------
 inline void Thread::start() {
   stop();
-  exit_flag_.clear();
-  thread_ = std::thread([this] -> void { threadFunction(); });
+  thread_ = std::jthread([this](const std::stop_token& stop_token) { threadFunction(stop_token); });
 }
 
 //-------------------------------------------------------------------------------------------------
 inline void Thread::stop() noexcept {
-  exit_flag_.test_and_set();
+  thread_.request_stop();
   if (thread_.joinable()) {
     thread_.join();
   }
 }
 
 //-------------------------------------------------------------------------------------------------
-inline void Thread::threadFunction() noexcept {
+inline void Thread::threadFunction(const std::stop_token& stop_token) noexcept {
   try {
 #ifdef __linux__
     // for easy identification on tools like htop, set the name of the thread
@@ -120,12 +122,14 @@ inline void Thread::threadFunction() noexcept {
 
     bool continue_process = true;
     auto wakeup_tp = ProcessClock::now();
-    while (continue_process and not exit_flag_.test()) {
+    while (continue_process and not stop_token.stop_requested()) {
       continue_process = config_.process();
       const auto now_tp = ProcessClock::now();
       const auto dt = now_tp - wakeup_tp;
       wakeup_tp = (dt > config_.interval) ? now_tp : (wakeup_tp + config_.interval);
-      std::this_thread::sleep_until(wakeup_tp);
+      auto lock = std::unique_lock{ wait_mutex_ };
+      std::ignore = wait_condition_.wait_until(
+          lock, stop_token, wakeup_tp, [&stop_token] { return stop_token.stop_requested(); });
     }
 
     config_.teardown();
