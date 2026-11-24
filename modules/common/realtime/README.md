@@ -60,8 +60,14 @@ Long-running stress tests are hidden from default test runs (and CI) using the C
 
 ## TODO
 
-- [ ] Refactor thread class out of realtime and put it in 'grape'
+- [ ] Recover SPMC channels from stale shared memory after writer crashes
+- [ ] Detect SPMC writer death or restart
+- [ ] Make `Thread` setup, teardown, and stop semantics failure-safe
   - Insert logging to capture timer overruns in the loop
+  - The default `setup` returns `false`. A user who sets only `process` gets a thread that 
+    silently exits without running anything.
+  - An exception from `process` jumps to the `catch` and skips `teardown()`, so anything acquired 
+    in `setup` (devices, real-time scheduling) isn't released.
 - [ ] Application note on how to design the architecture of a realtime loop 
   - Passing data across RT/non-RT boundary using shm-based ring buffers
   - Notion of ticks and timestamps

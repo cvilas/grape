@@ -2,6 +2,7 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#include <atomic>
 #include <cmath>
 #include <csignal>
 #include <cstring>
