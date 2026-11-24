@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.1](https://github.com/cvilas/grape/compare/v0.14.0...v0.14.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **base:** cleans up shared memory on failure ([437baf0](https://github.com/cvilas/grape/commit/437baf0884d370a5826b65bebb708d01ab908295))
+* **ipc:** makes publisher move and thread safe ([687c939](https://github.com/cvilas/grape/commit/687c939b3ab56d0926599dd4507d3d203879cd60))
+* **linalg:** simplifies code with deducing-this ([cf9a23e](https://github.com/cvilas/grape/commit/cf9a23ef9ca17243be40ee9c98f6d56f2fc46921))
+* **log:** make periodic flushing interruptible ([98cae99](https://github.com/cvilas/grape/commit/98cae99aaef280541bd3ced81bf8abe696c64c0f))
+* **realtime:** destroys pthread mutex attributes when done with it ([cc9c0ef](https://github.com/cvilas/grape/commit/cc9c0ef937d15e1d297b3d0e7262f150e9bd1183))
+* **realtime:** reports mallopt failures accurately ([095ed20](https://github.com/cvilas/grape/commit/095ed20486824c653f9e202899f9c94714e7944e))
+
 ## [0.14.0](https://github.com/cvilas/grape/compare/v0.13.0...v0.14.0) (2026-11-22)
 
 * **build:** sets baseline for CPU instruction sets ([6ff86d0](https://github.com/cvilas/grape/commit/6ff86d019ff3c5e9c035578d281b6531a3c61b80))
