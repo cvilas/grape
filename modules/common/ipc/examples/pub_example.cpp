@@ -23,7 +23,7 @@ auto main() -> int {
     };
 
     const auto topic = grape::ipc::ex::ExampleTopicAttributes{};
-    auto publisher = grape::ipc::Publisher(topic, match_cb);
+    const auto publisher = grape::ipc::Publisher(topic, match_cb);
 
     auto counter = 0U;
     constexpr auto SLEEP_TIME = std::chrono::milliseconds(500);

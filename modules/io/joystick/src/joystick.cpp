@@ -31,33 +31,12 @@
 
 #include "grape/joystick/controls.h"
 #include "grape/utils/attributes.h"
+#include "grape/utils/scope_guard.h"
 #include "grape/wall_clock.h"
 
 struct timeval;
 
 namespace {
-
-//=================================================================================================
-template <std::invocable ExitFn>
-class [[nodiscard]] ScopeGuard {
-public:
-  explicit ScopeGuard(ExitFn&& fn) : exit_fn_(std::move(fn)) {
-  }
-  ~ScopeGuard() {
-    exit_fn_();
-  }
-
-  ScopeGuard(const ScopeGuard&) = delete;
-  ScopeGuard(ScopeGuard&&) = delete;
-  auto operator=(const ScopeGuard&) = delete;
-  auto operator=(ScopeGuard&&) = delete;
-
-private:
-  ExitFn exit_fn_;
-};
-
-template <std::invocable ExitFn>
-ScopeGuard(ExitFn&&) -> ScopeGuard<ExitFn>;
 
 //=================================================================================================
 /// Mimics std::bitset but provides a subset of functionality
