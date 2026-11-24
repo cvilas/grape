@@ -102,6 +102,16 @@ TEST_CASE("Basic write and read", "[SharedMemory]") {
 }
 
 //-------------------------------------------------------------------------------------------------
+TEST_CASE("Failed creation removes the shared memory object", "[SharedMemory]") {
+  const auto test_shm_name = createUniqueShmName();
+
+  const auto maybe_shm = ShMem::create(test_shm_name, 0, ShMem::Access::ReadWrite);
+
+  REQUIRE_FALSE(maybe_shm);
+  REQUIRE_FALSE(ShMem::exists(test_shm_name));
+}
+
+//-------------------------------------------------------------------------------------------------
 TEST_CASE("SharedMemory move semantics", "[SharedMemory]") {
   SECTION("Move constructor works correctly") {
     const auto test_shm_name = createUniqueShmName();
