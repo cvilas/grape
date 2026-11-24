@@ -15,12 +15,14 @@
 #include <sys/types.h>  // for off_t
 #include <unistd.h>     // for close, ftruncate
 
+#include "grape/utils/scope_guard.h"
+
 namespace grape {
 
 //-------------------------------------------------------------------------------------------------
 auto SharedMemory::exists(const std::string& name) -> bool {
   const auto fd = ::shm_open(name.c_str(), O_RDONLY, 0);
-  const auto exists = (fd > 0);
+  const auto exists = (fd >= 0);
   if (exists) {
     ::close(fd);
   }
@@ -62,6 +64,13 @@ auto SharedMemory::create(const std::string& name, std::size_t size, Access acce
     const auto err = std::error_code(errno, std::system_category());
     return std::unexpected(Error{ "(shm_open) ", err.message() });
   }
+  const auto close_fd = ScopeGuard{ [fd] { ::close(fd); } };
+  auto unlink_on_failure = true;
+  const auto rollback = ScopeGuard{ [&name, &unlink_on_failure] {
+    if (unlink_on_failure) {
+      ::shm_unlink(name.c_str());
+    }
+  } };
 
   // set size of shared memory
   if (::ftruncate(fd, static_cast<off_t>(size)) == -1) {
@@ -89,7 +98,7 @@ auto SharedMemory::create(const std::string& name, std::size_t size, Access acce
     const auto err = std::error_code(errno, std::system_category());
     return std::unexpected(Error{ "(mmap) ", err.message() });
   }
-  ::close(fd);  // Not needed anymore
+  unlink_on_failure = false;
 
   SharedMemory shm;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -108,6 +117,7 @@ auto SharedMemory::open(const std::string& name, Access access)
     const auto err = std::error_code(errno, std::system_category());
     return std::unexpected(Error{ "(shm_open) ", err.message() });
   }
+  const auto close_fd = ScopeGuard{ [fd] { ::close(fd); } };
 
   // read size of the shared memory object
   struct stat stats{};
@@ -125,7 +135,6 @@ auto SharedMemory::open(const std::string& name, Access access)
     const auto err = std::error_code(errno, std::system_category());
     return std::unexpected(Error{ "(mmap) ", err.message() });
   }
-  ::close(fd);  // Not needed anymore
 
   SharedMemory shm;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
