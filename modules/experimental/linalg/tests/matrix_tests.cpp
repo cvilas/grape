@@ -10,6 +10,7 @@
 #include <format>
 #include <random>
 #include <stdexcept>
+#include <utility>
 
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
@@ -129,6 +130,11 @@ TEST_CASE("Matrix initialises from comma-separated values in row-major order", "
 }
 
 //-------------------------------------------------------------------------------------------------
+// Access to a temporary yields an rvalue, so it cannot silently dangle
+static_assert(std::same_as<decltype(Matrix<2, 2>{}(0, 0)), double&&>);
+static_assert(std::same_as<decltype(std::declval<const Matrix<2, 2>&>()(0, 0)), const double&>);
+static_assert(std::same_as<decltype(Matrix<2, 2>{}.elements()), std::array<double, 4>&&>);
+
 TEST_CASE("Matrix element access is bounds-checked", "[linalg]") {
   auto mat = Matrix<2, 2>{};
   const auto& const_mat = mat;
