@@ -71,7 +71,7 @@ public:
       detail::throwOutOfRange("Matrix index out of range");
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-    return self.storage_[(row * NumColumns) + col];
+    return std::forward_like<decltype(self)>(self.storage_[(row * NumColumns) + col]);
   }
 
   /// @return Reference to element at index (column vectors only).
@@ -83,20 +83,15 @@ public:
       detail::throwOutOfRange("Matrix index out of range");
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-    return self.storage_[index];
+    return std::forward_like<decltype(self)>(self.storage_[index]);
   }
 
   /// Exact elementwise equality. Prefer comparing against a tolerance instead.
   constexpr auto operator==(const Matrix&) const -> bool = default;
 
   /// @return All elements, contiguous and row-major (e.g. to pass to other libraries)
-  [[nodiscard]] constexpr auto elements() GRAPE_LIFETIMEBOUND -> std::array<Scalar, SIZE>& {
-    return storage_;
-  }
-
-  [[nodiscard]] constexpr auto elements() const GRAPE_LIFETIMEBOUND
-      -> const std::array<Scalar, SIZE>& {
-    return storage_;
+  [[nodiscard]] constexpr auto elements(this auto&& self GRAPE_LIFETIMEBOUND) -> decltype(auto) {
+    return std::forward_like<decltype(self)>(self.storage_);
   }
 
 private:
@@ -242,6 +237,7 @@ inline constexpr auto SMALL_KERNEL_SIZE = 8UZ;
 ///   the result instead stores and reloads it on every step.
 template <std::size_t NumRows, std::size_t Inner, std::size_t NumColumns,
           std::floating_point Scalar,
+          // named in GRAPE_LINALG_GCC_UNROLL_ROWS, so keep the two in step
           std::size_t RowUnroll = ((NumRows <= SMALL_KERNEL_SIZE) ? SMALL_KERNEL_SIZE : 1UZ)>
 constexpr auto multiply(const Matrix<NumRows, Inner, Scalar>& lhs,
                         const Matrix<Inner, NumColumns, Scalar>& rhs)
