@@ -40,14 +40,6 @@ namespace detail {
 }  // namespace detail
 
 //=================================================================================================
-/// Arithmetic element types, excluding bool and character types
-template <typename T>
-concept NumericType = std::floating_point<T> ||
-                      (std::integral<T> && !std::same_as<T, bool> && !std::same_as<T, char> &&
-                       !std::same_as<T, wchar_t> && !std::same_as<T, char8_t> &&
-                       !std::same_as<T, char16_t> && !std::same_as<T, char32_t>);
-
-//=================================================================================================
 /// Dense matrix with compile-time dimensions.
 ///
 /// - Elements are stored flat in row-major order.
@@ -56,8 +48,8 @@ concept NumericType = std::floating_point<T> ||
 ///
 /// @tparam NumRows Number of rows (> 0)
 /// @tparam NumColumns Number of columns (> 0)
-/// @tparam Scalar Element type (see NumericType)
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar = double>
+/// @tparam Scalar Floating point element type
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar = double>
   requires((NumRows > 0UZ) && (NumColumns > 0UZ))
 class Matrix {
 public:
@@ -68,8 +60,7 @@ public:
 
   /// Creates a matrix from comma-separated element values, specified in row-major order.
   template <typename... Values>
-    requires((sizeof...(Values) == SIZE) && (std::convertible_to<Values, Scalar> && ...) &&
-             (std::floating_point<Scalar> || (std::integral<Values> && ...)))
+    requires((sizeof...(Values) == SIZE) && (std::convertible_to<Values, Scalar> && ...))
   constexpr explicit Matrix(Values... values) : storage_{ static_cast<Scalar>(values)... } {
   }
 
@@ -95,8 +86,7 @@ public:
     return self.storage_[index];
   }
 
-  /// Exact elementwise equality. For floating point matrices, prefer comparing against a
-  /// tolerance instead.
+  /// Exact elementwise equality. Prefer comparing against a tolerance instead.
   constexpr auto operator==(const Matrix&) const -> bool = default;
 
   /// @return All elements, contiguous and row-major (e.g. to pass to other libraries)
@@ -115,29 +105,25 @@ private:
 
 //-------------------------------------------------------------------------------------------------
 /// Column vector with compile-time length
-template <std::size_t NumRows, NumericType Scalar = double>
+template <std::size_t NumRows, std::floating_point Scalar = double>
 using Vector = Matrix<NumRows, 1UZ, Scalar>;
 
 namespace detail {
 
 //-------------------------------------------------------------------------------------------------
-/// @return (mul1 * mul2) + addend, rounded once for floating point types
-template <NumericType Scalar>
+/// @return (mul1 * mul2) + addend, rounded once
+template <std::floating_point Scalar>
 constexpr auto multiplyAdd(Scalar mul1, Scalar mul2, Scalar addend) -> Scalar {
-  if constexpr (std::floating_point<Scalar>) {
 #ifdef __clang__
-    if consteval {
-      return (mul1 * mul2) + addend;
-    }
-#endif
-    return std::fma(mul1, mul2, addend);
-  } else {
+  if consteval {
     return (mul1 * mul2) + addend;
   }
+#endif
+  return std::fma(mul1, mul2, addend);
 }
 
 //-------------------------------------------------------------------------------------------------
-template <NumericType Scalar>
+template <std::floating_point Scalar>
 constexpr auto absolute(Scalar value) -> Scalar {
   return (value < Scalar{}) ? -value : value;
 }
@@ -147,21 +133,18 @@ constexpr auto absolute(Scalar value) -> Scalar {
 //-------------------------------------------------------------------------------------------------
 /// @return (ax * ay) - (bx * by), accurate to a few ulp even under cancellation (Kahan's algorithm,
 /// see docs/kahan.pdf)
-template <NumericType Scalar>
+template <std::floating_point Scalar>
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 constexpr auto differenceOfProducts(Scalar ax, Scalar ay, Scalar bx, Scalar by) -> Scalar {
-  if constexpr (std::floating_point<Scalar>) {
-    const auto prod = bx * by;
-    const auto rounding_err = detail::multiplyAdd(-bx, by, prod);
-    const auto diff = detail::multiplyAdd(ax, ay, -prod);
-    return diff + rounding_err;
-  } else {
-    return (ax * ay) - (bx * by);
-  }
+  const auto prod = bx * by;
+  const auto rounding_err = detail::multiplyAdd(-bx, by, prod);
+  const auto diff = detail::multiplyAdd(ax, ay, -prod);
+  return diff + rounding_err;
 }
 
 //-------------------------------------------------------------------------------------------------
 /// @return Identity matrix of the specified order
-template <std::size_t Order, NumericType Scalar = double>
+template <std::size_t Order, std::floating_point Scalar = double>
 constexpr auto identity() -> Matrix<Order, Order, Scalar> {
   auto mat = Matrix<Order, Order, Scalar>{};
   for (std::size_t i = 0UZ; i < Order; ++i) {
@@ -174,7 +157,7 @@ namespace detail {
 
 //-------------------------------------------------------------------------------------------------
 /// @return Matrix of op applied to corresponding elements.
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar, typename Op,
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar, typename Op,
           std::same_as<Matrix<NumRows, NumColumns, Scalar>>... Mats>
 constexpr auto elementwise(Op op, const Matrix<NumRows, NumColumns, Scalar>& first,
                            const Mats&... rest) -> Matrix<NumRows, NumColumns, Scalar> {
@@ -193,7 +176,7 @@ constexpr auto elementwise(Op op, const Matrix<NumRows, NumColumns, Scalar>& fir
 
 //-------------------------------------------------------------------------------------------------
 /// @return Elementwise sum lhs + rhs
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator+(const Matrix<NumRows, NumColumns, Scalar>& lhs,
                          const Matrix<NumRows, NumColumns, Scalar>& rhs)
     -> Matrix<NumRows, NumColumns, Scalar> {
@@ -202,7 +185,7 @@ constexpr auto operator+(const Matrix<NumRows, NumColumns, Scalar>& lhs,
 
 //-------------------------------------------------------------------------------------------------
 /// @return Elementwise negation of mat
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator-(const Matrix<NumRows, NumColumns, Scalar>& mat)
     -> Matrix<NumRows, NumColumns, Scalar> {
   return detail::elementwise(std::negate{}, mat);
@@ -210,7 +193,7 @@ constexpr auto operator-(const Matrix<NumRows, NumColumns, Scalar>& mat)
 
 //-------------------------------------------------------------------------------------------------
 /// @return Elementwise difference lhs - rhs
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator-(const Matrix<NumRows, NumColumns, Scalar>& lhs,
                          const Matrix<NumRows, NumColumns, Scalar>& rhs)
     -> Matrix<NumRows, NumColumns, Scalar> {
@@ -219,7 +202,7 @@ constexpr auto operator-(const Matrix<NumRows, NumColumns, Scalar>& lhs,
 
 //-------------------------------------------------------------------------------------------------
 /// @return mat scaled elementwise by factor
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator*(const Matrix<NumRows, NumColumns, Scalar>& mat,
                          std::type_identity_t<Scalar> factor)
     -> Matrix<NumRows, NumColumns, Scalar> {
@@ -228,7 +211,7 @@ constexpr auto operator*(const Matrix<NumRows, NumColumns, Scalar>& mat,
 
 //-------------------------------------------------------------------------------------------------
 /// @return mat scaled elementwise by factor
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator*(std::type_identity_t<Scalar> factor,
                          const Matrix<NumRows, NumColumns, Scalar>& mat)
     -> Matrix<NumRows, NumColumns, Scalar> {
@@ -236,8 +219,8 @@ constexpr auto operator*(std::type_identity_t<Scalar> factor,
 }
 
 //-------------------------------------------------------------------------------------------------
-/// @return mat divided elementwise by divisor (truncating for integral matrices)
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+/// @return mat divided elementwise by divisor
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator/(const Matrix<NumRows, NumColumns, Scalar>& mat,
                          std::type_identity_t<Scalar> divisor)
     -> Matrix<NumRows, NumColumns, Scalar> {
@@ -257,7 +240,8 @@ inline constexpr auto SMALL_KERNEL_SIZE = 8UZ;
 /// - Small: the outer loops are unrolled so the whole result stays in registers.
 /// - Large: each result row is accumulated in a local array held in registers. Accumulating into
 ///   the result instead stores and reloads it on every step.
-template <std::size_t NumRows, std::size_t Inner, std::size_t NumColumns, NumericType Scalar,
+template <std::size_t NumRows, std::size_t Inner, std::size_t NumColumns,
+          std::floating_point Scalar,
           std::size_t RowUnroll = ((NumRows <= SMALL_KERNEL_SIZE) ? SMALL_KERNEL_SIZE : 1UZ)>
 constexpr auto multiply(const Matrix<NumRows, Inner, Scalar>& lhs,
                         const Matrix<Inner, NumColumns, Scalar>& rhs)
@@ -301,7 +285,8 @@ constexpr auto multiply(const Matrix<NumRows, Inner, Scalar>& lhs,
 
 //-------------------------------------------------------------------------------------------------
 /// @return Matrix product lhs * rhs
-template <std::size_t NumRows, std::size_t Inner, std::size_t NumColumns, NumericType Scalar>
+template <std::size_t NumRows, std::size_t Inner, std::size_t NumColumns,
+          std::floating_point Scalar>
 constexpr auto operator*(const Matrix<NumRows, Inner, Scalar>& lhs,
                          const Matrix<Inner, NumColumns, Scalar>& rhs)
     -> Matrix<NumRows, NumColumns, Scalar> {
@@ -310,7 +295,7 @@ constexpr auto operator*(const Matrix<NumRows, Inner, Scalar>& lhs,
 
 //-------------------------------------------------------------------------------------------------
 /// @return Sum of diagonal elements of mat
-template <std::size_t Order, NumericType Scalar>
+template <std::size_t Order, std::floating_point Scalar>
 constexpr auto trace(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
   auto sum = Scalar{};
   for (std::size_t i = 0UZ; i < Order; ++i) {
@@ -321,7 +306,7 @@ constexpr auto trace(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
 
 //-------------------------------------------------------------------------------------------------
 /// @return Transpose of mat
-template <std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto transpose(const Matrix<NumRows, NumColumns, Scalar>& mat)
     -> Matrix<NumColumns, NumRows, Scalar> {
   auto result = Matrix<NumColumns, NumRows, Scalar>{};
@@ -337,7 +322,8 @@ constexpr auto transpose(const Matrix<NumRows, NumColumns, Scalar>& mat)
 //-------------------------------------------------------------------------------------------------
 /// @return Copy of the SubRows x SubColumns block of mat starting at (StartRow, StartColumn)
 template <std::size_t StartRow, std::size_t StartColumn, std::size_t SubRows,
-          std::size_t SubColumns, std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+          std::size_t SubColumns, std::size_t NumRows, std::size_t NumColumns,
+          std::floating_point Scalar>
   requires((StartRow + SubRows <= NumRows) && (StartColumn + SubColumns <= NumColumns))
 constexpr auto submatrix(const Matrix<NumRows, NumColumns, Scalar>& mat)
     -> Matrix<SubRows, SubColumns, Scalar> {
@@ -353,7 +339,8 @@ constexpr auto submatrix(const Matrix<NumRows, NumColumns, Scalar>& mat)
 //-------------------------------------------------------------------------------------------------
 /// Overwrites the block of mat starting at (StartRow, StartColumn) with sub
 template <std::size_t StartRow, std::size_t StartColumn, std::size_t SubRows,
-          std::size_t SubColumns, std::size_t NumRows, std::size_t NumColumns, NumericType Scalar>
+          std::size_t SubColumns, std::size_t NumRows, std::size_t NumColumns,
+          std::floating_point Scalar>
   requires((StartRow + SubRows <= NumRows) && (StartColumn + SubColumns <= NumColumns))
 constexpr void setSubmatrix(Matrix<NumRows, NumColumns, Scalar>& mat,
                             const Matrix<SubRows, SubColumns, Scalar>& sub) {
@@ -368,7 +355,7 @@ namespace detail {
 
 //-------------------------------------------------------------------------------------------------
 /// @return Row and magnitude of the largest element in column col, on or below the diagonal
-template <std::size_t Order, NumericType Scalar>
+template <std::size_t Order, std::floating_point Scalar>
 constexpr auto findPivot(const Matrix<Order, Order, Scalar>& mat, std::size_t col)
     -> std::pair<std::size_t, Scalar> {
   auto pivot_row = col;
@@ -385,7 +372,7 @@ constexpr auto findPivot(const Matrix<Order, Order, Scalar>& mat, std::size_t co
 
 //-------------------------------------------------------------------------------------------------
 /// Swaps rows row_a and row_b of mat, from column first_col onwards
-template <std::size_t Order, NumericType Scalar>
+template <std::size_t Order, std::floating_point Scalar>
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 constexpr void swapRows(Matrix<Order, Order, Scalar>& mat, std::size_t row_a, std::size_t row_b,
                         std::size_t first_col = 0UZ) {
@@ -396,7 +383,7 @@ constexpr void swapRows(Matrix<Order, Order, Scalar>& mat, std::size_t row_a, st
 
 //-------------------------------------------------------------------------------------------------
 /// @return Infinity norm of mat (largest absolute row sum)
-template <std::size_t Order, NumericType Scalar>
+template <std::size_t Order, std::floating_point Scalar>
 GRAPE_ALWAYS_INLINE constexpr auto infinityNorm(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
   auto result = Scalar{ 0 };
   for (std::size_t row = 0UZ; row < Order; ++row) {
@@ -424,7 +411,7 @@ constexpr auto isFinite(const Matrix<Rows, Cols, Scalar>& mat) -> bool {
 }
 
 //-------------------------------------------------------------------------------------------------
-template <NumericType Scalar>
+template <std::floating_point Scalar>
 constexpr auto sumOfThreeProducts(Scalar x1, Scalar y1, Scalar x2, Scalar y2, Scalar x3, Scalar y3)
     -> Scalar {
   return multiplyAdd(x1, y1, multiplyAdd(x2, y2, x3 * y3));
@@ -432,58 +419,11 @@ constexpr auto sumOfThreeProducts(Scalar x1, Scalar y1, Scalar x2, Scalar y2, Sc
 
 //-------------------------------------------------------------------------------------------------
 /// Adjugate and determinant of a small matrix: inverse = adjugate / determinant
-template <std::size_t Order, NumericType Scalar>
+template <std::size_t Order, std::floating_point Scalar>
 struct Adjugate {
   Matrix<Order, Order, Scalar> adjugate;
   Scalar determinant;
 };
-
-//-------------------------------------------------------------------------------------------------
-template <std::floating_point Scalar>
-struct Minors4 {
-  Scalar up0;
-  Scalar up1;
-  Scalar up2;
-  Scalar up3;
-  Scalar up4;
-  Scalar up5;
-  Scalar lo0;
-  Scalar lo1;
-  Scalar lo2;
-  Scalar lo3;
-  Scalar lo4;
-  Scalar lo5;
-};
-
-//-------------------------------------------------------------------------------------------------
-template <std::floating_point Scalar>
-GRAPE_ALWAYS_INLINE constexpr auto minors4(const Matrix<4, 4, Scalar>& mat) -> Minors4<Scalar> {
-  return {
-    .up0 = differenceOfProducts(mat(0, 0), mat(1, 1), mat(0, 1), mat(1, 0)),
-    .up1 = differenceOfProducts(mat(0, 0), mat(1, 2), mat(0, 2), mat(1, 0)),
-    .up2 = differenceOfProducts(mat(0, 0), mat(1, 3), mat(0, 3), mat(1, 0)),
-    .up3 = differenceOfProducts(mat(0, 1), mat(1, 2), mat(0, 2), mat(1, 1)),
-    .up4 = differenceOfProducts(mat(0, 1), mat(1, 3), mat(0, 3), mat(1, 1)),
-    .up5 = differenceOfProducts(mat(0, 2), mat(1, 3), mat(0, 3), mat(1, 2)),
-    .lo0 = differenceOfProducts(mat(2, 0), mat(3, 1), mat(2, 1), mat(3, 0)),
-    .lo1 = differenceOfProducts(mat(2, 0), mat(3, 2), mat(2, 2), mat(3, 0)),
-    .lo2 = differenceOfProducts(mat(2, 0), mat(3, 3), mat(2, 3), mat(3, 0)),
-    .lo3 = differenceOfProducts(mat(2, 1), mat(3, 2), mat(2, 2), mat(3, 1)),
-    .lo4 = differenceOfProducts(mat(2, 1), mat(3, 3), mat(2, 3), mat(3, 1)),
-    .lo5 = differenceOfProducts(mat(2, 2), mat(3, 3), mat(2, 3), mat(3, 2)),
-  };
-}
-
-//-------------------------------------------------------------------------------------------------
-template <std::floating_point Scalar>
-constexpr auto determinant4(const Minors4<Scalar>& minors) -> Scalar {
-  return multiplyAdd(minors.up0, minors.lo5,
-                     multiplyAdd(-minors.up1, minors.lo4,
-                                 multiplyAdd(minors.up2, minors.lo3,
-                                             multiplyAdd(minors.up3, minors.lo2,
-                                                         multiplyAdd(-minors.up4, minors.lo1,
-                                                                     minors.up5 * minors.lo0)))));
-}
 
 //-------------------------------------------------------------------------------------------------
 template <std::floating_point Scalar>
@@ -518,9 +458,22 @@ GRAPE_ALWAYS_INLINE constexpr auto adjugate(const Matrix<3, 3, Scalar>& mat)
 template <std::floating_point Scalar>
 GRAPE_ALWAYS_INLINE constexpr auto adjugate(const Matrix<4, 4, Scalar>& mat)
     -> Adjugate<4, Scalar> {
-  const auto minors = minors4(mat);
-  const auto [up0, up1, up2, up3, up4, up5, lo0, lo1, lo2, lo3, lo4, lo5] = minors;
-  const auto det = determinant4(minors);
+  const auto up0 = differenceOfProducts(mat(0, 0), mat(1, 1), mat(0, 1), mat(1, 0));
+  const auto up1 = differenceOfProducts(mat(0, 0), mat(1, 2), mat(0, 2), mat(1, 0));
+  const auto up2 = differenceOfProducts(mat(0, 0), mat(1, 3), mat(0, 3), mat(1, 0));
+  const auto up3 = differenceOfProducts(mat(0, 1), mat(1, 2), mat(0, 2), mat(1, 1));
+  const auto up4 = differenceOfProducts(mat(0, 1), mat(1, 3), mat(0, 3), mat(1, 1));
+  const auto up5 = differenceOfProducts(mat(0, 2), mat(1, 3), mat(0, 3), mat(1, 2));
+  const auto lo0 = differenceOfProducts(mat(2, 0), mat(3, 1), mat(2, 1), mat(3, 0));
+  const auto lo1 = differenceOfProducts(mat(2, 0), mat(3, 2), mat(2, 2), mat(3, 0));
+  const auto lo2 = differenceOfProducts(mat(2, 0), mat(3, 3), mat(2, 3), mat(3, 0));
+  const auto lo3 = differenceOfProducts(mat(2, 1), mat(3, 2), mat(2, 2), mat(3, 1));
+  const auto lo4 = differenceOfProducts(mat(2, 1), mat(3, 3), mat(2, 3), mat(3, 1));
+  const auto lo5 = differenceOfProducts(mat(2, 2), mat(3, 3), mat(2, 3), mat(3, 2));
+  const auto det = multiplyAdd(
+      up0, lo5,
+      multiplyAdd(-up1, lo4,
+                  multiplyAdd(up2, lo3, multiplyAdd(up3, lo2, multiplyAdd(-up4, lo1, up5 * lo0)))));
   return {
     .adjugate =
         Matrix<4, 4, Scalar>{
@@ -553,16 +506,9 @@ template <std::size_t Order, std::floating_point Scalar>
 constexpr auto determinant(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
   if constexpr (Order == 1UZ) {
     return mat(0, 0);
-  } else if constexpr (Order == 2UZ) {
-    return differenceOfProducts(mat(0, 0), mat(1, 1), mat(0, 1), mat(1, 0));
-  } else if constexpr (Order == 3UZ) {
-    const auto minor0 = differenceOfProducts(mat(1, 1), mat(2, 2), mat(1, 2), mat(2, 1));
-    const auto minor1 = differenceOfProducts(mat(1, 0), mat(2, 2), mat(1, 2), mat(2, 0));
-    const auto minor2 = differenceOfProducts(mat(1, 0), mat(2, 1), mat(1, 1), mat(2, 0));
-    return detail::multiplyAdd(mat(0, 0), minor0,
-                               detail::multiplyAdd(-mat(0, 1), minor1, mat(0, 2) * minor2));
-  } else if constexpr (Order == 4UZ) {
-    return detail::determinant4(detail::minors4(mat));
+  } else if constexpr (Order <= 4UZ) {
+    // The adjugate terms are unused and optimised away
+    return detail::adjugate(mat).determinant;
   } else {
     auto lu = mat;
     auto det = Scalar{ 1 };
@@ -682,7 +628,7 @@ constexpr auto inverse(const Matrix<Order, Order, Scalar>& mat)
 
 //-------------------------------------------------------------------------------------------------
 /// @return Dot (inner) product of two vectors
-template <std::size_t Order, NumericType Scalar>
+template <std::size_t Order, std::floating_point Scalar>
 constexpr auto dot(const Vector<Order, Scalar>& lhs, const Vector<Order, Scalar>& rhs) -> Scalar {
   auto sum = Scalar{};
   for (std::size_t i = 0UZ; i < Order; ++i) {
@@ -700,7 +646,7 @@ constexpr auto norm(const Vector<Order, Scalar>& vec) -> Scalar {
 
 //-------------------------------------------------------------------------------------------------
 /// @return Cross product lhs x rhs
-template <NumericType Scalar>
+template <std::floating_point Scalar>
 constexpr auto cross(const Vector<3, Scalar>& lhs, const Vector<3, Scalar>& rhs)
     -> Vector<3, Scalar> {
   return Vector<3, Scalar>{
@@ -720,7 +666,7 @@ constexpr auto cross(const Vector<3, Scalar>& lhs, const Vector<3, Scalar>& rhs)
 /// std::format support. Element format specifiers apply: std::format("{:.2f}", mat) gives e.g.
 /// "[[1.00, 2.00]; [3.00, 4.00]]".
 // NOLINTBEGIN(cert-dcl58-cpp)
-template <std::size_t NumRows, std::size_t NumColumns, grape::linalg::NumericType Scalar>
+template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 struct std::formatter<grape::linalg::Matrix<NumRows, NumColumns, Scalar>> : std::formatter<Scalar> {
   auto format(const grape::linalg::Matrix<NumRows, NumColumns, Scalar>& mat,
               std::format_context& ctx) const {
