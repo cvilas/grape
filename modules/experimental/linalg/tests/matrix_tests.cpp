@@ -7,7 +7,6 @@
 #include <compare>
 #include <concepts>
 #include <cstddef>
-#include <cstdint>
 #include <format>
 #include <random>
 #include <stdexcept>
@@ -46,52 +45,45 @@ void requireMatrixApprox(const Matrix<NumRows, NumColumns>& actual,
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 //-------------------------------------------------------------------------------------------------
-// Every operation is usable in constant expressions. Integer matrices make the checks exact.
-static_assert(identity<2, int>() == Matrix<2, 2, int>{ 1, 0, 0, 1 });
-static_assert(Matrix<2, 2, int>{ 1, 2, 3, 4 } + Matrix<2, 2, int>{ 4, 3, 2, 1 } ==
-              Matrix<2, 2, int>{ 5, 5, 5, 5 });
-static_assert(Matrix<2, 2, int>{ 5, 5, 5, 5 } - Matrix<2, 2, int>{ 1, 2, 3, 4 } ==
-              Matrix<2, 2, int>{ 4, 3, 2, 1 });
-static_assert(-Matrix<2, 2, int>{ 1, 2, 3, 4 } == Matrix<2, 2, int>{ -1, -2, -3, -4 });
-static_assert(Matrix<2, 2, int>{ 1, 2, 3, 4 } * 2 == Matrix<2, 2, int>{ 2, 4, 6, 8 });
-static_assert(2 * Matrix<2, 2, int>{ 1, 2, 3, 4 } == Matrix<2, 2, int>{ 2, 4, 6, 8 });
-static_assert(Matrix<2, 2, int>{ 1, 2, 3, 4 } * Matrix<2, 2, int>{ 5, 6, 7, 8 } ==
-              Matrix<2, 2, int>{ 19, 22, 43, 50 });
-static_assert(trace(Matrix<2, 2, int>{ 1, 2, 3, 4 }) == 5);
-static_assert(transpose(Matrix<2, 3, int>{ 1, 2, 3, 4, 5, 6 }) ==
-              Matrix<3, 2, int>{ 1, 4, 2, 5, 3, 6 });
-static_assert(dot(Vector<3, int>{ 1, 2, 3 }, Vector<3, int>{ 4, 5, 6 }) == 32);
-static_assert(cross(Vector<3, int>{ 1, 0, 0 }, Vector<3, int>{ 0, 1, 0 }) ==
-              Vector<3, int>{ 0, 0, 1 });
-static_assert(submatrix<1, 1, 2, 2>(Matrix<3, 3, int>{ 1, 2, 3, 4, 5, 6, 7, 8, 9 }) ==
-              Matrix<2, 2, int>{ 5, 6, 8, 9 });
+// Every operation is usable in constant expressions. Small integer values make the checks exact.
+static_assert(identity<2>() == Matrix<2, 2>{ 1., 0., 0., 1. });
+static_assert(Matrix<2, 2>{ 1., 2., 3., 4. } + Matrix<2, 2>{ 4., 3., 2., 1. } ==
+              Matrix<2, 2>{ 5., 5., 5., 5. });
+static_assert(Matrix<2, 2>{ 5., 5., 5., 5. } - Matrix<2, 2>{ 1., 2., 3., 4. } ==
+              Matrix<2, 2>{ 4., 3., 2., 1. });
+static_assert(-Matrix<2, 2>{ 1., 2., 3., 4. } == Matrix<2, 2>{ -1., -2., -3., -4. });
+static_assert(Matrix<2, 2>{ 1., 2., 3., 4. } * 2. == Matrix<2, 2>{ 2., 4., 6., 8. });
+static_assert(2. * Matrix<2, 2>{ 1., 2., 3., 4. } == Matrix<2, 2>{ 2., 4., 6., 8. });
+static_assert(Matrix<2, 2>{ 1., 2., 3., 4. } * Matrix<2, 2>{ 5., 6., 7., 8. } ==
+              Matrix<2, 2>{ 19., 22., 43., 50. });
+static_assert(std::is_eq(trace(Matrix<2, 2>{ 1., 2., 3., 4. }) <=> 5.));
+static_assert(transpose(Matrix<2, 3>{ 1., 2., 3., 4., 5., 6. }) ==
+              Matrix<3, 2>{ 1., 4., 2., 5., 3., 6. });
+static_assert(std::is_eq(dot(Vector<3>{ 1., 2., 3. }, Vector<3>{ 4., 5., 6. }) <=> 32.));
+static_assert(cross(Vector<3>{ 1., 0., 0. }, Vector<3>{ 0., 1., 0. }) == Vector<3>{ 0., 0., 1. });
+static_assert(submatrix<1, 1, 2, 2>(Matrix<3, 3>{ 1., 2., 3., 4., 5., 6., 7., 8., 9. }) ==
+              Matrix<2, 2>{ 5., 6., 8., 9. });
 
 // Floating point operations are constexpr too; compare against a range to avoid exact equality
 constexpr auto CONSTEXPR_DET = determinant(Matrix<2, 2>{ 1., 2., 3., 4. });
 static_assert((CONSTEXPR_DET > -2.0001) && (CONSTEXPR_DET < -1.9999));
 
-// Element type rules: bool and character types are not valid element types (but the fixed width
-// 8-bit integers are), and an integral matrix refuses fractional values rather than truncating them
+// Elements are floating point only
 template <typename Scalar>
 concept ValidElement = requires { typename Matrix<1, 1, Scalar>; };
-static_assert(ValidElement<int> && ValidElement<float> && ValidElement<double>);
-static_assert(ValidElement<std::int8_t> && ValidElement<std::uint8_t>);
-static_assert(not ValidElement<bool>);
-static_assert(not ValidElement<char> && not ValidElement<wchar_t> && not ValidElement<char8_t> &&
-              not ValidElement<char16_t> && not ValidElement<char32_t>);
-static_assert(not std::constructible_from<Matrix<1, 2, int>, double, double>);
+static_assert(ValidElement<float> && ValidElement<double> && ValidElement<long double>);
+static_assert(not ValidElement<int> && not ValidElement<bool> && not ValidElement<char>);
 static_assert(std::constructible_from<Matrix<1, 2, double>, int, int>);
 
 // Scalar operands convert to the element type, so integer literals scale floating point matrices
 static_assert(Matrix<1, 2>{ 1., 2. } * 2 == Matrix<1, 2>{ 2., 4. });
 static_assert(0.5 * Matrix<1, 2, float>{ 1.F, 2.F } == Matrix<1, 2, float>{ 0.5F, 1.F });
 static_assert(Matrix<1, 2>{ 3., 6. } / 3 == Matrix<1, 2>{ 1., 2. });
-static_assert(Matrix<1, 2, int>{ 7, 9 } / 2 == Matrix<1, 2, int>{ 3, 4 });
 
 // Elements are exposed contiguously in row-major order
-static_assert(Matrix<2, 2, int>{ 1, 2, 3, 4 }.elements() == std::array{ 1, 2, 3, 4 });
-static_assert(Matrix<2, 2, int>{ 1, 2, 3, 4 }(1, 0) == 3);
-static_assert(Vector<2, int>{ 1, 2 }(1) == 2);
+static_assert(Matrix<2, 2>{ 1., 2., 3., 4. }.elements() == std::array{ 1., 2., 3., 4. });
+static_assert(std::is_eq(Matrix<2, 2>{ 1., 2., 3., 4. }(1, 0) <=> 3.));
+static_assert(std::is_eq(Vector<2>{ 1., 2. }(1) <=> 2.));
 
 // Closed-form determinants are exact for small integers. (Exact floating point comparisons in this
 // file use std::is_eq(a <=> b) to state that exactness is intended.)
@@ -382,7 +374,7 @@ TEST_CASE("Submatrix blocks can be read and written", "[linalg]") {
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Matrix formats with std::format, honouring element format specifiers", "[linalg]") {
-  REQUIRE(std::format("{}", Matrix<2, 2, int>{ 1, 2, 3, 4 }) == "[[1, 2]; [3, 4]]");
+  REQUIRE(std::format("{}", Matrix<2, 2>{ 1., 2., 3., 4. }) == "[[1, 2]; [3, 4]]");
   REQUIRE(std::format("{:.1f}", Vector<2>{ 0.25, -1. }) == "[[0.2]; [-1.0]]");
 }
 
