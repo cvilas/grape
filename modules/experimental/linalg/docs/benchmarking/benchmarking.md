@@ -15,42 +15,43 @@ Before acting on a difference like that, confirm it with `-falign-functions=64 -
 
 ## X86_64 baseline
 
-Measured on AMD Ryzen AI Max+ 395, `x86-64-v3`, `-O2 -g`, GCC 16.0.1, Clang 23.1.6 (libc++), Eigen 3.4.0.
+Measured on AMD Ryzen AI Max+ 395, `x86-64-v3`, `-O3` (`Release`), GCC 16.0.1, Clang 23.1.6 (libc++), Eigen 3.4.0.
 
 | Benchmark | linalg GCC | linalg Clang | Eigen GCC | Eigen Clang | What |
 |---|---:|---:|---:|---:|:----|
-| `multiply/3x3/f32` | 2.29 ns | 1.30 ns | 1.63 ns | 8.21 ns | _NxN_ Square matrix product |
-| `multiply/4x4/f32` | 2.01 ns | 0.91 ns | 2.01 ns | 2.00 ns | .. |
-| `multiply/6x6/f32` | 12.16 ns | 11.19 ns | 30.11 ns | 7.31 ns | .. |
-| `determinant/3x3/f32` | 1.22 ns | 1.22 ns | 0.90 ns | 0.90 ns | Closed-form determinant |
-| `determinant/4x4/f32` | 4.20 ns | 4.17 ns | 2.78 ns | 2.00 ns | .. |
-| `determinant/15x15/f32` | 456.16 ns | 443.73 ns | 458.74 ns | 587.13 ns | Gaussian elimination |
-| `inverse/4x4/f32` | 13.91 ns | 13.04 ns | 5.16 ns | 5.36 ns | General inverse |
-| `inverse/15x15/f32` | 983.37 ns | 506.29 ns | 1,223 ns | 1,240 ns | .. |
-| `quaternion_multiply/f32` | 1.30 ns | 1.59 ns | 0.81 ns | 0.72 ns | Attitude composition, matrix → quaternion |
-| `quaternion_from_matrix/f32` | 1.69 ns | 2.09 ns | 3.18 ns | 2.03 ns | .. |
-| `gyro_integration_latency/f32` | 14.87 ns | 13.76 ns | 12.58 ns | 12.03 ns | `q = normalized(q * dq)` as a dependent chain (latency) |
-| `transform_position/f32` | 1.49 ns | 1.58 ns | 1.38 ns | 0.79 ns | `Transform * Position`; must match the untyped version |
-| `batch_transform_10k/f32` | 9,098 ns | 9,826 ns | 12,753 ns | 3,893 ns | One transform over 10,000 points (throughput) |
-| `kalman_step_15x6/f32` | 1,078 ns | 753.56 ns | 1,552 ns | 1,627 ns | Predict + update, 15 states, 6-D measurement (`eigen_ldlt` solves instead of inverting) |
-| `multiply/3x3/f64` | 1.94 ns | 2.70 ns | 2.24 ns | 1.92 ns | .. |
-| `multiply/4x4/f64` | 2.04 ns | 2.23 ns | 2.04 ns | 2.03 ns | .. |
-| `multiply/6x6/f64` | 11.07 ns | 12.01 ns | 12.61 ns | 11.36 ns | .. |
-| `determinant/3x3/f64` | 1.23 ns | 1.22 ns | 0.90 ns | 0.90 ns | .. |
-| `determinant/4x4/f64` | 4.21 ns | 4.20 ns | 2.79 ns | 2.02 ns | .. |
-| `determinant/15x15/f64` | 465.07 ns | 421.15 ns | 465.21 ns | 569.83 ns | .. |
-| `inverse/4x4/f64` | 14.12 ns | 13.69 ns | 7.06 ns | 7.36 ns | .. |
-| `inverse/15x15/f64` | 788.04 ns | 626.39 ns | 1,169 ns | 1,276 ns | .. |
-| `quaternion_multiply/f64` | 1.31 ns | 1.27 ns | 0.86 ns | 1.00 ns | .. |
-| `quaternion_from_matrix/f64` | 2.44 ns | 2.43 ns | 2.51 ns | 2.50 ns | .. |
-| `gyro_integration_latency/f64` | 17.27 ns | 15.11 ns | 17.73 ns | 13.94 ns | .. |
-| `transform_position/f64` | 1.49 ns | 1.59 ns | 2.08 ns | 0.81 ns | .. |
-| `batch_transform_10k/f64` | 7,470 ns | 5,916 ns | 13,415 ns | 4,701 ns | .. |
-| `kalman_step_15x6/f64` | 1,145 ns | 966.18 ns | 1,742 ns | 1,636 ns | .. |
+| `multiply/3x3/f32` | 2.95 ns | 1.32 ns | 1.78 ns | 8.32 ns | _NxN_ Square matrix product |
+| `multiply/4x4/f32` | 1.12 ns | 0.90 ns | 2.00 ns | 2.00 ns | .. |
+| `multiply/6x6/f32` | 18.44 ns | 16.08 ns | 14.44 ns | 10.42 ns | .. |
+| `determinant/3x3/f32` | 1.33 ns | 1.21 ns | 0.91 ns | 0.90 ns | Closed-form determinant |
+| `determinant/4x4/f32` | 4.31 ns | 4.16 ns | 2.77 ns | 2.00 ns | .. |
+| `determinant/15x15/f32` | 394.37 ns | 403.01 ns | 458.71 ns | 597.51 ns | Gaussian elimination |
+| `inverse/4x4/f32` | 14.94 ns | 12.82 ns | 5.06 ns | 5.35 ns | General inverse |
+| `inverse/15x15/f32` | 724.59 ns | 588.74 ns | 1,160 ns | 1,172 ns | .. |
+| `quaternion_multiply/f32` | 1.42 ns | 1.59 ns | 0.85 ns | 0.72 ns | Attitude composition, matrix → quaternion |
+| `quaternion_from_matrix/f32` | 1.92 ns | 2.15 ns | 1.80 ns | 1.54 ns | .. |
+| `gyro_integration_latency/f32` | 16.28 ns | 13.91 ns | 12.75 ns | 12.16 ns | `q = normalized(q * dq)` as a dependent chain (latency) |
+| `transform_position/f32` | 1.54 ns | 1.58 ns | 0.76 ns | 0.79 ns | `Transform * Position`; must match the untyped version |
+| `batch_transform_10k/f32` | 9,288 ns | 9,814 ns | 4,154 ns | 3,857 ns | One transform over 10,000 points (throughput) |
+| `kalman_step_15x6/f32` | 1,028 ns | 745.22 ns | 1,612 ns | 1,663 ns | Predict + update, 15 states, 6-D measurement (`eigen_ldlt` solves instead of inverting) |
+| `multiply/3x3/f64` | 2.79 ns | 2.70 ns | 1.86 ns | 1.94 ns | .. |
+| `multiply/4x4/f64` | 2.14 ns | 2.22 ns | 2.22 ns | 2.03 ns | .. |
+| `multiply/6x6/f64` | 12.19 ns | 11.37 ns | 11.99 ns | 14.14 ns | .. |
+| `determinant/3x3/f64` | 1.26 ns | 1.22 ns | 0.90 ns | 0.90 ns | .. |
+| `determinant/4x4/f64` | 4.20 ns | 4.18 ns | 2.87 ns | 2.01 ns | .. |
+| `determinant/15x15/f64` | 429.48 ns | 415.50 ns | 446.11 ns | 597.54 ns | .. |
+| `inverse/4x4/f64` | 15.80 ns | 13.06 ns | 6.56 ns | 7.34 ns | .. |
+| `inverse/15x15/f64` | 824.04 ns | 757.76 ns | 1,369 ns | 1,281 ns | .. |
+| `quaternion_multiply/f64` | 1.31 ns | 1.26 ns | 0.86 ns | 1.02 ns | .. |
+| `quaternion_from_matrix/f64` | 2.43 ns | 2.43 ns | 2.42 ns | 2.46 ns | .. |
+| `gyro_integration_latency/f64` | 17.46 ns | 15.67 ns | 17.93 ns | 15.58 ns | .. |
+| `transform_position/f64` | 1.49 ns | 1.61 ns | 0.75 ns | 0.82 ns | .. |
+| `batch_transform_10k/f64` | 7,421 ns | 5,942 ns | 4,631 ns | 4,653 ns | .. |
+| `kalman_step_15x6/f64` | 987.42 ns | 929.33 ns | 1,654 ns | 1,640 ns | .. |
 
 ## ARM64 baseline
 
-Measured on an 8-core ARMv8.2-A system, `-O2 -g`, GCC 16.2.1, Clang 23.1.5 (libc++),
+Measured on an 8-core ARMv8.2-A system, `-O2 -g`, GCC 16.2.1, Clang 23.1.5 (libc++). Not yet
+re-measured at `-O3` or since the kernels were simplified.
 
 | Benchmark | linalg GCC | linalg Clang | Eigen GCC | Eigen Clang | What |
 |---|---:|---:|---:|---:|:----|
@@ -70,7 +71,7 @@ Measured on an 8-core ARMv8.2-A system, `-O2 -g`, GCC 16.2.1, Clang 23.1.5 (libc
 | `kalman_step_15x6/f32` | 1,270.73 ns | 960.66 ns | 1,934.55 ns | 1,751.80 ns | Predict + update, 15 states, 6-D measurement |
 | `multiply/3x3/f64` | 2.84 ns | 2.48 ns | 2.64 ns | 2.10 ns | .. |
 | `multiply/4x4/f64` | 3.17 ns | 3.05 ns | 14.82 ns | 2.72 ns | .. |
-| `multiply/6x6/f64` | 63.83 ns | 20.81 ns | 12.40 ns | 9.80 ns | .. |
+| `multiply/6x6/f64` | 24.2 ns | 17.9 ns | 12.40 ns | 9.80 ns | .. |
 | `determinant/3x3/f64` | 1.26 ns | 1.26 ns | 0.91 ns | 0.95 ns | .. |
 | `determinant/4x4/f64` | 4.50 ns | 4.53 ns | 2.42 ns | 2.41 ns | .. |
 | `determinant/15x15/f64` | 625.64 ns | 523.82 ns | 621.87 ns | 735.95 ns | .. |
@@ -85,24 +86,16 @@ Measured on an 8-core ARMv8.2-A system, `-O2 -g`, GCC 16.2.1, Clang 23.1.5 (libc
 
 ## Implementation notes
 
-GCC at `-O2` vectorises only code shaped for it. It skips loops that need a scalar remainder or a
-runtime alias check, and it keeps small arrays in registers only when their loops are fully
-unrolled. Clang needs none of this. The workarounds are in
+Kernels are plain loops that GCC and Clang vectorise at `-O3`. The remaining workarounds are in
 [`matrix.h`](../../include/grape/linalg/matrix.h):
 
-- **Unroll hints** (GCC only) on element-wise and multiply loops. Removing them makes GCC 2–6×
-  slower.
-- **Two multiply kernels.** Small sizes unroll so the result stays in registers. Larger sizes
-  accumulate each row in a local array (15×15 multiply 3.6× faster).
-- **Gauss-Jordan reads a local copy of the pivot row**, and updates rows at full width (15×15
-  inverse 1.7× faster on GCC).
 - **Bounds-check failure is thrown out of line.** An inline `throw` stops GCC inlining element
-  access in large functions (GCC batch transform 2.5× faster).
-- **Closed-form inverse helpers are force-inlined.** Otherwise the adjugate is returned through
-  memory (4×4 inverse up to 1.3× faster).
+  access (GCC `quaternion_from_matrix` 3–4× faster).
+- **Closed-form adjugates are force-inlined.** `determinant()` reuses them and relies on the unused
+  terms being optimised away (4×4 determinant 2× faster).
+- **Multiply accumulates each row in a local vector** (GCC 6×6 `f64` 1.5× faster than
+  accumulating into the result).
 
-Ruled out: `#pragma omp simd` (not allowed in `constexpr` functions), and
-`-fvect-cost-model=dynamic` (a build-wide flag that closes only part of the gap).
-
-Known gaps: `-O3` makes GCC's 4×4 kernels 3–5× slower, and the 4×4 inverse is 2–3× slower than
-Eigen's hand-written SIMD kernel.
+Known gaps: against the former `-O2` build with GCC-specific unroll hints, 6×6 multiply (both
+compilers) and Clang's 15×15 inverse are 15–50% slower. The 4×4 inverse is 2–3× slower than Eigen's
+hand-written SIMD kernel, and `transform_position`/`batch_transform_10k` are ~2× slower than Eigen.
