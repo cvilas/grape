@@ -13,23 +13,12 @@
 #include <functional>
 #include <limits>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
 
 #include "grape/utils/attributes.h"
-
-// GCC vectorises small loops only when they are unrolled (see docs/benchmarking). Clang does not
-// need these hints. GCC takes only a literal or a template parameter name as the unroll count.
-#if defined(__GNUC__) && !defined(__clang__)
-#define GRAPE_LINALG_GCC_UNROLL _Pragma("GCC unroll 8")
-#define GRAPE_LINALG_GCC_UNROLL_FULL _Pragma("GCC unroll 16")
-#define GRAPE_LINALG_GCC_UNROLL_ROWS _Pragma("GCC unroll RowUnroll")
-#else
-#define GRAPE_LINALG_GCC_UNROLL
-#define GRAPE_LINALG_GCC_UNROLL_FULL
-#define GRAPE_LINALG_GCC_UNROLL_ROWS
-#endif
 
 namespace grape::linalg {
 
@@ -149,34 +138,15 @@ constexpr auto identity() -> Matrix<Order, Order, Scalar> {
   return mat;
 }
 
-namespace detail {
-
-//-------------------------------------------------------------------------------------------------
-/// @return Matrix of op applied to corresponding elements.
-template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar, typename Op,
-          std::same_as<Matrix<NumRows, NumColumns, Scalar>>... Mats>
-constexpr auto elementwise(Op op, const Matrix<NumRows, NumColumns, Scalar>& first,
-                           const Mats&... rest) -> Matrix<NumRows, NumColumns, Scalar> {
-  auto result = Matrix<NumRows, NumColumns, Scalar>{};
-  auto& out = result.elements();
-  // GCC optimises better over indexed loop instead of std::ranges::transform
-  GRAPE_LINALG_GCC_UNROLL
-  for (std::size_t i = 0UZ; i < out.size(); ++i) {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-    out[i] = op(first.elements()[i], rest.elements()[i]...);
-  }
-  return result;
-}
-
-}  // namespace detail
-
 //-------------------------------------------------------------------------------------------------
 /// @return Elementwise sum lhs + rhs
 template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator+(const Matrix<NumRows, NumColumns, Scalar>& lhs,
                          const Matrix<NumRows, NumColumns, Scalar>& rhs)
     -> Matrix<NumRows, NumColumns, Scalar> {
-  return detail::elementwise(std::plus{}, lhs, rhs);
+  auto result = Matrix<NumRows, NumColumns, Scalar>{};
+  std::ranges::transform(lhs.elements(), rhs.elements(), result.elements().begin(), std::plus{});
+  return result;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -184,7 +154,9 @@ constexpr auto operator+(const Matrix<NumRows, NumColumns, Scalar>& lhs,
 template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scalar>
 constexpr auto operator-(const Matrix<NumRows, NumColumns, Scalar>& mat)
     -> Matrix<NumRows, NumColumns, Scalar> {
-  return detail::elementwise(std::negate{}, mat);
+  auto result = Matrix<NumRows, NumColumns, Scalar>{};
+  std::ranges::transform(mat.elements(), result.elements().begin(), std::negate{});
+  return result;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -193,7 +165,9 @@ template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scala
 constexpr auto operator-(const Matrix<NumRows, NumColumns, Scalar>& lhs,
                          const Matrix<NumRows, NumColumns, Scalar>& rhs)
     -> Matrix<NumRows, NumColumns, Scalar> {
-  return detail::elementwise(std::minus{}, lhs, rhs);
+  auto result = Matrix<NumRows, NumColumns, Scalar>{};
+  std::ranges::transform(lhs.elements(), rhs.elements(), result.elements().begin(), std::minus{});
+  return result;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -202,7 +176,10 @@ template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scala
 constexpr auto operator*(const Matrix<NumRows, NumColumns, Scalar>& mat,
                          std::type_identity_t<Scalar> factor)
     -> Matrix<NumRows, NumColumns, Scalar> {
-  return detail::elementwise([factor](Scalar elem) { return elem * factor; }, mat);
+  auto result = Matrix<NumRows, NumColumns, Scalar>{};
+  std::ranges::transform(mat.elements(), result.elements().begin(),
+                         [factor](Scalar elem) { return elem * factor; });
+  return result;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -220,63 +197,11 @@ template <std::size_t NumRows, std::size_t NumColumns, std::floating_point Scala
 constexpr auto operator/(const Matrix<NumRows, NumColumns, Scalar>& mat,
                          std::type_identity_t<Scalar> divisor)
     -> Matrix<NumRows, NumColumns, Scalar> {
-  return detail::elementwise([divisor](Scalar elem) { return elem / divisor; }, mat);
-}
-
-namespace detail {
-
-inline constexpr auto SMALL_KERNEL_SIZE = 8UZ;
-
-//-------------------------------------------------------------------------------------------------
-/// @return Matrix product lhs * rhs
-///
-/// The loops run in i-k-j order so that both operands are read row-major. There are two kernels
-/// because GCC needs different code shapes to vectorise small and large sizes (Clang is fast with
-/// either):
-/// - Small: the outer loops are unrolled so the whole result stays in registers.
-/// - Large: each result row is accumulated in a local array held in registers. Accumulating into
-///   the result instead stores and reloads it on every step.
-template <std::size_t NumRows, std::size_t Inner, std::size_t NumColumns,
-          std::floating_point Scalar,
-          // named in GRAPE_LINALG_GCC_UNROLL_ROWS, so keep the two in step
-          std::size_t RowUnroll = ((NumRows <= SMALL_KERNEL_SIZE) ? SMALL_KERNEL_SIZE : 1UZ)>
-constexpr auto multiply(const Matrix<NumRows, Inner, Scalar>& lhs,
-                        const Matrix<Inner, NumColumns, Scalar>& rhs)
-    -> Matrix<NumRows, NumColumns, Scalar> {
   auto result = Matrix<NumRows, NumColumns, Scalar>{};
-  if constexpr ((NumRows <= SMALL_KERNEL_SIZE) && (Inner <= SMALL_KERNEL_SIZE)) {
-    GRAPE_LINALG_GCC_UNROLL
-    for (std::size_t row = 0UZ; row < NumRows; ++row) {
-      GRAPE_LINALG_GCC_UNROLL
-      for (std::size_t inner = 0UZ; inner < Inner; ++inner) {
-        const auto lhs_elem = lhs(row, inner);
-        for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-          result(row, col) = multiplyAdd(lhs_elem, rhs(inner, col), result(row, col));
-        }
-      }
-    }
-    return result;
-  }
-  GRAPE_LINALG_GCC_UNROLL_ROWS
-  for (std::size_t row = 0UZ; row < NumRows; ++row) {
-    auto acc = Vector<NumColumns, Scalar>{};
-    GRAPE_LINALG_GCC_UNROLL
-    for (std::size_t inner = 0UZ; inner < Inner; ++inner) {
-      const auto lhs_elem = lhs(row, inner);
-      GRAPE_LINALG_GCC_UNROLL_FULL
-      for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-        acc(col) = multiplyAdd(lhs_elem, rhs(inner, col), acc(col));
-      }
-    }
-    GRAPE_LINALG_GCC_UNROLL_FULL
-    for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-      result(row, col) = acc(col);
-    }
-  }
+  std::ranges::transform(mat.elements(), result.elements().begin(),
+                         [divisor](Scalar elem) { return elem / divisor; });
   return result;
 }
-
-}  // namespace detail
 
 //-------------------------------------------------------------------------------------------------
 /// @return Matrix product lhs * rhs
@@ -285,7 +210,21 @@ template <std::size_t NumRows, std::size_t Inner, std::size_t NumColumns,
 constexpr auto operator*(const Matrix<NumRows, Inner, Scalar>& lhs,
                          const Matrix<Inner, NumColumns, Scalar>& rhs)
     -> Matrix<NumRows, NumColumns, Scalar> {
-  return detail::multiply(lhs, rhs);
+  // i-k-j order reads both operands row-major
+  auto result = Matrix<NumRows, NumColumns, Scalar>{};
+  for (std::size_t row = 0UZ; row < NumRows; ++row) {
+    auto acc = Vector<NumColumns, Scalar>{};
+    for (std::size_t inner = 0UZ; inner < Inner; ++inner) {
+      const auto lhs_elem = lhs(row, inner);
+      for (std::size_t col = 0UZ; col < NumColumns; ++col) {
+        acc(col) = detail::multiplyAdd(lhs_elem, rhs(inner, col), acc(col));
+      }
+    }
+    for (std::size_t col = 0UZ; col < NumColumns; ++col) {
+      result(row, col) = acc(col);
+    }
+  }
+  return result;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -379,7 +318,7 @@ constexpr void swapRows(Matrix<Order, Order, Scalar>& mat, std::size_t row_a, st
 //-------------------------------------------------------------------------------------------------
 /// @return Infinity norm of mat (largest absolute row sum)
 template <std::size_t Order, std::floating_point Scalar>
-GRAPE_ALWAYS_INLINE constexpr auto infinityNorm(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
+constexpr auto infinityNorm(const Matrix<Order, Order, Scalar>& mat) -> Scalar {
   auto result = Scalar{ 0 };
   for (std::size_t row = 0UZ; row < Order; ++row) {
     auto row_sum = Scalar{ 0 };
@@ -533,8 +472,6 @@ constexpr auto inverseGaussJordan(const Matrix<Order, Order, Scalar>& mat, Scala
   const auto singular_tolerance =
       static_cast<Scalar>(Order) * std::numeric_limits<Scalar>::epsilon() * mat_norm;
 
-  // Rows are updated in full width. Columns left of col are already zero in the pivot row, but a
-  // constant loop count vectorises better.
   auto lhs = mat;
   auto rhs = identity<Order, Scalar>();
   for (std::size_t col = 0UZ; col < Order; ++col) {
@@ -547,17 +484,10 @@ constexpr auto inverseGaussJordan(const Matrix<Order, Order, Scalar>& mat, Scala
       swapRows(lhs, col, pivot_row, col);
       swapRows(rhs, col, pivot_row);
     }
-    // Local copies of the pivot row spare GCC from proving that row != col before vectorising
     const auto inv_pivot = Scalar{ 1 } / lhs(col, col);
-    auto pivot_lhs = Vector<Order, Scalar>{};
-    auto pivot_rhs = Vector<Order, Scalar>{};
     for (std::size_t j = 0UZ; j < Order; ++j) {
-      pivot_lhs(j) = lhs(col, j) * inv_pivot;
-      lhs(col, j) = pivot_lhs(j);
-    }
-    for (std::size_t j = 0UZ; j < Order; ++j) {
-      pivot_rhs(j) = rhs(col, j) * inv_pivot;
-      rhs(col, j) = pivot_rhs(j);
+      lhs(col, j) *= inv_pivot;
+      rhs(col, j) *= inv_pivot;
     }
     for (std::size_t row = 0UZ; row < Order; ++row) {
       if (row == col) {
@@ -565,10 +495,8 @@ constexpr auto inverseGaussJordan(const Matrix<Order, Order, Scalar>& mat, Scala
       }
       const auto factor = lhs(row, col);
       for (std::size_t j = 0UZ; j < Order; ++j) {
-        lhs(row, j) = multiplyAdd(-factor, pivot_lhs(j), lhs(row, j));
-      }
-      for (std::size_t j = 0UZ; j < Order; ++j) {
-        rhs(row, j) = multiplyAdd(-factor, pivot_rhs(j), rhs(row, j));
+        lhs(row, j) = multiplyAdd(-factor, lhs(col, j), lhs(row, j));
+        rhs(row, j) = multiplyAdd(-factor, rhs(col, j), rhs(row, j));
       }
     }
   }
@@ -639,10 +567,6 @@ constexpr auto cross(const Vector<3, Scalar>& lhs, const Vector<3, Scalar>& rhs)
 }
 
 }  // namespace grape::linalg
-
-#undef GRAPE_LINALG_GCC_UNROLL
-#undef GRAPE_LINALG_GCC_UNROLL_FULL
-#undef GRAPE_LINALG_GCC_UNROLL_ROWS
 
 //-------------------------------------------------------------------------------------------------
 /// std::format support. Element format specifiers apply: std::format("{:.2f}", mat) gives e.g.
