@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <concepts>
 #include <limits>
 #include <optional>
@@ -273,14 +274,11 @@ public:
                                    Scalar tolerance = DEFAULT_TOLERANCE)
       -> std::optional<Rotation> {
     // Comparisons are written so that NaN is rejected
-    const auto gram = mat * transpose(mat);
-    const auto ident = identity<3, Scalar>();
-    for (std::size_t row = 0UZ; row < 3UZ; ++row) {
-      for (std::size_t col = 0UZ; col < 3UZ; ++col) {
-        if (!(detail::absolute(gram(row, col) - ident(row, col)) <= tolerance)) {
-          return std::nullopt;
-        }
-      }
+    const auto orthonormality_err = (mat * transpose(mat)) - identity<3, Scalar>();
+    if (!std::ranges::all_of(orthonormality_err.elements(), [tolerance](Scalar err) {
+          return detail::absolute(err) <= tolerance;
+        })) {
+      return std::nullopt;
     }
     // orthonormal: determinant is +1 (rotation) or -1 (reflection)
     if (!(determinant(mat) > Scalar{ 0 })) {
