@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <concepts>
@@ -258,20 +259,18 @@ constexpr auto multiply(const Matrix<NumRows, Inner, Scalar>& lhs,
   }
   GRAPE_LINALG_GCC_UNROLL_ROWS
   for (std::size_t row = 0UZ; row < NumRows; ++row) {
-    auto acc = std::array<Scalar, NumColumns>{};
+    auto acc = Vector<NumColumns, Scalar>{};
     GRAPE_LINALG_GCC_UNROLL
     for (std::size_t inner = 0UZ; inner < Inner; ++inner) {
       const auto lhs_elem = lhs(row, inner);
       GRAPE_LINALG_GCC_UNROLL_FULL
       for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-        acc[col] = multiplyAdd(lhs_elem, rhs(inner, col), acc[col]);
+        acc(col) = multiplyAdd(lhs_elem, rhs(inner, col), acc(col));
       }
     }
     GRAPE_LINALG_GCC_UNROLL_FULL
     for (std::size_t col = 0UZ; col < NumColumns; ++col) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      result(row, col) = acc[col];
+      result(row, col) = acc(col);
     }
   }
   return result;
@@ -396,14 +395,7 @@ GRAPE_ALWAYS_INLINE constexpr auto infinityNorm(const Matrix<Order, Order, Scala
 /// @return true if no element is inf or NaN
 template <std::size_t Rows, std::size_t Cols, std::floating_point Scalar>
 constexpr auto isFinite(const Matrix<Rows, Cols, Scalar>& mat) -> bool {
-  for (std::size_t row = 0UZ; row < Rows; ++row) {
-    for (std::size_t col = 0UZ; col < Cols; ++col) {
-      if (!(absolute(mat(row, col)) <= std::numeric_limits<Scalar>::max())) {
-        return false;
-      }
-    }
-  }
-  return true;
+  return std::ranges::all_of(mat.elements(), [](Scalar elem) { return std::isfinite(elem); });
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -557,19 +549,15 @@ constexpr auto inverseGaussJordan(const Matrix<Order, Order, Scalar>& mat, Scala
     }
     // Local copies of the pivot row spare GCC from proving that row != col before vectorising
     const auto inv_pivot = Scalar{ 1 } / lhs(col, col);
-    auto pivot_lhs = std::array<Scalar, Order>{};
-    auto pivot_rhs = std::array<Scalar, Order>{};
+    auto pivot_lhs = Vector<Order, Scalar>{};
+    auto pivot_rhs = Vector<Order, Scalar>{};
     for (std::size_t j = 0UZ; j < Order; ++j) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      pivot_lhs[j] = lhs(col, j) * inv_pivot;
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      lhs(col, j) = pivot_lhs[j];
+      pivot_lhs(j) = lhs(col, j) * inv_pivot;
+      lhs(col, j) = pivot_lhs(j);
     }
     for (std::size_t j = 0UZ; j < Order; ++j) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      pivot_rhs[j] = rhs(col, j) * inv_pivot;
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-      rhs(col, j) = pivot_rhs[j];
+      pivot_rhs(j) = rhs(col, j) * inv_pivot;
+      rhs(col, j) = pivot_rhs(j);
     }
     for (std::size_t row = 0UZ; row < Order; ++row) {
       if (row == col) {
@@ -577,12 +565,10 @@ constexpr auto inverseGaussJordan(const Matrix<Order, Order, Scalar>& mat, Scala
       }
       const auto factor = lhs(row, col);
       for (std::size_t j = 0UZ; j < Order; ++j) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-        lhs(row, j) = multiplyAdd(-factor, pivot_lhs[j], lhs(row, j));
+        lhs(row, j) = multiplyAdd(-factor, pivot_lhs(j), lhs(row, j));
       }
       for (std::size_t j = 0UZ; j < Order; ++j) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
-        rhs(row, j) = multiplyAdd(-factor, pivot_rhs[j], rhs(row, j));
+        rhs(row, j) = multiplyAdd(-factor, pivot_rhs(j), rhs(row, j));
       }
     }
   }
