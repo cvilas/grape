@@ -52,39 +52,41 @@ Measured on AMD Ryzen AI Max+ 395, `x86-64-v3`, `-O3` (`Release`), GCC 16.0.1, C
 
 ## ARM64 baseline
 
-Measured on an 8-core ARMv8.2-A system, `-O2 -g`, GCC 16.2.1, Clang 23.1.5 (libc++). Not yet
-re-measured at `-O3` or since the kernels were simplified.
+Measured on an Apple M1 Pro, `ARMv8.2-A`, pinned to one performance core, `-O3` (`Release`), GCC
+16.2.1, Clang 23.1.6 (libc++), Eigen 5.0.1-dev.
 
 | Benchmark | linalg GCC | linalg Clang | Eigen GCC | Eigen Clang | What |
 |---|---:|---:|---:|---:|:----|
-| `multiply/3x3/f32` | 2.84 ns | 3.09 ns | 2.55 ns | 2.14 ns | _NxN_ Square matrix product |
-| `multiply/4x4/f32` | 2.02 ns | 1.90 ns | 1.85 ns | 1.61 ns | .. |
-| `multiply/6x6/f32` | 9.48 ns | 11.21 ns | 10.96 ns | 9.97 ns | .. |
-| `determinant/3x3/f32` | 1.26 ns | 1.26 ns | 0.91 ns | 0.95 ns | Closed-form determinant |
-| `determinant/4x4/f32` | 4.50 ns | 4.53 ns | 2.42 ns | 2.41 ns | .. |
-| `determinant/15x15/f32` | 614.42 ns | 455.04 ns | 573.39 ns | 752.51 ns | Gaussian elimination |
-| `inverse/4x4/f32` | 15.26 ns | 18.50 ns | 7.38 ns | 9.71 ns | General inverse |
-| `inverse/15x15/f32` | 1,918.86 ns | 732.55 ns | 1,887.97 ns | 1,927.63 ns | .. |
-| `quaternion_multiply/f32` | 1.50 ns | 1.49 ns | 0.99 ns | 1.65 ns | Attitude composition, matrix → quaternion |
-| `quaternion_from_matrix/f32` | 2.81 ns | 3.03 ns | 1.64 ns | 1.99 ns | .. |
-| `gyro_integration_latency/f32` | 22.11 ns | 23.05 ns | 18.12 ns | 17.76 ns | Dependent quaternion integration chain |
-| `transform_position/f32` | 1.36 ns | 1.24 ns | 2.57 ns | 0.90 ns | `Transform * Position` |
-| `batch_transform_10k/f32` | 10,229.35 ns | 3,812.50 ns | 33,291.09 ns | 6,875.66 ns | One transform over 10,000 points |
-| `kalman_step_15x6/f32` | 1,270.73 ns | 960.66 ns | 1,934.55 ns | 1,751.80 ns | Predict + update, 15 states, 6-D measurement |
-| `multiply/3x3/f64` | 2.84 ns | 2.48 ns | 2.64 ns | 2.10 ns | .. |
-| `multiply/4x4/f64` | 3.17 ns | 3.05 ns | 14.82 ns | 2.72 ns | .. |
-| `multiply/6x6/f64` | 24.2 ns | 17.9 ns | 12.40 ns | 9.80 ns | .. |
-| `determinant/3x3/f64` | 1.26 ns | 1.26 ns | 0.91 ns | 0.95 ns | .. |
-| `determinant/4x4/f64` | 4.50 ns | 4.53 ns | 2.42 ns | 2.41 ns | .. |
-| `determinant/15x15/f64` | 625.64 ns | 523.82 ns | 621.87 ns | 735.95 ns | .. |
-| `inverse/4x4/f64` | 25.71 ns | 18.51 ns | 8.36 ns | 8.93 ns | .. |
-| `inverse/15x15/f64` | 1,950.33 ns | 1,142.94 ns | 1,866.09 ns | 1,796.36 ns | .. |
-| `quaternion_multiply/f64` | 1.51 ns | 1.49 ns | 1.24 ns | 1.49 ns | .. |
-| `quaternion_from_matrix/f64` | 2.98 ns | 3.16 ns | 1.82 ns | 1.74 ns | .. |
-| `gyro_integration_latency/f64` | 24.02 ns | 24.27 ns | 22.24 ns | 19.01 ns | .. |
-| `transform_position/f64` | 1.36 ns | 1.24 ns | 2.11 ns | 1.10 ns | .. |
-| `batch_transform_10k/f64` | 10,277.41 ns | 7,629.43 ns | 28,286.77 ns | 7,693.25 ns | .. |
-| `kalman_step_15x6/f64` | 1,696.99 ns | 1,407.38 ns | 2,577.85 ns | 2,156.91 ns | .. |
+| `multiply/3x3/f32` | 2.78 ns | 3.11 ns | 1.82 ns | 2.15 ns | _NxN_ Square matrix product |
+| `multiply/4x4/f32` | 2.98 ns | 1.90 ns | 1.87 ns | 1.62 ns | .. |
+| `multiply/6x6/f32` | 23.27 ns | 10.61 ns | 11.10 ns | 11.10 ns | .. |
+| `determinant/3x3/f32` | 1.27 ns | 1.27 ns | 0.92 ns | 0.96 ns | Closed-form determinant |
+| `determinant/4x4/f32` | 4.54 ns | 4.63 ns | 2.46 ns | 2.42 ns | .. |
+| `determinant/15x15/f32` | 391.39 ns | 458.80 ns | 571.66 ns | 704.91 ns | Gaussian elimination |
+| `inverse/4x4/f32` | 18.80 ns | 17.51 ns | 7.49 ns | 9.78 ns | General inverse |
+| `inverse/15x15/f32` | 1,054 ns | 919.12 ns | 1,587 ns | 1,854 ns | .. |
+| `quaternion_multiply/f32` | 1.52 ns | 1.51 ns | 1.01 ns | 1.66 ns | Attitude composition, matrix → quaternion |
+| `quaternion_from_matrix/f32` | 2.86 ns | 2.79 ns | 2.96 ns | 3.11 ns | .. |
+| `gyro_integration_latency/f32` | 22.40 ns | 22.83 ns | 18.36 ns | 17.84 ns | `q = normalized(q * dq)` as a dependent chain (latency) |
+| `transform_position/f32` | 1.34 ns | 1.20 ns | 0.80 ns | 0.91 ns | `Transform * Position`; must match the untyped version |
+| `batch_transform_10k/f32` | 3,350 ns | 3,324 ns | 6,509 ns | 6,969 ns | One transform over 10,000 points (throughput) |
+| `batch_transform_10k/f32/map` | 3,349 ns | 3,327 ns | - | - | The same through `Transform::map()` |
+| `kalman_step_15x6/f32` | 1,161 ns | 934.67 ns | 1,904 ns | 1,953 ns | Predict + update, 15 states, 6-D measurement (`eigen_ldlt` solves instead of inverting) |
+| `multiply/3x3/f64` | 2.80 ns | 2.50 ns | 1.86 ns | 2.16 ns | .. |
+| `multiply/4x4/f64` | 5.75 ns | 3.14 ns | 2.94 ns | 13.28 ns | .. |
+| `multiply/6x6/f64` | 24.81 ns | 18.26 ns | 12.79 ns | 9.89 ns | .. |
+| `determinant/3x3/f64` | 1.28 ns | 1.29 ns | 0.92 ns | 0.97 ns | .. |
+| `determinant/4x4/f64` | 4.55 ns | 4.67 ns | 2.46 ns | 2.44 ns | .. |
+| `determinant/15x15/f64` | 422.40 ns | 545.84 ns | 627.20 ns | 703.41 ns | .. |
+| `inverse/4x4/f64` | 21.87 ns | 17.75 ns | 8.06 ns | 9.06 ns | .. |
+| `inverse/15x15/f64` | 1,524 ns | 1,422 ns | 1,746 ns | 1,795 ns | .. |
+| `quaternion_multiply/f64` | 1.54 ns | 1.51 ns | 1.25 ns | 1.50 ns | .. |
+| `quaternion_from_matrix/f64` | 2.91 ns | 2.99 ns | 2.51 ns | 2.46 ns | .. |
+| `gyro_integration_latency/f64` | 24.41 ns | 24.76 ns | 20.53 ns | 19.07 ns | .. |
+| `transform_position/f64` | 1.34 ns | 1.21 ns | 1.17 ns | 1.11 ns | .. |
+| `batch_transform_10k/f64` | 6,645 ns | 6,636 ns | 7,086 ns | 7,729 ns | .. |
+| `batch_transform_10k/f64/map` | 6,644 ns | 6,634 ns | - | - | .. |
+| `kalman_step_15x6/f64` | 1,535 ns | 1,393 ns | 2,474 ns | 2,330 ns | .. |
 
 ## Implementation notes
 
