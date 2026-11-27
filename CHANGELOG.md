@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.0](https://github.com/cvilas/grape/compare/v0.14.1...v0.15.0) (2026-11-27)
+
+
+### Features
+
+* **linalg:** adds Transform::map() for batches of positions ([13c048a](https://github.com/cvilas/grape/commit/13c048afab655755b89b67462761baedc0057114))
+
+
+### Performance Improvements
+
+* **linalg:** vectorises batch point transforms ([e2a4213](https://github.com/cvilas/grape/commit/e2a421393299bcda63145229eaa17ca4bb59745c))
+
 ## [0.14.1](https://github.com/cvilas/grape/compare/v0.14.0...v0.14.1) (2026-11-24)
 
 
