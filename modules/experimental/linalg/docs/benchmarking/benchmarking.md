@@ -30,8 +30,8 @@ Measured on AMD Ryzen AI Max+ 395, `x86-64-v3`, `-O3` (`Release`), GCC 16.0.1, C
 | `quaternion_multiply/f32` | 1.42 ns | 1.59 ns | 0.85 ns | 0.72 ns | Attitude composition, matrix → quaternion |
 | `quaternion_from_matrix/f32` | 1.92 ns | 2.15 ns | 1.80 ns | 1.54 ns | .. |
 | `gyro_integration_latency/f32` | 16.28 ns | 13.91 ns | 12.75 ns | 12.16 ns | `q = normalized(q * dq)` as a dependent chain (latency) |
-| `transform_position/f32` | 1.54 ns | 1.58 ns | 0.76 ns | 0.79 ns | `Transform * Position`; must match the untyped version |
-| `batch_transform_10k/f32` | 9,288 ns | 9,814 ns | 4,154 ns | 3,857 ns | One transform over 10,000 points (throughput) |
+| `transform_position/f32` | 1.18 ns | 1.59 ns | 0.76 ns | 0.79 ns | `Transform * Position`; must match the untyped version |
+| `batch_transform_10k/f32` | 4,421 ns | 9,026 ns | 4,154 ns | 3,857 ns | One transform over 10,000 points (throughput) |
 | `kalman_step_15x6/f32` | 1,028 ns | 745.22 ns | 1,612 ns | 1,663 ns | Predict + update, 15 states, 6-D measurement (`eigen_ldlt` solves instead of inverting) |
 | `multiply/3x3/f64` | 2.79 ns | 2.70 ns | 1.86 ns | 1.94 ns | .. |
 | `multiply/4x4/f64` | 2.14 ns | 2.22 ns | 2.22 ns | 2.03 ns | .. |
@@ -44,8 +44,8 @@ Measured on AMD Ryzen AI Max+ 395, `x86-64-v3`, `-O3` (`Release`), GCC 16.0.1, C
 | `quaternion_multiply/f64` | 1.31 ns | 1.26 ns | 0.86 ns | 1.02 ns | .. |
 | `quaternion_from_matrix/f64` | 2.43 ns | 2.43 ns | 2.42 ns | 2.46 ns | .. |
 | `gyro_integration_latency/f64` | 17.46 ns | 15.67 ns | 17.93 ns | 15.58 ns | .. |
-| `transform_position/f64` | 1.49 ns | 1.61 ns | 0.75 ns | 0.82 ns | .. |
-| `batch_transform_10k/f64` | 7,421 ns | 5,942 ns | 4,631 ns | 4,653 ns | .. |
+| `transform_position/f64` | 1.50 ns | 1.60 ns | 0.75 ns | 0.82 ns | .. |
+| `batch_transform_10k/f64` | 6,950 ns | 5,335 ns | 4,631 ns | 4,653 ns | .. |
 | `kalman_step_15x6/f64` | 987.42 ns | 929.33 ns | 1,654 ns | 1,640 ns | .. |
 
 ## ARM64 baseline
@@ -93,9 +93,15 @@ Kernels are plain loops that GCC and Clang vectorise at `-O3`. The remaining wor
   access (GCC `quaternion_from_matrix` 3–4× faster).
 - **Closed-form adjugates are force-inlined.** `determinant()` reuses them and relies on the unused
   terms being optimised away (4×4 determinant 2× faster).
+- **Tagged coordinates are copied elementwise.** GCC does not vectorise loops that copy a whole
+  `Vector` into a member (GCC `batch_transform_10k/f32` 1.9× faster).
+- **`Transform * Position` accumulates onto the translation** instead of adding it last (one
+  rounding fewer; batch transform ~10% faster).
 - **Multiply accumulates each row in a local vector** (GCC 6×6 `f64` 1.5× faster than
   accumulating into the result).
 
 Known gaps: against the former `-O2` build with GCC-specific unroll hints, 6×6 multiply (both
 compilers) and Clang's 15×15 inverse are 15–50% slower. The 4×4 inverse is 2–3× slower than Eigen's
-hand-written SIMD kernel, and `transform_position`/`batch_transform_10k` are ~2× slower than Eigen.
+hand-written SIMD kernel. `transform_position` is 1.5–2× slower than Eigen, whose padded 4×4 isometry
+maps a point with three 4-lane FMAs. Clang does not vectorise `batch_transform_10k` across points
+(2.3× slower than Eigen).
