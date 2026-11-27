@@ -258,7 +258,12 @@ void linalgRawTransformPosition(benchmark::State& state) {
     benchmark::DoNotOptimize(rotation);
     benchmark::DoNotOptimize(translation);
     benchmark::DoNotOptimize(position);
-    auto mapped = (rotation * position) + translation;
+    auto mapped = translation;
+    for (std::size_t col = 0UZ; col < 3UZ; ++col) {
+      for (std::size_t row = 0UZ; row < 3UZ; ++row) {
+        mapped(row) = la::detail::multiplyAdd(rotation(row, col), position(col), mapped(row));
+      }
+    }
     benchmark::DoNotOptimize(mapped);
   }
 }

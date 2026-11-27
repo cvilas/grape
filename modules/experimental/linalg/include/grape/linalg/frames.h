@@ -94,8 +94,9 @@ template <std::floating_point Scalar>
 class TaggedCoordinates {
 public:
   constexpr TaggedCoordinates() = default;
+  // Copied elementwise: GCC does not vectorise loops that copy a whole Vector into a member
   constexpr explicit TaggedCoordinates(const Vector<3, Scalar>& coordinates)
-    : coordinates_(coordinates) {
+    : coordinates_{ coordinates(0), coordinates(1), coordinates(2) } {
   }
   constexpr explicit TaggedCoordinates(Scalar cx, Scalar cy, Scalar cz)
     : coordinates_{ cx, cy, cz } {
@@ -387,9 +388,16 @@ public:
   template <PointType Point>
   constexpr auto operator*(const Position<From, Point, Scalar>& point) const
       -> Position<To, Point, Scalar> {
-    return Position<To, Point, Scalar>{
-      (rotation_.matrix() * point.coordinates()) + translation_.coordinates(),
-    };
+    // Accumulating onto the translation saves a rounding and an addition
+    const auto& rot = rotation_.matrix();
+    const auto& pos = point.coordinates();
+    auto mapped = translation_.coordinates();
+    for (std::size_t col = 0UZ; col < 3UZ; ++col) {
+      for (std::size_t row = 0UZ; row < 3UZ; ++row) {
+        mapped(row) = detail::multiplyAdd(rot(row, col), pos(col), mapped(row));
+      }
+    }
+    return Position<To, Point, Scalar>{ mapped };
   }
 
   /// @return Free vector re-expressed in To coordinates (no translation applied)
