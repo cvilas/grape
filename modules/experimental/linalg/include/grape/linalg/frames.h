@@ -8,6 +8,8 @@
 #include <concepts>
 #include <limits>
 #include <optional>
+#include <span>
+#include <stdexcept>
 #include <type_traits>
 
 #include "grape/linalg/matrix.h"
@@ -85,6 +87,9 @@ constexpr auto rz(Scalar angle) -> Matrix<3, 3, Scalar> {
   };
 }
 
+template <FrameType To, FrameType From, std::floating_point Scalar>
+class Transform;
+
 namespace detail {
 
 //-------------------------------------------------------------------------------------------------
@@ -108,6 +113,9 @@ public:
   }
 
 private:
+  template <FrameType, FrameType, std::floating_point>
+  friend class grape::linalg::Transform;
+
   Vector<3, Scalar> coordinates_{};
 };
 
@@ -398,6 +406,37 @@ public:
       }
     }
     return Position<To, Point, Scalar>{ mapped };
+  }
+
+  /// Maps each element of points into the matching element of mapped. Faster than mapping each
+  /// point in a loop. Sizes must match: at compile time for fixed-size spans, otherwise throws
+  /// std::invalid_argument.
+  template <PointType Point, std::size_t PointsExtent, std::size_t MappedExtent>
+    requires((PointsExtent == MappedExtent) || (PointsExtent == std::dynamic_extent) ||
+             (MappedExtent == std::dynamic_extent))
+  constexpr void map(std::span<const Position<From, Point, Scalar>, PointsExtent> points,
+                     std::span<Position<To, Point, Scalar>, MappedExtent> mapped) const {
+    if (points.size() != mapped.size()) {
+      throw std::invalid_argument("Transform::map: points and mapped differ in size");
+    }
+    // Same arithmetic as operator*(Position). Each coordinate is stored on its own: Clang does not
+    // vectorise across points when whole Positions are stored.
+    const auto& rot = rotation_.matrix();
+    const auto& trans = translation_.coordinates();
+    auto out_point = mapped.begin();
+    for (const auto& point : points) {
+      // Copied elementwise, so mapping in place is safe and GCC still vectorises
+      const auto& in = point.coordinates();
+      const auto pos = Vector<3, Scalar>{ in(0), in(1), in(2) };
+      auto& out = (out_point++)->coordinates_;
+      for (std::size_t row = 0UZ; row < 3UZ; ++row) {
+        auto acc = trans(row);
+        for (std::size_t col = 0UZ; col < 3UZ; ++col) {
+          acc = detail::multiplyAdd(rot(row, col), pos(col), acc);
+        }
+        out(row) = acc;
+      }
+    }
   }
 
   /// @return Free vector re-expressed in To coordinates (no translation applied)

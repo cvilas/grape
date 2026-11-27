@@ -2,9 +2,12 @@
 // Copyright (C) 2026 GRAPE Contributors
 //=================================================================================================
 
+#include <array>
 #include <concepts>
 #include <cstddef>
 #include <numbers>
+#include <span>
+#include <stdexcept>
 
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
@@ -241,6 +244,49 @@ TEST_CASE("Transform maps positions between frames and composes along the chain"
   const auto dir_world = pose_wc * dir_camera;
   requireCoordsApprox(dir_world.coordinates(), Vector<3>{ 0., 1., 0. });
 }
+
+//-------------------------------------------------------------------------------------------------
+TEST_CASE("Transform maps a batch of positions as it maps each one", "[linalg]") {
+  const auto pose = Transform<World, Body>{ Rotation<World, Body>::aboutY(0.3),
+                                            Displacement<World, World, Body>{ 1., -2., 3. } };
+  const auto points = std::array{
+    Position<Body, Landmark>{ 1., 2., 3. },
+    Position<Body, Landmark>{ -4., 5., 0.5 },
+    Position<Body, Landmark>{ 0., 0., 0. },
+  };
+  auto mapped = std::array<Position<World, Landmark>, points.size()>{};
+  pose.map(std::span{ points }, std::span{ mapped });
+  for (std::size_t i = 0UZ; i < points.size(); ++i) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
+    REQUIRE((pose * points[i]).coordinates() == mapped[i].coordinates());
+  }
+
+  // a transform within one frame can map in place
+  // (the rotation must mix coordinates, or reading a partly written point would go unnoticed)
+  const auto shift = Transform<World, World>{ Rotation<World, World>::aboutZ(0.7),
+                                              Displacement<World, World, World>{ 1., 2., 3. } };
+  auto in_place = mapped;
+  shift.map(std::span<const Position<World, Landmark>>{ in_place }, std::span{ in_place });
+  for (std::size_t i = 0UZ; i < mapped.size(); ++i) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,cppcoreguidelines-pro-bounds-constant-array-index)
+    REQUIRE((shift * mapped[i]).coordinates() == in_place[i].coordinates());
+  }
+
+  // sizes are checked at run time when either span is dynamic
+  auto too_short = std::array<Position<World, Landmark>, 2>{};
+  REQUIRE_THROWS_AS(
+      pose.map(std::span{ points }, std::span<Position<World, Landmark>>{ too_short }),
+      std::invalid_argument);
+}
+
+// Fixed-size spans of different sizes do not compile
+template <std::size_t PointsSize, std::size_t MappedSize>
+concept MappableSizes =
+    requires(const Transform<World, Body>& pose,
+             std::span<const Position<Body, Landmark>, PointsSize> points,
+             std::span<Position<World, Landmark>, MappedSize> mapped) { pose.map(points, mapped); };
+static_assert(MappableSizes<3, 3> && MappableSizes<3, std::dynamic_extent>);
+static_assert(not MappableSizes<3, 2>);
 
 //-------------------------------------------------------------------------------------------------
 TEST_CASE("Transform inverse reverses rotation and translation", "[linalg]") {

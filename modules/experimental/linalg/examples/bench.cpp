@@ -290,6 +290,26 @@ void linalgBatchTransform(benchmark::State& state) {
 }
 
 //-------------------------------------------------------------------------------------------------
+/// linalgBatchTransform through Transform::map()
+template <std::floating_point Scalar>
+void linalgBatchTransformMap(benchmark::State& state) {
+  auto transform = randomTransform<Scalar>();
+  auto input = std::vector<la::Position<Body, Point, Scalar>>(BATCH_SIZE);
+  std::ranges::generate(
+      input, [] { return la::Position<Body, Point, Scalar>{ randomMatrix<3, 1, Scalar>() }; });
+  auto output = std::vector<la::Position<World, Point, Scalar>>(BATCH_SIZE);
+  for (const auto unused : state) {
+    (void)unused;
+    benchmark::DoNotOptimize(transform);
+    // escape the output buffer so its stores cannot be dropped as dead
+    benchmark::DoNotOptimize(output.data());
+    transform.map(std::span{ std::as_const(input) }, std::span{ output });
+    benchmark::ClobberMemory();
+  }
+  state.SetItemsProcessed(state.iterations() * static_cast<std::int64_t>(BATCH_SIZE));
+}
+
+//-------------------------------------------------------------------------------------------------
 /// One predict + update step of a 15-state Kalman filter, inverting the innovation covariance
 template <std::floating_point Scalar>
 void linalgKalmanStep(benchmark::State& state) {
@@ -585,6 +605,7 @@ void registerPerScalar() {
   add("transform_position" + suffix + "/linalg", linalgTransformPosition<Scalar>);
   add("transform_position" + suffix + "/linalg_raw", linalgRawTransformPosition<Scalar>);
   add("batch_transform_10k" + suffix + "/linalg", linalgBatchTransform<Scalar>);
+  add("batch_transform_10k" + suffix + "/linalg_map", linalgBatchTransformMap<Scalar>);
   add("kalman_step_15x6" + suffix + "/linalg", linalgKalmanStep<Scalar>);
 #ifdef GRAPE_LINALG_BENCH_EIGEN
   add("quaternion_multiply" + suffix + "/eigen", eigenQuaternionMultiply<Scalar>);
