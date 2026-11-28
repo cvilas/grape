@@ -15,7 +15,7 @@
 namespace grape::splat {
 
 //=================================================================================================
-/// Interactive 3D gaussian splat viewer, rendered with the SDL3 GPU API.
+/// Interactive 3D gaussian splat and point-cloud viewer, rendered with the SDL3 GPU API.
 ///
 /// User interactions follow the OpenInventor examiner viewer:
 /// - Left drag                     : rotate about focal point (virtual trackball)

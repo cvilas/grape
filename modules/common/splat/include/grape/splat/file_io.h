@@ -28,9 +28,12 @@ inline constexpr auto SPLAT_RECORD_SIZE = 32U;
 /// @note Lossy: colour, opacity and rotation are quantised to 8 bits per component
 [[nodiscard]] auto encodeSplat(std::span<const Splat> splats) -> std::vector<std::byte>;
 
-/// Decode the contents of a binary little-endian PLY file produced by 3D gaussian splatting
-/// training pipelines (Kerbl et al., 2023). See docs/file_formats.md
+/// Decode the contents of a binary little-endian PLY point cloud or file produced by 3D gaussian
+/// splatting training pipelines (Kerbl et al., 2023). See docs/file_formats.md
 /// @note Only the view-independent colour (f_dc_*) is used; higher-order SH (f_rest_*) is ignored
+/// @note Point clouds require x/y/z. RGB must be entirely present or absent; incomplete RGB or
+/// gaussian-specific attributes are rejected. Points are represented as zero-scale splats with
+/// maximum peak opacity.
 /// @param data File contents
 /// @return Decoded splats, or a description of the error
 [[nodiscard]] auto decodePly(std::span<const std::byte> data)

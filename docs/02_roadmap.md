@@ -22,7 +22,7 @@
   - [ ] Build scenegraph using data-oriented design
   - [ ] Extend to support asset loading using assimp
   - [ ] Design a text-based scenegraph description format using our scripting engine
-  - [ ] Interactive point cloud viewer
+  - [x] Interactive point cloud viewer
 - [ ] Advanced serialisation
   - [ ] Auto serdes using reflection and [variadic structured bindings](https://github.com/cvilas/scratch/blob/master/variadic_bindings.cpp)
   - [ ] Cross language [binding](https://godbolt.org/z/bYPcjMd9q) to functions for scripting

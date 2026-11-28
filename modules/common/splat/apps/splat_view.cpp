@@ -42,14 +42,14 @@ auto parseAxis(std::string_view name) -> grape::splat::Vec3 {
 }  // namespace
 
 //=================================================================================================
-// Interactive viewer for 3D gaussian splat files (.splat, .ply). See README.md for user controls.
+// Interactive viewer for 3D gaussian splat and point-cloud files (.splat, .ply).
 auto main(int argc, const char* argv[]) -> int {
   try {
     static constexpr auto DEFAULT_FOV_DEG = 50.F;
     static constexpr auto HALF_TURN_DEG = 180.F;
     const auto args =
-        grape::conio::ProgramDescription("Interactive 3D gaussian splat viewer")
-            .declareOption<std::string>("file", "Splat file to view (.splat or .ply)")
+        grape::conio::ProgramDescription("Interactive 3D gaussian splat and point-cloud viewer")
+            .declareOption<std::string>("file", "Scene file to view (.splat or .ply)")
             .declareOption<std::string>("up", "World axis shown as screen-up (x,-x,y,-y,z,-z)",
                                         "-y")
             .declareOption<float>("fov", "Vertical field of view (degrees)", DEFAULT_FOV_DEG)
@@ -61,7 +61,7 @@ auto main(int argc, const char* argv[]) -> int {
       std::println(stderr, "{}", splats.error());
       return EXIT_FAILURE;
     }
-    std::println("Loaded {} splats from {}", splats->size(), path.string());
+    std::println("Loaded {} points or splats from {}", splats->size(), path.string());
 
     auto viewer = grape::splat::Viewer({
         .title = std::format("Splat Viewer - {}", path.filename().string()),

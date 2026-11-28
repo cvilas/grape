@@ -4,8 +4,8 @@ Read [gaussian_splatting.md](./gaussian_splatting.md) for theory. This document 
 
 ## Scope
 
-A small, dependency-light viewer for pre-trained 3D gaussian splat scenes. Training, editing and
-view-dependent colour are out of scope.
+A small, dependency-light viewer for pre-trained 3D gaussian splat scenes and PLY point clouds.
+Training, editing and view-dependent colour are out of scope.
 
 ## Scene representation
 
@@ -14,6 +14,11 @@ orientation (unit quaternion) and an 8-bit RGBA colour, where alpha is the peak 
 the information content of the `.splat` format ([file_formats.md](./file_formats.md)). The 3D
 covariance is `Σ = R·S·Sᵀ·Rᵀ` (Kerbl et al., 2023), computed once on the CPU at load time and
 uploaded with the position and colour into a GPU storage buffer (48 bytes per gaussian).
+
+Each PLY point is represented by a `Splat` with zero scale, identity rotation and maximum peak
+opacity. It follows the same sorting and rendering pipeline as gaussians. The screen-space
+low-pass term gives it a fixed-size, soft footprint, rather than a world-space radius; fragment
+alpha is capped at 0.99 and falls off towards its edges.
 
 ## Rendering pipeline
 
@@ -65,12 +70,13 @@ focal point.
 - **Zoom**: Change the field of view, keeping the camera in place (OpenInventor's zoom thumbwheel).
   'View all' places the camera to fit the subject in the current field of view, so the start-up
   `--fov` changes perspective but not the subject's size on screen.
-- **Seek**: Pick the nearest sufficiently opaque gaussian under the pointer (CPU ray proximity
+- **Seek**: Pick the nearest sufficiently opaque gaussian or point under the pointer (CPU ray proximity
   test) and make it the new focal point, moving half way towards it.
 - **View all**: Frame the scene's main subject. Captured scenes contain a sparse shell of
   distant background gaussians, so the bounding sphere is centred at the per-axis median of
   positions with radius at the median distance from it (`computeBounds()`), rather than the
-  conventional enclosing sphere.
+  conventional enclosing sphere. This also applies to point clouds and may leave much of a
+  uniformly distributed cloud outside the initial view.
 
 ## Coordinate conventions
 
@@ -87,8 +93,8 @@ File                                  | Contents
 `include/grape/splat/depth_sort.h`    | Back to front ordering
 `src/viewer.cpp`                      | Frame loop, GPU pipeline, mouse and keyboard handling
 `include/grape/splat/examiner_camera.h` | OpenInventor-style orbiting camera
-`include/grape/splat/file_io.h`       | `.splat` and `.ply` reading and writing
-`include/grape/splat/math.h`          | Rendering math built on [grape::linalg](../../linalg/README.md): type aliases, degenerate-input policies, GPU matrix layout
+`include/grape/splat/file_io.h`       | `.splat` and `.ply` reading; `.splat` writing
+`include/grape/splat/math.h`          | Rendering math built on [grape::linalg](../../../common/linalg/README.md): type aliases, degenerate-input policies, GPU matrix layout
 `src/gpu.h`, `src/async_sorter.h`     | SDL GPU and threading plumbing
 
 ## Limitations
@@ -96,6 +102,8 @@ File                                  | Contents
 - Requires a Vulkan capable GPU (shaders are compiled to SPIR-V at build time)
 - No view-dependent colour (spherical harmonics beyond degree 0 are ignored)
 - Depth sort is per-splat on the CPU. Overlapping splats may 'pop' as the view changes.
+- Point markers have a fixed screen-space footprint and are blended, not rendered as hard,
+  depth-tested points. Point size is not configurable.
 - Build requires `glslangValidator` (`glslang-tools` package, installed by 
   `toolchains/install_base.sh`)
 

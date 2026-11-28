@@ -188,6 +188,29 @@ TEST_CASE("PLY decoder reads 3DGS training output", "[file_io]") {
 }
 
 //-------------------------------------------------------------------------------------------------
+TEST_CASE("PLY decoder reads point clouds", "[file_io]") {
+  auto data = toBytes(
+      "ply\n"
+      "format binary_little_endian 1.0\n"
+      "element vertex 2\n"
+      "property float x\nproperty float y\nproperty float z\n"
+      "property uchar red\nproperty uchar green\nproperty uchar blue\n"
+      "end_header\n");
+  append(data, std::array{ 1.F, 2.F, 3.F, });
+  append(data, std::array<std::uint8_t, 3>{ 10, 20, 30 });
+  append(data, std::array{ -1.F, 0.F, 0.5F, });
+  append(data, std::array<std::uint8_t, 3>{ 255, 128, 0 });
+
+  const auto decoded = grape::splat::decodePly(data);
+  REQUIRE(decoded.has_value());
+  REQUIRE(decoded->size() == 2);
+  CHECK(decoded->at(0).position == Vec3{ 1.F, 2.F, 3.F });
+  CHECK(decoded->at(0).scale == Vec3{});
+  CHECK(decoded->at(0).color == grape::splat::Rgba{ 10, 20, 30, 255 });
+  CHECK(decoded->at(1).color == grape::splat::Rgba{ 255, 128, 0, 255 });
+}
+
+//-------------------------------------------------------------------------------------------------
 TEST_CASE("PLY decoder rejects unsupported or malformed input", "[file_io]") {
   const auto header = [](std::string_view format, std::string_view properties) {
     return toBytes(std::string("ply\nformat ") + std::string(format) + " 1.0\nelement vertex 1\n" +
@@ -214,6 +237,24 @@ TEST_CASE("PLY decoder rejects unsupported or malformed input", "[file_io]") {
     const auto result = grape::splat::decodePly(data);
     REQUIRE_FALSE(result);
     CHECK(result.error().contains("'y'"));
+  }
+  SECTION("partial gaussian attributes") {
+    auto data = header("binary_little_endian",
+                       "property float x\nproperty float y\nproperty float z\n"
+                       "property float opacity\n");
+    data.resize(data.size() + (4 * sizeof(float)));
+    const auto result = grape::splat::decodePly(data);
+    REQUIRE_FALSE(result);
+    CHECK(result.error().contains("'f_dc_0'"));
+  }
+  SECTION("partial point colours") {
+    auto data = header("binary_little_endian",
+                       "property float x\nproperty float y\nproperty float z\n"
+                       "property uchar red\n");
+    data.resize(data.size() + (3 * sizeof(float)) + sizeof(std::uint8_t));
+    const auto result = grape::splat::decodePly(data);
+    REQUIRE_FALSE(result);
+    CHECK(result.error().contains("'green'"));
   }
   SECTION("not a PLY file") {
     CHECK_FALSE(grape::splat::decodePly(toBytes("hello\nworld\n")));

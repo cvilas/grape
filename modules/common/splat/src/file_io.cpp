@@ -33,6 +33,7 @@ static_assert(std::endian::native == std::endian::little,
 /// Zeroth-order spherical harmonics basis constant: 1 / (2·sqrt(π))
 constexpr auto SH_C0 = 0.28209479177387814F;
 constexpr auto COLOR_MAX = 255.F;
+constexpr auto COLOR_MAX_U8 = std::uint8_t{ 255 };
 constexpr auto QUAT_SCALE = 128.F;
 
 //-------------------------------------------------------------------------------------------------
@@ -188,6 +189,37 @@ struct PlyElement {
   bool has_list_property{ false };  //!< records are variable size
   std::vector<PlyProperty> properties;
 };
+
+//-------------------------------------------------------------------------------------------------
+auto findPlyProperty(const PlyElement& element, std::string_view name) -> const PlyProperty* {
+  const auto it = std::ranges::find(element.properties, name, &PlyProperty::name);
+  return (it == element.properties.end()) ? nullptr : &(*it);
+}
+
+//-------------------------------------------------------------------------------------------------
+template <std::size_t N>
+auto optionalPlyProperties(const PlyElement& element, const std::array<std::string_view, N>& names)
+    -> std::expected<std::optional<std::array<const PlyProperty*, N>>, std::string> {
+  auto properties = std::array<const PlyProperty*, N>{};
+  auto found = 0UZ;
+  for (auto i = 0UZ; i < names.size(); ++i) {
+    properties.at(i) = findPlyProperty(element, names.at(i));
+    if (properties.at(i) != nullptr) {
+      ++found;
+    }
+  }
+  if (found == 0) {
+    return std::nullopt;
+  }
+  if (found != properties.size()) {
+    for (auto i = 0UZ; i < names.size(); ++i) {
+      if (properties.at(i) == nullptr) {
+        return std::unexpected(std::format("PLY: Missing vertex property '{}'", names.at(i)));
+      }
+    }
+  }
+  return properties;
+}
 
 //-------------------------------------------------------------------------------------------------
 struct PlyHeader {
@@ -401,27 +433,72 @@ auto decodePly(std::span<const std::byte> data) -> std::expected<std::vector<Spl
     return std::unexpected("PLY: File is truncated");
   }
 
-  // Map required attributes to properties
-  static constexpr auto ATTRIBUTES = std::array<std::string_view, 14>{
-    "x",       "y",       "z",       "f_dc_0", "f_dc_1", "f_dc_2", "opacity",
-    "scale_0", "scale_1", "scale_2", "rot_0",  "rot_1",  "rot_2",  "rot_3",
-  };
-  auto props = std::array<const PlyProperty*, ATTRIBUTES.size()>{};
-  for (auto i = 0UZ; i < ATTRIBUTES.size(); ++i) {
-    const auto it = std::ranges::find(vertex->properties, ATTRIBUTES.at(i), &PlyProperty::name);
-    if (it == vertex->properties.end()) {
-      return std::unexpected(std::format("PLY: Missing vertex property '{}'", ATTRIBUTES.at(i)));
+  static constexpr auto POSITION_ATTRIBUTES = std::array<std::string_view, 3>{ "x", "y", "z" };
+  auto position_props = std::array<const PlyProperty*, POSITION_ATTRIBUTES.size()>{};
+  for (auto i = 0UZ; i < POSITION_ATTRIBUTES.size(); ++i) {
+    position_props.at(i) = findPlyProperty(*vertex, POSITION_ATTRIBUTES.at(i));
+    if (position_props.at(i) == nullptr) {
+      return std::unexpected(
+          std::format("PLY: Missing vertex property '{}'", POSITION_ATTRIBUTES.at(i)));
     }
-    props.at(i) = &(*it);
   }
+
+  static constexpr auto GAUSSIAN_ATTRIBUTES = std::array<std::string_view, 11>{
+    "f_dc_0",  "f_dc_1", "f_dc_2", "opacity", "scale_0", "scale_1",
+    "scale_2", "rot_0",  "rot_1",  "rot_2",   "rot_3",
+  };
+  const auto gaussian_props = optionalPlyProperties(*vertex, GAUSSIAN_ATTRIBUTES);
+  if (not gaussian_props) {
+    return std::unexpected(gaussian_props.error());
+  }
+  const auto is_gaussian = gaussian_props->has_value();
+
+  static constexpr auto COLOR_ATTRIBUTES =
+      std::array<std::string_view, 3>{ "red", "green", "blue" };
+  const auto color_props = optionalPlyProperties(*vertex, COLOR_ATTRIBUTES);
+  if (not color_props) {
+    return std::unexpected(color_props.error());
+  }
+
+  const auto read_color_channel = [&data](std::size_t record, const PlyProperty* prop) {
+    const auto value = readPlyScalar(data, record + prop->offset, prop->type);
+    return toUnorm8((prop->type == PlyType::Float32 or prop->type == PlyType::Float64) and
+                            value >= 0.F and value <= 1.F ?
+                        value :
+                        value / COLOR_MAX);
+  };
 
   auto splats = std::vector<Splat>{};
   splats.reserve(vertex->count);
-  auto values = std::array<float, ATTRIBUTES.size()>{};
+  auto values = std::array<float, GAUSSIAN_ATTRIBUTES.size()>{};
   for (auto idx = 0UZ; idx < vertex->count; ++idx) {
     const auto record = offset + (idx * vertex->stride);
-    for (auto i = 0UZ; i < props.size(); ++i) {
-      values.at(i) = readPlyScalar(data, record + props.at(i)->offset, props.at(i)->type);
+    const auto position = Vec3{
+      readPlyScalar(data, record + position_props.at(0)->offset, position_props.at(0)->type),
+      readPlyScalar(data, record + position_props.at(1)->offset, position_props.at(1)->type),
+      readPlyScalar(data, record + position_props.at(2)->offset, position_props.at(2)->type),
+    };
+
+    if (not is_gaussian) {
+      const auto color = (not color_props->has_value()) ?
+                             std::array<std::uint8_t, 3>{ 255, 255, 255 } :
+                             std::array{
+                               read_color_channel(record, color_props->value().at(0)),
+                               read_color_channel(record, color_props->value().at(1)),
+                               read_color_channel(record, color_props->value().at(2)),
+                             };
+      splats.push_back({
+          .position = position,
+          .scale = Vec3{},
+          .rotation = Quat{},
+          .color = { .r = color.at(0), .g = color.at(1), .b = color.at(2), .a = COLOR_MAX_U8 },
+      });
+      continue;
+    }
+
+    for (auto i = 0UZ; i < gaussian_props->value().size(); ++i) {
+      const auto* const prop = gaussian_props->value().at(i);
+      values.at(i) = readPlyScalar(data, record + prop->offset, prop->type);
     }
     // Training optimises unconstrained numbers. The PLY stores those raw values, and each one is
     // mapped into its valid range here, exactly as the training code does when rendering:
@@ -432,15 +509,15 @@ auto decodePly(std::span<const std::byte> data) -> std::expected<std::vector<Spl
     //   SH_C0·f_dc, offset by 0.5 so that a zero coefficient is mid-grey.
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     splats.push_back({
-        .position = Vec3{ values[0], values[1], values[2] },
-        .scale = Vec3{ std::exp(values[7]), std::exp(values[8]), std::exp(values[9]) },
+        .position = position,
+        .scale = Vec3{ std::exp(values[4]), std::exp(values[5]), std::exp(values[6]) },
         // the PLY stores quaternion components in w, x, y, z order
         .rotation =
-            normalize(Quat{ .x = values[11], .y = values[12], .z = values[13], .w = values[10] }),
-        .color = { .r = toUnorm8(0.5F + (SH_C0 * values[3])),
-                   .g = toUnorm8(0.5F + (SH_C0 * values[4])),
-                   .b = toUnorm8(0.5F + (SH_C0 * values[5])),
-                   .a = toUnorm8(sigmoid(values[6])),
+            normalize(Quat{ .x = values[8], .y = values[9], .z = values[10], .w = values[7] }),
+        .color = { .r = toUnorm8(0.5F + (SH_C0 * values[0])),
+                   .g = toUnorm8(0.5F + (SH_C0 * values[1])),
+                   .b = toUnorm8(0.5F + (SH_C0 * values[2])),
+                   .a = toUnorm8(sigmoid(values[3])),
         },
     });
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
