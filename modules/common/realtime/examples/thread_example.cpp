@@ -2,10 +2,13 @@
 // Copyright (C) 2023 GRAPE Contributors
 //=================================================================================================
 
+#include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <csignal>
-#include <cstring>
+#include <cstdint>
+#include <optional>
 #include <print>
 
 #include "grape/realtime/schedule.h"
@@ -29,7 +32,8 @@ class Profiler {
 public:
   struct Stats {
     std::uint64_t num_samples{};
-    double abs_max{};
+    double min{};
+    double max{};
     double mean{};
     double variance{};
   };
@@ -103,19 +107,16 @@ auto main() -> int {
     };
 
     Profiler profiler;
+    std::optional<grape::realtime::Thread::ProcessClock::time_point> last_tp;
 
     // set the periodic process function for the task thread
-    rt_task.process = [&profiler] -> bool {
+    rt_task.process = [&profiler, &last_tp] -> bool {
       const auto tp = grape::realtime::Thread::ProcessClock::now();
-      static auto last_tp = tp;
-      const auto dt = std::chrono::duration<double>(tp - last_tp).count();
+      if (last_tp) {
+        const auto dt = std::chrono::duration<double>(tp - *last_tp).count();
+        profiler.addSample(dt);
+      }
       last_tp = tp;
-
-      profiler.addSample(dt);
-      const auto stats = profiler.stats();
-      std::print("\rProcess step={:06d}, dt={:.6f}, max={:.6f}, mean={:.6f}, std.dev.={:.9f}",
-                 stats.num_samples, dt, stats.abs_max, stats.mean, std::sqrt(stats.variance));
-
       return true;
     };
 
@@ -135,9 +136,17 @@ auto main() -> int {
 
     // print results from task before exit
     const auto& stats = profiler.stats();
-    std::println(
-        "Final process timing statistics: max={:.6f}, mean={:.6f}, std.dev.={:.9f} ({} samples)",
-        stats.abs_max, stats.mean, std::sqrt(stats.variance), stats.num_samples);
+    if (stats.num_samples == 0) {
+      std::println("No complete process intervals recorded.");
+    } else {
+      std::println("Process intervals (seconds): min={:.9f}, max={:.9f}, mean={:.9f} ({} samples)",
+                   stats.min, stats.max, stats.mean, stats.num_samples);
+      if (stats.num_samples > 1) {
+        std::println("Sample standard deviation: {:.9f} seconds", std::sqrt(stats.variance));
+      } else {
+        std::println("Sample standard deviation requires at least two intervals.");
+      }
+    }
 
   } catch (...) {
     grape::Exception::print();
@@ -150,13 +159,21 @@ auto main() -> int {
 inline void Profiler::addSample(double sample) {
   // Numerically stable version of Welford's online algorithm from
   // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-  stats_.abs_max = std::max(std::abs(sample), stats_.abs_max);
+  if (stats_.num_samples == 0) {
+    stats_.min = sample;
+    stats_.max = sample;
+  } else {
+    stats_.min = std::min(sample, stats_.min);
+    stats_.max = std::max(sample, stats_.max);
+  }
   stats_.num_samples += 1;
   const auto delta = sample - stats_.mean;
   stats_.mean += delta / static_cast<double>(stats_.num_samples);
   const auto delta2 = sample - stats_.mean;
   ssd_ += delta * delta2;
-  stats_.variance = ssd_ / static_cast<double>(stats_.num_samples - 1);
+  if (stats_.num_samples > 1) {
+    stats_.variance = ssd_ / static_cast<double>(stats_.num_samples - 1);
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
