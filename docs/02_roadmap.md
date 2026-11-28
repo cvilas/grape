@@ -13,18 +13,16 @@
 - [x] [Picam](../modules/rpi/camera/README.md)  
 - [x] [Pisense](../modules/rpi/sense_hat/README.md)
 - [x] [Plot](../modules/common/plot/README.md)
+- [x] [Linalg](../modules/linalg/README.md)
+- [ ] [Drake](../modules/experimental/drake/README.md)
 - [ ] [AHRS](../modules/experimental/ahrs/README.md)
-- [ ] [Linalg](../modules/experimental/linalg/README.md)
-- [ ] Support zero-copy in IPC
-- [ ] [Remote teleop](../modules/experimental/robot/locomotion/teleop/README.md)
 - [ ] Audio support for [camera](../modules/camera/README.md)
-- [ ] Basic OpenGL scenegraph
+- [ ] Scenegraph
   - [ ] Clean up experimental implementation in scratch/scenegraph/copilot
   - [ ] Build scenegraph using data-oriented design
   - [ ] Extend to support asset loading using assimp
   - [ ] Design a text-based scenegraph description format using our scripting engine
-  - [ ] Interactive point cloud viewer
-- [ ] [Data recording](../modules/experimental/drake/README.md)
+  - [x] Interactive point cloud viewer
 - [ ] Advanced serialisation
   - [ ] Auto serdes using reflection and [variadic structured bindings](https://github.com/cvilas/scratch/blob/master/variadic_bindings.cpp)
   - [ ] Cross language [binding](https://godbolt.org/z/bYPcjMd9q) to functions for scripting
@@ -40,6 +38,7 @@
   - [ ] Integrator
   - [ ] Velocity observer
 - [ ] CANOpen
+- [ ] Low latency telemetry and remote control
 - [ ] [CI jobs](../.github/workflows/README.md)
 - [ ] Optimise the [ring buffers](https://rigtorp.se/ringbuffer/)
 

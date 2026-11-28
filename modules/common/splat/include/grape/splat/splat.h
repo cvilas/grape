@@ -24,22 +24,24 @@ struct Rgba {
 };
 
 //=================================================================================================
-/// A single 3D gaussian: a soft, coloured, semi-transparent ellipsoid. A scene is a list of these,
-/// typically between 100 thousand and a few million. See docs/gaussian_splatting.md.
+/// A 3D gaussian or point: a soft, coloured, semi-transparent primitive. A scene is a list of
+/// these, typically between 100 thousand and a few million. See docs/gaussian_splatting.md.
 ///
-/// Mathematically, it is the function G(p) = exp(-½·(p - μ)ᵀ·Σ⁻¹·(p - μ)) scaled by an opacity,
-/// where μ is `position` and Σ is the 3x3 covariance matrix (see covariance()). G is 1 at the
-/// centre and falls off smoothly, faster along the short axes of the ellipsoid.
+/// For positive scales, the gaussian is G(p) = exp(-½·(p - μ)ᵀ·Σ⁻¹·(p - μ)) scaled by an
+/// opacity, where μ is `position` and Σ is the 3x3 covariance matrix (see covariance()). G is 1 at
+/// the centre and falls off smoothly, faster along the short axes of the ellipsoid.
 ///
 /// The covariance is not stored directly. Instead, it is defined by `scale` and `rotation`:
 /// Σ = R·S·Sᵀ·Rᵀ, where R is the rotation matrix of `rotation` and S = diag(`scale`). These are
 /// intuitive (an ellipsoid's size and orientation) and always yield a valid covariance.
+/// A point has zero scale and covariance; the renderer's screen-space low-pass filter gives it a
+/// visible, soft footprint.
 ///
 /// Only the view-independent colour is represented. Full gaussian splatting scenes also store
 /// colour that changes with viewing direction (spherical harmonics), for shiny surfaces.
 struct Splat {
   Vec3 position;  //!< Centre μ (metres)
-  Vec3 scale;     //!< Standard deviation (1σ 'radius') along each local axis (metres, > 0)
+  Vec3 scale;     //!< Standard deviation along each axis (metres); zero represents a point
   Quat rotation;  //!< Orientation of the local axes (unit quaternion)
   Rgba color;     //!< Colour, and opacity at the centre (alpha)
 };

@@ -1,24 +1,29 @@
 # Splat
 
-Interactive viewer for 3D gaussian splat scenes.
+Interactive viewer for 3D gaussian splat scenes and binary PLY point clouds.
 
 ![Demo](./docs/demo.png)
 
 - [Primer on gaussian splatting](./docs/gaussian_splatting.md)
 - [Viewer design](./docs/design.md)
 - [Supported file formats](./docs/file_formats.md)
-- [Sample scenes](./models/README.md)
+- [Sample scenes and point clouds](./models/README.md)
 
 ## Usage
 
 ```bash
-grape_splat_view --file=modules/experimental/splat/models/hornedlizard.splat
+grape_splat_view --file=modules/splat/models/hornedlizard.splat
+grape_splat_view --file=modules/splat/models/sample-point-cloud-100k-binary.ply --up=y
 ```
+
+Point clouds use the same soft, depth-sorted renderer as gaussian splats. Points are shown as
+small, fixed-screen-size markers; see [file formats](./docs/file_formats.md) for supported PLY
+properties and limitations.
 
 Option | Default | Description
 -------|---------|------------
-`file` | -       | Scene file (`.splat` or `.ply`)
-`up`   | `-y`    | World axis shown as screen-up (`x`, `-x`, `y`, `-y`, `z`, `-z`). Most captured scenes use y-down (RDF) coordinates
+`file` | -       | Scene file (`.splat`, Gaussian PLY, or point-cloud PLY)
+`up`   | `-y`    | World axis shown as screen-up (`x`, `-x`, `y`, `-y`, `z`, `-z`). Captured gaussian scenes often use y-down (RDF); point clouds may use a different convention
 `fov`  | `50`    | Initial vertical field of view (degrees, 1 to 150). View all places the camera to fit the subject, so its size on screen is the same at any FOV; only the perspective changes. Use `Ctrl` + scroll to zoom
 
 ## Controls
@@ -40,3 +45,5 @@ Scroll wheel                                                    | Dolly
 `H`                                                             | Go to home view
 `Shift` + `H`                                                   | Set home view to the current view
 
+View all frames the median distance from the median position, not the entire cloud; use dolly to
+see more of a widely distributed scene.

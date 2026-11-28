@@ -41,7 +41,8 @@ like a snowball against a wall, rather than tracing rays through the scene.
 
 The blobs are not modelled by hand. Their positions, shapes, colours and opacities are found by
 **optimisation**: starting from a rough point cloud, adjust the parameters until rendered images
-match a set of photographs (section 7). This viewer only renders the result.
+match a set of photographs (section 7). This viewer renders the result and can also display
+ordinary PLY point clouds.
 
 ## 2. The gaussian, from 1D to 3D
 
@@ -197,6 +198,10 @@ screen-space σ' = f·σ/d = 50 px.
 reappear as it moves, causing flicker. Adding a small constant (0.3 px²) to the diagonal of Σ' blurs
 every splat to at least about a pixel wide. This is `LOW_PASS_PX2`.
 
+PLY point-cloud vertices use zero-scale splats. Their zero 3D covariance projects to zero, so
+this low-pass term provides their small, fixed-screen-size footprint. They are shaded and blended
+like other splats rather than as hard, depth-tested points.
+
 Code: steps 1 to 3 in [`splat.vert`](../src/shaders/splat.vert).
 
 ### 6.2 Covering the ellipse with a quad
@@ -303,8 +308,9 @@ Consequences that are visible in this viewer:
 There is no single standard. The two formats this viewer reads are described in
 [file_formats.md](./file_formats.md):
 
-- **`.ply`**: The direct output of training. Every parameter as a 32-bit float, including all 48 SH
-  coefficients. Large, lossless.
+- **`.ply`**: Either a point cloud with positions and optional RGB colours, or the direct output of
+  gaussian training, which can include all 48 SH coefficients. The viewer reads binary little-endian
+  PLY and ignores view-dependent coefficients.
 - **`.splat`**: A compact 32-byte record per splat with view-independent colour, opacity and
   rotation quantised to 8 bits.
 
@@ -314,7 +320,7 @@ Concept                                   | Code
 ------------------------------------------|-----
 Splat parameters                          | `Splat` in [`splat.h`](../include/grape/splat/splat.h)
 Σ = R·S·Sᵀ·Rᵀ                             | `covariance()` in [`splat.cpp`](../src/splat.cpp)
-Quaternion to rotation matrix             | `rotationOf()` in [`math.h`](../include/grape/splat/math.h), via [grape::linalg](../../linalg/docs/frames_and_numerics.md)
+Quaternion to rotation matrix             | `rotationOf()` in [`math.h`](../include/grape/splat/math.h), via [grape::linalg](../../../common/linalg/README.md)
 Projection Σ' = J·W·Σ·Wᵀ·Jᵀ               | Step 3 in [`splat.vert`](../src/shaders/splat.vert)
 Ellipse axes, quad                        | Steps 4 and 5 in [`splat.vert`](../src/shaders/splat.vert)
 Gaussian falloff α = o·exp(-½r²)          | [`splat.frag`](../src/shaders/splat.frag)

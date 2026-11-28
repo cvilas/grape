@@ -59,8 +59,7 @@ What makes QMotor awesome as a tool for real-time system development
 ## Build incrementally
 
 - Develop requirements. Consider combining controller, monitor and this README into a single document
-- Build [plot](../../experimental/plot/README.md) to plot any time-series data stream
-- Build [teleop](../../experimental/robot/locomotion/teleop/README.md) for remote control
+- Build [plot](../../plot/README.md) to plot any time-series data stream
 - Build [camera](../../camera/README.md) to broadcast live view of rig
+- Build [linalg](../../linalg/README.md) for math and dsp
 - Build [drake](../../experimental/drake/README.md) for data logging
-- Build [linalg](../../experimental/linalg/README.md) for math and dsp

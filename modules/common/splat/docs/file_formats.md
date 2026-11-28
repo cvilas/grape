@@ -3,8 +3,9 @@
 - `.splat` (native): The compact format from [antimatter15/splat](https://github.com/antimatter15/splat), 
   widely supported by web viewers and conversion tools. 32 bytes per gaussian, colour without 
   view-dependent effects. Chosen for being simple, compact and memory-mappable.
-- `.ply`: Output of the reference [3D gaussian splatting](https://github.com/graphdeco-inria/gaussian-splatting) 
-  implementation (binary little-endian). Only the view-independent (DC) colour is used.
+- `.ply`: Binary little-endian point clouds, or output of the reference
+  [3D gaussian splatting](https://github.com/graphdeco-inria/gaussian-splatting)
+  implementation. Only the view-independent (DC) colour is used for gaussians.
 
 Use `scripts/spz_to_splat.py` to convert Niantic `.spz` files.
 
@@ -27,7 +28,19 @@ Colour is the view-independent (DC) component: `255·(0.5 + C0·f_dc)`, where
 
 There is no up-axis information. Files converted from 3DGS training output are y-down (RDF).
 
-## `.ply` (3D gaussian splatting)
+## `.ply`
+
+Ordinary point-cloud vertices require `x`, `y`, and `z` properties. If `red`, `green`, and `blue`
+are all present, they are used as the point colour; if none are present, points are white. An
+incomplete RGB set is rejected. Each float colour channel in [0, 1] is treated as normalised;
+integer values and float values outside that range are interpreted on an 8-bit [0, 255] scale
+and clamped. Other properties, such as normals and `alpha`, are ignored.
+
+Points are represented as zero-scale splats with maximum peak opacity. They have a soft,
+fixed-screen-size footprint, are blended with the same shader as gaussians, and are not rendered
+as fully opaque hard points.
+
+The same PLY reader also supports 3D gaussian splatting output.
 
 Output of the [reference implementation](https://github.com/graphdeco-inria/gaussian-splatting).
 A standard [PLY](https://paulbourke.net/dataformats/ply/) file with `format binary_little_endian 1.0`
@@ -43,7 +56,10 @@ Property                     | Meaning
 
 Other properties (normals, `f_rest_*` higher order coefficients, etc) are ignored. Properties may
 be of any PLY scalar type, in any order. ASCII and big-endian PLY, and list properties in or
-before the `vertex` element, are not supported.
+before the `vertex` element, are not supported. The presence of any of the gaussian-specific
+properties above selects gaussian decoding and requires the complete set; a partial set is
+rejected rather than interpreted as a point cloud. An incomplete RGB set is also rejected even
+when gaussian properties are present.
 
 ## `.spz` (conversion only)
 
