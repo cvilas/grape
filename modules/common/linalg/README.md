@@ -28,7 +28,6 @@ A simple linear algebra library for robotic applications
 - [X] constexpr `Matrix` and `Vector` classes and supporting free functions
 - [X] `std::format`/`std::println` formatter
 - [X] Quaternion class and supporting free functions
-- [ ] Improve performance, especially on gcc
 - [ ] Numerically stable estimation (AHRS, EKF, nonlinear least squares)
   - [ ] Cholesky (LLT/LDLT) and `solve()`
   - [ ] QR for least squares

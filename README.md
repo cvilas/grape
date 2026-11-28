@@ -19,6 +19,7 @@ Selected features:
 - A stubbornly strict [command line parser](./modules/common/conio/README.md)
 - A high performance [inter-process communication library](./modules/common/ipc/README.md)
 - An efficient, high performance [2D plotting library](./modules/common/plot/README.md)
+- A minimal [linear algebra library](./modules/linalg/README.md)
 - An [application development framework](./docs/howto/write_applications.md)
 - Support for the latest C++ standard, compilers and tooling
 - Focus on [Raspberry Pi](https://www.raspberrypi.com/) as the target embedded hardware platform
